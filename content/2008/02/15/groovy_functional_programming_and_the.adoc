@@ -1,0 +1,63 @@
+= Groovy, functional programming and the curry method
+Cédric Champeau
+2008-02-15
+:jbake-type: post
+:jbake-tags: curry, functional, groovy, programming
+:jbake-status: published
+:source-highlighter: prettify
+
+I’m sure you have heard of functional programming, at least when you were sill a student (if you are, then you’re probably digging into it). The http://groovy.codehaus.org[Groovy language], built on top of Java, provides means of dealing with functional programming. Moreover, it offers a _curry_ method which allows powerful recursion mechanisms.
+
+For example, in maths, you’ll want to define the sum function of a list as the sum of the first element and the (recursive) sum of the rest of the list. Going further, you’ll want to define a meta function which defines the behaviour of the sum method :
+
+----------------------------------
+f(x1, x2, ...) = f(x1, f(x2, ...))
+----------------------------------
+
+That’s currying. Here’s a basic example which demonstrates this feature in Groovy. First, let’s define a reduce closure which takes as the first argument the function to be applied on the list of arguments :
+
+[source]
+----
+def reduce
+reduce = { fn, params ->
+    if (params.size()==1) return params[0]
+ fn(params[0], reduce(fn,params[1..
+
+Note that for the reduce function to be known inside the closure, you have to define it before (click here for details).
+
+Then we may define the sum() function as this :
+
+def sum = reduce.curry({ x,y -> x+y })
+
+----
+
+
+The sum method is a closure passed as a parameter to the curry method. Technically, it is equivalent to write a function where you replace the first parameter of the reduce closure with the sum closure. Now let’s see the result :
+
+[source]
+----
+println sum((1..10))
+
+--> 55
+
+----
+
+
+More interesting, as the parameter types are not specified, you may also use our sum function as a string or list concatenation :
+
+[source]
+----
+println sum(("a".."z"))
+
+--> abcdefghijklmnopqrstuvwxyz
+
+println sum([(1..10),(11..20)])
+
+--> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+----
+
+
+I *love* Groovy ;)
+
+Addendum: You should also use this with caution, as it costs much in invocation time, and you should not use it for so simple functions (summing is a very bad example as the cost in time of the sum operation is much less that the method invocation cost). Furthermore, don’t forget that it is *recursions*, so too many parameters will drive you too a stack overflow error ;-)

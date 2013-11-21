@@ -1,0 +1,254 @@
+= Customizing Groovy compilation process
+Cédric Champeau
+2011-05-12
+:jbake-type: post
+:jbake-tags: 1.8, compilation, groovy, programming
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Groovy compilation customizers
+------------------------------
+
+Groovy 1.8 introduced the notion of compilation customizers. They are used to tweak the compilation process, in order, for example, to add imports to scripts transparently, apply AST transformations without annotating classes or limiting the language for security. In this post, I will show you how to use them, and how you can write your own customizer.
+
+Prior to Groovy 1.8, you would have to override the _GroovyClassLoader_ and write several utility classes to add compilation units to the compilation process. While this worked, this was not really easy to do. Our first example will show you how easy it is now :
+
+[[]]
+Adding imports transparently
+----------------------------
+
+One of the recurring questions on the Groovy mailing lists was how one could add default imports to scripts. Groovy, for example, imports the java.util classes by default, which improves readability, but there was no simple way to add your own. Now, you can use the _ImportCustomizer_ class :
+
+[source]
+----
+import org.codehaus.groovy.control.customizers.ImportCustomizer
+
+...
+
+def importCustomizer = new ImportCustomizer()
+// regular imports
+importCustomizer.addImports('java.util.concurrent.atomic.AtomicInteger', 'java.util.concurrent.atomic.AtomicBoolean')
+// star imports
+importCustomizer.addStarImports('java.util.concurrent')
+// static star imports
+importCustomizer.addStaticStar('java.lang.Math')
+
+----
+
+
+Then all you need to do is to create a compiler configuration where you will register the customizer :
+
+[source]
+----
+def configuration = new CompilerConfiguration()
+configuration.addCompilationCustomizers(importCustomizer)
+def shell = new GroovyShell(configuration)
+shell.evaluate """
+  new AtomicInteger(0) // won't throw ClassNotFoundException
+"""
+
+----
+
+
+The import customizer provides additional methods to specify, for example, import aliases. Take a look at the javadoc for more details. Now we will take a look at another customizer which is provided by default in Groovy 1.8 and allows you to secure the execution of your scripts.
+
+[[]]
+Securing user scripts thanks to the SecureASTCustomizer
+-------------------------------------------------------
+
+The goal of this customizer is to filter the script to allow or disallow some constructs. For example, one building an arithmetic shell with Groovy would want to disallow the user to import or create classes, and limit the syntax to the basic operators. This can be achieved thanks to the _SecureASTCustomizer_, which filters out AST nodes and throws a _SecurityException_ whenever a disallowed construct is used.
+
+Let’s take a look at the example from the Javadoc, which defines an arithmetic shell :
+
+[source]
+----
+final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
+final SecureASTCustomizer secure = new SecureASTCustomizer()
+secure.with {
+    closuresAllowed = false
+    methodDefinitionAllowed = false
+
+    importsWhitelist = []
+    staticImportsWhitelist = []
+    staticStarImportsWhitelist = ['java.lang.Math'] // only java.lang.Math is allowed
+
+    tokensWhitelist = [
+            PLUS,
+            MINUS,
+            MULTIPLY,
+            DIVIDE,
+            MOD,
+            POWER,
+            PLUS_PLUS,
+            MINUS_MINUS,
+            COMPARE_EQUAL,
+            COMPARE_NOT_EQUAL,
+            COMPARE_LESS_THAN,
+            COMPARE_LESS_THAN_EQUAL,
+            COMPARE_GREATER_THAN,
+            COMPARE_GREATER_THAN_EQUAL,
+    ].asImmutable()
+
+    constantTypesClassesWhiteList = [
+            Integer,
+            Float,
+            Long,
+            Double,
+            BigDecimal,
+            Integer.TYPE,
+            Long.TYPE,
+            Float.TYPE,
+            Double.TYPE
+    ].asImmutable()
+
+    receiversClassesWhiteList = [
+            Math,
+            Integer,
+            Float,
+            Double,
+            Long,
+            BigDecimal
+    ].asImmutable()
+}
+
+// configuration ends here
+
+CompilerConfiguration config = new CompilerConfiguration()
+config.addCompilationCustomizers(imports, secure)
+GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
+
+----
+
+
+First, we allow static usage of java.lang.Math constants thanks to a static import added automatically through the _ImportCustomizer_ we’ve seen previously. Next comes the secure AST customizer configuration itself, which allows us to :
+
+* disallow usage of closures and methods
+* disallow imports by setting an empty import whitelist
+* disallow static imports by setting an empty static import whitelist
+* only allow static import of java.lang.Math methods and constants
+* filter out the allowed tokens of the language by allowing mathematical symbols only (tokensWhitelist)
+* filter out the types allowed to be used in the shell by explicitely specifying a list of allowed classes (note the usage of Float.TYPE, … for primitive types)
+* eventually, limit the classes of objects for which method calls are allowed
+
+Doing this, a script like this one :
+
+[source]
+----
+1+1
+---
+
+will run perfectly, while this one :
+
+code,prettyprint
+----
+ [source]
+----
+import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+import org.codehaus.groovy.ast.expr.*
+import org.codehaus.groovy.control.CompilerConfiguration
+
+class DeclarationExpressionChecker implements SecureASTCustomizer.ExpressionChecker {
+    boolean isAuthorized(Expression expression) {
+        if (expression instanceof DeclarationExpression) {
+            if (expression.leftExpression instanceof VariableExpression) {
+                def name = expression.leftExpression.name
+                if (name[0]==name[0].toUpperCase()) { return false }
+            }
+        }
+        
+        true
+    }
+}
+
+def secure = new SecureASTCustomizer()
+secure.addExpressionCheckers(new DeclarationExpressionChecker())
+
+def config = new CompilerConfiguration()
+config.addCompilationCustomizers(secure)
+
+def shell = new GroovyShell(config)
+shell.evaluate """
+   def allowed = 1+1
+   def Disallowed = 1+1
+"""
+
+----
+
+
+In this alternative example (suggested by http://twitter.com/#!/hansamann/status/68676573552852992[Sven Haiges]), we will prevent the user from calling _System.exit()_ :
+
+[source]
+----
+import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+import org.codehaus.groovy.ast.expr.*
+import org.codehaus.groovy.control.CompilerConfiguration
+
+class MethodCallExpressionChecker implements SecureASTCustomizer.ExpressionChecker {
+    boolean isAuthorized(Expression expression) {
+        if (expression instanceof MethodCallExpression) {
+            if (expression.objectExpression instanceof ClassExpression) {
+                if (expression.objectExpression.type.name==System.name) {
+                    if (expression.methodAsString=='exit') return false
+                }
+            }
+        }
+        
+        true
+    }
+}
+
+def secure = new SecureASTCustomizer()
+secure.addExpressionCheckers(new MethodCallExpressionChecker())
+
+def config = new CompilerConfiguration()
+config.addCompilationCustomizers(secure)
+
+def shell = new GroovyShell(config)
+shell.evaluate """
+   System.exit(0)
+"""
+
+----
+
+
+[[]]
+Applying AST transformations transparently with the ASTTransformationCustomizer
+-------------------------------------------------------------------------------
+
+The last customizer provided in Groovy 1.8 allows you to transparently add AST transformations to your scripts. This is particularly useful if you think about the new _ThreadInterrupt_ AST transformation, for example, which will not likely be added to scripts by hand. Another advantage of this customizer is to have an alternative to the global AST transformation mechanism, and can also be used to help the development of such global transforms. Usage is fairly easy :
+
+[source]
+----
+def configuration = new CompilerConfiguration()
+configuration.addCompilationCustomizers(new ASTTransformationCustomizer(Log))
+def shell = new GroovyShell(configuration)
+
+----
+
+
+Here, we define an ASTTransformationCustomizer which will automatically apply the @Log AST Transformations to all classes in the compilation unit. Note that it is interesting in two different ways :
+
+* it prevents the user from having to add the @Log transformation to each class he writes
+* it allows a local AST transformation (@Log) to be applied just as if it was a global one
+
+The second point is important to understand, because it also shows a limit of this customizer : every class in the compilation unit will have the transformation applied, but there is no way to pass AST transformation arguments. For example, here, you cannot change the name of the generated field, while if you used the @Log annotation directly, you could have passed an argument for it. If you need to pass arguments, I encourage you to take a look at the source code of the _ASTTransformationCustomizer_ and write your own customizer.
+
+Transparently adding global AST transformations is not more complicated. Unlike local AST transformations, global AST transformations do not have a corresponding annotation, and do not have arguments, so you must refer to the ASTTransformation class itself :
+
+[source]
+----
+def configuration = new CompilerConfiguration()
+configuration.addCompilationCustomizers(new ASTTransformationCustomizer(MyASTTransformationClass))
+def shell = new GroovyShell(configuration)
+
+----
+
+
+The difference from the local case is the type of the class passed as the argument of the customizer constructor. In the case of a local AST transformation, you must pass the annotation class, while in the global case, you pass the AST transformation class directly. Using this customizer, you have an alternative option to the _META-INF/services/org.codehaus.groovy.transform.ASTTransformation_ registration process.
+
+[[]]
+Writing your own customizer
+---------------------------
+
+In addition to those 3 bundled customizers, you may want to write your own. To to this, you just have to extend the _org.codehaus.groovy.control.customizers.CompilationCustomizer_ abstract class, which is basically a _PrimaryClassNodeOperation_ for which the compiler phase is fixed. If you need to write a customizer, I strongly encourage you to read the _ImportCustomizer_ or _ASTTransformation_ customizer sources, which are quite simple to understand. Eventually, if you have particular needs or see potential improvements to the current implementations, do not hesitate to join the http://groovy.329449.n5.nabble.com/[mailing list], or raise http://jira.codehaus.org/browse/GROOVY[JIRA issue].

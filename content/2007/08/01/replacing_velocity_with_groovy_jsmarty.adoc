@@ -1,0 +1,59 @@
+= Replacing Velocity with Groovy = JSmarty ?
+Cédric Champeau
+2007-08-01
+:jbake-type: post
+:jbake-tags: groovy, smarty, velocity
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Templating languages as first choice technology for front-end customization 
+----------------------------------------------------------------------------
+
+I’m not fond of JSF-like front end technologies. I mean, for anyone who’s used to templating technologies such as Smarty for PHP, using JSF is masochism : crying things like you can’t just iterate over a simple collection. With JSF, you must understand the underlaying philosophy and the technology before you succeed in doing something as simple as echoing a set of records. Too complicated for simple designs, and, nonetheless, unusable by a web designer (I mean someone who’s able to write HTML, but knows almost nothing of programming).
+
+That’s why I like templating technologies : simplicity, and with a good application design, you won’t break the MVC model. Customizing a web design for the needs of a customer would not require anything else than changing a few front-end templates. For this I’ve been using Apache Velocity in Java, while in PHP I was used to Smarty.
+
+[[]]
+Velocity’s main drawback 
+-------------------------
+
+But Velocity does not offer the softness Smarty has : imagine your web designer needs a date format tag in order to pretty print a date variable. In Smarty, you just need to write a plugin (ok, for dates it is just included ;-)), and it is straight available in your templates. With Velocity, you must imagine all usages of the variables or objects you expose before you make a template. I mean that you must think that a web designer would like to format a date, then expose the date utility to the template.
+
+In this case, in order to be sure you won’t forget anything, you could simply expose all of your utility classes to the template, but this is fondamentaly unnecessary, ugly and you could possibly never imagine everything a template writer could need. The problem is right there : with Velocity, if you did not think of something at the design time, then it will not be possible to do at runtime, just because template variables and utility classes are exposed programmatically. It is just right for variables, but a problem for utility classes. That’s the main drawback I found to Velocity.
+
+Then came Groovy and its SimpleTemplateEngine. Basically, it does the very same as Velocity for templating, but its main advantage is that you can embed groovy code _into_ the template : +
+
+[source]
+----
+import groovy.text.SimpleTemplateEngine
+
+def tpl_src ='''
+<% def formatDate(date) {
+    new java.text.SimpleDateFormat("EEE, MMM d, ''yy").format(date)
+}%>
+
+The date today is <% print formatDate(date) %>'''
+
+def binding = [ "date": Calendar.getInstance().getTime() ]
+def engine = new SimpleTemplateEngine()
+println engine.createTemplate(tpl_src).make(binding)
+
+----
+
+
+Just as simple as that ! You won’t need to rebuild an application in order to make an utility class, which has fundamentally nothing to do with the application logic, available to a template (front end logic). That’s where I liked Smarty so much, and makes me think I should actually think of replacing my Velocity templates with Groovy ones.
+
+[[]]
+ Should I move ?
+----------------
+
+Well, before moving, I’ll have to double check things like :
+
+* performance : how does Groovy templates compare to Velocity (Smarty has this caching thing)?
+* template inclusion : how can I manage template inclusions like velocity does ?
+* security : beeing able to run arbitrary code in the template may not be a _so good idea_… +
+
+Well I have a semi-answer for the last one : GSP pages, built upon Groovy, seem to have a tag, but GSP’s are part of the grails framework, which is too large for this particular need.
+
+What do you think ? +

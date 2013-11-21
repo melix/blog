@@ -1,0 +1,43 @@
+= The strange Hibernate version numbers
+Cédric Champeau
+2008-08-21
+:jbake-type: post
+:jbake-tags: hibernate, opensource
+:jbake-status: published
+:source-highlighter: prettify
+
+I am fascinated with Hibernate version numbers. Have you noticed how uncommon they are ? In the open source community, almost every project follows the same rules :
+
+--------------------------
+project-MAJOR.minor.bugfix
+--------------------------
+
+For example :
+
+----------------
+commons-io-1.2.3
+----------------
+
+or
+
+-----------------
+spring-core-2.0.0
+-----------------
+
+If necessary, you may append release specific modifiers :
+
+* alpha version : -alpha1, -alpha2, …
+* beta version : -beta1, -beta2, …
+* release candidate : -rc1, …
+
+Hibernate does not follow those conventions. You may find :
+
+* hibernate-3.2.0.cr1 : why not hibernate-3.2.0-rc1 ?
+* hibernate-3.3.0.ga : why not hibernate-3.3.0 ?
+* hibernate-3.3.0.SP1 : why not hibernate-3.3.1 ?
+* hibernate-search-3.1.0.Beta1 : why not hibernate-search-3.1.0-beta1 ?
+* …
+
+If you are used to Maven, then you must have been annoyed with it, as the http://repo1.maven.org/maven2/org/hibernate/hibernate/[resulting artifacts never follow the same conventions] (with or without dash, uppercase or not, …).
+
+Pretty frustrating. As a widely used library, I would expect Hibernate to follow the most common versioning schemes…

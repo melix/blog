@@ -1,0 +1,60 @@
+= Gradle plugin for CloudFoundry now supports standalone applications
+Cédric Champeau
+2012-07-03
+:jbake-type: post
+:jbake-tags: cloudfoundry, gradle
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+gradle-cf-plugin upgraded to 0.2
+--------------------------------
+
+I have just published a new version of the http://www.gradle.org[Gradle] plugin for link:[CloudFoundry]. The main change is that it supports standalone applications, meaning you will be able to push your applications to CloudFoundry all from Gradle.
+
+To deploy a standalone application, you can do the following:
+
+[source]
+----
+buildscript {
+       repositories {
+         mavenCentral()
+       }
+       dependencies {
+           classpath group: 'org.gradle.api.plugins', name: 'gradle-cf-plugin', version: '0.2.0'
+       }
+   }
+
+   apply plugin: 'cloudfoundry'
+
+----
+
+
+Then add to your _build.gradle_ file a section describing your deployment settings (note the _standalone_ framework):
+
+[source]
+----
+cloudfoundry {
+   target='http://api.vcap.me'
+   username = 'user-AT-domain-DOT-com'
+   password='foobar'
+   application = 'myapp'
+   framework = 'standalone'
+   applicationFramework='standalone'
+   runtime = 'java'
+   command = "$name/bin/$name"
+   file = distZip.archivePath
+   uris = ['http://myurl.vcap.me']
+   memory = 256
+}
+
+----
+
+
+If you migrate your application from version 0.1.0 to 0.2.0 of the plugin, then you have to change the _warFile_ property to _file_. Now, you are able to push your application to CloudFoundry using the _cf-push_ task:
+
+--------------
+gradle cf-push
+--------------
+
+Note that in future versions of the plugin, we will likely change the name of the tasks so that they follow the Gradle conventions (using, for example, _cfPush_ instead of _cf-push_).

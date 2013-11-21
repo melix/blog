@@ -1,0 +1,49 @@
+= XPointer support in JDK is incomplete
+Cédric Champeau
+2008-07-16
+:jbake-type: post
+:jbake-tags: java, jdk, xinclude, xpointer
+:jbake-status: published
+:source-highlighter: prettify
+
+There are some days when you want to kill people who don’t document their code, and some where you just want to kill those who silently ignore specifications. Today, I’ve spent hours digging into the source code of the Sun JDK (1.5) in order to find out why one of my XML inclusions did not work. Worse, there wasn’t a single warning, nor a single error in the console…
+
+[[]]
+The story
+---------
+
+I’m using http://www.w3.org/TR/xinclude/[XInclude] to split long XML files into smaller parts. Basically, it allows you to write things like this :
+
+[source]
+----
+
+
+ 
+  
+ 
+--
+
+You may activate this feature using the following lines of configuration :
+
+code,prettyprint
+----
+ [source]
+----
+
+
+ 
+  
+ 
+--
+
+(note the *xpointer=``xpointer(//macros/*)''* syntax).
+
+Well, if you came to this page thinking you’d find a solution to the fact that this does not work, I can’t help you. It doesn’t. While the documentation says that _XInclude_ support is implemented in the JDK, the truth is that it is incomplete. The JDK just supports the http://www.w3.org/TR/xinclude/#XPElement[element scheme] but not the http://www.w3.org/TR/xinclude/#XPointer[xpointer scheme]. Well, the specification of XInclude says that the implementation of the second one is optional, but the main problem with the JDK is that is never throws an _UnsupportedOperationException_. Worse, it silently parses your includes, and never throws any error (hence, the xi:fallback element is ignored).
+
+[[]]
+XPointer scheme support ?
+
+----
+
+
+If you know about a Java library which supports the _xpointer scheme_, please let me know, I haven’t found any yet.

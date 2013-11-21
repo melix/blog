@@ -1,0 +1,183 @@
+= Separating configuration from deployment in web applications
+Cédric Champeau
+2007-12-26
+:jbake-type: post
+:jbake-tags: configuration, j2ee, java, spring, tomcat, web
+:jbake-status: published
+:source-highlighter: prettify
+
+Since I write web applications, I’ve always been struggling with a very basic problem. Basically, I refuse to write, and tell my coworkers too, applications which require a compilation for each customer. This seems common sense, but it is really critical when building applications which require a high level of customization. The second problem is about *upgrading applications*.
+
+[[]]
+The weakness of web applications containers
+-------------------------------------------
+
+Take Tomcat. Anyone who has ever deployed a _.war_ file knows that: deploying a war *erases* everything in the exploded directory. This means that if you have made customizations in files located in WEB-INF directory (for example to configure your database), upgrading the application will make you loose all your configuration data. This has two implications:
+
+* for the developer, this requires writing down a burn-proof upgrade guide which mostly consists of saying ``backup all your data and do what you’ve done for the first version another time''.
+* for the customer, this leads to situations when you prefer not to upgrade because you *fear the upgrade procedure* : you cannot allow breaking your system
+
+I’ve personally seen both situations : as a developer, for my applications, and as a customer (upgrading Jira/Confluence), and lead me to find an alternative solution : *allowing separation of configuration from binaries in a web environment in a system independent way*. Basically, the application should work out of the box, and you should never have to rewrite configuration files again.
+
+[[]]
+Classloader magics
+------------------
+
+Using Java, I’ve not found any cleaner way of reading configuration/resources any easier than using the classloader : it is an elegant system independent way of retrieving data. For example, you could get your configuration file this way :
+
+[source]
+----
+public static final String PROPERTIES_FILE="/CONFIG/configuration.properties";
+
+// ...
+
+InputStream in = this.getClass().getResourceAsStream(PROPERTIES_FILE);
+Properties props = new Properties();
+try {
+   props.load(in);
+} catch (IOException e) {
+   theLogger.warn("Unable to read configuration file " + PROPERTIES_FILE, e);
+}
+
+----
+
+
+This assumes that a file called _configuration.properties_ is accessible *in the CONFIG directory at the root level in the classpath*. I think web environments miss some top level classpath directory convention like my _CONFIG_ directory. We have the _WEB-INF_ and _META-INF_ directories, but both are *bundled with the application binaries*(_war_ file). I’d like to have, someday, a JSR which dynamically adds a _CONFIG_ directory in the application classpath. Application servers would be encouraged to separate this directory from the exploded one. For example, in a Tomcat environment, it would lead to the following directory structure :
+
+* tomcat/
+* tomcat/webapps
+* tomcat/webapps/my-app
+* tomcat/webapps-conf/
+* tomcat/webapps-conf/my-app
+
+The usual tricks that you do in the WEB-INF/classes directory would, therefore, be done in the webapps-conf/my-app directory. As this feature/standard is missing, I’ve been obliged to find a workaround using the Spring framework (but this could be reproduced in any web application).
+
+[[]]
+An implementation of configuration separation using Spring
+----------------------------------------------------------
+
+[[]]
+Concept
+~~~~~~~
+
+Basically, I have implemented a fallback mechanism which allows fine grained configuration data finding procedure. When the application is bootstraping, it will look for its configuration files. If nothing is found, it will create a configuration directory and copy the default configuration files into it, then continue the boostrap using those files. I’ve chosen the following fallback mechanism (feel free to code your own), which targets at locating the _application home directory_:
+
+* if a properties file is accessible in the classpath, the application will look for a property in it which contains the application home directory
+* if a system property is set, then the application will read its home directory from it
+* the application creates its home directory in the _user home_ (that is the user which actually _runs_ the application server
+
+This mechanism allows multiple configurations : if you want to deploy your web application more than once on a single server, choose the first solution (agreed you’ll have to write *one* file in the WEB-INF/classes directory). If you don’t need it, just export a system property before running the web application server. And finally, the simplest case is the last one, but in this case I strongly recommand that your web application user home directory is separated from the server binaries too. For example, under Linux, I usually run my Tomcat application server with its own user/group) (tomcat), but the tomcat user home *must not* be the tomcat home. You should have something like this : /opt/tomcat : the application server /home/tomcat : the tomcat user home directory Doing this, upgrading the application server itself is easier, and you’ll never erase your configuration data. By the way, the solution I propose also allows you to share configuration across multiple web applications.
+
+[[]]
+Spring implementation
+~~~~~~~~~~~~~~~~~~~~~
+
+The Spring implementation of this lookup algorithm makes use of the Spring _property placeholder_ concept: a property placeholder allows Spring to define properties programmatically which can be used in its configuration files. For example, you’ll have the following XML code :
+
+[source]
+----
+
+In the previous snippet, _$\{myproperty}_ is a property. The idea is to read all those properties from a custom property placeholder configurer and use them into our Spring configuration file. The good thing is that you can actually *use those properties for importing other Spring configuration files*, for example:
+
+code,prettyprint---- code,prettyprint
+
+
+
+    
+...
+----
+
+And the application configurer magic. In this case, we create two Spring configuration files, one called _applications.xml_ and the other named _generated.applications.xml_. Both are real Spring configuration files :
+
+code,prettyprint
+----
+ code,prettyprint
+public class ApplicationConfigurer extends PropertyPlaceholderConfigurer {
+ private final static Logger theLogger = Logger.getLogger(ApplicationConfigurer.class);
+
+ public static final String APPLICATION_HOME_PROPERTY = "application.home";
+        public static final String CUSTOM_APPLICATIONS_FILE = "applications.xml";
+ public static final String GENERATED_APPLICATIONS_FILE = "generated.applications.xml";
+
+ private static final String APPLICATION_HOME = ".mycompany"+File.separatorChar+"myapp";
+ private static final String APPLICATION_PROPERTIES_FILE = "/myapp.properties";
+ private static final String SAMPLE_APPLICATIONS_FILE = "/com/mycompany/conf/applications.sample.xml";
+
+
+ public ApplicationConfigurator() {
+
+  // output generic version data
+  theLogger.info(Version.getVersion());
+  theLogger.info("(c) MyCompany 2007");
+
+  String fultyHome = null;
+
+  // search for application.properties file
+  InputStream in = this.getClass().getResourceAsStream(APPLICATION_PROPERTIES_FILE);
+  Properties props = new Properties();
+  if (in != null) {
+   try {
+    props.load(in);
+    setProperties(props);
+    fultyHome = props.getProperty(APPLICATION_HOME_PROPERTY);
+   } catch (IOException e) {
+    in = null;
+    theLogger.warn("Unable to read properties file " + APPLICATION_PROPERTIES_FILE, e);
+   }
+
+  }
+
+  if (in == null) { // search for system property
+   fultyHome = System.getProperty(APPLICATION_HOME_PROPERTY);
+   if (fultyHome == null) { // create default home
+    fultyHome = System.getProperty("user.home") + File.separator + APPLICATION_HOME;
+   }
+   props.put(APPLICATION_HOME_PROPERTY, fultyHome);
+   setProperties(props);
+  }
+
+  theLogger.info("Using APPLICATION_HOME : " + fultyHome);
+  File homeDir = new File(fultyHome);
+  createDefaults(homeDir);
+
+ }
+
+ private void createDefaults(File aHome) {
+  if (!aHome.exists()) {
+   theLogger.info(aHome + " does not exist. Creating default files");
+   aHome.mkdirs();
+  }
+  File appFile = new File(aHome, CUSTOM_APPLICATIONS_FILE);
+  if (!appFile.exists()) {
+   theLogger.info("Configuration "+ CUSTOM_APPLICATIONS_FILE +" does not exist. Using defaults file.");
+   theLogger.info("Please edit " + appFile.getAbsolutePath() + " then restart the application");
+   URL url = this.getClass().getResource(SAMPLE_APPLICATIONS_FILE);
+   File src = new File(url.getFile());
+            copySampleFile(appFile, src);
+            copySampleFile(new File(aHome, GENERATED_APPLICATIONS_FILE),src);
+        }
+ }
+
+    private void copySampleFile(File aAppFile, File aSrc) {
+        try {
+            FileOutputStream out = new FileOutputStream(aAppFile);
+            FileInputStream in = new FileInputStream(aSrc);
+            in.getChannel().transferTo(0, aSrc.length(), out.getChannel());
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            theLogger.error("Unable to copy default applications file",e);
+        }
+    }
+
+
+}
+-------------------------------------------------------------------------------------------------------
+
+That’s all ! This class creates a single property called _application.home_ that may be used in your Spring configuration file. As I said before, you could read more that one property and create a whole set of properties to be used in your Spring configuration file, but as I also split my Spring configuration files and the lack of property exports to child contexts, the only property I export is the application home, so that *other beans can programatically create Spring contexts*.
+
+[[]]
+Conclusion
+----------
+
+This post showed you that you could, at level design, avoid some lacks to the Java web application frameworks which makes it rather complex to separate configuration data from the application itself. This is a low cost implementation which demonstrates that it is not necessarily costly to think about it, and that it is, to my mind, something that *should always be done* because it *simplifies maintenance*.

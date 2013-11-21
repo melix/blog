@@ -1,0 +1,189 @@
+= Experience feedback on Groovy
+Cédric Champeau
+2010-07-27
+:jbake-type: post
+:jbake-tags: grails, groovy, intellij, java, scala
+:jbake-status: published
+:source-highlighter: prettify
+
+_(lecteurs francophones, vous pouvez consulter la http://www.jroller.com/melix/entry/retour_d_exp%C3%A9rience_groovy[version française ici])_
+
+On the occasion of the 3rd anniversary of this blog, I wanted to write a special post. It appears that it will be special in two ways. First, it’s the first one to be published in both French and English. Second, this article is about a language which slowly took a large place in my everyday work for the last years, I mean Groovy. I hope this post will interest you, and will help those who hesitate on using this language industrially to make their choice : I’ll try to show off the pros and cons, and as usual, discussion is open : I encourage you to write comments. I will focus on the industrial consequences of choosing Groovy more than the technical issues, though both are related.
+
+[[]]
+Once upon a time
+----------------
+
+Groovy adoption at Lingway wasn’t made in one day. I joined the team in a special circumstance, as the company I was working for was bought by Lingway. At this time, we already used to integrate scripting languages to allow easier customizations, but their usage was rather limited. I had made the choice to integrate both Mozilla Rhino and BeanShell, but not Groovy. Why ? Well the reason is quite simple : I had missed it.
+
+At Lingway, in the context of rewriting Perl components to Java and improving them, I was driven by the idea of using scripting languages to make things easier to customize. Particularly, there were two main use cases :
+
+* the need to parametrize data acquisition workflows for our main product, Lingway Knowledge Management
+* the design of a new content extraction engine for documents written in natural language
+
+It was by that time, reading posts about _closures_ (the lack of) in Java that I discovered Groovy. It was the beginning of a long love story ! What Groovy allowed to do perfectly suited my requirements :
+
+* a language on the JVM
+* able to use Java libraries, and, very important, usable from Java libraries (also known as cross compilation)
+* a dynamic language supporting closures
+* ability to write DSLs (Domain Specific Languages)
+* a clear and simple syntax which would allow people not aware of development to write scripts
+
+Those two use cases, which lead to a global adoption of Groovy in our components/products, will allow me to illustrate the pros and cons of this language in an industrial context.
+
+[[]]
+Syntax matters
+--------------
+
+If there were one thing to highlight as a key factor of Groovy’s adoption, it would definitely be syntax. Groovy offerts over other JVM languages like Scala or Clojure, major advantages :
+
+* a syntax 95%-compatible with Java : it greatly reduces the learning curve since any Java developer will be able to code in Groovy without having to know nor understand the subtleties of this language. In a reduced team where there’s not much time allowed for learning, it is very important.
+* precious add-ons : utility methods/classes which simplifies the usage of standard JDK Apis and makes code more compact
+* usage of closures, which allows us to focus on algorithmics more than syntax
+* a dynamic type system, which allows newbies to avoid thinking about types
+
+Let’s come back on the last point : I have already said that I planned to use Groovy in edge cases where ``users'' were not ``computer aware''. While this term is quite unfair, it does hide what I consider now as a great success in the introduction of Groovy. The challenge was dared, but it worked : at Lingway, we have three profile types in our technical team : first, developers - like me -, coming from software engineering. Second, consultants, who are trained for programming, but have lower pure technical skills : their main abilities are transforming customer needs into parametrization. Those are the people who write our workflows. Last but not least, linguists, who for most only know about computers as tools : they don’t know anything about programming languages and software engineering. However, thanks to Groovy, all those three profiles are able to collaborate on a single platform, a single language. The ability for Groovy to simplify at most syntax and the ability to create DSLs is amazing.
+
+Let’s take a real example, in the context of acquisition workflows A java programmer would have written (correctly) the following :
+
+[source]
+----
+Map inputMap = new HashMap()
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Title, "Hello, World !");
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Body,"Groovy is cool !");
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,com.lingway.lkm.db.corpus.bean.languages.LanguageKind.ENGLISH);
+
+----
+
+
+Usage of Groovy in workflows allows us to simplify it to :
+
+[source]
+----
+inputMap = [
+   title: "Hello, World !"
+   body: "Groovy is cool !"
+   language: "en"
+]
+
+----
+
+
+This way of doing allows the workflow ``code'' to be much more readable. It allows us to focus on what to do, not on how to do. This is extremely important and allows us to save time : it is easier to read and maintain. Moreover, it is not required to be an expert to understand what it does : no need to know what a HashMap is. No need to even know that you actually need to instanciate one. Let’s see another example where we would like to sum up the numbers contained in a flat file (one number per line). Our Java developper would have written the following :
+
+[source]
+----
+File file = new File("/tmp/data.txt");
+int total = 0;
+try {
+ BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
+ String line;
+ while ((line=reader.readLine())!=null) {
+  if (line.length()>0) total += Integer.valueOf(line);
+ }
+ reader.close();
+} catch (IOException e) {
+ // this must never happen, and if it does, I don't know what to do
+}
+System.out.println("total = " + total);
+
+----
+
+
+In Groovy, you’d just write this :
+
+[source]
+----
+def total = 0
+new File("/tmp/data.txt").eachLine("utf-8") { line ->
+   if (line) total += line as int
+}
+println "Total : $total"
+
+----
+
+
+From 13 lines, we fall to 4. Those 4 lines only focus on what to do. At worse, you’ll have to explain to your interlocutor what _eachLine_ or _as int_ does, and you’re done. Likely, Groovy is the perfect candidate for simplifying the usage of Java APIs. One of my favorite example is taken from the Gaelyk documentation, a simplified web framework based on Groovy :
+
+[source]
+----
+mail.send sender: "app-admin-email-AT-gmail-DOT-com",
+   to: "recipient-AT-somecompany-DOT-com",
+   subject: "Hello",
+   textBody: "Hello, how are you doing? -- MrG",
+   attachment: [data: "Chapter 1, Chapter 2".bytes, fileName: "outline.txt"]
+
+----
+
+
+Here’s an example of a ``mini-DSL'', dedicated to sending e-mails. How could one imagine something simpler ? When you actually know about the verbosity of the Javamail API, it’s no match…
+
+So, thanks to Groovy’s adaptability, we were able to :
+
+* make our workflows readable
+* write a DSL dedicated to linguistic extraction rules. This language is the core of our internal data extraction tool, and is mainly used by our linguists
+
+About that, the strengths of Groovy in such a tool are multiple :
+
+* it allows non developers to write rules which are compiled to bytecode then executed by the JVM
+* when the DSL is not sufficient, linguists may ask the developers for help. The latter would then write chunks of Groovy code which perform complex operations
+
+Therefore, what is possible is not limited to what the DSL allows. It is something particularly important to understand : if we had chosen to write a classical DSL, a rule based engine which would use its own syntax, then we would probably have achieved a higher level of readability, but we would also have had to :
+
+* either write an interpreter (simple solution) or a compiler (complex one) for our rules
+* develop new versions of the language as new needs are discovered
+
+With Groovy, you just skip those steps, and you just earn an extra : it’s just code. Even if linguists actually write rules, there’s nothing that prevents us from writing regular code inside. The whole language is usable…
+
+A funny thing is that as time passes by, linguists show an increasing curiosity towards the ``code'' part of rules. They naturally aim at factorizing rules : the language becomes structuring and leads to better code quality !
+
+[[]]
+The barriers
+------------
+
+So far I’ve been particularly enthusiast about Groovy. However, it’s not that simple, and there are things that are get complicated. I’ll split the barriers into two categories : technical barriers and humain barriers. Don’t neglect any of them.
+
+[[]]
+Technical barriers
+~~~~~~~~~~~~~~~~~~
+
+The first technical barrier we encountered was performance. Release after release, Groovy becomes faster and I can tell you that the current versions are really fast. However, don’t expect miracles. In particular, in the context of our extraction engine, we had a very important performance expectation. The objective, for example, was to be able to perform a complete resume parsing and data extraction (name, surname, personal data, experiences, trainings, …) from a binary document (Word,…) within a second. If the core of our engine had been written in Groovy, there’s no chance that we could have reached such a performance. That’s why we decided to write the critical parts in pure Java, while the domain code is written in Groovy (leading to a DSL). This way we have a good trade-off between performance and readability.
+
+So, if writing code in Groovy is really easy thanks to its syntax, it is just also easy to write slow code. I remember a parser written in Groovy which read the XML configuration file of our engine. This code was written in Groovy because the _XmlSlurper_ makes it really easy to read XML files. Whatever, the Java code was 20 times as fast as the Groovy version… (admittedly, almost 20 times longer). Another example about the curious default type used by Groovy in decimal computations :
+
+[source]
+----
+def num = 1.1
+
+----
+
+
+The type associated to _num_ is not, as one would expect, _float_ nor _double_, it’s _BigDecimal_. As a direct consequence, every benchmark found on the web about Groovy falls into this trap. You just have to strongly type your code to make performance acceptable (and more). For a language which simplifies life by avoiding strong typing, it seems curious and just mystifies the principal of least surprise (for the curious, there’s an explanation for that, as the Groovy developers chose to apply the principal of least surprise to the result of computations more than on the types : using _BigDecimal_ allows computations to be exact).
+
+Using Groovy code from Java leads to another barrier : since the natural way of coding in Groovy is to weakly type, Groovy generated APIs only take _Object_ as parameters. Those APIs are just unusable, so if your Groovy code is intended to be used from Java, you’ll have to make the effort to strongly type.
+
+Another barrier is directly related to the global adoption of Groovy in the technical team. The success of Groovy makes that we wish to introduce it everywhere. However, when different components include different versions of Groovy, you take the risk of compatibility issues. Happily, unlike the Scala language for example, Groovy maintains binary compatibility between one version and another. I greatly reduces the risks when upgrading.
+
+[[]]
+Human barriers
+~~~~~~~~~~~~~~
+
+Curiously, the main barriers encountered during the adoption of Groovy were not technical but humain. And more curiously, the ones I faced did not come from people I expected. I expected linguists to rebel, it were developers !
+
+To understand properly, you must understand that developers are Lingway all have nearly 10 years of experience. I can modestly say that they are good (if not very) developers. As good developers, they use good tools : I cannot understand when people use _vi_ or _Emacs_ to code : the main strength of Java has never been the language, but rather its tools. At Lingway, we use _IntelliJ IDEA_. This IDE is for me the best IDE available on the market for Java development. We’ve used it for long, and getting back to Eclipse would be worse than a curse for us. With a strongly types language like Java, and even more with the addition of generics, code is understandable (but rather noisy) : you actually know, reading the code, that this collection actually contains that type of objects. The compiler will complain if you try to use different content, and if you use an intelligent IDE, without having to compile, it will indicate to you what are the possible choices for what method, depending on the context. As time goes, the programmer develops what I call the ``completion frenzy'' : you actually pass most of your time pressing the CTRL+space or CTRL+Q key combinations. It’s no use to read javadoc, since my IDE will gently indicate me what the method expects at what position. When you intensively practice that, you may reach an incredible productivity.
+
+In that context, the transition to Groovy looks like a regression : being widely sub-typed (and I’m fighting to make understand that weakly typed doesn’t mean untyped), it’s most of time impossible to know what a method/closure/map expects as a parameter without reading the documentation. However, when we come to documentation, we can find the best, like the worse. Even your IDE is useless : it doesn’t have enough hints to help you. Most of CTRL+space calls are headed for failure : it leads to an incredible frustration.
+
+Therefore, developers just tend to come back the natural way : Java developers ``Java-ize'' their code, instead of Groovyfying it. We loose readability for ease of development. It’s quite paradoxical and I try to fight against this, but it’s difficult to challenge : I just think that unless you are a very curious and open developer, you’ll find it frustrating to fly visually. It’s just like getting 10 years back.
+
+I must admit I have not succeeded to perfectly initiate the Groovy spirit to the team. Some make resist while others make efforts but it’s a question of feeling first : it’s very hard to fight against natural tendencies.
+
+Recently, we started using _Grails_ for an application of e-reputation analysis. This development is still in progress, and once again, I made a bet to try to developer faster. For now, I’m really satisfied of the result which leads to an unprecedented productivity. However, frustrations are not gone : the IDE support is far from perfect and widely insufficient : almost no completion, no differentiation between dynamic methods which are added by default to every object and service methods, for example. There’s not much more completion for _render_ parameters. For _taglibs_, the standard completion is insufficient and there’s no way for the IDE to actually help because Grails taglibs definition miss metadata about required attributes and so on. You just actually have to open multiple Grails help web pages to get it right.
+
+[[]]
+Conlusion
+---------
+
+Through this post, I tried to show off the industrial usage of Groovy, integrated in many components which actually are in production (in our case, for more than 3 years). The global balance is positive, but you really don’t have to neglect the barriers of the integration of Groovy. Particularly, Groovy doesn’t escape one of the most complicated activities : driving change. A programmer which is too comfortable with Java will have difficulties to embrace the language and will sometimes be awfully insincere just to justify his own choices, guided by personal comfort : scarifying readability for tools. This is not unjustifiable, since I often find myself cursing the lack of completion from my IDE. This is not enough to change my mind about Groovy : this is surely one of the best thing that happened to Java for the last 10 years… A language to recommand, and I hope it’ll spread widely !
+
+_(for my english-speaking audience, my english is not perfect, do not hesitate to correct me)_

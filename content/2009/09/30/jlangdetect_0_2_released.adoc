@@ -1,0 +1,35 @@
+= JLangdetect 0.2 released
+Cédric Champeau
+2009-09-30
+:jbake-type: post
+:jbake-tags: jlangdetect, nlp
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+JLangDetect 0.2 released !
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is a small update which includes the following features :
+
+* Ability to detect the language of a document using a subset of the languages used for training
+* Logs now managed by log4j
+
+The ability to use a subset of the languages used for training is important if you know that a document must be written in french or english, for example, but the detector has been trained for more languages. Using a subset will ensure that the detector returns one of those languages.
+
+[[]]
+Downloads
+~~~~~~~~~
+
+JLangDetect is licensed under http://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0].
+
+* Binary : http://www.jroller.com/melix/resource/jlangdetect/jlangdetect-0.2.jar[jlangdetect-0.2.jar]
+* Source: http://www.jroller.com/melix/resource/jlangdetect/jlangdetect-0.2-sources.jar[jlangdetect-0.2-sources.jar]
+* Javadoc: http://www.jroller.com/melix/resource/jlangdetect/jlangdetect-0.2-javadoc.jar[jlangdetect-0.2-javadoc.jar]
+* Europarl pre-compiled corpus: http://cedric.champeau.free.fr/jlangdetect/ngrams-europarl.zip[ngrams-europarl.zip]
+
+[[]]
+Version Control
+~~~~~~~~~~~~~~~
+
+Project is hosted on http://code.google.com/p/jlangdetect/[Google code].

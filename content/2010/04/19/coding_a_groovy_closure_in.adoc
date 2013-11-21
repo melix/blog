@@ -1,0 +1,89 @@
+= Coding a Groovy closure in pure Java
+Cédric Champeau
+2010-04-19
+:jbake-type: post
+:jbake-tags: closure, groovy
+:jbake-status: published
+:source-highlighter: prettify
+
+Today I just wanted to share a simple trick that’s not well documented in Groovy : in a project which mixes Java and Groovy code, I’ve faced a problem where I wanted to use a Groovy method in Java which took a _Closure_ as a parameter. Here’s how to do it. Actually, it’s quite simple :
+
+*Groovy*
+
+[source]
+----
+class Operation {
+    def op(list, action) {
+        list.each { action(it) }
+    }
+}
+
+----
+
+
+*Java*
+
+[source]
+----
+public class MyJavaClass {
+    private Operation groovy = new Operation();
+
+    private void shouldBeUsedAsClosure(Object o) {
+        System.out.println(o);
+    }
+
+    public void demonstrateClosureUsage() {
+        // creates a closure which delegates calls to this Java object
+        MethodClosure cl = new MethodClosure(this, "shouldBeUsedAsClosure");
+        groovy.op(Arrays.asList("hello", "world"), cl);
+    }
+
+    public static void main(String... args) {
+         MyJavaClass java = new MyJavaClass();
+        java.demonstrateClosureUsage();
+    }
+}
+
+----
+
+
+This example is straighforward, however, this allows you to write your custom ``closures'' directly in Java. This is somehow interesting whenever performance matters and that critical portions of code need to be coded in Java.
+
+Note that you can have multiple methods with the same name, Groovy will automatically dispatch the call to the appropriate delegate :
+
+[source]
+----
+public class MyJavaClass {
+    private Operation groovy = new Operation();
+
+    private void shouldBeUsedAsClosure(String str) {
+        System.out.println(str.toUpperCase());
+    }
+
+    private void shouldBeUsedAsClosure(int x) {
+        System.out.println(x*x);
+    }
+
+    public void demonstrateClosureUsage() {
+        // creates a closure which delegates calls to this Java object
+        MethodClosure cl = new MethodClosure(this, "shouldBeUsedAsClosure");
+        groovy.op(Arrays.asList("hello", "world","this","should","print","4 : ",2), cl);
+    }
+
+    public static void main(String... args) {
+         MyJavaClass java = new MyJavaClass();
+        java.demonstrateClosureUsage();
+    }
+}
+
+----
+
+
+This is an elegant way to avoid multiple _instanceOf_ tests to check the type of the closure arguments. Last but not least, Groovy also provides a way to call static methods as closures, passing the class instead of an instance as the owner parameter :
+
+[source]
+----
+   MethodClosure cl = new MethodClosure(MyJavaClass.class, "staticMethod");
+
+----
+

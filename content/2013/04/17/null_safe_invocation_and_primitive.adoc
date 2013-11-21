@@ -1,0 +1,58 @@
+= Null-safe invocation and primitive types
+Cédric Champeau
+2013-04-17
+:jbake-type: post
+:jbake-tags: groovy, null, programming
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Null-safe method invocation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Yesterday, I worked on http://jira.codehaus.org/browse/GROOVY-6101[a bug] reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:
+
+[source]
+----
+class Person {
+   String name
+   int age
+}
+
+Person getPerson() { null }
+
+Person p = getPerson()
+
+def result = p?.age
+
+----
+
+
+Now the question is, what is the value of _result_? If you run this in the Groovy console, the result would be _null_. This is compatible with the assumption that the null-safe invocation operator (?.) always return null if the receiver of the message is null (here, _p_ is null, so result is null). The definition is pretty easy, but it gets more complicated if you slightly modify the code:
+
+[source]
+----
+int result = p?.age
+
+----
+
+
+By explicitely setting the type to _int_, executing this would throw an error, stating that you cannot convert _null_ to _int_. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if _p_ is not null, the assignment is perfectly valid since _getAge()_ is expected to return a primitive type… This means that unlike the ``normal'' invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.
+
+[[]]
+The dynamic world
+~~~~~~~~~~~~~~~~~
+
+What if the null-safe invoker was aware of the return type? In ``null-safe'', you must think about what the ``safe'' part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the *receiver* is null, then return null. This means that because _p_ is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was _getAge()_, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a _default value_ compatible with the primitive type. This means that here, I would expect the null-safe invoker to return _0_. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when _p?.age_ is executed, the target method hasn’t been chosen, because you need to know the runtime type of _p_ to determine what method will eventually be called. As _p_ is null, the dynamic runtime doesn’t know the type of _p_, so has no idea that calling _age_ would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…
+
+[[]]
+The static world
+~~~~~~~~~~~~~~~~
+
+Now what if we’re in a pure static world? In that case, the method to be called is chosen at compile time, given the inferred type of _p_. It means that unlike the dynamic runtime, the static compiler, at this point, knows that _p.age_ is _p.getAge()_ which returns a primitive type. So it is capable of handling the null-safe invocation with what I think is better, semantically speaking: _null-safe_ invocation only checks the receiver, and returns a value which depends on the return type of the method being invoked. So a static compiler is able to return _0_ instead of the non-pritive _null_. What is funny is that I asked, on Twitter, what people expected from the result of _p?.getAge()_ if _p_ is null. Everybody answered _null_. So it’s clear that my way of thinking is not mainstream, but I’m ok with that. I just find it awkward that an operator which is supposed to act on invocation is also capable of altering the return type…
+
+[[]]
+Conclusion
+~~~~~~~~~~
+
+Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)

@@ -1,0 +1,73 @@
+= The truth about annotations inheritance
+Cédric Champeau
+2008-01-17
+:jbake-type: post
+:jbake-tags: annotations, inheritance, java
+:jbake-status: published
+:source-highlighter: prettify
+
+I’ve read tons of articles about the subject : are annotations inherited or not ? Java 5 annotations are powerful, but you must understand what you do. Annotating a class does not necessarily mean that a subclass will keep the annotation. So, are they inherited or not ? The truth is that if you *want* your annotations to be inherited, you *must* specify it. Here’s a simple JUnit 4.4 test case to show you the concept.
+
+[source]
+----
+package test.annotations;
+
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
+
+public class AnnotationTest {
+
+ @Retention(RetentionPolicy.RUNTIME)
+ public @interface SimpleAnnotation {
+  String value() default "test";
+ }
+
+ @Retention(RetentionPolicy.RUNTIME)
+ @Inherited
+ public @interface InheritedAnnotation {
+  String value() default "test";
+ }
+
+ // two simple classes that will show that the annotation is *not* inherited
+ @SimpleAnnotation
+ class BaseClass {
+ }
+
+ class SubclassDoesNotInheritAnnotation extends BaseClass {
+ }
+
+ // two simple classes that will show that the annotation *is* inherited
+ @InheritedAnnotation
+ class InheritedBase {
+ }
+
+ class ChildInheritsAnnotation extends InheritedBase {
+ }
+
+ // proof
+ @Test
+ public void testAnnotations() {
+  // not inherited
+  Annotation[] annotations = BaseClass.class.getAnnotations();
+  assertEquals(1, annotations.length);
+  annotations = SubclassDoesNotInheritAnnotation.class.getAnnotations();
+  assertEquals(0, annotations.length);
+
+  // inherited
+  annotations = InheritedBase.class.getAnnotations();
+  assertEquals(1, annotations.length);
+  annotations = ChildInheritsAnnotation.class.getAnnotations();
+  assertEquals(1, annotations.length);
+ }
+
+}
+
+----
+
+
+The secret is the @Inherited annotation, which will ensure that subclasses will be annotated too.

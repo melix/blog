@@ -1,0 +1,17 @@
+= IntelliJ IDEA's local history saved my life !
+Cédric Champeau
+2008-01-17
+:jbake-type: post
+:jbake-tags: idea, intellij, java
+:jbake-status: published
+:source-highlighter: prettify
+
+One of my coworkers came to me quite stressed after having ``accidently'' deleted source files from his project. The problem was that he had not done it from our editor, IntelliJ IDEA, but rather directly via windows explorer. Furthermore, he had also pressed ``shift+delete'', which, for those who are not aware of that combination, means ``delete without possibility to recover''.
+
+Damned. Not commit for the late two days (!), Windows XP, NTFS, shift+delete. My first thought was that he was screwed. Then we thought about the local history feature of Jetbrain’s editor. If there was a place where he could recover his files, there it was.
+
+So we went to the ``View -> Recent changes'' menu, and IDEA showed us a popup showing ``external changes''. We clicked and thanks Jetbrains, the files were marked as deleted. We just had to select them, click on ``revert'' and voilà !
+
+Ok, Jetbrains did not saved my life. They saved his life ;)
+
+P.S : I’m using Ubuntu Linux every day, and I have to admit the problem would have been the same : that’s not a windows related problem :)

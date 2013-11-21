@@ -1,0 +1,22 @@
+= JLangdetect available at google code
+Cédric Champeau
+2009-07-16
+:jbake-type: post
+:jbake-tags: java, jlangdetect, nlp
+:jbake-status: published
+:source-highlighter: prettify
+
+Hi,
+
+Several persons asked for it, so I took some time to create a google code project for JLangdetect. You’ll find it here :
+
+http://code.google.com/p/jlangdetect/
+
+I had not much time to improve it, so feel free to contribute. My ideas for future directions include :
+
+* remove ``irrevelant'' portions of texts from corpora to reduce the size of the n-gram trees
+* add ability to limit the tested text to a subset of test languages (useful if you know that your text is either in english or french, but your detector is configured with more languages)
+* add pre-filters to both learning and detection algorithms in order to address problems like case (if the corpus is a large well written text but the tested string is an uppercase title, then detection will likely be wrong)
+* improve detection thanks to pluggable add-ons like lexicon recognition, …
+
+Take a look at my posts related to http://www.jroller.com/melix/tags/jlangdetect[JLangdetect] for more details.

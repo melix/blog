@@ -1,0 +1,92 @@
+= JLangDetect 0.3 released with bundled language profiles
+Cédric Champeau
+2011-06-27
+:jbake-type: post
+:jbake-tags: detection, europarl, java, jlangdetect, language
+:jbake-status: published
+:source-highlighter: prettify
+
+It’s been a while since I did not release a new version of https://code.google.com/p/jlangdetect[JLangDetect], a simple Java library for language identification. I have made several changes to this version, which should make it simpler to integrate and test.
+
+* package name changed from _com.lingway.jlangdetect_ to _me.champeau.jlangdetect_ : there have been several questions regarding licensing, and whether JLangDetect was related to Lingway or not. The answer is no : it’s a pet project I’m leading, so to be clearer about that, I decided to rename the main package.
+* 3 modules : _jlangdetect_, _jlangdetect-europarl_ and _jlangdetect-extra_ :
+** _jlangdetect_ provides the basic language identification tooling : learning algorithms and language detection support, but it does *not* integrate any language profile. This is basically the same level of support as the previous releases.
+** _jlangdetect-europarl_ provides an http://www.statmt.org/europarl/[Europarl] based language detector which already includes resources for detecting languages for 21 european languages.
+** _jlangdetect-extra_ extends the Europarl detector with 4 languages : Russian, Chinese, Japanese and Korean. Those detectors are less robust than the Europarl ones due to the lack of royalty-free resources available, but should be sufficient for most needs.
+* less memory usage: JLangDetect 0.3 introduces a simple algorithm to reduce the size of each language profile without loosing too much accuracy. In version 0.2, an Europarl based language detector for 11 languages took about 25MB of RAM. Now, you can detect 21 languages with only 4MB of RAM for language profiles.
+
+[[]]
+How to use it ?
+---------------
+
+The simplest way to use JLangDetect is to use the _UberLanguageDetector_ singleton, available in the _jlangdetect-extra_ module :
+
+[source]
+----
+import  me.champeau.ld.UberLanguageDetector;
+UberLanguageDetector detector = UberLanguageDetector.getInstance();
+
+// ..
+
+String language = detector.detectLang("ceci est un petit texte en français");
+
+----
+
+
+Alternatively, if you don’t need to detect russian, chinese, japanese or korean languages, you can use the _EuroparlDetector_ available in the _jlangdetect-europarl_ module. Note that you can still create your own language detector and register custom languages using the core module.
+
+[[]]
+Maven integration
+-----------------
+
+JLangDetect is now available through Maven. To use it, you can add the following repository into your pom.xml file :
+
+[source]
+----
+
+  jlangdetect-googlecode
+  JLangDetect Maven repository
+  https://jlangdetect.googlecode.com/svn/repo
+
+----
+
+
+Then use the following dependency :
+
+[source]
+----
+
+  me.champeau.jlangdetect
+  jlangdetect-extra
+  0.3
+
+----
+
+
+[[]]
+Use from Groovy
+---------------
+
+As a last integration example, here is how to use it from Groovy, through a simple script :
+
+[source]
+----
+@GrabResolver('https://jlangdetect.googlecode.com/svn/repo')
+@Grab('me.champeau.jlangdetect:jlangdetect-extra:0.3')
+import me.champeau.ld.UberLanguageDetector as ULD
+
+ULD.instance.with {
+  assert detectLang('ceci est un petit texte en français') == 'fr'
+  assert detectLang('this is a text in english') == 'en'
+}
+
+----
+
+
+[[]]
+Direct downloads
+----------------
+
+* http://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect/0.3/jlangdetect-0.3.jar[JLangDetect 0.3 (jar)]
+* http://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect-europarl/0.3/jlangdetect-europarl-0.3.jar[JLangDetect Europarl 0.3 (jar)]
+* http://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect-extra/0.3/jlangdetect-extra-0.3.jar[JLangDetect Extra 0.3 (jar)]

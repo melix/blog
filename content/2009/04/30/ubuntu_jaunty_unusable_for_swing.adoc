@@ -1,0 +1,17 @@
+= Ubuntu Jaunty unusable for Swing debugging ?
+Cédric Champeau
+2009-04-30
+:jbake-type: post
+:jbake-tags: intellij, jaunty, swing, ubuntu
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Ubuntu 9.04 Jaunty unusable for Swing GUI debugging ?
+-----------------------------------------------------
+
+I (and Thomas Singer) am having trouble with debugging Swing GUIs under Jaunty. The problem, http://www.jetbrains.net/devnet/message/5237046[described in this post] doesn’t seem to be only related to IDEA, but is rather annoying : the whole desktop freezes when the debugger reaches a breakpoint. The only way to release the lock is to switch to a console with CTRL+ALT+F1 and kill the debugged process.
+
+It looks like some already http://wiki.netbeans.org/wiki/view/FaqDebuggingAWTXWindows[had the problem with Netbeans] in previous versions of the JDK, and a workaround was available thanks to the _AllowDeactivateGrabs_ option in _xorg.conf_. However, it seems that this https://bugs.launchpad.net/ubuntu/+source/xorg-server/+bug/338489[option has been removed from Xorg]. That’s a pity as it just doesn’t leave any workaround for this bug.
+
+If anyone has a solution, please do not hesitate to comment this post, or http://www.jetbrains.net/devnet/message/5237046[join the discussion]

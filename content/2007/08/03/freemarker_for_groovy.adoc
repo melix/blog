@@ -1,0 +1,96 @@
+= FreeMarker for Groovy
+Cédric Champeau
+2007-08-03
+:jbake-type: post
+:jbake-tags: freemarker, groovy
+:jbake-status: published
+:source-highlighter: prettify
+
+After finding out that http://www.jroller.com/melix/entry/replacing_velocity_with_groovy_jsmarty[Groovy templates would be great as a replacement for Velocity], then thinking about http://www.jroller.com/melix/entry/grails_spring_and_templates_security[security issues], I came to a third solution.
+
+[[]]
+FreeMarker for Groovy
+---------------------
+
+Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add ``tags'' or ``plugins'' to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html[transform] for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :
+
+* Beeing able to dynamically add plugins for a customer
+* fix does nasty security issues by making the web designer unable to directly write Groovy code (the programmer creates plugins, then makes them available to a customer)
+
+[[]]
+How does it work ?
+------------------
+
+Imagine your customer requires an URL Encoding text transform, and that FreeMarker does not offer this possibility. Then, you would just need to :
+
+* Create a plugin named _urlencoder_ that implements the _IGroovyFreeMarkerPlugin_ interface
+* Copy this plugin into the Groovy FreeMarker template engine plugins directory
+
+Tell your customer how to use it :
+
+[source]
+----
+<@groovy plugin="urlencoder">this is an expression that will be converted to its URL Encoding form
+
+----
+
+
+The FreeMarker engine will then call your plugin and return the transform. Note that you may embed FreeMarker tags and variables : the transform content does not need to be plain text. For example :
+
+[source]
+----
+<@groovy plugin="urlencoder">this is an ${expression} that will be converted to its URL Encoding form
+
+----
+
+
+Now take a look a the plugin code itself:
+
+[source]
+----
+import groovy.text.freemarker.IGroovyFreeMarkerPlugin
+
+class urlencoder implements IGroovyFreeMarkerPlugin {
+ String transform(Map params, String content) {
+  URLEncoder.encode(content);
+ }
+}
+
+----
+
+
+Here’s a sample groovy script that will show you how you can use the template engine :
+
+[source]
+----
+import groovy.text.freemarker.FreeMarkerTemplateEngine
+
+def tpl = '''
+Hello, ${user.name}
+<@groovy plugin="urlencoder" mode=user>this is a test ${user.name}'''
+def engine = new FreeMarkerTemplateEngine("plugins")
+def binding = ["user" : ["name":"cedric"]]
+println engine.createTemplate(tpl).make(binding)
+
+----
+
+
+[[]]
+Default implementation bonuses
+------------------------------
+
+I’ve built a rather simple implementation, but it still has some additional features:
+
+* Template caching: instead of using the _createTemplate()_ method, use the _createNamedTemplate()_ one first. It will create a template and put it into the template cache, then use the _getNamedTemplate()_ method to retrieve a cached template.
+* Plugin loader: there’s a default implementation which reads plugins from a directory. Feel free to implement the _IGroovyFreeMarkerPluginLoader_ if you want more complex loaders
+* Plugin parameters: if the <@groovy> tag content is not sufficient, you may add parameters to the transform, and use them in the plugin thanks to the params map. For example : <@groovy plugin=``temperatureconvertor'' source=``celcius'' dest=``kelvin''>112
+
+[[]]
+Grabbing the code
+-----------------
+
+* Binary: http://cedric.champeau.free.fr/freemarker/gfreemarker-0.1.0.jar[gfreemarker-0.1.0.jar]
+* Javadoc: http://cedric.champeau.free.fr/freemarker/gfreemarker-javadoc.zip[gfreemarker-javadoc.zip]
+* Sources (with IntelliJ IDEA project): http://cedric.champeau.free.fr/freemarker/GroovyFreeMarker.tar.gz[GroovyFreeMarker.tar.gz]
+
+You will also need the latest http://cedric.champeau.free.fr/freemarker/freemarker.jar[freemarker.jar]. I will not have much time to work on this, so feel free to contribute !

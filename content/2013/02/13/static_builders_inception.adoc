@@ -1,0 +1,265 @@
+= Static builders inception
+Cédric Champeau
+2013-02-13
+:jbake-type: post
+:jbake-tags: builder, compilation, groovy, programming, static
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Documentation is good for everybody
+-----------------------------------
+
+As part of the http://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html[Groovy documentation effort], I started writing documentation for several features of Groovy, including http://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration[compiler configuration], http://docs.codehaus.org/display/GROOVY/Type+checking+extensions[type checking extensions], and yesterday the http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo annotation].
+
+What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo documentation], I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…
+
+In the following post, I will show you how I combined several features of Groovy 2.1 to provide an implementation of a statically compiled HTML builder: static compilation, @DelegatesTo, meta-annotations, custom type checking extensions and of course AST transformations, without having to write all the boilerplate necessary to make it type safe! Nothing less…
+
+[[]]
+Statically compiled markup builder
+----------------------------------
+
+What if we could annotate a class as a markup builder, describe its schema, then, if a user wants to statically compile the builder usage, have a type-safe, statically compiled builder? That means, if you write this:
+
+[source]
+----
+@groovy.transform.CompileStatic
+String build() {
+    def builder = new HTMLBuilder()
+    builder.html {
+        body {
+            p {
+                out << "Hello, this is "
+                a(href:'http://groovy.codehaus.org') { out << 'Groovy' }
+            }
+        }
+    }
+}
+
+----
+
+
+Then you want *compile-time errors* if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo documentation] showed that it was possible to create a statically checked (and statically compiled) builder.
+
+There were two problems in the approach from the documentation:
+
+* unnecessary repetitive/verbose code (inner classes)
+* no ability to perform checks on the allowed attributes of a tag at *compile-time*
+
+[[]]
+Here comes the statically compiled markup builder experiment!
+-------------------------------------------------------------
+
+[[]]
+The night hacker
+~~~~~~~~~~~~~~~~
+
+So last night, I started an experiment to see if I could make things easier and after two hours of coding, I had indeed a first working implementation, which allowed me to define a schema for my builder, but didn’t check attributes yet.
+
+Today, I spent several hours fixing bugs for Groovy 2.1.1, including some that prevented me from going further (including one with nasty classloading issues that prevented Gradle from loading some classes from my AST transformation…). After that, I could eventually fix my prototype and I now have a fully working implementation…
+
+[[]]
+Checking out the sources
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+First of all, all the code is available on https://github.com/melix/staticbuilder[GitHub]. It makes uses of the gradle wrapper, so all you need is to run:
+
+[source]
+----
+    $ ./gradlew test
+
+----
+
+
+[[]]
+The builder
+~~~~~~~~~~~
+
+Creating a statically checked builder is easy:
+
+[source]
+----
+    import groovyx.transform.StaticMarkupBuilder
+
+    @StaticMarkupBuilder
+    class HTMLBuilder {
+        static schema = {
+            html {
+                head { title() }
+                body {
+                   p()
+                   a(attributes:['href', 'target'])
+                }
+            }
+        }
+    }
+
+----
+
+
+For examples of several builders, you can take a look at the http://bit.ly/XAOvhJ[unit test].
+
+What is important here is that using the *@StaticMarkupBuilder*, we are not using a builder, we are defining one:
+
+* a statically compiled builder
+* which accepts a predefined schema
+
+Here, the schema is very simple. It says that at the top level, we can find the _html_ tag. This tag can include either a _head_ or a _body_ tag. Below body, you can find either _p_ or _a_, and if it’s an _a_, then the only allowed attributes are _href_ and _target_.
+
+It’s a very simple schema that of course doesn’t matches what you can do in HTML5, but remember that it’s a prototype aimed at showing off the amazing capabilities of Groovy 2.1.
+
+To use it, you can do:
+
+[source]
+----
+    @CompileStatic
+    void test() { // using a method to ensure that the builder will be statically compiled!
+        def out = new ByteArrayOutputStream()
+        def builder = new Builder3(out)
+        builder.html {
+            body {
+                p 'Hello, Groovy!'
+            }
+        }
+        println out.toString()
+    }
+
+----
+
+
+What we’re doing here is creating a builder inside a statically compiled portion of code (so that you can make sure that the builder usage is indeed statically compiled). If you run this code, it will show:
+
+[source]
+----
+    Hello, Groovy!
+
+----
+
+
+But what is really interesting is showing what would happen if you use a wrong tag:
+
+[source]
+----
+    @CompileStatic
+    void test() { // using a method to ensure that the builder will be statically compiled!
+        def out = new ByteArrayOutputStream()
+        def builder = new Builder3(out)
+        builder.html {
+            bodyp { // compile-time error!
+                p 'Hello, Groovy!'
+            }
+        }
+        println out.toString()
+    }
+
+----
+
+
+Here, Groovy will fail at compile-time!
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Groovyc: [Static type checking] - Cannot find matching method groovyx.transform.StaticMarkupBuilderTest#bodyp(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
+    Groovyc: [Static type checking] - Cannot find matching method groovyx.transform.StaticMarkupBuilderTest#p(java.lang.String). Please check if the declared type is right and if the method exists.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Of course, the error message can be improved (there are ways to do this), but what is interesting is that you really fail before the test gets executed!
+
+[[]]
+Behind the magic
+^^^^^^^^^^^^^^^^
+
+To acheive this first example, there are two things in action:
+
+* a meta-annotation, called _@StaticMarkupBuilder_ that will expand itself into _@CompileStatic_ and _StaticMarkupBuilderGenerator_: this way, using a single annotation, I am saying that the builder will be statically compiled without having to use @CompileStatic explicitely. The second annotation is an AST transformation:
+* an AST transformation that transforms the schema definition into a set of inner-classes, close to what the documentation says
+
+The AST transformation is very powerful. Say you have this schema:
+
+[source]
+----
+    static schema = {
+        html {}
+    }
+
+----
+
+
+Then the AST transformation will create an inner class called _HTMLBuilder$HtmlTag_, then also create, in the _HTMLBuilder class_, a method which name is _html_ and uses a closure… Of course, it will add the _@DelegatesTo_ annotation transparently, so the generated method signature will look like this:
+
+[source]
+----
+    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }
+
+----
+
+
+For sub-tags, the principle is the same, but instead of generating the method in the HTMLBuilder class, it is added to the appropriate inner tag class… Of course, the AST transform does a bit more work:
+
+* make the builder and each generated inner class extend a base class (_AbstractTag_), this class defining how a tag should be rendered.
+* generate methods for string only arguments (_p `text'_) or empty tags
+* generate a method for tags accepting attributes
+
+The latter is very important as it will help us demonstrate how we can also check that when the builder is used, the attributes being used are checked against a list of valid tags.
+
+[[]]
+The attribute checking problem
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here, we have an interesting problem: our schema allows us to say that the _a_ tag only accepts _href_ and _target_ attributes. But can we prevent the user from using other attributes at *compile-time?*
+
+-------------------------------------------------------------
+    builder {
+        ...
+        a(notGood:'invalid attribute') { out << 'Link text' }
+    }
+-------------------------------------------------------------
+
+Let’s see what happens if we don’t perform additional magic. When the builder is checked by the type checker, it will find a method named _a_, which accepts a map and a closure as arguments. This method exists, so it passes compilation. This is bad, because we wanted a compile-time error here. We could have, when we generated the builder class, added a check into the _a_ method body that verifies that the map keys are in the authorized list, but it’s a runtime check and here we want a compile-time one…
+
+So we have a new challenge:
+
+* how to make the authorized attributes list known when the builder usage is compiled?
+* how to make the static compiler *check* that the user only picks attributes from that list
+
+For the first part, my choice was to add an annotation in the map parameter of the generated method:
+
+[source]
+----
+    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }
+
+----
+
+
+Alright, so now we have the information available at runtime, when the compiler will select this method, the method will have an annotation that we can reflect to retrieve the list of attributes… Still, the compiler won’t use that information, so we’re doomed, right?
+
+Not really, because Groovy 2.1 includes http://docs.codehaus.org/display/GROOVY/Type+checking+extensions[type checking extensions]. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!
+
+The code of this type checking extension can be found http://bit.ly/Yryqb7[here].
+
+We’re almost done! The only problem with this solution is that one has to annotate every method that uses our builder with @CompileStatic(extension=’groovyx/transform/StaticBuilderExtension.groovy’). This is not as cool as seeing the extension being automatically applied…
+
+[[]]
+Global AST transformations to the rescue
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There’s one solution to this. We will use a global AST transformation here. Unlike local AST transformations that are triggered by seeing an annotation in the code, global AST transformations are automatically loaded by the compiler and applied to every class being compiled. Thanks to this feature, we will be able to scan classes being compiled and if we find something annotated with @CompileStatic, then change it to @CompileStatic(extensions=’…’). That’s all!
+
+The code for such an annotation can be found http://bit.ly/UfjmjQ[here].
+
+You must remember that using global AST transformations have a significant impact on compilation times, since they are applied on every class, so always make sure you don’t use unnecessary transforms.
+
+[[]]
+Conclusion
+----------
+
+The main focus of this blog post wasn’t to describe in details how the AST transformation works, but rather show you how a smart combination of the features of Groovy 2.1 can allow you to perform tasks that would seem impossible, like type checking at compile-time the usage of a builder, statically compiling the code and eventually, performing checks on things that are normally unchecked by the compiler (arguments of a call).
+
+In the end, this example is not complete, of course:
+
+* the definition of the schema is insufficient (what about tags that allow arbitrary tags, …)
+* allowText attribute isn’t used yet
+* the error messages can be improved (yes, it is possible to replace them with tags!)
+* the API can be improved for more fluency
+
+But what is more important is that using such techniques, I am pretty sure that someone even crazier than me could write a more complete implementation that would accept, say… a real schema (think of xsd)!

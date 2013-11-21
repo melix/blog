@@ -1,0 +1,15 @@
+= Language detection : more thoughts
+Cédric Champeau
+2008-09-25
+:jbake-type: post
+:jbake-tags: java, jlangdetect, nlp
+:jbake-status: published
+:source-highlighter: prettify
+
+Following my http://www.jroller.com/melix/entry/nlp_in_java_a_language[previous post], some people asked me if JLangDetect was sufficient by itself. The obvious answer is no. There are many reasons for that. A good language detection should combine several heuristics. JLangDetect is one. In Lingway KM, we use several techniques to improve detection. For example, there are few steps that you must ensure, in order to maximize your chances.
+
+JLangDetect does a good job because it requires a correct input :
+
+* have the inputstream is correctly read, meaning you should ensure that character encoding is correct. Java internaly encodes string in unicode, but your reader must know the encoding *before* reading the bytes. This makes it not as trivial as it first seems, and that’s why projects like JChardet exist. Read a iso-latin1 character stream as if it was unicode, and your language detection will be totally broken.
+* make sure you have raw text : HTML and XML is forbidden. Language detection is optimal on plain text. Tags are very noisy, and will result in wrong language detection.
+* Try to keep revelant parts of the input stream : if your text is issued from a web page, there are chances that you’ll get noise caused by advertisements, menus and so on. You should try to keep your detector focused on what you want to detect : the language of the text.

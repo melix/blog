@@ -1,0 +1,40 @@
+= Java BGGA closures proposal and the Groovy syntax
+Cédric Champeau
+2008-02-29
+:jbake-type: post
+:jbake-tags: bgga, closures, groovy, java
+:jbake-status: published
+:source-highlighter: prettify
+
+While there’s still no decision made on the integration of closure to the Java language (AFAIK), I think the http://www.javac.info/[BGGA proposal] is the most promising candidate. I’m quite confident it will eventually be integrated to the language.
+
+However, I was wondering about the syntax of the proposal, mainly because more and more programmers are using closures in Groovy. Basically, you’ll write a closure in Groovy like this :
+
+[source]
+----
+{ x,y -> x+y }
+
+----
+
+
+In the BGGA proposal, the syntax is more verbose because Java is strongly typed :
+
+[source]
+----
+{int x, int y => x + y}
+
+----
+
+
+Everything would be fine, but I was wondering about the _=>_ separator, which _can_ be confusing :
+
+[source]
+----
+{int x, int y => x >= y }
+
+----
+
+
+IMHO, it would be better if the proposal followed the syntax that’s getting known by more and more people, that is to say the Groovy one : replacing _=>_ with _->_
+
+What do you think ?

@@ -1,0 +1,15 @@
+= Java 7 idea : change default file encoding
+Cédric Champeau
+2008-09-16
+:jbake-type: post
+:jbake-tags: 7, java
+:jbake-status: published
+:source-highlighter: prettify
+
+Apart from closures I eventually doubt will be integrated into Java 7, there’s something I’d really like to see, althought it introduces a (small yet easily fixable) change : I think the default *source file encoding* should be the same for all platforms. Thumbs up for UTF-8, since it is able to represent most of characters for every language (for exotic characters, you still may use \uxxxx notation).
+
+I still can’t understand (but there must be valid reasons apart from people creating files with notepad) why the default source file encoding is not the same on every platform. The biggest problem is when using multiple development environments on the same project : people using Windows create source files using _cp1252_ while people like me, programming under Linux, are using _utf-8_.
+
+The problem occurs when people introduce special characters (very common in french, for example in string constants or comments) in source code : you won’t be able to build under another platform unless you specify the source file encoding flag, which is rather annoying.
+
+The problem can be obviously fixed with your favorite editor (IntelliJ IDEA allows choosing the default file encoding), but I’d really like it to be fixed in the compiler, so that the builds are consistent accross multiple platforms (plus, if you use continuous integration, there are chances that your build server is not using the encoding you expect).

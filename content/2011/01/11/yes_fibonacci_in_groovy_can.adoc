@@ -1,0 +1,267 @@
+= Yes, Fibonacci in Groovy can be as fast as Java !
+Cédric Champeau
+2011-01-11
+:jbake-type: post
+:jbake-tags: asm, bytecode, fibonacci, groovy, java, programming
+:jbake-status: published
+:source-highlighter: prettify
+
+_After reading this, take a look at the complete @Bytecode AST transformation implementation http://www.jroller.com/melix/entry/asm_plugin_for_intellij_and[here]_
+
+Yes, the famous Fibonacci test can be as fast in Groovy that it is in Java. In fact, Vaclav Pech showed us that http://www.jroller.com/vaclav/entry/memoize_groovy_functions_with_gpars[it could even be faster]. Here, I’ll show you how you can acheive the same level of performance as Java without changing the algorithm. I have buzzed on Twitter saying this was a pure Groovy solution. In fact, I’m cheating a little, as one would consider this is not really pure Groovy, but indeed, you can do this only with .groovy files.
+
+[[]]
+It all started with one quote
+-----------------------------
+
+Around one discussion about the integration of Groovy++ into Groovy, which always end up with benchmarks comparisons, Jochen Theodorou said :
+
+Well, with the AST transforms you could also generate java bytecode directly. Many things are possible with Groovy.
+
+When Jochen speaks, everyone listens. I did so. Was he really saying that I could generate *bytecode* through AST transformations ? I’ve read this phrase carefully multiple times, then digged into the Groovy source code, and indeed, there was a _BytecodeSequence_ AST Node. Wow. Groovy never stops surprising me. Ok, so let’s start a proof of concept, and let’s do it with the king of the benchmarks (my appreciation), the Fibonacci benchmark.
+
+[[]]
+Java vs Groovy
+--------------
+
+This benchmark is really interesting, because it shows us where Groovy is really bad against Java. That’s not important to me as I reckon this is not what Groovy is made for, but well, you know, benchmarks are all around, and people get nasty when they start telling your-favorite-language-is-crap-because-it-s-too-slow. I’m going to show you what I can do with Groovy, guys ! So here’s a Java implementation :
+
+[source]
+----
+public int fib(int i) {
+   return i < 2 ? 1 : fib(i - 2) + fib(i - 1);
+}
+
+----
+
+
+And now, it’s Groovy counterpart :
+
+[source]
+----
+int fib(int i) {
+   i < 2 ? 1 : fib(i - 2) + fib(i - 1);
+}
+
+----
+
+
+Definitely similar, but Groovy 1.7.6 runs this 30x slower than Java…
+
+[[]]
+Groovy’s revenge, part 1 : ASM
+------------------------------
+
+The first episode for Groovy’s revenge consists of writing an http://www.jroller.com/melix/entry/asm_bytecode_outline_for_intellij[ASM plugin for IntelliJ IDEA], because, you know, it was such a pain to work with Eclipse. That’s done.
+
+[[]]
+Groovy’s revenge, part 2 : AST Transformations
+----------------------------------------------
+
+The second episode, and most interesting, consists of writing an AST Transformation that will allow you to write bytecode right into Groovy. I did that, and here’s what my final script looks like :
+
+[source]
+----
+@ast.Bytecode
+int fib(int i) {
+ l0
+    iload 1
+    iconst_2
+    if_icmpge l1
+    iconst_1
+    _goto l2
+ l1
+    frame SAME
+    aload 0
+    iload 1
+    iconst_2
+    isub
+    invokevirtual '.fib','(I)I'
+    aload 0
+    iload 1
+    iconst_1
+    isub
+    invokevirtual '.fib', '(I)I'
+    iadd
+ l2
+   frame same1,'I'
+    ireturn
+}
+
+int groovyFib(int i) { i<2?1:groovyFib(i-2)+groovyFib(i-1)}
+println "Pure Groovy"
+long sd = System.currentTimeMillis()
+println groovyFib(40)
+println "Computed in ${(System.currentTimeMillis()-sd)}ms"
+
+println "Bytecode Groovy"
+sd = System.currentTimeMillis()
+println fib(40)
+println "Computed in ${(System.currentTimeMillis()-sd)}ms"
+
+----
+
+
+And here’s the output :
+
+[source]
+----
+Pure Groovy
+165580141
+Computed in 18465ms
+Bytecode Groovy
+165580141
+Computed in 576ms
+
+----
+
+
+Annotating a method with _@Bytecode_ allows you to write it’s body in JVM pseudo-bytecode (you’ll notice some slight differences), but it’s almost exactly the same as what the ASM plugin will show when you display the bytecode of a method.
+
+Interested in the AST Transformation code ? Here it is. Note that it is in very early stages, and I wrote this as a proof-of-concept. I’m unsure that there’s really a need for such a powerful tool in Groovy, that’s mostly fun for me ! However, it could be useful for self-generating code, you know, all the stuff about robots that write their own code and eventually generate giant networks of machines which destroys humanity… Maybe that could be useful for dynamic recompilation too, like what’s done in many emulators. However, if you think that could be interesting to have a complete implementation, let me know and I could push the code so that it comes as a Groovy module.
+
+The code. It’s surprisingly easy. However, you’ll have to use the _groovy-all_ jar to get this work, because the bytecode AST transformations uses the embedded _ASM_ library which is relocated at build time. The first and easy step is the AST annotation itself :
+
+[source]
+----
+package ast
+
+import java.lang.annotation.ElementType
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import java.lang.annotation.Target
+import org.codehaus.groovy.transform.GroovyASTTransformationClass
+
+@Retention(RetentionPolicy.SOURCE)
+@Target([ElementType.METHOD])
+@GroovyASTTransformationClass(["ast.BytecodeASTTransformation"])
+public @interface Bytecode {
+
+}
+
+----
+
+
+Then the implementation of the transformation :
+
+[source]
+----
+package ast
+
+import groovyjarjarasm.asm.Label
+import groovyjarjarasm.asm.MethodVisitor
+import groovyjarjarasm.asm.Opcodes
+import org.codehaus.groovy.ast.ASTNode
+import org.codehaus.groovy.ast.expr.ArgumentListExpression
+import org.codehaus.groovy.ast.expr.MethodCallExpression
+import org.codehaus.groovy.ast.expr.VariableExpression
+import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.classgen.BytecodeInstruction
+import org.codehaus.groovy.classgen.BytecodeSequence
+import org.codehaus.groovy.control.CompilePhase
+import org.codehaus.groovy.control.SourceUnit
+import org.codehaus.groovy.transform.ASTTransformation
+import org.codehaus.groovy.transform.GroovyASTTransformation
+
+@GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
+class BytecodeASTTransformation implements ASTTransformation, Opcodes {
+ void visit(ASTNode[] nodes, SourceUnit source) {
+  def meth = nodes[1]
+  def instructions = meth.code.statements
+  meth.code = new BytecodeSequence(new BytecodeInstruction() {
+   @Override
+   void visit(MethodVisitor mv) {
+    def labels = [:]
+    // perform first visit to collect labels
+    instructions.each { ExpressionStatement stmt ->
+     def expression = stmt.expression
+     if (expression instanceof VariableExpression) {
+      def text = expression.text
+      if (text ==~ /l[0-9]+/) {
+       labels.put(text, new Label())
+      }
+     }
+    }
+    instructions.each { ExpressionStatement stmt ->
+     def expression = stmt.expression
+     if (expression instanceof VariableExpression) {
+      def text = expression.text
+      if (text ==~ /l[0-9]+/) {
+       mv.visitLabel(labels[text])
+      } else if (text =~ /[aild]const|[aild]sub|[aild]add|[aild]return/) {
+       mv.visitInsn(Opcodes."${text.toUpperCase()}")
+      } else {
+       throw new IllegalArgumentException("Bytecode operation unsupported : "+text);
+      }
+     } else if (expression instanceof MethodCallExpression) {
+      if (expression.objectExpression instanceof VariableExpression && expression.arguments instanceof ArgumentListExpression) {
+       if (expression.objectExpression.text=="this") {
+        def opcode = expression.methodAsString.toUpperCase()
+        ArgumentListExpression args = expression.arguments
+        switch (opcode) {
+         case '_GOTO':
+          mv.visitJumpInsn(GOTO, labels[args.expressions[0].text])
+          break;
+         case 'IF_ICMPGE':
+         case 'IF_ICMPLE':
+         case 'IF_ICMPNE':
+         case 'IF_ICMPLT':
+         case 'IF_ICMPGT':
+          mv.visitJumpInsn(Opcodes."${opcode}", labels[args.expressions[0].text])
+          break;
+         case 'ALOAD':
+         case 'ILOAD':
+          mv.visitVarInsn(Opcodes."${opcode}", args.expressions[0].text as int)
+          break;
+         case 'INVOKEVIRTUAL':
+          def (clazz,call) = args.expressions[0].text.split(/\./)
+          def signature = args.expressions[1].text
+          if (!clazz) clazz = meth.declaringClass.name
+          mv.visitMethodInsn(INVOKEVIRTUAL, clazz, call, signature)
+          break;
+         case 'FRAME':
+          def frameId = args.expressions[0].text.toUpperCase()
+          if ('SAME'==frameId) {
+           mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+           break;
+          } else if ('SAME1'==frameId) {
+           if (args.expressions[1].text=='I') {
+            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, [Opcodes.INTEGER] as Object[]);
+            break;
+           }
+          }
+         default:
+          throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+        }
+       } else {
+        throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+       }
+      } else {
+       throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+      }
+     } else {
+      throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+     }
+    }
+   }
+  })
+ }
+
+}
+
+----
+
+
+The code shows that there are many bytecode instructions that I did not manage. This is because I just wanted a proof-of-concept, so I mostly dealt with the instructions required to make the Fibonacci test run. However, thanks to Groovy dynamic nature, the code is rather compact, and consists of three steps :
+
+* Visit the method AST node to replace bytecode pseudo-instructions with a BytecodeSequence AST Node
+* which requires visiting the code block itself to collect the labels
+* then generate the visit instructions
+
+[[]]
+Conclusion
+----------
+
+My conclusion is rather simple : Groovy is amazing. Even when you think it’s beaten by another JVM language, you’ll always find room for improvement. This one looks like the most absolute solution : the DIY way, which reminds me when I was young and that I wrote assembler code on an Amstrad CPC 6128 for demos. This was fun, and I’m having fun again ! For you, if you find this code useful, then it’s a world of verify errors that opens to you. Good luck !
+
+_Footnote : for those who don’t get the irony, this is obvioulsy not a solution for making Groovy faster. It’s a nonsense to take a benchmark like this and say ``Groovy is slow''. I’ve blogged many times about Groovy performance and showed this is rarely an issue. No, this point is about AST transformations, and how you could use bytecode to extend the language and implement missing features at the lower level._

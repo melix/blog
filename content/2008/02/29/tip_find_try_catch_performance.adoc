@@ -1,0 +1,59 @@
+= Tip: Find try/catch performance bottlenecks with structural search in IntelliJ IDEA
+Cédric Champeau
+2008-02-29
+:jbake-type: post
+:jbake-tags: idea, intellij, performance, tip
+:jbake-status: published
+:source-highlighter: prettify
+
+Advanced Java programmers are aware that _try/catch_ statements cost many CPU cycles, so it is generally a bad idea to catch exceptions in loop statements. Moreover, even with profilers, it may be hard to find out that a _try/catch_ statement is responsible for a performance bottleneck : you have to take a look at your code, and figure out whether it should be optimized or not. In many cases, you should definitely avoid using _try/catch_ statements in loops.
+
+Fortunately, IntelliJ IDEA has this powerful structural search feature. Let’s explain how to use it in order to find those possible bottlenecks. Structural search is powerful as it allows you to describe ``patterns'' of code to match. No matter the indentation, no matter the statements, you’ll just lookup for *structural matches*.
+
+In our case, you need to look for something that ``looks like'' this :
+
+[source]
+----
+for () {
+  try {
+  } catch () {
+  }
+}
+
+----
+
+
+The corresponding structural search pattern will be :
+
+[source]
+----
+for ($decl$;$condition$;$increment$) {
+ $beforeStatements$;
+ try {
+  $TryStatement$;
+ } catch ($exceptionType$ $ex$) {
+  $CatchStatement$;
+ }
+ $afterStatements$;
+}
+
+----
+
+
+To use this, either click on the ``search structurally'' item in the search menu, or press _Ctrl+Shift+S_ and enter the pattern : +
+ +
+
+image:http://www.jroller.com/melix/resource/idea/structwindow.png[image]
+
+ +
+ +
+ Then you need to tweak the variables in order to specify the cardinalities. Click on ``Edit variables'', and update :
+
+* beforeStatements : minimum count 0, maximum count unlimited
+* afterStatements : minimum count 0, maximum count unlimited
+* tryStatement : minimum count 1, maximum count unlimited
+* catchStatement : minimum count 0, maximum count unlimited
+
+The other variables may stay as defaults (min 1, max 1).
+
+Now click on ``Find'' and you’ll probably find some of those nasty constructs. The previous patterns works for classical for loops, you need to tune it to work for _Java 5 for each constructs_, and don’t forget _while_ loops too.

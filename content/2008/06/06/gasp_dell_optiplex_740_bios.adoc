@@ -1,0 +1,16 @@
+= *gasp* Dell Optiplex 740 bios upgrade failure
+Cédric Champeau
+2008-06-06
+:jbake-type: post
+:jbake-tags: bios, dell, upgrade
+:jbake-status: published
+:source-highlighter: prettify
+
+This morning, I wanted to upgrade my BIOS to check out if the changes made to the nforce chipset support were to improve disk performance on my Ubuntu box… First, the bad thing is that you need to boot Windows to be able to upgrade. Fortunately, I had a (very) small Windows XP partition for that kind of things. So I launched the upgrade and *gasp*, it kept spawning messages like this :
+
+-------------------------------
+FAILURE !! FAILURE !!
+Click ok to try to reflash BIOS
+-------------------------------
+
+Ok, BIOS was cleared, no new BIOS installed… After fighting up several minutes, I managed to get the upgrade complete. For those who would experience the same mess, here’s the trick : increase the priority of the BIOS upgrade process to ``higher than normal''. Back to Ubuntu ;)

@@ -1,0 +1,79 @@
+= My Git tweaks for daily usage
+Cédric Champeau
+2012-07-25
+:jbake-type: post
+:jbake-tags: git, groovy
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+A few tricks for daily Git usage
+--------------------------------
+
+Since http://groovy.codehaus.org[Groovy] switched to Git for version control, and more recently to GitHub for hosting, I’ve had great pleasure working with this tool. In this post, I’ll just show you some basic tricks that I use on a daily basis.
+
+[[]]
+Adding the git branch to the Bash prompt
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+My first tweak is to have my bash prompt show me the current branch I’m working on. This is very handy. I borrowed the setup from http://pastebin.com/CLYTaS5A[this pastebin] but unfortunately, I can’t find the original author. Note that it also adds support for svn. Add the following to your _.bashrc_ file:
+
+[source]
+----
+#GIT
+simple_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
+}
+
+parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(git::\1)/'
+}
+parse_svn_branch() {
+  parse_svn_url | sed -e 's#^'"$(parse_svn_repository_root)"'##g' | awk -F / '{print "(svn::"$1 "/" $2 ")"}'
+}
+parse_svn_url() {
+  svn info 2>/dev/null | grep -e '^URL*' | sed -e 's#^URL: *\(.*\)#\1#g '
+}
+parse_svn_repository_root() {
+  svn info 2>/dev/null | grep -e '^Repository Root:*' | sed -e 's#^Repository Root: *\(.*\)#\1\/#g '
+}
+export PS1="\[\033[00m\]\u@\h\[\033[01;34m\] \w \[\033[31m\]\$(parse_git_branch)\$(parse_svn_branch) \[\033[00m\]$\[\033[00m\] "
+
+----
+
+
+[[]]
+Some aliases
+~~~~~~~~~~~~
+
+All those aliases must be added to your _.gitconfig_ file into the _[alias]_ section.
+
+One thing I’m doing often with Groovy development is to fix some bug into a branch, then backport the fix to other branches. My preferred tool for this is _cherry-pick_. Cherry picking a commit is really easy, but to make it even easier, I’m using an alias that shows me the hash of the last commit on a branch:
+
+--------------------------
+[alias]
+ last = log --oneline -n 1
+--------------------------
+
+Then calling _git last_ will show me the hash of the commit to be cherry-picked. Another problem is that _git cherry-pick_ is a bit long to type, especially if you do this often, and _git cherry_ doesn’t get autocompleted when you press tab, so I’m using another alias for cherry-picking:
+
+-----------------
+[alias]
+ cp = cherry-pick
+-----------------
+
+If you are used to _svn_, you also know that _co_ is an alias for _checkout_ so I’m adding this too:
+
+--------------
+[alias]
+ co = checkout
+--------------
+
+Eventually, here is a nice history view of commits:
+
+----------------------------------------------
+[alias]
+ hist = log --oneline --graph --decorate --all
+----------------------------------------------
+
+That’s all, those aliases are currently the only ones I’m using on a daily basis, but of course, I’m relatively new to git, so there are chances that new aliases will show up in the future!

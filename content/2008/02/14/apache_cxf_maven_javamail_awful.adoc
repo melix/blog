@@ -1,0 +1,95 @@
+= Apache CXF + Maven + Javamail + Log4J (update)
+Cédric Champeau
+2008-02-14
+:jbake-type: post
+:jbake-tags: apache, commons, cxf, email, javamail, maven
+:jbake-status: published
+:source-highlighter: prettify
+
+I had much trouble trying to figure out why a project we moved to Apache CXF (for managing web services) suddenly started to send malformed emails. Basically, we use Commons email for sending emails to the administrator whenever a monitored service goes wrong.
+
+Everything went good until we moved our web service layer to the powerful http://incubator.apache.org/cxf[Apache CXF]. Instead of sending a well formed e-mail, the server suddenly started sending emails without subject nor correct sender. As we use Maven for building our project, and CXF makes use of Apache Geronimo Javamail/activation implementations, I immediatly suspected a buggy implementation of javamail.
+
+Instead of sending, in the _DATA_ section of the email the following :
+
+[source]
+----
+DATA
+From: "I am the sender" 
+
+----
+
+
+Geronimo javamail implementation only sends what was actually set as the mail content :
+
+[source]
+----
+DATA
+the content of my mail
+
+----
+
+
+I don’t know if it is a feature or a bug, but it really sucks (update : it’s neither feature nor bug, it’s a classpath messup, see the latest paragraph). To get rid of this mess, we had to exclude the geronimo dependencies from both _cxf-rt-core_ and _cxf-rt-databinding-jaxb_ modules. And, if like us you have a dependency on another module using CXF too, don’t forget to exclude from the parent module too.
+
+Basically, you shoud write something like this in your _pom.xml_ file :
+
+[source]
+----
+  
+   org.apache.cxf
+   cxf-rt-core
+   ${cxf.version}
+   
+    
+     org.apache.geronimo.specs
+     geronimo-javamail_1.4_spec
+    
+    
+     org.apache.geronimo.specs
+     geronimo-activation_1.1_spec
+    
+   
+  
+  
+   org.apache.cxf
+   cxf-rt-frontend-jaxws
+   ${cxf.version}
+  
+  
+   org.apache.cxf
+   cxf-rt-databinding-jaxb
+   ${cxf.version}
+   
+    
+     org.apache.geronimo.specs
+     geronimo-javamail_1.4_spec
+    
+    
+     org.apache.geronimo.specs
+     geronimo-activation_1.1_spec
+    
+   
+  
+
+----
+
+
+Then, add the Sun javamail/activation implementations instead :
+
+[source]
+----
+  
+   javax.mail
+   mail
+   1.4
+  
+
+----
+
+
+To the CXF team : *please make those dependencies optional*.
+
+To the Maven team : *please add the global exclude feature so that we won’t have to specify excludes on each dependency !*
+
+*Update:* After filing a bug report on Geronimo, I’ve made further investigations. The problem is more complex than I first thought : if there were only the Geronimo dependencies, I would not have had the same error. Instead, I would have got a message telling me that it could not find the ``SMTP transport''. I figured out that the problem was our log4j dependency, which depends on javax.mail. The Geronimo Spec mail API does not implement the SMTP transport : it is implemented in a separated artifact. So the SMTP transport that was used in my case what the one in the Javamail transitive dependency from log4j. The problem that seems to arise is that Geronimo is not compatible with the transport layer from Javamail : if you just order the classpath differently, all goes fine. It all depends on the library which is first loaded…

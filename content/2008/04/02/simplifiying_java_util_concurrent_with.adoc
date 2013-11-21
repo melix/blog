@@ -1,0 +1,48 @@
+= Simplifiying java.util.concurrent with Groovy
+Cédric Champeau
+2008-04-02
+:jbake-type: post
+:jbake-tags: concurrent, groovy, java
+:jbake-status: published
+:source-highlighter: prettify
+
+Ever wondered how to simplify _java.util.concurrent_ usage with Groovy ? Here’s a simple example of what can be easily done using closures. The following code executes several closures in parallel and waits upon completion before resuming the script.
+
+[source]
+----
+def doInParallel(Closure... closures) {
+ def service = java.util.concurrent.Executors.newFixedThreadPool(closures.length)
+ def latch = new java.util.concurrent.CountDownLatch(closures.length)
+ closures.each { cl -> service.execute({
+  try {
+   cl.call()
+  } catch (e) {
+   throw e
+  } finally {
+   latch.countDown()
+  }
+ })}
+ latch.await()
+ service.shutdown()
+}
+
+----
+
+
+Here’s how to use it :
+
+[source]
+----
+
+doInParallel(
+   { println 1+1 },
+   { callVeryLongProcess() },
+   { throw Exception() } // demonstrates the correct handling of exceptions
+)
+
+println "This line of code will only appear after every closure in doInParallel is completed"
+
+----
+
+
+Fun, isn’t it ?

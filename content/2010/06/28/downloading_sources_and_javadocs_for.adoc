@@ -1,0 +1,23 @@
+= Downloading sources and javadocs of dependencies in Grails
+Cédric Champeau
+2010-06-28
+:jbake-type: post
+:jbake-tags: eclipse, grails, javadoc
+:jbake-status: published
+:source-highlighter: prettify
+
+After having searched half the internet for a solution, here’s the simplest one I’ve found for downloading the sources and the javadoc of dependencies in Grails :
+
+[source]
+----
+grails install-plugin eclipse-scripts
+grails download-sources-and-javadocs
+
+----
+
+
+Note that you actually don’t need to use Eclipse for this to work (I don’t). Unfortunately, Jetbrains’ IntelliJ IDEA will not recognize sources and javadocs automatically, so you’ll have to attach them manually. No magic trick for that. For those interested in this feature, please http://youtrack.jetbrains.net/issue/IDEA-53294[vote for it].
+
+I’m quite astonished this feature is not bundled with Grails. It’s much more complicated to actually deal with third party libraries without access to either the documentation or the sources…
+
+[edit]Jetbrains have fixed the http://youtrack.jetbrains.net/issue/IDEA-53294[issue], but only in IntelliJ IDEA X. Hope it’ll get backported to 9.0.x.

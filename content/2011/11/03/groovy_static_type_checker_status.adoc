@@ -1,0 +1,403 @@
+= Groovy static type checker: status update
+Cédric Champeau
+2011-11-03
+:jbake-type: post
+:jbake-tags: checking, groovy, static, type
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+About Groovy
+------------
+
+As some of you may already know, I joined SpringSource/VMware a month ago and I am working on the Groovy language.One of my tasks, which will make me busy a little while, consists of developing a _static type checker_. This project, internally, is known as _Grumpy_. Why this name? Is it supposed to be public? Indeed; no. It’s an internal name only, because the main goal of this project is to make the compiler grumpy, meaning it will complain where regular Groovy does not. In this post, I will explain what _static type checking_ (STC) consists of, what is already implemented, what’s in progress and eventually, I will need your help. The Groovy language is community driven. While developers like me may propose features, we want to make sure that they are useful to the community and that they are implemented the way YOU expect it to be. This is why, at some points, we will ask you for a decision to be made. Most of times, decisions to be made are not related to technical issues, but rather behaviour issues. I will try to hint you where decisions are to be made, or when they have already been taken. Be sure to give your opinion, either commenting on this post, either sending an e-mail to the user mailing-list.
+
+[[]]
+Groovy Static Type Checking
+---------------------------
+
+_Update: Now http://docs.codehaus.org/pages/viewpage.action?pageId=227053189[Groovy 2.0.0-beta-1 has been released] with the static type checker integrated! You can give it a try, and give us feedback of course._
+
+First of all, you’ll want to take a look at the http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking[Groovy Enhancement Proposal] page which describes what are the goals of this feature. Right now, it’s still in heavy development, so it’s being developed on its own branch (called _grumpy_). Basically, the idea is to make Groovy complain at compile time about types, instead of runtime. In fact, as Jochen Theodorou http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html[explains on his blog post], the Groovy compiler in ``regular'' mode, cannot make many checks at compile time regarding types, missing properties, missing methods and so on, because the language allows runtime meta-programming. Runtime meta-programming allows you, for example, to dynamically add members to a class, change the methods which are invoked, change the return types, bind external properties, … This means that if a program was to be statically checked, then it would fail, although it would work perfectly at runtime. An example is better than words, let’s take this code:
+
+[source]
+----
+String.metaClass.foo = { -> 1 }
+assert 'Hello, World!'.foo() == 1
+
+----
+
+
+If you run it, then you will see that it’s perfectly fine: at *runtime*, we modify the metaClass of the String class so that it adds a new method on the String class which is known as foo() and returns an int. If this program was to be statically checked, then it would fail at compile time, because the compiler would not find the ``foo'' method on the String class.
+
+So, why should we add STC if it will make the compiler fail where a program is perfectly valid ? In fact, there are many reasons for that. One of them is that Java programmers who discover Groovy are often amazed about the conciseness of the language as compared to Java, and start programming in Groovy like they would in Java, that is to say with types and leveraging the syntax of Groovy. The key here is that many programmers never use the dynamic features of Groovy, but rather use the language as a ``better Java syntax''. If you don’t do runtime metaprogramming, then you can do static type checking. This drives me to another reason for using STC: fail early. It’s always better to discover errors at compile time that at runtime. No need for long talks here: you can easily imagine a program running perfectly fine for long, until it reaches a poorly tested branch where you made a typo:
+
+[source]
+----
+void method(String message) {
+   if (rareCondition) {
+ println "Did you spot the error in this ${message.toUppercase()}?"
+   }
+}
+
+----
+
+
+I tend to think that even if you use the dynamic features of Groovy (say, for example, builders), it’s good to be able type check parts of code you know should be statically checked.
+
+[[]]
+The behaviour of the static type checker
+----------------------------------------
+
+[[]]
+Implementation details
+~~~~~~~~~~~~~~~~~~~~~~
+
+Now it’s time to give you more information about the static type checker, that is to say the current implementation. Basically, you activate the static type checker either by annotating a class or a method with _@TypeChecked_:
+
+[source]
+----
+import groovy.transform.TypeChecked
+
+@TypeChecked
+void method(String message) {
+   if (rareCondition) {
+ println "Did you spot the error in this ${message.toUppercase()}?"
+   }
+}
+
+----
+
+
+I like code, so let’s see what the compiler has to say about this example, and let’s run it :
+
+-----------------------------------------------------------------------------------
+2 compilation errors:
+
+[Static type checking] - The variable [rareCondition] is undeclared.
+ at line: 5, column: 8
+
+[Static type checking] - Cannot find matching method java.lang.String#toUppercase()
+ at line: 6, column: 46
+-----------------------------------------------------------------------------------
+
+First, it complains about an unbound variable, _rareCondition_. The compiler cannot statically determine its type, which is not allowed. The second error demonstrates the fact that missing methods are now disallowed and replaced with a nice error message that helps you spot the typo. Those explain the primary goals of the static type checker:
+
+* check for missing methods or properties and report error
+* check for type safety
+* type inferrence
+* support for ``GDK methods'', that is to say methods added by Groovy to common classes, aka extension methods
+* support for Groovy idiomatic constructs like _with_, _each_, …
+
+There are also secondary objectives, which are under discussion:
+
+* flow typing (see http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html[Jochen’s post])
+* unification types
+* static compilation
+
+[[]]
+What’s implemented, what’s not implemented
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The best way to find out what’s implemented or not is to checkout the _grumpy_ branch from http://xircles.codehaus.org/projects/groovy/repo/git/repo[Codehaus Git repository] (also available on https://github.com/groovy/groovy-core/tree/grumpy[GitHub] and have a look at the unit tests located in _src/test/groovy/transform/stc_. Another way is to read the http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking[GEP-8 page on the wiki] which gives you examples plus textual explanations. However, this page is not always up-to-date. Let’s show some nice examples of already implemented stuff:
+
+Groovy-style constructors checks
+
+Checks that arguments provided when using the Groovy-style constructors are valid. Especially, this will throw errors:
+
+[source]
+----
+Dimension d = [100] // wrong number of arguments
+Dimension d = ['100','200'] // wrong argument types
+
+class A {
+ int x
+ int y
+ }
+A a = [x:100, y:200, z: 300] // missing property
+
+----
+
+
+Type inferrence
+
+[source]
+----
+def myname = 'Cedric'
+"My upper case name is ${myname.toUpperCase()}"
+println "My upper case name is ${myname}".toUpperCase()
+
+----
+
+
+Type inference with spread operator
+
+[source]
+----
+def keys = [x:1,y:2,z:3]*.key
+def values = [x:'1',y:'2',z:'3']*.value
+keys*.toUpperCase()
+values*.toUpperCase()
+
+----
+
+
+instanceof
+
+If we detect that we are in an ``instanceof'' block, we can avoid explicit casting:
+
+[source]
+----
+Object o
+if (o instanceof String) o.toUpperCase()
+
+----
+
+
+Flow typing
+
+As we already said, this is still under discussion, but the prototype static type checker already implements some kind of flow typing. It’s still buggy (I will let you discover how to mislead it ;-)), but already allows some nice things like this:
+
+[source]
+----
+class A {
+ void foo() {}
+}
+def name = new A()
+name.foo() // no need to cast
+name = 1
+name = '123'
+name.toInteger() // no need to cast, and toInteger() is defined by DGM
+
+----
+
+
+To give you an idea, if we choose not to do flow typing (give your opinion about that!), then you would have to write this :
+
+[source]
+----
+class A {
+ void foo() {}
+}
+def name = new A()
+((Foo)name).foo() // no need to cast
+name = 1
+name = '123'
+((String)name).toInteger() // no need to cast, and toInteger() is defined by DGM
+
+----
+
+
+Casts are necessary because the _name_ variable is assigned multiple times with different incompatible types. Personnaly, I think flow typing is more Groovy style than ``regular'' typing.
+
+[[]]
+Not implemented
+~~~~~~~~~~~~~~~
+
+Currently, there are two major features that are not implemented:
+
+* Support for generics
+* Support for Groovy idiomatic constructs like ``each''
+
+The first one (generics) is already under heavy development (and is, I must admit, giving me headaches), and there’s not much to say about it (apart that it is really complicated to implement!).
+
+The second point is trickier. We already support the _with_ idiomatic construct. However, we must pay attention on the constructs with uses closures as arguments, and that is the case with lots of Groovy extension methods like _each_, _collect_, … I think it is important that the static type checker deals with those before the first official beta including the STC goes out, but it requires decisions from the community.
+
+[[]]
+We need you!
+------------
+
+Don’t worry, I won’t ask you to implement those features (though, if you want to, I will never prevent you from doing this :-D), but I do ask for your opinion. Before all, I will illustrate the problem with a simple example:
+
+[source]
+----
+['I','feel','grumpy'].each {
+   println it.toUpperCase()
+}
+
+----
+
+
+This is currently unsupported, and will throw an error, saying that you cannot call the _toUpperCase_ method on a _String_. We all agree that it should not complain, and I am in favor of fixing this as soon as possible. However, we must decide _how_ to fix this, in a manner that allows, for example, library writers to be compatible with the type checker.
+
+What’s the problem here ? Basically, the signature of the each method is the following:
+
+[source]
+----
+private static  Iterator each(Iterator iter, Closure closure)
+
+----
+
+
+It is defined in DefaultGroovyMethods, so it’s an extension method, and you could think of it as a method available on the _Iterator_ interface, thus, let’s modify the signature to make it clearer:
+
+[source]
+----
+public static  Iterator each(Closure closure)
+
+----
+
+
+Now, the only thing we know at this point is that the _each_ method takes a closure as an argument, but:
+
+* we don’t know what the implementor does with the closure
+* we don’t know what arguments will be used when calling the closure
+* Java doesn’t provide enough type information for us to infer the type of the arguments
+
+This means that the block of code representing the closure, in our example, cannot be type checked correctly, because we cannot infer the type of the arguments (here, the implicit _it_) that will be used when the closure gets called.
+
+For those who know Groovy++, it states that the problem has been solved by adding generics information to the DGM signatures. However, I don’t think this solution is perfect, and I’d rather like to propose various solutions.
+
+The first, obvious solution is to let the developer explicitely specify types. This is a solution, but not really a Groovy one:
+
+[source]
+----
+['I','feel','grumpy'].each { String it ->
+   println it.toUpperCase()
+}
+
+----
+
+
+The main idea is for the implementor to provide type information through an annotation. Let’s call this annotation _@ClosureTypeInfo_ (if you have better names…). Then I could write this:
+
+[source]
+----
+void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }
+
+----
+
+
+This allows the type checker:
+
+* to determine that the closure code block requires two arguments of types _String_ and _Set_
+* to type check the closure code block using this type information
+
+The problem is that if your class is parameterized, then you can’t use generic types as the arguments of the closure:
+
+[source]
+----
+class MyClass {
+   void myMethod(@ClosureTypeInfo(argTypes=[T]) Closure strategy) { ... } // this is not allowed because of type erasure
+}
+
+----
+
+
+So, another idea (which is probably the one used by Groovy++, but I could not determine if it is actually how it works) is to use the parameterized types from the declaring class. For example, we would change the _each_ signature to:
+
+[source]
+----
+public static 
+
+----
+
+
+When used like this, the type checker will infer that the arguments used for the closure will be the parameterized types of the declaring class. Therefore, if you use _each_ on a List, then it is an each on an Iterator which is parameterized with , so we determine that the arguments which will be used by the each method will be a single String argument.
+
+If you are aware of how Java generics work, you may wonder why we use the generic types from the declaring class, and not those from the method. Indeed, we could have the following method signature:
+
+[source]
+----
+public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }
+
+----
+
+
+Then, the type information from which the argument types would be taken would be those from the method call:
+
+[source]
+----
+['I','feel','grumpy'].each {
+   println it.toUpperCase()
+}
+
+----
+
+
+Now you have the explanation about why I don’t like this idea:
+
+* awkward, not groovy at all, syntax
+* requires you to add type information although we want it to be inferred
+* why, in that case, not explicitely specify type information in the closure ?
+
+Indeed, this is more understandable:
+
+[source]
+----
+['I','feel','grumpy'].each { String it ->
+   println it.toUpperCase()
+}
+
+----
+
+
+So, we must stick with the parameterized types from the class. Now, we must also take care of subclasses and extract parameterized types from superclasses. This is why I started dealing with generics before dealing with closure argument types. For example, this should work:
+
+[source]
+----
+class StringList extends LinkedList {}
+def list = new StringList()
+...
+list.each {
+   println it.toUpperCase()
+}
+
+----
+
+
+So we have an annotation that allows us to either provide explicit type information (classes used as arguments) or infer types from parameterized types. Note that in the latter case, this works great for methods like _each_, _collect_, … but this may not make any sense. For example, imagine that we didn’t use an annotation, and always inferred type from generics. Then imagine the following code:
+
+[source]
+----
+class Foo {
+    T foo(Closure cl) {
+        cl.call(1)
+    }
+    U bar(Closure cl) {
+        cl.call([] as Set)
+    }
+}
+
+def foo = new Foo()
+assert foo.foo {
+    2*it
+} == 2
+assert foo.bar {
+    it
+}.class == HashSet
+
+----
+
+
+In this case, the foo() and bar() methods both take a different closure arguments, but the annotation would have expected that both take two arguments (a String and a Set). So, in that case, we would definitely want the generics to be inferred from the method generics. If we do so, we’re back to the situation we described previously, where types are more likely to be written explicitely in the closure block rather than in a generic declaration. I am not sure how we should solve this, so any idea is welcome.
+
+Additionaly, this annotation can also be used to solve another problem: how will the type checker know what kind of delegate is used? The delegation strategy changes the order to which the missing methods or properties are looked up in a closure. Depending on the context, the developer may want to say that the closure passed as an argument of a method must have a specified delegation strategy.
+
+Last thing in this long post, is things we won’t be able to solve (at least, I can’t think of any proper way to do this). For example, regular Groovy allows you to do this:
+
+[source]
+----
+def strategy = { println it.toUpperCase() }
+list.each(strategy)
+
+----
+
+
+In static mode, you’ll have, at least, to do this :
+
+[source]
+----
+def strategy = { String it -> println it.toUpperCase() }
+list.each(strategy)
+
+----
+
+
+*But* you’ll have to keep in mind that the compiler cannot, in that case, check that the closure passed as an argument to the each method uses the correct argument types.
+
+[[]]
+Last word
+---------
+
+I hope this post has given you the opportunity to better understand the goals of the static type checker in upcoming Groovy. It is also there for you to give your opinion, as we want the behaviour of the type checker to be ``community driven'', that is to say we want to find a behaviour that matches your expectations. Eventually, feel free to contribute, and suggest ways to solve problems like the ones I have highlighted here. Thanks for reading!

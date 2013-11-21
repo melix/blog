@@ -1,0 +1,52 @@
+= Groovy @Bytecode AST transformation released
+Cédric Champeau
+2011-01-16
+:jbake-type: post
+:jbake-tags: asm, ast, bytecode, groovy, programming, transformation
+:jbake-status: published
+:source-highlighter: prettify
+
+Following http://www.jroller.com/melix/entry/yes_fibonacci_in_groovy_can[my post about Fibonacci performance in Groovy], Guillaume Laforge gently asked me to continue my work, so I’m releasing the first version of a Groovy AST transformation which allows you to write a method body directly as bytecode. There are several usages for this, but I think the most important is educational : it’s one of the simplest (if not the simplest) way of testing JVM bytecode.
+
+Here’s an example of what you may write :
+
+[source]
+----
+@groovyx.ast.bytecode.Bytecode
+int fib(int i) {
+    iload 1
+    iconst_2
+    if_icmpge l1
+    iload 1
+    _goto l2
+   l1
+    aload 0
+    iload 1
+    iconst_2
+    isub
+    invokevirtual '.fib', '(I)I'
+    aload 0
+    iload 1
+    iconst_1
+    isub
+    invokevirtual '.fib' ,'(I)I'
+    iadd
+   l2
+    ireturn
+}
+println fib(40)
+
+----
+
+
+The documentation about how to write bytecode and the supported features are on the https://github.com/melix/groovy-bytecode-ast/wiki[project homepage at GitHub]. The source code is licensed under the Apache License version 2. If you find any bug or have feature requests, please fill in the https://github.com/melix/groovy-bytecode-ast/issues[bug tracker].
+
+[[]]
+Downloads and sources
+---------------------
+
+You must use the groovy-all version of Groovy for this AST transform to work. Then, download the following jar :
+
+* https://github.com/downloads/melix/groovy-bytecode-ast/groovy-bytecode-ast-0.1.0.jar[groovy-bytecode-ast-0.1.0.jar]
+
+Sources are built with http://gradle.org/[Gradle] and tests made with http://code.google.com/p/spock/[the Spock framework]. Unit tests are also a great source of documentation, do hot hesitate to check them out.

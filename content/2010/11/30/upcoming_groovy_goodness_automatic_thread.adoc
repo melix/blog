@@ -1,0 +1,231 @@
+= Upcoming Groovy goodness : automatic thread interruption
+Cédric Champeau
+2010-11-30
+:jbake-type: post
+:jbake-tags: ast, groovy, programming
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Introduction
+------------
+
+Using Groovy can really be addictive. It deals with so many different problems that you’ll eventually end up using it everywhere in your application. One of the situations that I think is widely used is embedding Groovy for your business logic. For example, embedding a Groovy DSL which allows users to customize their application or even run scripts on your platform. However, when doing this, you expose your infrastructure dangerously : what if a user accidently creates an infinite loop ? What if another creates a memory leak ? Would it be reasonable if your whole application goes down because a customer just ran _one poor script_ ?
+
+There are common solutions for that, but most are not suitable. The real solution would be to isolate the script from the rest of the application by spawning it in its own process. However, this may be complicated to do if you need to share objects from the original VM.
+
+As I had this problem multiple times in the past, I proposed a patch to Groovy 1.8 introducing a new AST Transformation which was just, at the beginning, an elegant solution for interrupting loops and closures when the running thread has been interrupted. Eventually, thanks to the Groovy folks (and a special mention to Hamlet D’Arcy), we ended up with three separate annotations that I’ll describe here.
+
+[[]]
+A basic example
+---------------
+
+Here’s the most basic example : how would you manage this ?
+
+[source]
+----
+while (true) {
+ // eat cpu
+}
+
+----
+
+
+You can test it in the Groovy console (_groovyConsole_ command), and try to click on the script interruption button. Most likely you won’t be able to click on the script interruption button because the script doesn’t even make a call to _Thread.yield()_ which does not let a chance to the UI thread to catch up. If you could, Groovy would have sent an interruption request to the script thread. However, even in that case, the script thread would never stop because no one ever checks for interruption. Here’s where the first annotation comes up.
+
+[[]]
+New AST Transformations
+-----------------------
+
+*Note that the following is based on an early implementation and subject to changes. Those annotations are available since the Groovy 1.8.0-beta-3 release.*
+
+[[]]
+@ThreadInterrupt
+~~~~~~~~~~~~~~~~
+
+This is the most basic transformation we can apply. The script above becomes :
+
+[source]
+----
+@ThreadInterrupt
+import groovy.transform.ThreadInterrupt
+
+while (true) {
+// eat cpu
+}
+
+----
+
+
+If you run it in the Groovy 1.8.0-beta3 console, you will not notice any change, apart from the fact that you can click on the interrupt button now. If you do so, you’ll see an exception thrown :
+
+[source]
+----
+java.lang.InterruptedException: Execution Interrupted
+ at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+ at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:39)
+ at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:27)
+
+----
+
+
+The magic here is that our transformation automatically added a thread interruption check in the loop block. Thus, the annotated code is equivalent to the following :
+
+[source]
+----
+while (true) {
+  if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Execution Interrupted");
+// eat cpu
+}
+
+----
+
+
+That’s all ! Adding this annotation ensures that _for_, _while_,_do_ loops and closures will have an interruption check added. It will also add a check on method start. This annotation also applies on classes. The behaviour of the transformation can also be tuned for your needs :
+
+* _checkOnMethodStart_ annotation parameter (defaults to true) adds an interrupt check as the first statement of a method body
+* _applyToAllClasses_ annotation parameter (default to true) will apply the transformation to every class in your script (or compilation unit if not in a script), therefore allowing to interrupt more complex method call pathes.
+
+You may wonder what use is this transform if the user has to explicitely add it to scripts (s)he writes. However, the good thing is that you can do it automatically, because Groovy scripts accept import statements anywhere. So basically, you could take the user code, append the annotated import, and you’d see the expected behaviour.
+
+[[]]
+@TimedInterrupt
+~~~~~~~~~~~~~~~
+
+The second AST Transformation to be added allows interrupting a script after a maximum execution time. It is interesting when you want to automatically timeout scripts. For example :
+
+[source]
+----
+@TimedInterrupt(10)
+import groovy.transform.TimedInterrupt
+
+while (true) {
+// eat cpu
+}
+
+----
+
+
+In this example, the script will automatically timeout after 10 seconds, throwning a _TimeoutException_. Apart from the two previously described annotation parameters, this annotation accepts two additional ones :
+
+* _value_ (mandatory, defaults to 1) : the amount of time unit the script is allowed to consume
+* _unit_ (defaults to TimeUnit.SECONDS) : the unit used to describe the timeout
+
+[[]]
+@ConditionalInterrupt
+~~~~~~~~~~~~~~~~~~~~~
+
+This one is another powerful variant of automatic thread interruption annotation. It allows the user to provide a custom condition for interruption. For example, one would like to check that user credentials are valid, while other would like to ensure that there are enough file descriptors left to allow script execution. There’s a wide variety of problems that can be solved thanks to this one. In my examples, I’ll focus on simple test cases to show off the advantages of this annotation.
+
+[source]
+----
+@ConditionalInterrupt({counter++>1})
+import groovy.transform.ConditionalInterrupt
+
+counter=0
+def scriptMethod() {
+     4.times {
+         println 'executing script method...'
+     }
+}
+
+scriptMethod()
+
+----
+
+
+In this example, the @ConditionalInterrupt annotation accepts a _closure as annotation value_. This amazing features which is already used by https://github.com/andresteingress/gcontracts[GContracts] allows us to annotate a class (or import statement) with a custom condition. Here, we implement a custom interruption policy which decides that an _InterruptedException_ should be thrown whenever _counter1_. The _counter_ variable references the one defined in the script. This is the main difficulty you’ll have to face with this annotation : variable scoping. The semantics is not different from the one in regular Groovy scripts, but may be hard to understand. Indeed, replacing the line :
+
+[source]
+----
+counter=0
+
+----
+
+
+with
+
+[source]
+----
+def counter=0
+
+----
+
+
+would cause the compilation to fail because the counter variable would not be in the scope. Now the hard question is given the annotated script upper, how many times would you expect the `executing script method…' message to be displayed ? If your answer is 2, not bad, but you missed one point. If your answer is 1, either you are lucky, or you are brilliant. If your answer is anything else, you’ll be interested in the explanation.
+
+How is this script updated ? To check it out, you can use the AST Browser found in the Groovy console. It will show you how your script gets transformed, and help you tune your custom conditions. Here, the generated script looks like this (stripped for clarity) :
+
+[source]
+----
+public class script1291150384631 extends groovy.lang.Script { 
+
+    public java.lang.Object run() {
+        counter = 0
+        this.scriptMethod()
+    }
+
+    public java.lang.Object scriptMethod() {
+        if (this.conditionalTransform$condition()) {
+            throw new java.lang.InterruptedException('Execution Interrupted')
+        }
+        4.times({ 
+            if (this.conditionalTransform$condition()) {
+                throw new java.lang.InterruptedException('Execution Interrupted')
+            }
+            this.println('executing script method...')
+        })
+    }
+
+    protected java.lang.Boolean conditionalTransform$condition() {
+        ( counter )++ > 1
+    }
+
+}
+
+----
+
+
+Got it ? If your answer was two, you probably missed the fact that _scriptMethod_ first statement will be, by default (understand unless you set the _checkOnMethodStart_ flag to false), an interruption check…
+
+Can we do anything more complex with it ? Indeed, you can. For example, I can imagine, in a web application, a custom condition that would use a helper class which looks up a thread local to extract the current request context and check user credentials. Here’s another example which demonstrates a very simple case where the condition is shared by multiple classes :
+
+[source]
+----
+import groovy.transform.ConditionalInterrupt
+
+class Helper {
+  static int i=0
+  static def shouldInterrupt() { i++>0 }
+}
+
+@ConditionalInterrupt({ Helper.shouldInterrupt() })
+class MyClass {
+   def myMethod() { }
+}
+
+class MyOtherClass {
+   def myOtherMethod() { new MyClass().myMethod() }
+}
+
+new MyOtherClass().myOtherMethod()
+
+----
+
+
+Here, a Helper class stores a static counter. Every method call will increase the counter, independently of the class from which a method is called. A few tricks to understand though :
+
+* we are using static members for the helper class (both counter and method) because this annotation *does not* add interrupt checks on static members. If it had, then the Helper class itself would have been modified, and you would have ended with a stack overflow error.
+* it is not necessary to add the annotation to the second class as by default, the _applyToAllClasses_ flag is on
+
+[[]]
+A few gotchas
+-------------
+
+There is something more you need to be aware when using this annotation : first, it’s obvious (yet we talk about it) that this won’t deal with pure Java classes that the script may use. If an infinite loop occurs in a Java library used by the script, it won’t get interrupted. Second, you must take care of open resources, especially files, sockets, result sets, … that would not be closed if the script didn’t check for exceptions. Those magic annotations won’t do it for you.
+
+[[]]
+Conclusion
+----------
+
+I really hope you’ll enjoy those new features, as I think those are quite mandatory in production environments where Groovy scripts are not totally under control (this is not limited to user errors, but resources exhausted is a common case too).

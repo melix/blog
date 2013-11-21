@@ -1,0 +1,156 @@
+= Improved AST transformation testing in Groovy 2
+Cédric Champeau
+2012-07-12
+:jbake-type: post
+:jbake-tags: ast, groovy, programming, testing, transformation
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Structural (AST) testing
+------------------------
+
+Since Groovy 1.6, the language provides a very nice feature called http://groovy.codehaus.org/Compile-time+Metaprogramming+-+AST+Transformations[AST transformations]. AST transformations allows you to hook into the compilation process in order to modify the internal representation of the source code at compile time. This internal representation, known as the Abstract Syntax Tree(AST) is a very powerful way to enhance the language or reduce verbosity of the code.
+
+The different releases of Groovy came with new AST transformations such as:
+
+* _@Log/@Log4j/@Slf4j_: transparently adding a logger to your class
+* _@ToString_: Generating a nice _toString_ implementation for your class
+* _@EqualsAndHashCode_: Generating the famous _equals_ and _hashcode_ methods
+* _@Canonical_: Combining _@ToString_ and _@EqualsAndHashCode_
+* _@WithReadLock/@WithWriteLock_: for guarding method bodies with read/write locks (reentrant locks)
+
+and many more!
+
+Developing such AST transformations is very interesting but requires a deeper knowledge of the internal APIs of the Groovy language (specifically, the AST part). However, people who have developped such AST transformations know that testing them is a bit difficult:
+
+* The most useful tool is the _AST browser_ which can be found in the _Groovy Console_. It allows you to ``browse'' the AST of the code which is in the console. This is very useful because it allows you to write the code you’d like to generate and see what AST structure you need to produce. Or you can use it the opposite way, looking for patterns of AST to recognize in order to transform them.
+* Testing if the AST transform is successul can only be done externally, that is to say by testing that the effects of the transform are visible on a class. For example, testing the _@Log_ AST transform consists in applying the transform on a test class, then add calls to _log_ and see if they are successful.
+
+External testing is easy to do, but the main problem is that you no longer manipulate an AST: you manipulate classes which have already been generated. This is problematic for several reasons:
+
+* You can only test when your AST transform code is valid, that is to say that it doesn’t throw an error in the compilation process.
+* The Groovy compilation process is separated into phases, and it is useful to add tests to check was exists in one phase, and what exists in another phase.
+* You can only check easily things that introduce/remove fields or methods. It’s impossible to test, for example, an AST transform which doesn’t touch the AST…
+* You cannot check for properties found in the AST
+
+The two last points were my major concern when I developped the type checker for Groovy 2. As you may know, the type checker is implemented in the form of an AST transformation which annotates the AST with node metadata. This node metadata is not visible in the AST browser and is of free form. In the case of the type checker, node metadata consists of type inference information. So, in that case, testing my AST transformation consisted of scripts with variables defined with certain types, and just checking that the compiler didn’t throw any error (or did throw an error). The problem is that you cannot check if the inferred type of a precise AST node is correct.
+
+[[]]
+Improved AST transformation testing
+-----------------------------------
+
+[[]]
+@ASTTest
+~~~~~~~~
+
+For that reason, Groovy 2.0 introduces a new AST transformation which is precisely aimed at testing AST transformations! This AST transformation is named _ASTTest_ and allows you to execute assertions on the AST tree. Let’s take a simple example:
+
+[source]
+----
+    for (int i in 1..n) {
+        @ASTTest(phase=INSTRUCTION_SELECTION, value= {
+            assert node.getNodeMetaData(DECLARATION_INFERRED_TYPE) == int_TYPE
+        })
+        def k = i
+    }
+
+----
+
+
+This test is extracted from the type checker test suite. You can see:
+
+* we’re annotating a declaration with _ASTTest_
+* we specify, as an annotation parameter, the compilation phase the test is expected to run
+* and we specify code which will be executed on the annotated AST node
+
+In this case, _node_ in the closure refers to the annotated AST node, that is to say, here, a _DeclarationExpression_. We’re calling _getNodeMetaData_ which is a method defined on any AST node which allows to retrieve the node metadata that we talked about earlier. Here, we want to retrieve the type of the variable which is inferred by the type checker. Last and important, we add an assert statement to check that this inferred type corresponds to an _int_.
+
+If the assertion fails, the unit test will fail. This is very important, because we now have a mean to test the AST itself. I said it was impossible before, but in fact, it was possible but it required a lot of trickery such custom classloaders and so on…
+
+In Groovy 2.0.0, _ASTTest_ does nothing more than this, but we have a problem: not every node in the AST can be annotated. We’re limited to what it is syntactically possible to annotate: classes, methods, types, packages, declarations, … If what you want to test is a node which doesn’t belong to that category, then you need to annotate a wrapping node (in most situations, a method) then ``browse'' manually to the node you want to test. For example, in the previous example, we could access the right hand side of the declaration expression using _node.rightExpression_ and perform assertions on that.
+
+However, if you start from a method and try to access a particular node into the method body, I admit it is quite painful, because you have to check what is the exact AST tree which is generated by the compiler, then find a ``path'' to your node. And it is very easy to break this path just by adding a statement in the code, which makes the unit tests fragile.
+
+[[]]
+Improving @ASTTest
+~~~~~~~~~~~~~~~~~~
+
+For that reason, I wrote an utility class which will allow you to perform ``smart'' lookups in the AST tree. This helper class is not available in Groovy 2.0.0 but it is easy to add and I will probably introduce it in the next release(_edit:_ see https://jira.codehaus.org/browse/GROOVY-5597[GROOVY-5597]): it is called _LabelFinder_. The idea is that even if you cannot annotate everything in the code, it’s still very easy to add _labels_ to your code. Then, Groovy may be able to search for a particular label and return to you the list of AST nodes which are defined on such a label:
+
+[source]
+----
+void foo() {
+    def x = 1
+    x++
+    forLoop:
+    for (int i=0; i
+Here, we added a forLoop label in the code, and we will use it as a lookup point for @ASTTest:
+
+@ASTTest(phase=SEMANTIC_ANALYSIS, value= {
+     lookup(node, 'forLoop').each {
+        assert it instanceof ForStatement
+     }
+})
+void foo() {
+    def x = 1
+    x++
+    forLoop:
+    for (int i=0; i
+The major advantage of this technique is that you don't suffer the structural code syndrom anymore: the test is not fragile with regards to AST changes anymore. If you introduce
+statements before the forLoop label, this won't change the result of the call to lookup. If you don't use such an utility, you would have to change, for example, the index
+of a statement in a block...
+In this example, I made use of a static import to reduce the verbosity of the test code. You may be interested in seeing the actual code of LabelFinder. It's actually quite simple:
+
+public class LabelFinder extends ClassCodeVisitorSupport {
+
+
+    public static List lookup(MethodNode node, String label) {
+        LabelFinder finder = new LabelFinder(label, null)
+        node.code.visit(finder)
+
+        finder.targets
+    }
+
+    public static List lookup(ClassNode node, String label) {
+        LabelFinder finder = new LabelFinder(label, null)
+        node.methods*.code*.visit(finder)
+        node.declaredConstructors*.code*.visit(finder)
+
+        finder.targets
+    }
+
+    private final String label
+    private final SourceUnit unit
+
+    private List targets = new LinkedList();
+
+    LabelFinder(final String label, final SourceUnit unit) {
+        this.label = label
+        this.unit = unit;
+    }
+
+    @Override
+    protected SourceUnit getSourceUnit() {
+        unit
+    }
+
+    @Override
+    protected void visitStatement(final Statement statement) {
+        super.visitStatement(statement)
+        if (statement.statementLabel==label) targets << statement
+    }
+
+    List getTargets() {
+        return Collections.unmodifiableList(targets)
+    }
+}
+
+----
+
+
+[[]]
+Enjoy!
+~~~~~~
+
+I hope you liked this little introduction to a simple yet powerful tool introduced in Groovy 2. In sincerely hope this will make the life of AST transformations developpers easier!

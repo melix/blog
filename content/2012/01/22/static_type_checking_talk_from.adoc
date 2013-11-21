@@ -1,0 +1,43 @@
+= Static type checking talk from Paris Groovy/Grails User Group
+Cédric Champeau
+2012-01-22
+:jbake-type: post
+:jbake-tags: checking, groovy, programming, static, type
+:jbake-status: published
+:source-highlighter: prettify
+
+[[]]
+Static type checking and compilation in Groovy 2.0
+--------------------------------------------------
+
+This week, I had an interesting 2 days work session at Paris (La Defense) with Guillaume Laforge, Jochen Theodorou and Rémi Forax as a guest star. On Thursday night, I talked about my work on _static type checking_ and experimental _static compilation_ at the http://www.meetup.com/Paris-Groovy-Grails/events/45108892/[Paris Groovy and Grails User Group]. Here are the slides:
+
+[[]]
+Some comments
+-------------
+
+First of all, a large part of the session was spent in explaining what static type checking implies in terms of semantics for a language like Groovy. I tried to explain that _by definition_, type checking a dynamic language is impossible, so you have to make decisions and drop support for dynamic features in that case. However, this is in most situations not a problem for people looking for static type checking, because what they need is to guarantee the behaviour of a program at runtime *and* compile time.
+
+The last part of the talk was spent in explaining the most important difference in behaviour between dynamic method dispatch and static method dispatch. This was necessary to introduce the experimental static compiler which should make its way in the next beta of Groovy 2.0. I tried to explain the three different options we have regarding static compilation and method dispatch:
+
+* Java-like method dispatch, which has the main interest of being known of most people (at least, people who faced the problem once). This solution however has major drawbacks. In particular, it removes most of the interest of the flow typing mode, and requires extra verbosity which is the opposite of the Groovy philosophy.
+* Dynamic-Groovy like method dispatch. Typically, this is wanted to avoid a ``third language'' (not Java, nor Groovy), and this is were you want a statically compiled Groovy program to behave at runtime like dynamic Groovy does. While this sounds interesting, it also has major problems. The first one is performance, which would be awful because we would have to introduce tons of ``instanceof'' checks at compile time to correctly dispatch methods. More complicated, this ``instanceof cascade'' would generate unreadable bytecode (think of parameter combinations) which would also be a major performance issue for CPUs (which, as Rémi said during the session, really do not like branching). Even worse, this wouldn’t work anymore if you subclass the statically compiled class because the new overloaded methods wouldn’t be known from the compiler. This is why I consider this solution the worse of all, though I understand people who want it. Last but not least, Groovy 2.0 will introduce *InvokeDynamic* support which should greatly improve performance of dynamic Groovy without loosing its semantics.
+* The third solution I presented is the one currently implemented in the experimental compiler: inference based method dispatch. This definitely creates a third language in terms of dispatch semantics, but as the developer explicitly adds an annotation, he should be aware of the differences (which only occur when you have overloaded methods). Inference based dispatch also has the advantage of being ``flow typing'' compatible, and removes a lot of verbosity. It has my preference, which explains why this is what is implemented right now.
+
+Our guest star Rémi Forax also suggested an alternative solution, which would in theory maintain the semantics of dynamic Groovy, though we are in a statically compiled world. The idea is that when the compiler detects an overloaded method, it should generate the appropriate instanceof checks and seal the class (to avoid it to be subclassed). But as we discussed that solution the next day, we found some cases where even in that situation, we wouldn’t be able to guarantee dynamic Groovy like behaviour without adding explicit guards on every static method call (in particular, changing the metaclass or detection of category usage). This would also lead in a major performance penalty (Rémi couldn’t avoid telling us that all answers to our problem are in InvokeDynamic, but still, we want to offer something for pre-Java 7 people).
+
+[[]]
+The future
+----------
+
+I ended the talk with a small view of what’s still to be done. There are still bugs in the static type checker (especially in loops where an overloaded method result is assigned to one of its parameters) and probably a lot more in the compiler. Eventually, I insisted on the fact that every point of both static type checking and static compilation *are to be discussed with the community*. While static type checking will most probably be part of Groovy 2.0, it’s still unsure about static compilation, and that’s why we would like you to answer the surveys that are in the presentation.
+
+[[]]
+Toward a new MOP
+----------------
+
+As this session was a gift for static types lovers, we also wanted to offer something for our dynamic language users. This came with a long discussion about a new MOP (also known as MOP 2.0). The result of the discussion will be published by Guillaume Laforge as a new GEP (Groovy Enhancement Proposal). Once again, community will be involved.
+
+Thanks a lot!
+
+_French speaking users might also be interested in my talk at the http://www.nantesjug.org/[Nantes JUG] which introduced http://portal.sliderocket.com/vmware/Introduction-aux-DSLs-en-Groovy[DSLs in Groovy]._
