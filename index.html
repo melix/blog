@@ -9,10 +9,10 @@
     <meta name="keywords" content="">    
 
     <!-- Le styles -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/asciidoctor.css" rel="stylesheet">
-    <link href="/css/base.css" rel="stylesheet">
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/asciidoctor.css" rel="stylesheet">
+    <link href="css/base.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -28,7 +28,8 @@
   </head>
   <body>
     <div id="wrap">
-   	
+   
+	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-fixed-top">
         <div class="navbar-inner">
@@ -38,11 +39,11 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <a class="brand" href="/blog">Cédric Champeau's blog</a>
             <div class="nav-collapse collapse">
               <ul class="nav">                
-                <li><a href="/about.html">About</a></li>
-                <li><a href="feed.xml">Feed</a></li>                
+                <li><a href="/blog/about.html">About</a></li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -53,7 +54,7 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
-  			<a href="/2013/07/30/deck2pdf_exporting_html5_slide_decks.html"><h1>deck2pdf: Exporting HTML5 slide decks to PDF</h1></a>
+  			<a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html"><h1>deck2pdf: Exporting HTML5 slide decks to PDF</h1></a>
   			<p>30 juillet 2013</p>
 			<p><em>Tags: </em>deckjs </em> dzslides </em> html5 </em> impressjs </em> javascript </em> pdf </em> revealjs </em> slideshow </p>
   			<p><div class="sect1">
@@ -133,7 +134,7 @@ pause = 2000
 </div>
 </div>
 </div></p>
-  			<a href="/2013/05/27/gr8conf_europe_2013_is_over.html"><h1>GR8Conf Europe 2013 is over</h1></a>
+  			<a href="/blog/2013/05/27/gr8conf_europe_2013_is_over.html"><h1>GR8Conf Europe 2013 is over</h1></a>
   			<p>27 mai 2013</p>
 			<p><em>Tags: </em>gr8conf </em> groovy </em> programming </p>
   			<p><div class="sect1">
@@ -227,7 +228,7 @@ pause = 2000
 </div>
 </div>
 </div></p>
-  			<a href="/2013/04/17/null_safe_invocation_and_primitive.html"><h1>Null-safe invocation and primitive types</h1></a>
+  			<a href="/blog/2013/04/17/null_safe_invocation_and_primitive.html"><h1>Null-safe invocation and primitive types</h1></a>
   			<p>17 avril 2013</p>
 			<p><em>Tags: </em>groovy </em> null </em> programming </p>
   			<p><div class="sect2">
@@ -281,7 +282,7 @@ def result = p?.age
 <p>Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)</p>
 </div>
 </div></p>
-  			<a href="/2013/03/26/les_écoles_sont_elles_le.html"><h1>Les écoles sont-elles le problème ?</h1></a>
+  			<a href="/blog/2013/03/26/les_écoles_sont_elles_le.html"><h1>Les écoles sont-elles le problème ?</h1></a>
   			<p>26 mars 2013</p>
 			<p><em>Tags: </em>enseignement </em> informatique </p>
   			<p><div id="preamble">
@@ -352,7 +353,7 @@ def result = p?.age
 	
 	<hr />
 	
-	<p>Older posts are available in the <a href="/archive.html">archive</a>.</p>
+	<p>Older posts are available in the <a href="archive.html">archive</a>.</p>
 
 		</div>
 		<div id="push"></div>
@@ -368,9 +369,9 @@ def result = p?.age
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/js/jquery-1.9.1.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/run_prettify.js"></script>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
   </body>
 </html>
