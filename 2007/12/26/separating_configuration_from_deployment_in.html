@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Separating configuration from deployment in web applications</h1>
+	</div>
+
+	<p><em>26 décembre 2007</em></p>
+	<p><em>Tags: </em>configuration </em> j2ee </em> java </em> spring </em> tomcat </em> web </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Since I write web applications, I’ve always been struggling with a very basic problem. Basically, I refuse to write, and tell my coworkers too, applications which require a compilation for each customer. This seems common sense, but it is really critical when building applications which require a high level of customization. The second problem is about <strong>upgrading applications</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_weakness_of_web_applications_containers">The weakness of web applications containers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Take Tomcat. Anyone who has ever deployed a <em>.war</em> file knows that: deploying a war <strong>erases</strong> everything in the exploded directory. This means that if you have made customizations in files located in WEB-INF directory (for example to configure your database), upgrading the application will make you loose all your configuration data. This has two implications:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>for the developer, this requires writing down a burn-proof upgrade guide which mostly consists of saying &#8220;backup all your data and do what you’ve done for the first version another time&#8221;.</p>
+</li>
+<li>
+<p>for the customer, this leads to situations when you prefer not to upgrade because you <strong>fear the upgrade procedure</strong> : you cannot allow breaking your system</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>I’ve personally seen both situations : as a developer, for my applications, and as a customer (upgrading Jira/Confluence), and lead me to find an alternative solution : <strong>allowing separation of configuration from binaries in a web environment in a system independent way</strong>. Basically, the application should work out of the box, and you should never have to rewrite configuration files again.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_classloader_magics">Classloader magics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Using Java, I’ve not found any cleaner way of reading configuration/resources any easier than using the classloader : it is an elegant system independent way of retrieving data. For example, you could get your configuration file this way :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public static final String PROPERTIES_FILE="/CONFIG/configuration.properties";
+
+// ...
+
+InputStream in = this.getClass().getResourceAsStream(PROPERTIES_FILE);
+Properties props = new Properties();
+try {
+   props.load(in);
+} catch (IOException e) {
+   theLogger.warn("Unable to read configuration file " + PROPERTIES_FILE, e);
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This assumes that a file called <em>configuration.properties</em> is accessible <strong>in the CONFIG directory at the root level in the classpath</strong>. I think web environments miss some top level classpath directory convention like my <em>CONFIG</em> directory. We have the <em>WEB-INF</em> and <em>META-INF</em> directories, but both are <strong>bundled with the application binaries</strong>(<em>war</em> file). I’d like to have, someday, a JSR which dynamically adds a <em>CONFIG</em> directory in the application classpath. Application servers would be encouraged to separate this directory from the exploded one. For example, in a Tomcat environment, it would lead to the following directory structure :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>tomcat/</p>
+</li>
+<li>
+<p>tomcat/webapps</p>
+</li>
+<li>
+<p>tomcat/webapps/my-app</p>
+</li>
+<li>
+<p>tomcat/webapps-conf/</p>
+</li>
+<li>
+<p>tomcat/webapps-conf/my-app</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The usual tricks that you do in the WEB-INF/classes directory would, therefore, be done in the webapps-conf/my-app directory. As this feature/standard is missing, I’ve been obliged to find a workaround using the Spring framework (but this could be reproduced in any web application).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_an_implementation_of_configuration_separation_using_spring">An implementation of configuration separation using Spring</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concept">Concept</h3>
+<div class="paragraph">
+<p>Basically, I have implemented a fallback mechanism which allows fine grained configuration data finding procedure. When the application is bootstraping, it will look for its configuration files. If nothing is found, it will create a configuration directory and copy the default configuration files into it, then continue the boostrap using those files. I’ve chosen the following fallback mechanism (feel free to code your own), which targets at locating the <em>application home directory</em>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>if a properties file is accessible in the classpath, the application will look for a property in it which contains the application home directory</p>
+</li>
+<li>
+<p>if a system property is set, then the application will read its home directory from it</p>
+</li>
+<li>
+<p>the application creates its home directory in the <em>user home</em> (that is the user which actually <em>runs</em> the application server</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This mechanism allows multiple configurations : if you want to deploy your web application more than once on a single server, choose the first solution (agreed you’ll have to write <strong>one</strong> file in the WEB-INF/classes directory). If you don’t need it, just export a system property before running the web application server. And finally, the simplest case is the last one, but in this case I strongly recommand that your web application user home directory is separated from the server binaries too. For example, under Linux, I usually run my Tomcat application server with its own user/group) (tomcat), but the tomcat user home <strong>must not</strong> be the tomcat home. You should have something like this : /opt/tomcat : the application server /home/tomcat : the tomcat user home directory Doing this, upgrading the application server itself is easier, and you’ll never erase your configuration data. By the way, the solution I propose also allows you to share configuration across multiple web applications.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_spring_implementation">Spring implementation</h3>
+<div class="paragraph">
+<p>The Spring implementation of this lookup algorithm makes use of the Spring <em>property placeholder</em> concept: a property placeholder allows Spring to define properties programmatically which can be used in its configuration files. For example, you’ll have the following XML code :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>
+In the previous snippet, _$\{myproperty}_ is a property. The idea is to read all those properties from a custom property placeholder configurer and use them into our Spring configuration file. The good thing is that you can actually *use those properties for importing other Spring configuration files*, for example:
+
+code,prettyprint---- code,prettyprint
+
+
+
+
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the application configurer magic. In this case, we create two Spring configuration files, one called <em>applications.xml</em> and the other named <em>generated.applications.xml</em>. Both are real Spring configuration files :</p>
+</div>
+<div class="paragraph">
+<p>code,prettyprint</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> code,prettyprint
+public class ApplicationConfigurer extends PropertyPlaceholderConfigurer {
+ private final static Logger theLogger = Logger.getLogger(ApplicationConfigurer.class);
+
+ public static final String APPLICATION_HOME_PROPERTY = "application.home";
+        public static final String CUSTOM_APPLICATIONS_FILE = "applications.xml";
+ public static final String GENERATED_APPLICATIONS_FILE = "generated.applications.xml";
+
+ private static final String APPLICATION_HOME = ".mycompany"+File.separatorChar+"myapp";
+ private static final String APPLICATION_PROPERTIES_FILE = "/myapp.properties";
+ private static final String SAMPLE_APPLICATIONS_FILE = "/com/mycompany/conf/applications.sample.xml";
+
+
+ public ApplicationConfigurator() {
+
+  // output generic version data
+  theLogger.info(Version.getVersion());
+  theLogger.info("(c) MyCompany 2007");
+
+  String fultyHome = null;
+
+  // search for application.properties file
+  InputStream in = this.getClass().getResourceAsStream(APPLICATION_PROPERTIES_FILE);
+  Properties props = new Properties();
+  if (in != null) {
+   try {
+    props.load(in);
+    setProperties(props);
+    fultyHome = props.getProperty(APPLICATION_HOME_PROPERTY);
+   } catch (IOException e) {
+    in = null;
+    theLogger.warn("Unable to read properties file " + APPLICATION_PROPERTIES_FILE, e);
+   }
+
+  }
+
+  if (in == null) { // search for system property
+   fultyHome = System.getProperty(APPLICATION_HOME_PROPERTY);
+   if (fultyHome == null) { // create default home
+    fultyHome = System.getProperty("user.home") + File.separator + APPLICATION_HOME;
+   }
+   props.put(APPLICATION_HOME_PROPERTY, fultyHome);
+   setProperties(props);
+  }
+
+  theLogger.info("Using APPLICATION_HOME : " + fultyHome);
+  File homeDir = new File(fultyHome);
+  createDefaults(homeDir);
+
+ }
+
+ private void createDefaults(File aHome) {
+  if (!aHome.exists()) {
+   theLogger.info(aHome + " does not exist. Creating default files");
+   aHome.mkdirs();
+  }
+  File appFile = new File(aHome, CUSTOM_APPLICATIONS_FILE);
+  if (!appFile.exists()) {
+   theLogger.info("Configuration "+ CUSTOM_APPLICATIONS_FILE +" does not exist. Using defaults file.");
+   theLogger.info("Please edit " + appFile.getAbsolutePath() + " then restart the application");
+   URL url = this.getClass().getResource(SAMPLE_APPLICATIONS_FILE);
+   File src = new File(url.getFile());
+            copySampleFile(appFile, src);
+            copySampleFile(new File(aHome, GENERATED_APPLICATIONS_FILE),src);
+        }
+ }
+
+    private void copySampleFile(File aAppFile, File aSrc) {
+        try {
+            FileOutputStream out = new FileOutputStream(aAppFile);
+            FileInputStream in = new FileInputStream(aSrc);
+            in.getChannel().transferTo(0, aSrc.length(), out.getChannel());
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            theLogger.error("Unable to copy default applications file",e);
+        }
+    }
+
+
+}
+-------------------------------------------------------------------------------------------------------
+
+That’s all ! This class creates a single property called _application.home_ that may be used in your Spring configuration file. As I said before, you could read more that one property and create a whole set of properties to be used in your Spring configuration file, but as I also split my Spring configuration files and the lack of property exports to child contexts, the only property I export is the application home, so that *other beans can programatically create Spring contexts*.
+
+[[]]
+Conclusion
+----------
+
+This post showed you that you could, at level design, avoid some lacks to the Java web application frameworks which makes it rather complex to separate configuration data from the application itself. This is a low cost implementation which demonstrates that it is not necessarily costly to think about it, and that it is, to my mind, something that *should always be done* because it *simplifies maintenance*.</pre>
+</div>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Dynamic database models with Groovy and Hibernate</h1>
+	</div>
+
+	<p><em>26 juillet 2007</em></p>
+	<p><em>Tags: </em>groovy </em> hibernate </em> java </p>
+
+	<p><div class="sect1">
+<h2 id="_the_problem">The problem </h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’ve been working some time with Hibernate and been quite happy with it. However, for one of the projects I’m working on, I’ve been facing a problem Hibernate could not manage alone. The main idea was just to migrate an existing database from MySQL to an ORM DB independent through Hibernate.</p>
+</div>
+<div class="paragraph">
+<p>Independently of the various compatibility problems which I should not address now, this project had a major difference with traditionnal database modelling : the application works with a different database for each customer, and each database has its own model (at least for some tables). Deploying for a customer does not require compiling a new application. Let’s come with an example.</p>
+</div>
+<div class="paragraph">
+<p>In documentary management, a document can be described as a set of fields :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> Document(title, abstract, subject, body)</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre> While some of those fields fit for every customer, working on specific documents require more fields. For example :</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> Document(title,abstract, subject, body, category)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where category is a custom field. <br>
+ <br>
+ Generally, if you are used to Hibernate, you may think the problem can be solved with a simple bean where all fields are stored as a map :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code> public class Document {
+    private int theID;
+    private Map theCustomFields;
+    /* ...  here comes the getters/setters */
+}
+</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>+
+There are two problems with this model :</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>types of properties are defined at compile time, and cannot be changed (property name type is String, but the property value is also. What if you want to store a boolean ?) <br></p>
+</li>
+<li>
+<p>Hibernate will generate two tables : one for the document, and the other one for the custom fields values.</p>
+<div class="literalblock">
+<div class="content">
+<pre> This is surely not what we want : the existing model just consists of a simple _document_ table for which all columns refer to a document property (aka custom field). This is both much simpler to read and does not require any join in order to read all the fields of a single document.  +</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This &#8220;limitation&#8221; of Hibernate just meant that I would not be able to migrate the database without changing its schema. In my case, this was just problematic as I could not upgrade the database schema, too many different components, written in several languages (Java, Perl, …) could write or read this database.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_groovybernate">Groovybernate ! </h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Therefore, I’ve been searching for a solution, and thought about dynamic bean generation. I’ve had read about the dynamic language Groovy, and decided to take a look. As it produces 100% Java compatible bytecode, I thought it would just fit for Hibernate. It took not very long to find out that I would be able to do what I wanted : <strong>achieving maximum database flexibility thanks to Groovy and Hibernate</strong>. This means runtime modification of the model, and optimum performance (no joins whatsoever for just bean properties). <br></p>
+</div>
+<div class="sect2">
+<h3 id="__how_does_it_work"> How does it work ?</h3>
+<div class="paragraph">
+<p>From Groovy 1.1 (still in beta stages), you may use annotations. That sounded good for me as I’ve always been using Hibernate Annotations in my projects. The idea was just to dynamically create an Annotated Java Bean from a description file, then make Hibernate aware of this class and <em>voilà</em> !</p>
+</div>
+<div class="paragraph">
+<p>The following consists of a simple Proof-Of-Concept. Instead of using a configuration file for describing the model, we’ll just do it programmatically. Then we’ll show how to use this model in order to dynamically create a Groovy class, create instances of it through Java and, eventually, persist it <em>via</em> Hibernate. <br></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="__why_not_pure_groovy"> Why not pure Groovy ?</h3>
+<div class="paragraph">
+<p>One could say that if I’ve managed to do this with Java and Groovy code mixed up, then I could’ve done it in pure Groovy. True. But I still remember that Groovy is a dynamic language loosely typed, which, therefore, does not offer the same compile-time security one could have with pure Java. I’m using IntelliJ IDEA every day for developpement, and not beeing able to say if your code is valid statically with Groovy is just a source of bunches of bugs, especially when you are using plents of third party libs. The following POC has been made with IntelliJ IDEA and the latest Groovy 1.1 beta 2, which allows compiling both Java and Groovy code at once, mixing up both languages without caring about cyclic dependencies. To be honest, my first trial was made with the beta 1 which did not offer this, and it was just more complicated : you had to separate 3 trees of source code : one for pure Groovy, one for pure Java, and the latest one is an interoperability set of Java interfaces and enumerations that allows the other two to communicate. Hopefully the Jetbrain guys went off this and provided us a new version of the compiler, and you should not have to do those (dirty but necessary) tricks. Note that using IntelliJ IDEA is not necessary. However, as the latest EAP offers an outstanding Groovy support, I strongly suggest that you take a look ;)</p>
+</div>
+<div class="paragraph">
+<p>To conclude, mixing up Java and Groovy code is just a mean of having the best of the two worlds : security of strongly typed Java and flexibility of dynamic Groovy. This just makes the best thing I’ve ever programmed in my life, that’s truly groovy !</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_preparing_the_model_with_meta_description">Preparing the model with meta description</h3>
+<div class="paragraph">
+<p>If I wish to be able to dynamically generate beans, the best idea is to have a meta description of my bean. If you are aware of Groovy, you could think about the ExpandoMetaClass which allows to dynamically add properties/methods on an object. However, we could not manage to use it in this case, because we needed to dynamically annotate the class and its properties. Groovy 1.1 supports annotations, but is not yet able to dynamically add annotations to classes or members (if I’m wrong, tell me now !).</p>
+</div>
+<div class="paragraph">
+<p>So I went by creating my own simplified meta model. Here’s the code (Java) :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class MetaClass {
+ private boolean isEntity = true;
+ private String theParentClass;
+ private String theName;
+ private String theTableName;
+ private Map
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This meta class allows describing a bean which should be persisted by Hibernate. We need to be able to describe the class fields too (Java) :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class MetaField {
+ private String theName;
+ private boolean isPK;
+ private MetaType theType;
+
+
+ public MetaField() {
+ }
+
+ public MetaField(String aName, boolean aPK, MetaType aType) {
+  theName = aName;
+  isPK = aPK;
+  theType = aType;
+ }
+
+ public String getName() {
+  return theName;
+ }
+
+ public void setName(String aName) {
+  theName = aName;
+ }
+
+ public boolean isPK() {
+  return isPK;
+ }
+
+ public void setPK(boolean aPK) {
+  isPK = aPK;
+ }
+
+ public MetaType getType() {
+  return theType;
+ }
+
+ public void setType(MetaType aType) {
+  theType = aType;
+ }
+
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then eventually, a set of meta types, with their Hibernate translation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public enum MetaType {
+ STRING("String"),
+ INT("Integer"),
+ LONG("Long"),
+ DOUBLE("Double"),
+ DATETIME("@Date Date"),
+ DATE("@Temporal(TemporalType.DATE) Date"),
+ TEXT("@Column(length = 2147483647) String");
+
+ String theHibernateConversion;
+
+ MetaType(String aStringValue) {
+  theHibernateConversion = aStringValue;
+ }
+
+ public String getHibernateConversion() {
+  return theHibernateConversion;
+ }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ok, let’s see now how we programmatically describe a bean :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>MetaClass meta = new MetaClass(cl);
+meta.setName('test');
+meta.addField(new MetaField("title", false, MetaType.STRING));
+meta.addField(new MetaField("date", false, MetaType.DATE));
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Easy, isn’t it ? You may be wondering why we must provide a GroovyClassLoader. This is something that I’ve been working with since the beginning, without cleaner solution : in order to be able to get a class instance which is both recognized by Groovy and Hibernate, Groovy must be the parent class loader…</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generating_a_groovy_bean">Generating a groovy bean</h3>
+<div class="paragraph">
+<p>Ok, this is the core trick : now that we have a meta description of a class, we need to translate it to a real Java Class object. This implies compiling our meta class into real bytecode. As we cannot use the ExpandoMetaClass, we’ll do it through dynamic code generation. As this kind of stuff is much easier to both write and read in the Groovy language (get it ? the best of the two worlds !), we’ll write it in Groovy. That’s where the old cyclic dependencies come : notice how we’ll use the MetaClass class which we’ve written in Java, while the Java code will have to be able to access this bean generator class, written in Groovy… Ugly enough, before beta 2, I had to write interfaces for all those objects which are shared between the two (and you’ll reckon that writing interfaces for beans is somehow… ridiculous). So here’s the core groovy bean generator (Groovy) : <br>
+ <br></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import MetaClass
+import groovy.text.Template
+import groovy.text.SimpleTemplateEngine
+class GroovyBeanGenerator {
+ public String getBeanSource(MetaClass meta) {
+  def tpl_src = '''import javax.persistence.*;
+
+&lt;% if (meta.isEntity) { %&gt;
+@Entity(name="${meta.tableName}")
+&lt;%}%&gt;
+class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.parentClass} &lt;%}%&gt;{
+&lt;% for (entry in meta.fields) {
+ def field = entry.value
+ print "    ";
+ if (field.isPK) print "@Id ";
+ println "${field.type.hibernateConversion} ${field.name}"
+}%&gt;
+}
+  '''
+  def binding = [ "meta": meta ]
+  def engine = new SimpleTemplateEngine()
+     def template = engine.createTemplate(tpl_src).make(binding)
+     return template.toString();
+ }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It works by defining a Groovy template, which is just a Groovy bean class code. Note that this code could surely be written shorter thanks to closures, but I’d rather keep it simple for newcomers. The goal of this class is just to generate source code for our bean. This bean is annotated with Hibernate Annotations. Now, we’ll write the simple Java bunch of code which will allow us to create instances of this bean and register them in Hibernate.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_groovybernateutil_for_dynamic_registration_of_beans">GroovybernateUtil for dynamic registration of beans</h3>
+<div class="paragraph">
+<p>This class will do two things (ok, we could have splitted them apart) : create instances of beans using the groovy bean generator and manage the Hibernate session.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class GroovybernateUtil {
+ private String theApplicationName;
+ private AnnotationConfiguration theConfiguration;
+ private boolean isModelUpdated;
+ private SessionFactory theSessionFactory;
+ private GroovyClassLoader theClassLoader;
+
+ public GroovybernateUtil(GroovyClassLoader aClassLoader, String aApplicationName, String aDialect, String aDriver, String anUrl, String aUsername, String aPassword) {
+  theClassLoader = aClassLoader;
+  theApplicationName = aApplicationName;
+  theConfiguration = (AnnotationConfiguration) new AnnotationConfiguration()
+   .setProperty("hibernate.dialect", aDialect)
+   .setProperty("hibernate.connection.driver_class", aDriver)
+   .setProperty("hibernate.connection.url", anUrl)
+   .setProperty("hibernate.connection.username", aUsername)
+   .setProperty("hibernate.connection.password", aPassword)
+//   .setProperty("hibernate.generate_statistics", "true")
+   .setProperty("hibernate.hbm2ddl.auto", "create-update");
+//   .setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        isModelUpdated = true;
+ }
+
+ public Session getSession() {
+  if (isModelUpdated) updateSessionFactory();
+  return theSessionFactory.openSession();
+ }
+
+ private void updateSessionFactory() {
+  theSessionFactory = theConfiguration.buildSessionFactory();
+  isModelUpdated = false;
+ }
+
+ public String getApplicationName() {
+  return theApplicationName;
+ }
+
+ public void setApplicationName(String aApplicationName) {
+  theApplicationName = aApplicationName;
+ }
+
+
+ public void registerGroovyBean(Class aBeanClass) {
+  theConfiguration.addAnnotatedClass(aBeanClass);
+ }
+
+ public void registerGroovyBean(String aBeanClass) throws ClassNotFoundException {
+  theConfiguration.addAnnotatedClass(theClassLoader.loadClass(aBeanClass));
+ }
+
+ public void registerGroovyBeanSource(InputStream aBeanSource) {
+  theConfiguration.addAnnotatedClass(theClassLoader.parseClass(aBeanSource));
+ }
+
+ public Statistics getStats() {
+  return theSessionFactory.getStatistics();
+ }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Anyone who’ll need to work with a dynamic database model should use this simple utility class in order to create an Hibernate session that will be aware of dynamic beans. We’re done !</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_make_it_run_together">Make it run together</h3>
+<div class="paragraph">
+<p>Ok, you’ve read a bunch of code, and now, I assume you’ll want to test it by yourself, and, surely, you’ll want to see how you’ll be able to create instances of thoses beans, set their properties and so on. Hopefully, each object instanciated in groovy inherits the GroovyOject interface, which provides the getters/setters we need.</p>
+</div>
+<div class="paragraph">
+<p>Here’s the simple test code. It reads a large CSV file which should be persisted in database. The CSV columns refer to bean properties, while rows are instances :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class Groovybernate {
+ public static void main(String[] args) throws IllegalAccessException, InstantiationException {
+
+  GroovyClassLoader cl = new GroovyClassLoader(Groovybernate.class.getClassLoader());
+  Thread.currentThread().setContextClassLoader(cl);
+  GroovybernateUtil util = new GroovybernateUtil(cl, "test",
+    "org.hibernate.dialect.MySQL5Dialect",
+    "com.mysql.jdbc.Driver",
+    "jdbc:mysql://localhost:3306/hibertest",
+    "test",
+    "password");
+  MetaClass meta = new MetaClass(cl);
+  meta.setName("test");
+  meta.setTableName("test");
+  meta.addField(new MetaField("id", true, MetaType.INT));
+  meta.addField(new MetaField("c1", false, MetaType.STRING));
+  meta.addField(new MetaField("c2", false, MetaType.STRING));
+  meta.addField(new MetaField("c3", false, MetaType.STRING));
+  meta.addField(new MetaField("c4", false, MetaType.STRING));
+  meta.addField(new MetaField("c5", false, MetaType.STRING));
+  meta.addField(new MetaField("c6", false, MetaType.STRING));
+  meta.addField(new MetaField("c7", false, MetaType.STRING));
+  meta.addField(new MetaField("c8", false, MetaType.STRING));
+  meta.addField(new MetaField("c9", false, MetaType.STRING));
+  meta.addField(new MetaField("c10", false, MetaType.STRING));
+  meta.addField(new MetaField("c11", false, MetaType.STRING));
+  meta.addField(new MetaField("c12", false, MetaType.STRING));
+  meta.addField(new MetaField("c13", false, MetaType.STRING));
+  meta.addField(new MetaField("c14", false, MetaType.STRING));
+  meta.addField(new MetaField("c15", false, MetaType.STRING));
+  meta.addField(new MetaField("c16", false, MetaType.STRING));
+  meta.addField(new MetaField("c17", false, MetaType.STRING));
+  try {
+   util.registerGroovyBean(meta.getBeanClass());
+  } catch (ClassNotFoundException e) {
+   e.printStackTrace();
+  }
+  Session session = util.getSession();
+  Transaction tx = session.beginTransaction();
+  long sd = Calendar.getInstance().getTimeInMillis();
+  BufferedReader reader = null;
+  try {
+   reader = new BufferedReader(new FileReader("resources/large.csv"));
+  } catch (FileNotFoundException e) {
+   e.printStackTrace();
+  }
+  int loop = 0;
+  try {
+   String line = reader.readLine();
+   while (line != null) {
+    try {
+     loop++;
+     String[] values = line.split(":::");
+     GroovyObject bean = meta.newInstance();
+     bean.setProperty("vid", loop);
+     for (int i = 0; i &lt; 17; i++) {
+      bean.setProperty("c" + (i + 1), values[i]);
+     }
+     session.save(bean);
+     if (loop % 10000==0) {
+      System.out.println("Committed "+loop+" records...");
+      session.flush();
+      session.clear();
+     }
+    } catch (ClassNotFoundException e) {
+     e.printStackTrace();
+    }
+    line = reader.readLine();
+   }
+  } catch (IOException e) {
+   e.printStackTrace();
+  }
+  tx.commit();
+
+  long ed = Calendar.getInstance().getTimeInMillis();
+  double duration = ((ed - sd) / 1000);
+  double persec = ((double) loop / duration);
+  double perhour = 3600 * persec;
+  System.out.println(MessageFormat.format("Processed {0} elements in {1} seconds ({2} records/h)", loop, duration, perhour));
+//  Statistics stats = util.getStats();
+
+ }
+}
+</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>To conclude, we’ve been able to perform what we wanted to do : to dynamically generate a bean from a meta description, which could be easily read from a configuration file, in order to achieve maximum flexibility in database schema customization. This allows customizing some objects of an application for customer needs, without needing to update an existing database schema (our need), with human readable database objects (one table per bean, instead of two tables, one for instances, the other for its properties) and very good performance. I hope this has given you some ideas about how you can go beyond the &#8220;limitations&#8221; of a static Hibernate object model without breaking the logic behind. I mean that with this solution, what should be pure configuration (database customization for customer needs) remains configuration without breaking the rules of ORM. If I had wanted to perform such without Groovy, I would have been obliged to compile a dedicated application for each customer, which is both unnecessary and completely illogic. Moreover, any change in the model would require building a new application…</p>
+</div>
+<div class="paragraph">
+<p>Comments welcome ;) <br></p>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

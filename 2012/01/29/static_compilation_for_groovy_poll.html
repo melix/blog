@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Static compilation for Groovy poll results</h1>
+	</div>
+
+	<p><em>29 janvier 2012</em></p>
+	<p><em>Tags: </em>compilation </em> groovy </em> programming </em> static </p>
+
+	<p><div class="sect1">
+<h2 id="_static_compilation_or_no_static_compilation">Static compilation or no static compilation?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In my <a href="http://www.jroller.com/melix/entry/static_type_checking_talk_from">previous blog post</a>, I published a link to the slides from my talk at the Paris Groovy and Grails User Group, where I presented the state of static type checking and compilation for Groovy 2.0. This talk was a unique occasion to retrieve feeback from the user community before we make any final decision about what should (or should not) be included in Groovy 2.0. Especially, we discussed about static compilation (there’s a consensus about static type checking, so I won’t talk about that here).</p>
+</div>
+<div class="paragraph">
+<p>I decided to add two polls to my presentation and especially, I wanted the poll about <strong>why</strong> people wanted static compilation to be answered <strong>before</strong> I talked about the feature. This was important to me because I didn’t want the result to be biased by my talk. After two weeks, 42 persons have answered the polls. Nor me, nor Guillaume Laforge nor Jochen Theodorou answered the poll, once again not to bias the results. Here are the results for question 1:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="http://jroller.com/melix/resource/polls/why-static-compilation.png" alt="image"></span></p>
+</div>
+<div class="paragraph">
+<p>Again, the question was introduced before I talked about the feature and it’s a multiple choices question (you may choose several answers). What is interesting is that only 3 persons said they didn’t want static compilation, although on the development mailing list, people against static compilation were very vocal. If only 3 people do not need static compilation, this would mean that the others have a good opinion about why they need it, so the following figures are interesting too:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>performance</strong> and <strong>type safety</strong> are both at the same level and the highest number of answers (17). While performance was really to be expected, I didn’t expect <em>type safety</em> so high, because basically, if you need type safety, the <em>@TypeChecked</em> annotation is enough (you don’t need static compilation). However, this is only true if you don’t consider the monkey patching issues, where the behaviour of Groovy can be changed at runtime, leading to runtime type errors while the program was statically checked.</p>
+</li>
+<li>
+<p><strong>I want a better Java</strong> comes next, with 12 answers. I expected this one, because when we talked about the static compilation feature on the mailing list, we had an interesting discussion about why people use Groovy, and I was thinking a lot of people already used Groovy as a better Java, although the language wasn’t designed as a replacement but more as a companion to Java.</p>
+</li>
+<li>
+<p>the next reason coming is that <em>people do not need the dynamic features</em> of Groovy. This is interesting too, because it has to be linked to two different things. First, type safety, because as we already said, you can type check the program to ensure type safety (not needing static compilation) only if you can guarantee that nothing beyond the scope of the compiler (already compiled classes, third party libraries or frameworks) do no modify the behaviour of a program at runtime. Statically compiling the program disables dynamic features, so using static compilation you can <em>ensure</em> type safety. The second point is that if you do not need dynamic features, then you are probably using Groovy as a better Java.</p>
+</li>
+<li>
+<p>the last option was to comment to tell about why you need static compilation. 4 people chose that option, but didn’t comment, so unfortunately I won’t be able to tell much about that :-). But it’s already interesting to notice that this score is still higher (but not far) than people who don’t need static compilation.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In my talk, after this poll, I started explaining the semantic differences that may appear when you statically compile a program, as compared to dynamic behaviour. I did that because I expected my explanation to make some people change their mind about static compilation. Especially, the most visible difference comes from method dispatch (runtime based in dynamic Groovy or ahead of time in static Groovy). I wanted to tell people that this difference is probably the one which will ultimately make the decision about integrating static compilation in Groovy Core or not. I explained 3 options, which were Java-like method dispatch, dynamic groovy like method dispatch and inference based method dispatch. In the end, I asked people to tell which of the options they preferred:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="http://jroller.com/melix/resource/polls/method-dispatch.png" alt="image"></span></p>
+</div>
+<div class="paragraph">
+<p>To summarize once more the pros and cons of each method, I would say that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java-like method dispatch has the advantage of well known semantics (though many people are uncapable of telling what precise corner cases would do in Java), but adds a lot of verbosity and disables <em>de facto</em> some of the features we already implemented in the type checker (like flow typing).</p>
+</li>
+<li>
+<p>Dynamic Groovy like behaviour has the major advantage of keeping the same semantics as dynamic Groovy, but has also major problems. First, performance, because runtime time dispatch is much slower than compile time dispatch. Second, statically checking a dynamic program is always error prone: the compiler may think that method 1 would be called, though at runtime, method 2 would be (because Groovy chooses the best method at runtime according to the actual type arguments), so you would have a difference between what the compiler thinks and what is really done. This means that type safety cannot be ensured anymore…</p>
+</li>
+<li>
+<p>Inference based dispatch, which is the current implementation, which has the advantage of being close to dynamic groovy while preserving a high level of performance. The major problem with that solution being that we introduce a third semantics which is nor the one from Java, nor the one from dynamic Groovy. The question, in the end, is always: &#8220;is it a problem?&#8221;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Looking at the poll results, there are already two very interesting things to notice: first, very few people answered that question (14 persons, barely 4% of all viewers of the presentation). My interpretation is that the question is complex, and that not many people actually understand the problem (which also makes me think some talks about the subject are important ;-)). But this also confirms to me that even in Java, very few people are actually capable of interpreting how method dispatch works. Basically, I think the reasoning is much simpler. If a program doesn’t do what you expect, then you debug it and solve the problem, be it a dispatch problem or not. The second interesting figure, which I did not expect at all, is that nobody chose the Java option. Once more, I interpret this as people are not afraid of having different semantics as long as debugging is possible.</p>
+</div>
+<div class="paragraph">
+<p>Ultimately, let’s compare the results of the two chosen options. Dynamic based dispatch has 6 answers, while inference based dispatch has 8. Being aware that most of the people who viewed the presentation weren’t at my talk and didn’t get the explanations about why I preferred inference based dispatch, I think the results are very interesting. If you consider that most people want static compilation for <strong>performance</strong> and <strong>type safety</strong> which, as I explained, cannot be ensured with dynamic based dispatch, the figures suddenly highlight a strong contradiction. Many people are interested in performance and type safety but still want to keep the dynamic behaviour. My traditional answer for that kind of people is that they should choose <em>invoke dynamic</em> support which will appear in Groovy 2.0 too, as it will guarantee the runtime semantics of a dynamic groovy program while improving performance (though, be warned, type safety cannot be ensured). Of course, static compilation is primarily aimed at people who cannot use invoke dynamic. For that, it seems that the results are in the good direction, because as long as you are aware that you choose a different semantics, then you are not lost. Hopefully, as I said, static compilation is totally optional, so if you choose to use static compilation, you are warned that you will have a slightly different runtime semantics. People who make intensive use of unit tests will probably be very happy with that :-)</p>
+</div>
+<div class="paragraph">
+<p>Last but not least, the polls are still open. Feel free to answer and comment, as feedback is really important. The most important thing, in the end, is the user community.</p>
+</div>
+<div class="paragraph">
+<p><em>Update: below you’ll find the updated figures, as of February 9th, 2012:</em></p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="http://www.jroller.com/melix/resource/polls/method-dispatch-20120209.png" alt="image"></span></p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="http://www.jroller.com/melix/resource/polls/static-compilation-20120209.png" alt="image"></span></p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

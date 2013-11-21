@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>CodeNarc plugin for IntelliJ IDEA updated</h1>
+	</div>
+
+	<p><em>18 janvier 2012</em></p>
+	<p><em>Tags: </em> </p>
+
+	<p><div class="sect1">
+<h2 id="_codenarc_for_intellij_idea_0_16_1">CodeNarc for IntelliJ IDEA 0.16.1</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Eventually, I managed to upgrade the CodeNarc for IntelliJ IDEA plugin to use CodeNarc 0.16.1. It took a while (sorry Hamlet ;)), but I faced an awful jar hell issue.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java_lang_linkageerror">java.lang.LinkageError</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It’s quite interesting indeed, though I am not fully happy with the &#8220;fix&#8221;. Let’s see what’s the problem. If any IntelliJ expert is here, I’d be happy to have some help. Basically, for compatibility with newer versions of Groovy, both CodeNarc and GMetrics (a dependency of CodeNarc) embed in their jar three classes which have disappeared from the newest Groovy version (in fact, they were moved in other packages):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>org.codehaus.groovy.ast.expr.RegexExpression</p>
+</li>
+<li>
+<p>org.codehaus.groovy.transform.powerassert.Value</p>
+</li>
+<li>
+<p>org.codehaus.groovy.transform.powerassert.ValueRecorder</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Normally, this shouldn’t be a problem, but when I ran the plugin, it failed loading with this cryptic error, well known from OSGI users:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java.lang.LinkageError: loader constraint violation: loader (instance of com/intellij/ide/plugins/cl/PluginClassLoader) previously initiated loading for a different type with name "org/codehaus/groovy/ast/expr/RegexExpression"
+ at java.lang.ClassLoader.defineClass1(Native Method)
+ at java.lang.ClassLoader.defineClassCond(ClassLoader.java:631)
+ at java.lang.ClassLoader.defineClass(ClassLoader.java:615)
+ at java.lang.ClassLoader.defineClass(ClassLoader.java:465)
+ at com.intellij.util.lang.UrlClassLoader._defineClass(UrlClassLoader.java:124)
+ at com.intellij.util.lang.UrlClassLoader.defineClass(UrlClassLoader.java:120)
+ at com.intellij.util.lang.UrlClassLoader._findClass(UrlClassLoader.java:96)
+ at com.intellij.ide.plugins.cl.PluginClassLoader.d(PluginClassLoader.java:102)
+ at com.intellij.ide.plugins.cl.PluginClassLoader.loadClass(PluginClassLoader.java:63)
+ at java.lang.ClassLoader.loadClass(ClassLoader.java:247)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Oh my, a LinkageError. Worse than a classical classpath issue. The problem comes from the fact that IntelliJ internally uses Groovy (where ?) and bundles <em>groovy-all-1.7.3.jar</em>. I had to remove the compatibility classes from the CodeNarc jars in order to have the plugin loaded correctly. I think a better solution would be to be able to use an embedded version of Groovy, but the plugin loaded would always include those classes. By the way, it looks to me that CodeNarc would use the internal Groovy version to run (1.7.3) whereas it would probably be better if we could use the version used by the project…</p>
+</div>
+<div class="paragraph">
+<p>Anyway, the plugin is upgraded, have fun!</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

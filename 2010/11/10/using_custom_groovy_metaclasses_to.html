@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Using custom Groovy metaclasses to boost performance</h1>
+	</div>
+
+	<p><em>10 novembre 2010</em></p>
+	<p><em>Tags: </em>groovy </em> performance </em> programming </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Groovy is a dynamic language by nature. This means, in Groovy, that method dispatches are controlled by metaclasses. This is really powerful, and allows nice tricks like the &#8220;method missing&#8221; or &#8220;property missing&#8221; calls that are used in many DSLs. The metaclass dictates what behaviour is expected whenever a call to a property or a method is made.</p>
+</div>
+<div class="paragraph">
+<p>The &#8220;problem&#8221; with this is that method execution paths may be really long. Though Groovy uses call site caching to improve performance, the chain of invocation to call a method in Groovy is much, much longer than in plain Java. The only reason why this chain is long is to allow that dynamic behaviour.</p>
+</div>
+<div class="paragraph">
+<p>Now, when performance is critical and that you still want to use Groovy as a DSL, there are not so many things you can do to improve performance :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>coding critical parts in Java and using mixed compilation to call Java classes</p>
+</li>
+<li>
+<p>use profilers to hunt down slow parts</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Today, I’ll add a nice one that I’ve just experienced : <strong>using custom metaclasses</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_explanation">The explanation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To simplify, almost every method call you make in Groovy will end up beeing dispatched by the class called <em>MetaClassImpl</em>. This class manages a wide variety of method calls or property access. It deals with closures as well as &#8220;regular objects&#8221;. We’ll take, as an example, the body of the <em>MetaClassImpl#invokeMethod(Class sender, Object object, String methodName, Object[] originalArguments, boolean isCallToSuper, boolean fromInsideClass)</em> method :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>checkInitalised();
+        if (object == null) {
+            throw new NullPointerException("Cannot invoke method: " + methodName + " on null object");
+        }
+
+        final Object[] arguments = originalArguments == null ? EMPTY_ARGUMENTS : originalArguments;
+//        final Class[] argClasses = MetaClassHelper.convertToTypeArray(arguments);
+//
+//        unwrap(arguments);
+
+        MetaMethod method = getMethodWithCaching(sender, methodName, arguments, isCallToSuper);
+        MetaClassHelper.unwrap(arguments);
+
+        if (method == null)
+            method = tryListParamMetaMethod(sender, methodName, isCallToSuper, arguments);
+
+        final boolean isClosure = object instanceof Closure;
+        if (isClosure) {
+            final Closure closure = (Closure) object;
+
+            final Object owner = closure.getOwner();
+
+            if (CLOSURE_CALL_METHOD.equals(methodName) || CLOSURE_DO_CALL_METHOD.equals(methodName)) {
+                final Class objectClass = object.getClass();
+                if (objectClass == MethodClosure.class) {
+                    final MethodClosure mc = (MethodClosure) object;
+                    methodName = mc.getMethod();
+                    final Class ownerClass = owner instanceof Class ? (Class) owner : owner.getClass();
+                    final MetaClass ownerMetaClass = registry.getMetaClass(ownerClass);
+                    return ownerMetaClass.invokeMethod(ownerClass, owner, methodName, arguments, false, false);
+                } else if (objectClass == CurriedClosure.class) {
+                    final CurriedClosure cc = (CurriedClosure) object;
+                    // change the arguments for an uncurried call
+                    final Object[] curriedArguments = cc.getUncurriedArguments(arguments);
+                    final Class ownerClass = owner instanceof Class ? (Class) owner : owner.getClass();
+                    final MetaClass ownerMetaClass = registry.getMetaClass(ownerClass);
+                    return ownerMetaClass.invokeMethod(owner, methodName, curriedArguments);
+                }
+                if (method==null) invokeMissingMethod(object,methodName,arguments);
+            } else if (CLOSURE_CURRY_METHOD.equals(methodName)) {
+                return closure.curry(arguments);
+            }
+
+            final Object delegate = closure.getDelegate();
+            final boolean isClosureNotOwner = owner != closure;
+            final int resolveStrategy = closure.getResolveStrategy();
+
+            final Class[] argClasses = MetaClassHelper.convertToTypeArray(arguments);
+
+            switch (resolveStrategy) {
+                case Closure.TO_SELF:
+                    method = closure.getMetaClass().pickMethod(methodName, argClasses);
+                    if (method != null) return method.invoke(closure, arguments);
+                    break;
+                case Closure.DELEGATE_ONLY:
+                    if (method == null &amp;&amp; delegate != closure &amp;&amp; delegate != null) {
+                        MetaClass delegateMetaClass = lookupObjectMetaClass(delegate);
+                        method = delegateMetaClass.pickMethod(methodName, argClasses);
+                        if (method != null)
+                            return delegateMetaClass.invokeMethod(delegate, methodName, originalArguments);
+                        else if (delegate != closure &amp;&amp; (delegate instanceof GroovyObject)) {
+                            return invokeMethodOnGroovyObject(methodName, originalArguments, delegate);
+                        }
+                    }
+                    break;
+                case Closure.OWNER_ONLY:
+                    if (method == null &amp;&amp; owner != closure) {
+                        MetaClass ownerMetaClass = lookupObjectMetaClass(owner);
+                        return ownerMetaClass.invokeMethod(owner, methodName, originalArguments);
+                    }
+                    break;
+                case Closure.DELEGATE_FIRST:
+                    if (method == null &amp;&amp; delegate != closure &amp;&amp; delegate != null) {
+                        MetaClass delegateMetaClass = lookupObjectMetaClass(delegate);
+                        method = delegateMetaClass.pickMethod(methodName, argClasses);
+                        if (method != null)
+                            return delegateMetaClass.invokeMethod(delegate, methodName, originalArguments);
+                    }
+                    if (method == null &amp;&amp; owner != closure) {
+                        MetaClass ownerMetaClass = lookupObjectMetaClass(owner);
+                        method = ownerMetaClass.pickMethod(methodName, argClasses);
+                        if (method != null) return ownerMetaClass.invokeMethod(owner, methodName, originalArguments);
+                    }
+                    if (method == null &amp;&amp; resolveStrategy != Closure.TO_SELF) {
+                        // still no methods found, test if delegate or owner are GroovyObjects
+                        // and invoke the method on them if so.
+                        MissingMethodException last = null;
+                        if (delegate != closure &amp;&amp; (delegate instanceof GroovyObject)) {
+                            try {
+                                return invokeMethodOnGroovyObject(methodName, originalArguments, delegate);
+                            } catch (MissingMethodException mme) {
+                                if (last == null) last = mme;
+                            }
+                        }
+                        if (isClosureNotOwner &amp;&amp; (owner instanceof GroovyObject)) {
+                            try {
+                                return invokeMethodOnGroovyObject(methodName, originalArguments, owner);
+                            } catch (MissingMethodException mme) {
+                                last = mme;
+                            }
+                        }
+                        if (last != null) return invokeMissingMethod(object, methodName, originalArguments, last, isCallToSuper);
+                    }
+
+                    break;
+                default:
+                    if (method == null &amp;&amp; owner != closure) {
+                        MetaClass ownerMetaClass = lookupObjectMetaClass(owner);
+                        method = ownerMetaClass.pickMethod(methodName, argClasses);
+                        if (method != null) return ownerMetaClass.invokeMethod(owner, methodName, originalArguments);
+                    }
+                    if (method == null &amp;&amp; delegate != closure &amp;&amp; delegate != null) {
+                        MetaClass delegateMetaClass = lookupObjectMetaClass(delegate);
+                        method = delegateMetaClass.pickMethod(methodName, argClasses);
+                        if (method != null)
+                            return delegateMetaClass.invokeMethod(delegate, methodName, originalArguments);
+                    }
+                    if (method == null &amp;&amp; resolveStrategy != Closure.TO_SELF) {
+                        // still no methods found, test if delegate or owner are GroovyObjects
+                        // and invoke the method on them if so.
+                        MissingMethodException last = null;
+                        if (isClosureNotOwner &amp;&amp; (owner instanceof GroovyObject)) {
+                            try {
+                                return invokeMethodOnGroovyObject(methodName, originalArguments, owner);
+                            } catch (MissingMethodException mme) {
+                                if (methodName.equals(mme.getMethod())) {
+                                    if (last == null) last = mme;
+                                } else {
+                                    throw mme;
+                                }
+                            }
+                            catch (InvokerInvocationException iie) {
+                                if (iie.getCause() instanceof MissingMethodException) {
+                                    MissingMethodException mme = (MissingMethodException) iie.getCause();
+                                    if (methodName.equals(mme.getMethod())) {
+                                        if (last == null) last = mme;
+                                    } else {
+                                        throw iie;
+                                    }
+                                }
+                                else
+                                  throw iie;
+                            }
+                        }
+                        if (delegate != closure &amp;&amp; (delegate instanceof GroovyObject)) {
+                            try {
+                                return invokeMethodOnGroovyObject(methodName, originalArguments, delegate);
+                            } catch (MissingMethodException mme) {
+                                last = mme;
+                            }
+                            catch (InvokerInvocationException iie) {
+                                if (iie.getCause() instanceof MissingMethodException) {
+                                    last = (MissingMethodException) iie.getCause();
+                                }
+                                else
+                                  throw iie;
+                            }
+                        }
+                        if (last != null) return invokeMissingMethod(object, methodName, originalArguments, last, isCallToSuper);
+                    }
+            }
+        }
+
+        if (method != null) {
+            return method.doMethodInvoke(object, arguments);
+        } else {
+            return invokePropertyOrMissing(object, methodName, originalArguments, fromInsideClass, isCallToSuper);
+        }
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ok, before you get a headache, you’ll just focus on one thing : most of this code deals with the <em>Closure</em> case. What if your class is not a closure ? I guess that’s true for about 90% of method calls. For example, in the following code :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def myObject = new MySuperFastJavaObject()
+myObject.mySuperFastMethod()
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, you just want the method call to behave exactly as if it were made from pure Java. If you don’t write a custom metaclass, the metaclass that will be used by Groovy will dispatch your method call through the upper algorithm. You have understood that there’s no need to deal with the closure case here. So, you could write your own metaclass that removes everything from the closure case in the invokeMethod method :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>package groovy.runtime.metaclass.com.mypackage;
+
+public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
+ ...
+        @Override
+ public Object invokeMethod(Class sender, Object object, String methodName, Object[] originalArguments, boolean isCallToSuper, boolean fromInsideClass) {
+  checkInitalised();
+  if (object == null) {
+   throw new NullPointerException("Cannot invoke method: " + methodName + " on null object");
+  }
+
+  final Object[] arguments = originalArguments == null ? EMPTY_ARGUMENTS : originalArguments;
+  MetaMethod method = getMethodWithCaching(sender, methodName, arguments, isCallToSuper);
+  MetaClassHelper.unwrap(arguments);
+
+  if (method != null) {
+   return method.doMethodInvoke(object, arguments);
+  } else {
+   return invokeMissingMethod(object, methodName, arguments);
+  }
+ }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Several things to notice :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>usage of the <em>groovy.runtime.metaclass</em> prefix in your package will guarantee that Groovy will automatically load your metaclass and assign it to your class</p>
+</li>
+<li>
+<p>the name of your metaclass is the name of your class plus the <em>MetaClass</em> suffix</p>
+</li>
+<li>
+<p>overriding some methods only can lead to huge performance improvements</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Now, say your object doesn’t require dynamic behaviour like <em>methodMissing</em>. Why would you end up calling the <em>invokeMissingMethod</em> method ? If you take a closer look at this method, you’ll notice that the default implementation does many things, and, in your case, will <strong>always</strong> fail since you don’t have defined any <em>methodMissing</em> method. That’s really a waste of time. So you can directly replace it with a missing method exception :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>package groovy.runtime.metaclass.com.mypackage;
+
+public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
+ ...
+        @Override
+ public Object invokeMethod(Class sender, Object object, String methodName, Object[] originalArguments, boolean isCallToSuper, boolean fromInsideClass) {
+  checkInitalised();
+  if (object == null) {
+   throw new NullPointerException("Cannot invoke method: " + methodName + " on null object");
+  }
+
+  final Object[] arguments = originalArguments == null ? EMPTY_ARGUMENTS : originalArguments;
+  MetaMethod method = getMethodWithCaching(sender, methodName, arguments, isCallToSuper);
+  MetaClassHelper.unwrap(arguments);
+
+  if (method != null) {
+   return method.doMethodInvoke(object, arguments);
+  } else {
+   throw new new MissingMethodException(methodName, sender, arguments);
+  }
+ }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that I also had the opposite case : if I were on a missing method, the target method in my Java class was always the same. So I could hijack the meta-object protocol so that it doesn’t try a tons of things before dispatching to <strong>always</strong> the same method missing implementation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>@Override
+ public Object invokeMissingProperty(final Object instance, final String propertyName, final Object optionalValue, final boolean isGetter) {
+  Layer layer = (Layer) instance; // Layer metaclass, it's ALWAYS a Layer
+         return layer.java_propertyMissing(propertyName);
+ }
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another case was dealing with the following bug (?) : <a href="http://jira.codehaus.org/browse/GROOVY-4495">http://jira.codehaus.org/browse/GROOVY-4495</a>. In a specific case, static method invocation always lead to the longest execution path possible. However, in my case, the class used is an utility class which inherits another, the two written in pure Java, and for which every method is static. In another words, it’s a toolbox. Why would I want dynamic method dispatching on this class ? There’s no reason. So, I implemented my own metaclass which directly delegated calls to the appropriate methods AND worked around the bug by adding the method defined by the parent class in the method cache.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_expected_improvements">Expected improvements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So, doing this, how much improvement can you expect ? Well, I’ll talk about my case. As I’ve already said, the critical parts of code are all written in pure Java. So most of Groovy is used as a DSL. After having added a single metaclass, I reached a 10% improvement in execution time. I was so surprised by the result that I added a few metaclasses, and I reached up to 25% execution time improvement depending on the application. The only thing I can say is that it is really important to take this in consideration when you want to make the best of Groovy. Try it yourself !</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Coding a Groovy closure in pure Java</h1>
+	</div>
+
+	<p><em>19 avril 2010</em></p>
+	<p><em>Tags: </em>closure </em> groovy </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Today I just wanted to share a simple trick that’s not well documented in Groovy : in a project which mixes Java and Groovy code, I’ve faced a problem where I wanted to use a Groovy method in Java which took a <em>Closure</em> as a parameter. Here’s how to do it. Actually, it’s quite simple :</p>
+</div>
+<div class="paragraph">
+<p><strong>Groovy</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class Operation {
+    def op(list, action) {
+        list.each { action(it) }
+    }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Java</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class MyJavaClass {
+    private Operation groovy = new Operation();
+
+    private void shouldBeUsedAsClosure(Object o) {
+        System.out.println(o);
+    }
+
+    public void demonstrateClosureUsage() {
+        // creates a closure which delegates calls to this Java object
+        MethodClosure cl = new MethodClosure(this, "shouldBeUsedAsClosure");
+        groovy.op(Arrays.asList("hello", "world"), cl);
+    }
+
+    public static void main(String... args) {
+         MyJavaClass java = new MyJavaClass();
+        java.demonstrateClosureUsage();
+    }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This example is straighforward, however, this allows you to write your custom &#8220;closures&#8221; directly in Java. This is somehow interesting whenever performance matters and that critical portions of code need to be coded in Java.</p>
+</div>
+<div class="paragraph">
+<p>Note that you can have multiple methods with the same name, Groovy will automatically dispatch the call to the appropriate delegate :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class MyJavaClass {
+    private Operation groovy = new Operation();
+
+    private void shouldBeUsedAsClosure(String str) {
+        System.out.println(str.toUpperCase());
+    }
+
+    private void shouldBeUsedAsClosure(int x) {
+        System.out.println(x*x);
+    }
+
+    public void demonstrateClosureUsage() {
+        // creates a closure which delegates calls to this Java object
+        MethodClosure cl = new MethodClosure(this, "shouldBeUsedAsClosure");
+        groovy.op(Arrays.asList("hello", "world","this","should","print","4 : ",2), cl);
+    }
+
+    public static void main(String... args) {
+         MyJavaClass java = new MyJavaClass();
+        java.demonstrateClosureUsage();
+    }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is an elegant way to avoid multiple <em>instanceOf</em> tests to check the type of the closure arguments. Last but not least, Groovy also provides a way to call static methods as closures, passing the class instead of an instance as the owner parameter :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>   MethodClosure cl = new MethodClosure(MyJavaClass.class, "staticMethod");
+</code></pre>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

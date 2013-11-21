@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy&amp;Grails eXchange 2012, type checking and upcoming conferences</h1>
+	</div>
+
+	<p><em>19 décembre 2012</em></p>
+	<p><em>Tags: </em>conferences </em> groovy </em> programming </p>
+
+	<p><div class="sect1">
+<h2 id="_long_time_no_see">Long time no see!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It’s a long time since I last blogged. I’ve been quite busy of course, but it doesn’t give me a good reason not to maintain this blog!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_groovy_grails_exchange_2012">The Groovy&amp;Grails eXchange 2012</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last week, I spoke at the <a href="http://skillsmatter.com/podcast/groovy-grails/type-checking-your-dsls">Groovy&amp;Grails eXchange 2012</a>. It was a really pleasant experience and I wanted to share some feelings with you.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_static_guy">The &#8220;static&#8221; guy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There is something very funny when I meet people now. One or two years ago, people knowing my name were just a few, focused, guys on the mailing list. Now, with the work I’ve done in Groovy 2, that is to say <em>static type checking</em> and <em>static compilation</em>, more and more people recognize me and even those who knew me before start to think of me as the &#8220;static guy&#8221;.</p>
+</div>
+<div class="paragraph">
+<p>The truth is that while it’s correct that my main focus was to develop those features and that I really enjoy it, I spent a lot of time working with Groovy before, and advocating its dynamic nature to my coworkers. The dynamic nature of the language helped us a lot and it’s definitely the main focus of the language. This means that in the dynamic vs static language war, I’m in the middle camp: I like both!</p>
+</div>
+<div class="paragraph">
+<p>This directly drives me to the most surprising talk given at the <a href="http://skillsmatter.com/event/groovy-grails/groovy-grails-exchange-2012">Groovy&amp;Grails eXchange</a>, I mean <a href="http://skillsmatter.com/podcast/groovy-grails/why-groovy-when-java-8-or-scala-or">&#8220;Why Groovy when Java 8 or Scala or…&#8221;</a> by Russel Winder. When I say surprising, I mean that it’s not often that you can hear &#8220;War Pigs&#8221; from Black Sabbath before the talk begins, and it’s not often either that in a Groovy conference, a speaker tries to demonstrate that Groovy is no longer necessary. At least, he tried to, because knowing him as one of the best Groovy advocates in town, I was just wondering all the short 45 minutes session along, when turnaround would occur. It did not. Maybe because Russel expected the session to last 1 hour, but even with 15 more minutes, I’m not convinced that he would, because if I understood him well, he wanted by this talk to conduce the Groovy community to be more active in the JVM community in general, by proving by the fact that Groovy is a major language, not just a poor substitute to Java 8.</p>
+</div>
+<div class="paragraph">
+<p>I <em>think</em> I’m not too far from the truth when I read this very funny comment about me in his <a href="http://www.russel.org.uk/blog/2012-12-18-19-57">blog post</a>: <em>Cédric Champeau the person driving the static type checking and compilation was in the audience and I survived. Perhaps I wasn’t contentious enough.</em>. I’m sorry if I disappointed you, Russel, but as I’m not in particular the &#8220;static guy&#8221; people think I am and that I have a very clear idea of what static compilation in Groovy is good for, I think it makes it difficult to make me unconfortable on the subject. In fact, I’m most worried about what people would think of this talk just reading the slides! Another thing, maybe, is that humour and cultural references in this talk were very british centered (that makes sense, we were in London after all) and that it was sometimes difficult to follow for me.</p>
+</div>
+<div class="sect2">
+<h3 id="_static_type_checking_for_groovy">Static type checking for Groovy</h3>
+<div class="paragraph">
+<p>Let me explain again why we introduced static type checking and static compilation in Groovy:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java scripting: (which has absolutely no relation to <em>Javascript</em>). A lot of people use Groovy as a Java scripting language. They do not use dynamic features of Groovy, and they are often disappointed when the compiler doesn’t offer the same kind of feedback as the Java compiler.</p>
+</li>
+<li>
+<p>Groovy as a better Java: Groovy syntax is more concise, Groovy has closures, learning curve is close to zero. Ah, but Groovy is a dynamic language. Period. @TypeChecked to the rescue!</p>
+</li>
+<li>
+<p>Performance. You always have to be careful here, because as I always explain, Groovy is not slow (anymore). It even perfoms really good when you think of all the wonders it does before invoking methods. But in some situations, it is significantly slower than Java. For those cases, you can use @CompileStatic and have generated bytecode very close if not equal to what Java produces, so acheive the same level of performance.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>What is interesting regarding performance is what Russel said in his talk: Java 8 will have lambdas, type checked lambdas (and using the new collections APIs the type checked syntax can even be more concise than the Groovy one, that’s a problem we must address) and for it, it makes use of the invoke dynamic feature that was introduced in Java 7. As you know, Groovy 2 introduced usage of invoke dynamic too, and Groovy 2.1 pushes it further enough that performance of dynamic Groovy is close to what Java offers (as always, be careful with figures, even more when talking about invokedynamic because from one VM to another you can have <strong>very</strong> different results). But that’s what we hoped from day 1 when adding invoke dynamic support to Groovy: we seriously hope that performance of dynamic languages, and here Groovy, will become close to the performance of static languages. So if performance is close to Java, why did we introduce static compilation in the same version as invoke dynamic? There are various reasons for that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>unfortunately, people will not use Java 8 in production before years. Java 7 in production is still rare, most people are stuck with Java 6. We had to offer performance for those people too.</p>
+</li>
+<li>
+<p>type checking: as explained before, even if you use a dynamic language, some people just <strong>want</strong> compilation errors</p>
+</li>
+<li>
+<p>enforced semantics: statically compiled code is immune to monkey patching. Any code compiled with invoke dynamic support will have the same behaviour as dynamic groovy, so will go though the meta-object protocol. This is not a problem, this is what we want and the good thing is that indy (invoke dynamic) makes it fast, but it can be a problem for framework creators, for example, that do not want their code to be subject to metaclass changes in a third party library.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Russel’s talk echoed to the last talk from day 1, which was an open discussion with the Groovy community. One of the covered subjects was why would people use static type checking or static compilation for Groovy. There were a lot of interesting comments but one of them shocked me: developers were saying that static type checking wasn’t necessary because you write unit tests. Ok, let me be very clear on the subject: I’m not against test-driven development (though I usually prefer writing unit tests as I implement things), but I seriously think that focusing on unit tests is a very big error:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>static type checking is about catching errors <em>early</em>, without having to <em>run</em> code. This is very important to understand</p>
+</li>
+<li>
+<p>people do not write tests, and if they do, it’s always not enough. If you do, you can only write tests for what you think of. Just as well as 100% code coverage doesn’t mean no bugs, thousands of unit tests doesn’t guarantee you’re covering all cases.</p>
+</li>
+<li>
+<p>DSLs: Groovy is a platform of choice for implementing DSLs. The thing is that a lot of DSLs are not aimed at developers. They are often aimed at people that know business rules and can focus on some formalism to describe them. Those people are not developers and you cannot expect them to write unit tests. That doesn’t mean we can’t do anything for them, and that’s also what my talk was about</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To be short, Groovy puts itself in the middle of the dynamic vs static war for very good reasons. One of them is choice. I like to have the choice to use the best strategy for my needs. If it’s dynamic code, let’s do it. If it’s static code, do it too. If you absolutely want type checking, you can, and if you want to use dynamic Groovy and still be able to throw errors at compile time for people using your DSL, now you can too… Because if you ever want to compare Groovy with Java 8, never ever forget that Groovy is more than statically compiled Groovy compared to Java 8. It offers both runtime and compile-time programming which makes it unavoidable if you want to implement a DSL on the JVM…</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_static_type_checking_for_dsls">Static type checking for DSLs</h3>
+<div class="paragraph">
+<p>GGX was the first conference where I talked about a new feature in Groovy 2.1, which is &#8220;customizable&#8221; type checking. The idea is to help the type checker where it fails, because you know more about your code, what it does, how it is implemented than it does. This allows very nice features, like the ability to throw errors at compile time where Groovy would normally fail at runtime, but using DSLs, independently of their implementation. This is in particular important for people that implement DSLs using dynamic features of the language, because the type checker is obviously totally lost in that situation. Having the ability to check a user script at compile time, report errors before it goes in production is a big win here. You can even have the compiler be smarter than Java (or another statically compiled language) is given your domain.</p>
+</div>
+<div class="paragraph">
+<p>The talk was rather technical and dealing with such a subject in only 45 minutes was a challenge (that I only half acheived) but I had good feedback. For those who are interested in the subject and missed this talk, you can still attend my session at <a href="http://greach.es/">the Greach conference</a> in Madrid in the end of January. I hope I’ll be able to do it at GR8Conf in an extended version in May too. Of course, you can still watch the recorded session online.</p>
+</div>
+<div class="paragraph">
+<p>I think this is a very powerful feature that opens a lot of new capabilities just like adding AST transformations to the language drove Groovy to a superior level. I’m eager to see what people will be able to do with it, even if it requires, that’s true, some technical skills, in particular some knowledge about the Groovy AST (abstract syntax tree). For people who are used to writing AST transforms, that shouldn’t be much a problem.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_meeting_the_community">Meeting the community</h3>
+<div class="paragraph">
+<p>Talking at conferences is always the best way to meet the community and gather feedback and new ideas from actual users. We are not, as Groovy or Grails committers, super heroes. I’m always amazed to see what users manage to do with what we implement in the language and I tend to think you are the real super heroes. At GGX, once again, I was really impressed with what Spock offers, for example. The talk was given by <a href="http://freeside.co/">Rob Fletcher</a> who also gave another talk about Grails for Hipsters. Both of his talks were so attended that at this point, the conference could have been named &#8220;The Rob Fletcher eXchange&#8221;. If you want someone to demonstrate the superiority of dynamic languages over static ones, he’s your man.</p>
+</div>
+<div class="paragraph">
+<p>Oh wait, did I say dynamic? ;-)</p>
+</div>
+<div class="paragraph">
+<p>Last word as a special thanks to <a href="http://www.cacoethes.co.uk/blog/">Peter Ledbrook</a> who left VMware a few weeks ago. He did a lot for this GGX conference but more than that, he was the best Groovy/Grails advocate and we’ll definitely miss him!</p>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

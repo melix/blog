@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Yes, Fibonacci in Groovy can be as fast as Java !</h1>
+	</div>
+
+	<p><em>11 janvier 2011</em></p>
+	<p><em>Tags: </em>asm </em> bytecode </em> fibonacci </em> groovy </em> java </em> programming </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>After reading this, take a look at the complete @Bytecode AST transformation implementation <a href="http://www.jroller.com/melix/entry/asm_plugin_for_intellij_and">here</a></em></p>
+</div>
+<div class="paragraph">
+<p>Yes, the famous Fibonacci test can be as fast in Groovy that it is in Java. In fact, Vaclav Pech showed us that <a href="http://www.jroller.com/vaclav/entry/memoize_groovy_functions_with_gpars">it could even be faster</a>. Here, I’ll show you how you can acheive the same level of performance as Java without changing the algorithm. I have buzzed on Twitter saying this was a pure Groovy solution. In fact, I’m cheating a little, as one would consider this is not really pure Groovy, but indeed, you can do this only with .groovy files.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_it_all_started_with_one_quote">It all started with one quote</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Around one discussion about the integration of Groovy++ into Groovy, which always end up with benchmarks comparisons, Jochen Theodorou said :</p>
+</div>
+<div class="paragraph">
+<p>Well, with the AST transforms you could also generate java bytecode directly. Many things are possible with Groovy.</p>
+</div>
+<div class="paragraph">
+<p>When Jochen speaks, everyone listens. I did so. Was he really saying that I could generate <strong>bytecode</strong> through AST transformations ? I’ve read this phrase carefully multiple times, then digged into the Groovy source code, and indeed, there was a <em>BytecodeSequence</em> AST Node. Wow. Groovy never stops surprising me. Ok, so let’s start a proof of concept, and let’s do it with the king of the benchmarks (my appreciation), the Fibonacci benchmark.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java_vs_groovy">Java vs Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This benchmark is really interesting, because it shows us where Groovy is really bad against Java. That’s not important to me as I reckon this is not what Groovy is made for, but well, you know, benchmarks are all around, and people get nasty when they start telling your-favorite-language-is-crap-because-it-s-too-slow. I’m going to show you what I can do with Groovy, guys ! So here’s a Java implementation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public int fib(int i) {
+   return i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And now, it’s Groovy counterpart :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>int fib(int i) {
+   i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Definitely similar, but Groovy 1.7.6 runs this 30x slower than Java…</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_groovy_s_revenge_part_1_asm">Groovy’s revenge, part 1 : ASM</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The first episode for Groovy’s revenge consists of writing an <a href="http://www.jroller.com/melix/entry/asm_bytecode_outline_for_intellij">ASM plugin for IntelliJ IDEA</a>, because, you know, it was such a pain to work with Eclipse. That’s done.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_groovy_s_revenge_part_2_ast_transformations">Groovy’s revenge, part 2 : AST Transformations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The second episode, and most interesting, consists of writing an AST Transformation that will allow you to write bytecode right into Groovy. I did that, and here’s what my final script looks like :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>@ast.Bytecode
+int fib(int i) {
+ l0
+    iload 1
+    iconst_2
+    if_icmpge l1
+    iconst_1
+    _goto l2
+ l1
+    frame SAME
+    aload 0
+    iload 1
+    iconst_2
+    isub
+    invokevirtual '.fib','(I)I'
+    aload 0
+    iload 1
+    iconst_1
+    isub
+    invokevirtual '.fib', '(I)I'
+    iadd
+ l2
+   frame same1,'I'
+    ireturn
+}
+
+int groovyFib(int i) { i&lt;2?1:groovyFib(i-2)+groovyFib(i-1)}
+println "Pure Groovy"
+long sd = System.currentTimeMillis()
+println groovyFib(40)
+println "Computed in ${(System.currentTimeMillis()-sd)}ms"
+
+println "Bytecode Groovy"
+sd = System.currentTimeMillis()
+println fib(40)
+println "Computed in ${(System.currentTimeMillis()-sd)}ms"
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And here’s the output :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>Pure Groovy
+165580141
+Computed in 18465ms
+Bytecode Groovy
+165580141
+Computed in 576ms
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Annotating a method with <em>@Bytecode</em> allows you to write it’s body in JVM pseudo-bytecode (you’ll notice some slight differences), but it’s almost exactly the same as what the ASM plugin will show when you display the bytecode of a method.</p>
+</div>
+<div class="paragraph">
+<p>Interested in the AST Transformation code ? Here it is. Note that it is in very early stages, and I wrote this as a proof-of-concept. I’m unsure that there’s really a need for such a powerful tool in Groovy, that’s mostly fun for me ! However, it could be useful for self-generating code, you know, all the stuff about robots that write their own code and eventually generate giant networks of machines which destroys humanity… Maybe that could be useful for dynamic recompilation too, like what’s done in many emulators. However, if you think that could be interesting to have a complete implementation, let me know and I could push the code so that it comes as a Groovy module.</p>
+</div>
+<div class="paragraph">
+<p>The code. It’s surprisingly easy. However, you’ll have to use the <em>groovy-all</em> jar to get this work, because the bytecode AST transformations uses the embedded <em>ASM</em> library which is relocated at build time. The first and easy step is the AST annotation itself :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>package ast
+
+import java.lang.annotation.ElementType
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import java.lang.annotation.Target
+import org.codehaus.groovy.transform.GroovyASTTransformationClass
+
+@Retention(RetentionPolicy.SOURCE)
+@Target([ElementType.METHOD])
+@GroovyASTTransformationClass(["ast.BytecodeASTTransformation"])
+public @interface Bytecode {
+
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the implementation of the transformation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>package ast
+
+import groovyjarjarasm.asm.Label
+import groovyjarjarasm.asm.MethodVisitor
+import groovyjarjarasm.asm.Opcodes
+import org.codehaus.groovy.ast.ASTNode
+import org.codehaus.groovy.ast.expr.ArgumentListExpression
+import org.codehaus.groovy.ast.expr.MethodCallExpression
+import org.codehaus.groovy.ast.expr.VariableExpression
+import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.classgen.BytecodeInstruction
+import org.codehaus.groovy.classgen.BytecodeSequence
+import org.codehaus.groovy.control.CompilePhase
+import org.codehaus.groovy.control.SourceUnit
+import org.codehaus.groovy.transform.ASTTransformation
+import org.codehaus.groovy.transform.GroovyASTTransformation
+
+@GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
+class BytecodeASTTransformation implements ASTTransformation, Opcodes {
+ void visit(ASTNode[] nodes, SourceUnit source) {
+  def meth = nodes[1]
+  def instructions = meth.code.statements
+  meth.code = new BytecodeSequence(new BytecodeInstruction() {
+   @Override
+   void visit(MethodVisitor mv) {
+    def labels = [:]
+    // perform first visit to collect labels
+    instructions.each { ExpressionStatement stmt -&gt;
+     def expression = stmt.expression
+     if (expression instanceof VariableExpression) {
+      def text = expression.text
+      if (text ==~ /l[0-9]+/) {
+       labels.put(text, new Label())
+      }
+     }
+    }
+    instructions.each { ExpressionStatement stmt -&gt;
+     def expression = stmt.expression
+     if (expression instanceof VariableExpression) {
+      def text = expression.text
+      if (text ==~ /l[0-9]+/) {
+       mv.visitLabel(labels[text])
+      } else if (text =~ /[aild]const|[aild]sub|[aild]add|[aild]return/) {
+       mv.visitInsn(Opcodes."${text.toUpperCase()}")
+      } else {
+       throw new IllegalArgumentException("Bytecode operation unsupported : "+text);
+      }
+     } else if (expression instanceof MethodCallExpression) {
+      if (expression.objectExpression instanceof VariableExpression &amp;&amp; expression.arguments instanceof ArgumentListExpression) {
+       if (expression.objectExpression.text=="this") {
+        def opcode = expression.methodAsString.toUpperCase()
+        ArgumentListExpression args = expression.arguments
+        switch (opcode) {
+         case '_GOTO':
+          mv.visitJumpInsn(GOTO, labels[args.expressions[0].text])
+          break;
+         case 'IF_ICMPGE':
+         case 'IF_ICMPLE':
+         case 'IF_ICMPNE':
+         case 'IF_ICMPLT':
+         case 'IF_ICMPGT':
+          mv.visitJumpInsn(Opcodes."${opcode}", labels[args.expressions[0].text])
+          break;
+         case 'ALOAD':
+         case 'ILOAD':
+          mv.visitVarInsn(Opcodes."${opcode}", args.expressions[0].text as int)
+          break;
+         case 'INVOKEVIRTUAL':
+          def (clazz,call) = args.expressions[0].text.split(/\./)
+          def signature = args.expressions[1].text
+          if (!clazz) clazz = meth.declaringClass.name
+          mv.visitMethodInsn(INVOKEVIRTUAL, clazz, call, signature)
+          break;
+         case 'FRAME':
+          def frameId = args.expressions[0].text.toUpperCase()
+          if ('SAME'==frameId) {
+           mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+           break;
+          } else if ('SAME1'==frameId) {
+           if (args.expressions[1].text=='I') {
+            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, [Opcodes.INTEGER] as Object[]);
+            break;
+           }
+          }
+         default:
+          throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+        }
+       } else {
+        throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+       }
+      } else {
+       throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+      }
+     } else {
+      throw new IllegalArgumentException("Bytecode operation unsupported : "+expression);
+     }
+    }
+   }
+  })
+ }
+
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The code shows that there are many bytecode instructions that I did not manage. This is because I just wanted a proof-of-concept, so I mostly dealt with the instructions required to make the Fibonacci test run. However, thanks to Groovy dynamic nature, the code is rather compact, and consists of three steps :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Visit the method AST node to replace bytecode pseudo-instructions with a BytecodeSequence AST Node</p>
+</li>
+<li>
+<p>which requires visiting the code block itself to collect the labels</p>
+</li>
+<li>
+<p>then generate the visit instructions</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>My conclusion is rather simple : Groovy is amazing. Even when you think it’s beaten by another JVM language, you’ll always find room for improvement. This one looks like the most absolute solution : the DIY way, which reminds me when I was young and that I wrote assembler code on an Amstrad CPC 6128 for demos. This was fun, and I’m having fun again ! For you, if you find this code useful, then it’s a world of verify errors that opens to you. Good luck !</p>
+</div>
+<div class="paragraph">
+<p><em>Footnote : for those who don’t get the irony, this is obvioulsy not a solution for making Groovy faster. It’s a nonsense to take a benchmark like this and say &#8220;Groovy is slow&#8221;. I’ve blogged many times about Groovy performance and showed this is rarely an issue. No, this point is about AST transformations, and how you could use bytecode to extend the language and implement missing features at the lower level.</em></p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

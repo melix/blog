@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Tip: Find try/catch performance bottlenecks with structural search in IntelliJ IDEA</h1>
+	</div>
+
+	<p><em>29 février 2008</em></p>
+	<p><em>Tags: </em>idea </em> intellij </em> performance </em> tip </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Advanced Java programmers are aware that <em>try/catch</em> statements cost many CPU cycles, so it is generally a bad idea to catch exceptions in loop statements. Moreover, even with profilers, it may be hard to find out that a <em>try/catch</em> statement is responsible for a performance bottleneck : you have to take a look at your code, and figure out whether it should be optimized or not. In many cases, you should definitely avoid using <em>try/catch</em> statements in loops.</p>
+</div>
+<div class="paragraph">
+<p>Fortunately, IntelliJ IDEA has this powerful structural search feature. Let’s explain how to use it in order to find those possible bottlenecks. Structural search is powerful as it allows you to describe &#8220;patterns&#8221; of code to match. No matter the indentation, no matter the statements, you’ll just lookup for <strong>structural matches</strong>.</p>
+</div>
+<div class="paragraph">
+<p>In our case, you need to look for something that &#8220;looks like&#8221; this :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>for () {
+  try {
+  } catch () {
+  }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The corresponding structural search pattern will be :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>for ($decl$;$condition$;$increment$) {
+ $beforeStatements$;
+ try {
+  $TryStatement$;
+ } catch ($exceptionType$ $ex$) {
+  $CatchStatement$;
+ }
+ $afterStatements$;
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To use this, either click on the &#8220;search structurally&#8221; item in the search menu, or press <em>Ctrl+Shift+S</em> and enter the pattern :<br>
+<br></p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="http://www.jroller.com/melix/resource/idea/structwindow.png" alt="image"></span></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>+
++
+Then you need to tweak the variables in order to specify the cardinalities. Click on ``Edit variables'', and update :</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>beforeStatements : minimum count 0, maximum count unlimited</p>
+</li>
+<li>
+<p>afterStatements : minimum count 0, maximum count unlimited</p>
+</li>
+<li>
+<p>tryStatement : minimum count 1, maximum count unlimited</p>
+</li>
+<li>
+<p>catchStatement : minimum count 0, maximum count unlimited</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The other variables may stay as defaults (min 1, max 1).</p>
+</div>
+<div class="paragraph">
+<p>Now click on &#8220;Find&#8221; and you’ll probably find some of those nasty constructs. The previous patterns works for classical for loops, you need to tune it to work for <em>Java 5 for each constructs</em>, and don’t forget <em>while</em> loops too.</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

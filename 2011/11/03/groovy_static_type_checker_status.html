@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy static type checker: status update</h1>
+	</div>
+
+	<p><em>03 novembre 2011</em></p>
+	<p><em>Tags: </em>checking </em> groovy </em> static </em> type </p>
+
+	<p><div class="sect1">
+<h2 id="_about_groovy">About Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As some of you may already know, I joined SpringSource/VMware a month ago and I am working on the Groovy language.One of my tasks, which will make me busy a little while, consists of developing a <em>static type checker</em>. This project, internally, is known as <em>Grumpy</em>. Why this name? Is it supposed to be public? Indeed; no. It’s an internal name only, because the main goal of this project is to make the compiler grumpy, meaning it will complain where regular Groovy does not. In this post, I will explain what <em>static type checking</em> (STC) consists of, what is already implemented, what’s in progress and eventually, I will need your help. The Groovy language is community driven. While developers like me may propose features, we want to make sure that they are useful to the community and that they are implemented the way YOU expect it to be. This is why, at some points, we will ask you for a decision to be made. Most of times, decisions to be made are not related to technical issues, but rather behaviour issues. I will try to hint you where decisions are to be made, or when they have already been taken. Be sure to give your opinion, either commenting on this post, either sending an e-mail to the user mailing-list.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_groovy_static_type_checking">Groovy Static Type Checking</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>Update: Now <a href="http://docs.codehaus.org/pages/viewpage.action?pageId=227053189">Groovy 2.0.0-beta-1 has been released</a> with the static type checker integrated! You can give it a try, and give us feedback of course.</em></p>
+</div>
+<div class="paragraph">
+<p>First of all, you’ll want to take a look at the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">Groovy Enhancement Proposal</a> page which describes what are the goals of this feature. Right now, it’s still in heavy development, so it’s being developed on its own branch (called <em>grumpy</em>). Basically, the idea is to make Groovy complain at compile time about types, instead of runtime. In fact, as Jochen Theodorou <a href="http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">explains on his blog post</a>, the Groovy compiler in &#8220;regular&#8221; mode, cannot make many checks at compile time regarding types, missing properties, missing methods and so on, because the language allows runtime meta-programming. Runtime meta-programming allows you, for example, to dynamically add members to a class, change the methods which are invoked, change the return types, bind external properties, … This means that if a program was to be statically checked, then it would fail, although it would work perfectly at runtime. An example is better than words, let’s take this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>String.metaClass.foo = { -&gt; 1 }
+assert 'Hello, World!'.foo() == 1
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you run it, then you will see that it’s perfectly fine: at <strong>runtime</strong>, we modify the metaClass of the String class so that it adds a new method on the String class which is known as foo() and returns an int. If this program was to be statically checked, then it would fail at compile time, because the compiler would not find the &#8220;foo&#8221; method on the String class.</p>
+</div>
+<div class="paragraph">
+<p>So, why should we add STC if it will make the compiler fail where a program is perfectly valid ? In fact, there are many reasons for that. One of them is that Java programmers who discover Groovy are often amazed about the conciseness of the language as compared to Java, and start programming in Groovy like they would in Java, that is to say with types and leveraging the syntax of Groovy. The key here is that many programmers never use the dynamic features of Groovy, but rather use the language as a &#8220;better Java syntax&#8221;. If you don’t do runtime metaprogramming, then you can do static type checking. This drives me to another reason for using STC: fail early. It’s always better to discover errors at compile time that at runtime. No need for long talks here: you can easily imagine a program running perfectly fine for long, until it reaches a poorly tested branch where you made a typo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>void method(String message) {
+   if (rareCondition) {
+ println "Did you spot the error in this ${message.toUppercase()}?"
+   }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I tend to think that even if you use the dynamic features of Groovy (say, for example, builders), it’s good to be able type check parts of code you know should be statically checked.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_behaviour_of_the_static_type_checker">The behaviour of the static type checker</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_implementation_details">Implementation details</h3>
+<div class="paragraph">
+<p>Now it’s time to give you more information about the static type checker, that is to say the current implementation. Basically, you activate the static type checker either by annotating a class or a method with <em>@TypeChecked</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import groovy.transform.TypeChecked
+
+@TypeChecked
+void method(String message) {
+   if (rareCondition) {
+ println "Did you spot the error in this ${message.toUppercase()}?"
+   }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I like code, so let’s see what the compiler has to say about this example, and let’s run it :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>2 compilation errors:
+
+[Static type checking] - The variable [rareCondition] is undeclared.
+ at line: 5, column: 8
+
+[Static type checking] - Cannot find matching method java.lang.String#toUppercase()
+ at line: 6, column: 46</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>First, it complains about an unbound variable, <em>rareCondition</em>. The compiler cannot statically determine its type, which is not allowed. The second error demonstrates the fact that missing methods are now disallowed and replaced with a nice error message that helps you spot the typo. Those explain the primary goals of the static type checker:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>check for missing methods or properties and report error</p>
+</li>
+<li>
+<p>check for type safety</p>
+</li>
+<li>
+<p>type inferrence</p>
+</li>
+<li>
+<p>support for &#8220;GDK methods&#8221;, that is to say methods added by Groovy to common classes, aka extension methods</p>
+</li>
+<li>
+<p>support for Groovy idiomatic constructs like <em>with</em>, <em>each</em>, …</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are also secondary objectives, which are under discussion:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>flow typing (see <a href="http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">Jochen’s post</a>)</p>
+</li>
+<li>
+<p>unification types</p>
+</li>
+<li>
+<p>static compilation</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_what_s_implemented_what_s_not_implemented">What’s implemented, what’s not implemented</h3>
+<div class="paragraph">
+<p>The best way to find out what’s implemented or not is to checkout the <em>grumpy</em> branch from <a href="http://xircles.codehaus.org/projects/groovy/repo/git/repo">Codehaus Git repository</a> (also available on <a href="https://github.com/groovy/groovy-core/tree/grumpy">GitHub</a> and have a look at the unit tests located in <em>src/test/groovy/transform/stc</em>. Another way is to read the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">GEP-8 page on the wiki</a> which gives you examples plus textual explanations. However, this page is not always up-to-date. Let’s show some nice examples of already implemented stuff:</p>
+</div>
+<div class="paragraph">
+<p>Groovy-style constructors checks</p>
+</div>
+<div class="paragraph">
+<p>Checks that arguments provided when using the Groovy-style constructors are valid. Especially, this will throw errors:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>Dimension d = [100] // wrong number of arguments
+Dimension d = ['100','200'] // wrong argument types
+
+class A {
+ int x
+ int y
+ }
+A a = [x:100, y:200, z: 300] // missing property
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Type inferrence</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def myname = 'Cedric'
+"My upper case name is ${myname.toUpperCase()}"
+println "My upper case name is ${myname}".toUpperCase()
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Type inference with spread operator</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def keys = [x:1,y:2,z:3]*.key
+def values = [x:'1',y:'2',z:'3']*.value
+keys*.toUpperCase()
+values*.toUpperCase()
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>instanceof</p>
+</div>
+<div class="paragraph">
+<p>If we detect that we are in an &#8220;instanceof&#8221; block, we can avoid explicit casting:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>Object o
+if (o instanceof String) o.toUpperCase()
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Flow typing</p>
+</div>
+<div class="paragraph">
+<p>As we already said, this is still under discussion, but the prototype static type checker already implements some kind of flow typing. It’s still buggy (I will let you discover how to mislead it ;-)), but already allows some nice things like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class A {
+ void foo() {}
+}
+def name = new A()
+name.foo() // no need to cast
+name = 1
+name = '123'
+name.toInteger() // no need to cast, and toInteger() is defined by DGM
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To give you an idea, if we choose not to do flow typing (give your opinion about that!), then you would have to write this :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class A {
+ void foo() {}
+}
+def name = new A()
+((Foo)name).foo() // no need to cast
+name = 1
+name = '123'
+((String)name).toInteger() // no need to cast, and toInteger() is defined by DGM
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Casts are necessary because the <em>name</em> variable is assigned multiple times with different incompatible types. Personnaly, I think flow typing is more Groovy style than &#8220;regular&#8221; typing.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_not_implemented">Not implemented</h3>
+<div class="paragraph">
+<p>Currently, there are two major features that are not implemented:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Support for generics</p>
+</li>
+<li>
+<p>Support for Groovy idiomatic constructs like &#8220;each&#8221;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The first one (generics) is already under heavy development (and is, I must admit, giving me headaches), and there’s not much to say about it (apart that it is really complicated to implement!).</p>
+</div>
+<div class="paragraph">
+<p>The second point is trickier. We already support the <em>with</em> idiomatic construct. However, we must pay attention on the constructs with uses closures as arguments, and that is the case with lots of Groovy extension methods like <em>each</em>, <em>collect</em>, … I think it is important that the static type checker deals with those before the first official beta including the STC goes out, but it requires decisions from the community.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_we_need_you">We need you!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Don’t worry, I won’t ask you to implement those features (though, if you want to, I will never prevent you from doing this :-D), but I do ask for your opinion. Before all, I will illustrate the problem with a simple example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>['I','feel','grumpy'].each {
+   println it.toUpperCase()
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is currently unsupported, and will throw an error, saying that you cannot call the <em>toUpperCase</em> method on a <em>String</em>. We all agree that it should not complain, and I am in favor of fixing this as soon as possible. However, we must decide <em>how</em> to fix this, in a manner that allows, for example, library writers to be compatible with the type checker.</p>
+</div>
+<div class="paragraph">
+<p>What’s the problem here ? Basically, the signature of the each method is the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>private static  Iterator each(Iterator iter, Closure closure)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is defined in DefaultGroovyMethods, so it’s an extension method, and you could think of it as a method available on the <em>Iterator</em> interface, thus, let’s modify the signature to make it clearer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public static  Iterator each(Closure closure)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, the only thing we know at this point is that the <em>each</em> method takes a closure as an argument, but:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>we don’t know what the implementor does with the closure</p>
+</li>
+<li>
+<p>we don’t know what arguments will be used when calling the closure</p>
+</li>
+<li>
+<p>Java doesn’t provide enough type information for us to infer the type of the arguments</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This means that the block of code representing the closure, in our example, cannot be type checked correctly, because we cannot infer the type of the arguments (here, the implicit <em>it</em>) that will be used when the closure gets called.</p>
+</div>
+<div class="paragraph">
+<p>For those who know Groovy++, it states that the problem has been solved by adding generics information to the DGM signatures. However, I don’t think this solution is perfect, and I’d rather like to propose various solutions.</p>
+</div>
+<div class="paragraph">
+<p>The first, obvious solution is to let the developer explicitely specify types. This is a solution, but not really a Groovy one:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>['I','feel','grumpy'].each { String it -&gt;
+   println it.toUpperCase()
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The main idea is for the implementor to provide type information through an annotation. Let’s call this annotation <em>@ClosureTypeInfo</em> (if you have better names…). Then I could write this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This allows the type checker:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>to determine that the closure code block requires two arguments of types <em>String</em> and <em>Set</em></p>
+</li>
+<li>
+<p>to type check the closure code block using this type information</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The problem is that if your class is parameterized, then you can’t use generic types as the arguments of the closure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class MyClass {
+   void myMethod(@ClosureTypeInfo(argTypes=[T]) Closure strategy) { ... } // this is not allowed because of type erasure
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So, another idea (which is probably the one used by Groovy++, but I could not determine if it is actually how it works) is to use the parameterized types from the declaring class. For example, we would change the <em>each</em> signature to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public static
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When used like this, the type checker will infer that the arguments used for the closure will be the parameterized types of the declaring class. Therefore, if you use <em>each</em> on a List, then it is an each on an Iterator which is parameterized with , so we determine that the arguments which will be used by the each method will be a single String argument.</p>
+</div>
+<div class="paragraph">
+<p>If you are aware of how Java generics work, you may wonder why we use the generic types from the declaring class, and not those from the method. Indeed, we could have the following method signature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then, the type information from which the argument types would be taken would be those from the method call:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>['I','feel','grumpy'].each {
+   println it.toUpperCase()
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you have the explanation about why I don’t like this idea:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>awkward, not groovy at all, syntax</p>
+</li>
+<li>
+<p>requires you to add type information although we want it to be inferred</p>
+</li>
+<li>
+<p>why, in that case, not explicitely specify type information in the closure ?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Indeed, this is more understandable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>['I','feel','grumpy'].each { String it -&gt;
+   println it.toUpperCase()
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So, we must stick with the parameterized types from the class. Now, we must also take care of subclasses and extract parameterized types from superclasses. This is why I started dealing with generics before dealing with closure argument types. For example, this should work:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class StringList extends LinkedList {}
+def list = new StringList()
+...
+list.each {
+   println it.toUpperCase()
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So we have an annotation that allows us to either provide explicit type information (classes used as arguments) or infer types from parameterized types. Note that in the latter case, this works great for methods like <em>each</em>, <em>collect</em>, … but this may not make any sense. For example, imagine that we didn’t use an annotation, and always inferred type from generics. Then imagine the following code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class Foo {
+    T foo(Closure cl) {
+        cl.call(1)
+    }
+    U bar(Closure cl) {
+        cl.call([] as Set)
+    }
+}
+
+def foo = new Foo()
+assert foo.foo {
+    2*it
+} == 2
+assert foo.bar {
+    it
+}.class == HashSet
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, the foo() and bar() methods both take a different closure arguments, but the annotation would have expected that both take two arguments (a String and a Set). So, in that case, we would definitely want the generics to be inferred from the method generics. If we do so, we’re back to the situation we described previously, where types are more likely to be written explicitely in the closure block rather than in a generic declaration. I am not sure how we should solve this, so any idea is welcome.</p>
+</div>
+<div class="paragraph">
+<p>Additionaly, this annotation can also be used to solve another problem: how will the type checker know what kind of delegate is used? The delegation strategy changes the order to which the missing methods or properties are looked up in a closure. Depending on the context, the developer may want to say that the closure passed as an argument of a method must have a specified delegation strategy.</p>
+</div>
+<div class="paragraph">
+<p>Last thing in this long post, is things we won’t be able to solve (at least, I can’t think of any proper way to do this). For example, regular Groovy allows you to do this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def strategy = { println it.toUpperCase() }
+list.each(strategy)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In static mode, you’ll have, at least, to do this :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def strategy = { String it -&gt; println it.toUpperCase() }
+list.each(strategy)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>But</strong> you’ll have to keep in mind that the compiler cannot, in that case, check that the closure passed as an argument to the each method uses the correct argument types.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_last_word">Last word</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I hope this post has given you the opportunity to better understand the goals of the static type checker in upcoming Groovy. It is also there for you to give your opinion, as we want the behaviour of the type checker to be &#8220;community driven&#8221;, that is to say we want to find a behaviour that matches your expectations. Eventually, feel free to contribute, and suggest ways to solve problems like the ones I have highlighted here. Thanks for reading!</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

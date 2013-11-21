@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Null-safe invocation and primitive types</h1>
+	</div>
+
+	<p><em>17 avril 2013</em></p>
+	<p><em>Tags: </em>groovy </em> null </em> programming </p>
+
+	<p><div class="sect2">
+<h3 id="_null_safe_method_invocation">Null-safe method invocation</h3>
+<div class="paragraph">
+<p>Yesterday, I worked on <a href="http://jira.codehaus.org/browse/GROOVY-6101">a bug</a> reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class Person {
+   String name
+   int age
+}
+
+Person getPerson() { null }
+
+Person p = getPerson()
+
+def result = p?.age
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now the question is, what is the value of <em>result</em>? If you run this in the Groovy console, the result would be <em>null</em>. This is compatible with the assumption that the null-safe invocation operator (?.) always return null if the receiver of the message is null (here, <em>p</em> is null, so result is null). The definition is pretty easy, but it gets more complicated if you slightly modify the code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>int result = p?.age
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By explicitely setting the type to <em>int</em>, executing this would throw an error, stating that you cannot convert <em>null</em> to <em>int</em>. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if <em>p</em> is not null, the assignment is perfectly valid since <em>getAge()</em> is expected to return a primitive type… This means that unlike the &#8220;normal&#8221; invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_dynamic_world">The dynamic world</h3>
+<div class="paragraph">
+<p>What if the null-safe invoker was aware of the return type? In &#8220;null-safe&#8221;, you must think about what the &#8220;safe&#8221; part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the <strong>receiver</strong> is null, then return null. This means that because <em>p</em> is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was <em>getAge()</em>, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a <em>default value</em> compatible with the primitive type. This means that here, I would expect the null-safe invoker to return <em>0</em>. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when <em>p?.age</em> is executed, the target method hasn’t been chosen, because you need to know the runtime type of <em>p</em> to determine what method will eventually be called. As <em>p</em> is null, the dynamic runtime doesn’t know the type of <em>p</em>, so has no idea that calling <em>age</em> would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_static_world">The static world</h3>
+<div class="paragraph">
+<p>Now what if we’re in a pure static world? In that case, the method to be called is chosen at compile time, given the inferred type of <em>p</em>. It means that unlike the dynamic runtime, the static compiler, at this point, knows that <em>p.age</em> is <em>p.getAge()</em> which returns a primitive type. So it is capable of handling the null-safe invocation with what I think is better, semantically speaking: <em>null-safe</em> invocation only checks the receiver, and returns a value which depends on the return type of the method being invoked. So a static compiler is able to return <em>0</em> instead of the non-pritive <em>null</em>. What is funny is that I asked, on Twitter, what people expected from the result of <em>p?.getAge()</em> if <em>p</em> is null. Everybody answered <em>null</em>. So it’s clear that my way of thinking is not mainstream, but I’m ok with that. I just find it awkward that an operator which is supposed to act on invocation is also capable of altering the return type…</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)</p>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

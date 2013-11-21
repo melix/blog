@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Inline assembly with Groovy&#8230; Evil or awesome?</h1>
+	</div>
+
+	<p><em>31 janvier 2011</em></p>
+	<p><em>Tags: </em>asm </em> bytecode </em> groovy </em> programming </p>
+
+	<p><div class="sect1">
+<h2 id="_inline_assembly_with_groovy_evil_or_awesome">Inline assembly with Groovy… Evil or awesome ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’m borrowing the title of this post from <a href="http://twitter.com/#!/cbeust/status/26826212915544066">a Tweet by Cédric Beust</a>, the creator of <a href="http://testng.org">TestNG</a> that followed my post about <a href="http://www.jroller.com/melix/entry/asm_plugin_for_intellij_and">inlining JVM bytecode instructions in Groovy</a>. I have read many different reactions from this, going from stupid to awesome. Though I started this as an ironic response to the <a href="http://www.jroller.com/melix/entry/yes_fibonacci_in_groovy_can">languages micro-benchmarking frenzy</a>, it seemed at the end that there was real interest for this. The question, now, is to determine whether this idea is, indeed, evil, or awesome.</p>
+</div>
+<div class="paragraph">
+<p>One of the first things to consider is that inlining JVM bytecode instructions is not inlining assembly. The code that we’re inlining is indeed <em>virtual machine instruction sequences</em>. That it really important to understand, because a JVM won’t let you do nasty things. It’s really, when you’re inlining assembly code in a C program, to crash your program (or, worse, the operating system itself). In a JVM, every bytecode sequence gets <em>verified</em> by the JVM before getting executed, and <em>checked</em> at runtime just like regular code.</p>
+</div>
+<div class="paragraph">
+<p>What does it mean ? It means that you won’t be able to execute bytecode which does things regular Java code wouldn’t be authorized to do. Let’s take an example. One could think that you could, through bytecode instructions, bypass the fact that you have to use reflection to access private fields of a class from another one :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>class Private {
+    private int value;
+}
+
+@groovyx.ast.bytecode.Bytecode
+void set(Private b, int x) {
+    aload 1
+    iload 2
+    putfield Private.value &gt;&gt; int
+    return
+}
+
+def bidon = new Private()
+set(bidon, 5)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The previous code, when executed, throws the regular <em>java.lang.IllegalAccessError</em>. It’s not different from what you would expect in pure Java. Now, what would happen if you wrote invalid bytecode sequences ? Do you think you would crash the JVM ? Let’s try :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>@groovyx.ast.bytecode.Bytecode
+int sum(int x, int y) {
+    aload 1
+    iload 2
+    iadd
+    ireturn
+}
+
+println sum(3,6)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Can you spot the error ? It’s the first line of the bytecode sequence : <em>aload 1</em> means push the reference of the first parameter object onto the stack. Here, the first parameter is not an object, but a primitive type (int), so we should have used <em>iload 1</em>. Here’s the output of this program :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Caught: java.lang.VerifyError: (class: Helper, method: sum signature: (II)I) Register 1 contains wrong type</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No crash at all, your program is just invalid and buggy, but nothing harmful. From this point of view, the <em>@Bytecode</em> annotation just provides another DSL for Groovy. It’s not different from any other DSL, apart from the fact that it’s translated directly into real JVM bytecode. Are DSLs inherently evil ? I don’t think so.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_so_where_s_the_evil">So where’s the evil ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Well, I think the problem is that every feature you add to a language will eventually be used. So, what would prevent someone from writing his whole code with bytecode instructions ? How can this be maintainable ? Not everyone speaks bytecode (to be honest, I find this more readable than Clojure, but that’s another debate ;)).</p>
+</div>
+<div class="paragraph">
+<p>That’s true, no one will prevent anyone from writing bytecode everywhere. But that’s exactly where code reviews and code analysis tools are useful : it’s easy to write crap with <strong>any language</strong>. It’s easy not to follow conventions, and it’s easy to take wrong decisions : why would you want to write inline bytecode right into Groovy ? The first bad reason would be to improve performance. Most likely, it’s easier to write a Java class that you’ll use into your groovy code. The second bad reason would be because that’s cool. It is, but don’t try this at work. The third one would be to think you are smarter than the Java compiler. Here are, in my opinion, a few reasons why you would want to inline bytecode into Groovy code :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>you are a student having programming language theory and compilation courses</p>
+</li>
+<li>
+<p>you already use bytecode generation in a project, and using this annotation it’s incredibly easy to test bytecode sequences. It makes Groovy the perfect partner for developers who use dynamic bytecode generation (try the <a href="http://www.jroller.com/melix/entry/asm_plugin_for_intellij_and">IntelliJ IDEA plugin to have a real good combo</a>)</p>
+</li>
+<li>
+<p>you are a genius Groovy hacker and understand that inlining bytecode could help you save a bunch of metaclass resolutions, and smart enough to understand why writing a Java class wouldn’t help you much about that</p>
+</li>
+<li>
+<p>you have written a dynamic bytecode generator which uses Groovy instead of direct ASM code to produce the class file</p>
+</li>
+<li>
+<p>you eventually want to write your own JVM language</p>
+</li>
+<li>
+<p>playing around with bytecode instructions helps you becoming a better Java programmer (totally subjective)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So, what do you think ? Evil ? Awesome ? Any good reason why you would allow or disallow inlined bytecode ?</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

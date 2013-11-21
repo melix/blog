@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>XPointer support in JDK is incomplete</h1>
+	</div>
+
+	<p><em>16 juillet 2008</em></p>
+	<p><em>Tags: </em>java </em> jdk </em> xinclude </em> xpointer </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are some days when you want to kill people who don’t document their code, and some where you just want to kill those who silently ignore specifications. Today, I’ve spent hours digging into the source code of the Sun JDK (1.5) in order to find out why one of my XML inclusions did not work. Worse, there wasn’t a single warning, nor a single error in the console…</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_story">The story</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’m using <a href="http://www.w3.org/TR/xinclude/">XInclude</a> to split long XML files into smaller parts. Basically, it allows you to write things like this :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>
+
+
+
+
+--
+
+You may activate this feature using the following lines of configuration :
+
+code,prettyprint</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[source]</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>
+
+
+
+
+--
+
+(note the *xpointer=``xpointer(//macros/*)''* syntax).
+
+Well, if you came to this page thinking you’d find a solution to the fact that this does not work, I can’t help you. It doesn’t. While the documentation says that _XInclude_ support is implemented in the JDK, the truth is that it is incomplete. The JDK just supports the http://www.w3.org/TR/xinclude/#XPElement[element scheme] but not the http://www.w3.org/TR/xinclude/#XPointer[xpointer scheme]. Well, the specification of XInclude says that the implementation of the second one is optional, but the main problem with the JDK is that is never throws an _UnsupportedOperationException_. Worse, it silently parses your includes, and never throws any error (hence, the xi:fallback element is ignored).
+
+[[]]
+XPointer scheme support ?
+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you know about a Java library which supports the <em>xpointer scheme</em>, please let me know, I haven’t found any yet.</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

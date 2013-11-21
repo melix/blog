@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>ASM Bytecode Outline for IntelliJ IDEA</h1>
+	</div>
+
+	<p><em>09 janvier 2011</em></p>
+	<p><em>Tags: </em>asm </em> bytecode </em> idea </em> intellij </p>
+
+	<p><div class="sect1">
+<h2 id="_an_asm_bytecode_outline_plugin_for_intellij_idea">An ASM bytecode outline plugin for IntelliJ IDEA</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Today, I’ve just submitted a new plugin which integrates <a href="http://asm.ow2.org/index.html">ASM</a> bytecode views into IntelliJ IDEA : it’s a bytecode outline plugin similar to <a href="http://asm.ow2.org/eclipse/index.html">the one provided for Eclipse</a>. It was really a pain for me to work with Eclipse, so I eventually decided to write my own plugin for my favorite IDE. It’s in early stages, but it just suits my needs right now.</p>
+</div>
+<div class="paragraph">
+<p>I have released it under an Apache 2 license, so there’s no problem for you to contribute if you want to improve it. By the way, this is also a test for me, since source code is available at <a href="https://github.com/melix/asm-bytecode-intellij">GitHut</a> and that I’m not really familiar with Git concepts.</p>
+</div>
+<div class="paragraph">
+<p>Until the release is available from Jetbrain’s plugin manager, you may download the first release <a href="https://github.com/downloads/melix/asm-bytecode-intellij/asm-bo-0.2.zip">here</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="_update">Update</h3>
+<div class="paragraph">
+<p>I’ve uploaded a new version (0.2) which solves a problem under Windows, and doesn’t force compile when not necessary.</p>
+</div>
+<div class="paragraph">
+<p>Here are a couple of screenshots :</p>
+</div>
+<div class="paragraph">
+<p><a href="http://www.jroller.com/melix/resource/asm/outline.png"><span class="image"><img src="http://www.jroller.com/melix/resource/asm/outline.png" alt="image"></span></a><br>
+<br>
+ <a href="http://www.jroller.com/melix/resource/asm/asmified.png"><span class="image"><img src="http://www.jroller.com/melix/resource/asm/asmified.png" alt="image"></span></a><br></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_usage">Usage</h3>
+<div class="paragraph">
+<p>It’s fairly easy : just right click on the editor, and choose &#8220;Bytecode Outline&#8221;. Your class will be compiled, and the bytecode will be shown in the tool window on the right. Note that I plan not to compile the class if the binary is up to date, but I’m facing a strange bug in IntelliJ right now when I do so.</p>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

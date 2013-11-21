@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy 2.0 from an insider</h1>
+	</div>
+
+	<p><em>29 juin 2012</em></p>
+	<p><em>Tags: </em>groovy </em> java </em> programming </p>
+
+	<p><div class="sect1">
+<h2 id="_groovy_2_0_is_has_landed">Groovy 2.0 is has landed!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It’s with great pleasure that we released Groovy 2 yesterday. For me, this is a special release and some kind of achievement because this is the first one for which I had a large contribution (a bit selfish I admit, but well…). Before that release, I had contributed code, then became committer, but I didn’t have much time to give to the Groovy project. Now that I’m working full time on it, it’s a bit easier!</p>
+</div>
+<div class="paragraph">
+<p>In this post, I will try to investigate some of the new features of Groovy 2 and provide you additional details that you won’t find in the announcement like some technical insight. There fore, it’s a good complement to the introduction that you can find on <a href="http://bit.ly/LV5N25">InfoQ</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_modularization">Modularization</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_modules">Modules</h3>
+<div class="paragraph">
+<p>This is probably one of my favorite features of Groovy 2. In this version, we made a lot of effort to split Groovy into several modules. This effort, driven by Paul King and backed by a <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+9+-+Modularization">Groovy Enhancement Proposal</a> has introduced several major changes in the codebase:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A build which is now fully based on <a href="http://gradle.org/">Gradle</a></p>
+</li>
+<li>
+<p>Core Groovy only contains the minimal set of classes required to run the language</p>
+</li>
+<li>
+<p>Several <em>optional</em> modules in their own source subtree</p>
+</li>
+<li>
+<p>an <em>extension module</em> mechanism has been put in place</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are dependencies between modules. Actually, if you look at the Gradle build, you would find a rather complicated dependency graph, but most of the complexity is just that we need to build a <em>minimal core</em> of Groovy (written in Java) to build the full Groovy project itself. As for the modules, here is the current dependency graph (click for larger image):</p>
+</div>
+<div class="paragraph">
+<p><a href="http://www.jroller.com/melix/resource/images/deps.png"><span class="image"><img src="http://www.jroller.com/melix/resource/images/deps.png" alt="image"></span></a></p>
+</div>
+<div class="paragraph">
+<p>Each module is available as a Maven artifact, under the groupId <em>org.codehaus.groovy</em> and an artifactId corresponding to the name on the schema. The core Groovy module is named <em>groovy</em> (not <em>groovy-core</em>) for compatibility with previous releases (you just need to upgrade the version number). We also provide a <em>groovy-all</em> jar which bundles all those modules in a single jar, as well as packaging some dependencies into a separate package to avoid class loading issues (in particular with ASM which is used by a lot of frameworks, but in different versions). If you upgrade from a previous version of Groovy, there are only two possible paths: if you were using the <em>groovy-all</em> jar, then just upgrade to the new <em>groovy-all</em> version. If you were using <em>groovy.jar</em>, then it is possible that some of the classes you were using have now moved into a module. In that case, include the module jar as a dependency.</p>
+</div>
+<div class="paragraph">
+<p>It’s worth noting that Groovy 2.0.0 is just a <em>milestone</em> in the modularization task: the following releases of Groovy will add new features, like the ability to add custom file extensions that actually <em>do something different</em> (like transparently applying AST transformations).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extension_modules">Extension modules</h3>
+<div class="paragraph">
+<p>When I talked about modularization, I told you that this was one of my favorite features. Now, I’m going to explain why! Groovy is more than a language. It also provides a lot of helpful APIs to reduce code verbosity. For example, if you have the <em>java.io.File</em> class in <em>Java</em>, there is no <em>getText(String encoding)</em> method on it which allows you to retrieve the contents of the file, although this is a quite common operation. Groovy adds this method onto the <em>File</em> class. This is sometimes (incorrectly) called known <em>category methods</em> or to be more correct_extension methods_. In previous versions of Groovy, most of those methods were defined in a class named <em>DefaultGroovyMethods</em>. With modularization, we have exploded that class into multiple helper classes, but more importantly, we added the ability for you to <strong>add your custom extension methods!</strong>. In the past, if you wanted to add a method named <em>foo</em> on the <em>String</em> class, there weren’t many options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>write a <em>Category</em> class, then <em>use</em> it: while this is quite easy to do, it has major drawbacks. First, it is lexically scoped <strong>and</strong> thread bound. This means that it is a dynamic feature, and that opening a <em>use</em> block influences all Groovy code being executed until the block is closed, including method calls. In other words, category usage &#8220;leaks&#8221; into the current thread (which can have its own advantages but I don’t like side effects). Moreover, it cannot be statically checked (which is one of the major additions of Groovy 2). Additionally, categories are performance killers, as they imply disabling a lot of possible optimizations. I think you understand, now, that I really don’t like categories!</p>
+</li>
+<li>
+<p>use a <em>metaclass</em>: it is very easy to do, but once again, it’s a pure dynamic feature, so it cannot be statically checked. It also has the disadvantage of not being easily reusable, and eventually, you may still be in conflict with another part of the code replacing the metaclass (which would remove your changes). Unlike categories, metaclass changes are visible to every thread and have immediate effect on every Groovy class. This is why this feature is the perfect candidate for <em>monkey patching</em>.</p>
+</li>
+<li>
+<p>write an <em>AST transformation</em>: done at compile time, this would transform your <em>foo</em> call into another call. This has the advantage of beeing done at compile time, also meaning that they can be statically checked (and compiled!), but writing AST transformations requires knowledge of (part of) the Groovy compiler infrastructure (specifically, the AST part). In general, unless you already have written AST transformations, this is much slower to develop than playing with a metaclass. It is also much harder to debug. But in the end, this is a very powerful feature and performance-wise, it is in general better than metaclass hacks. One important thing with AST transforms, though, is that they are selectively applied: you may choose on what classes they run, meaning that it’s not necessarily a global feature.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With Groovy 2, we provide a new way to write such extension methods, in a very friendly way: basically, you just need to write a support class that &#8220;looks like&#8221; DefaultGroovyMethods or Groovy categories. I will not repeat here how you can write such extension methods, but documentation can be found <a href="http://docs.codehaus.org/display/GROOVY/Creating+an+extension+module">here</a>. This technique has many advantages:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>easy to write</p>
+</li>
+<li>
+<p>easy to share (modules are jar files which may be included as a dependency)</p>
+</li>
+<li>
+<p>compatible with static type checking <strong>and</strong> static compilation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is so easy to put in place that we already have, for example, an <em>extension module</em> from <a href="https://twitter.com/tim_yates">Tim Yates</a> adding <a href="http://timyates.github.com/groovy-stream/">generators to Groovy</a>. Another interesting thing with the way extension modules are written is that many third-party libraries already use that kind of extension mechanism. Think of <a href="http://commons.apache.org/lang/api-2.5/org/apache/commons/lang/StringUtils.html">Apache Commons StringUtils class</a> for example. Every method in that class is a static method taking a <em>String</em> as the first parameter. With extension modules, this means that all you have to do is to write a module descriptor referencing that class to have those methods added directly on the <em>String</em> class!</p>
+</div>
+<div class="paragraph">
+<p>For advanced programmers, the extension module framework that have been added to Groovy allows you to register <em>MetaMethod_s to Groovy. This means that it not necessary for you to follow the static method way of doing extension methods: you could implement your own! Whatever technique you choose, you must be aware that just like _metaclass</em> tricks, extension methods are global: you cannot choose on what lexical scope they apply. Once the hooks are installed, extension methods are there forever.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_static_type_checking_and_compilation">Static type checking and compilation</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_why_static_type_checking_in_a_dynamic_language">Why static type checking in a dynamic language?</h3>
+<div class="paragraph">
+<p>There are various reasons why we wanted to add static type checking to the Groovy language. They are discussed in <a href="http://bit.ly/LV5N25">Guillaume Laforge’s article on InfoQ</a> but the main reason is definitely that <strong>we want Groovy to be even easier to use by Java developers</strong>. There has been a lot of FUD about Groovy performance and the fact that it is dynamically typed, but in the end, Groovy is among the fastest dynamic languages (if not the fastest) and performance problems are more often coming from I/O operations than from the language itself! Also, we must think about all developers: not everyone builds a Twitter… But for people coming from Java, the lack of static type checking was often a barrier preventing them from using Groovy. There are many things to say about dynamic vs static languages, but for people who are interested in evaluating productivity or ease of debugging, there are some interesting results in <a href="http://www.cs.washington.edu/education/courses/cse590n/10au/hanenberg-oopsla2010.pdf">this study from Stefan Hanenberg.</a></p>
+</div>
+<div class="paragraph">
+<p>Speaking of that, we often see (and we are really irritated by this) the quote from James Strachan, founder of the <em>Groovy</em> language, promoted as a very good reason why not to choose Groovy (and its corrolate, prefer Scala over it): &#8220;I can honestly say if someone had shown me the Programming Scala book by Martin Odersky, Lex Spoon &amp; Bill Venners back in 2003 I’d probably have never created Groovy.&#8221; I don’t know James personaly and I really respect his work and opinion and I joined the project well after but:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>James made this statement in 2009 after leaving the project in 2006 even before Groovy 1.0 was released. He is now also working on the Kotlin language. I don’t think that would mean that if Kotlin had existed back in 2003, Odersky wouldn’t have created Scala… or that James would drop Scala anyway. Different languages acheive different goals.</p>
+</li>
+<li>
+<p>If JPA existed in 2002, do you think Hibernate would have been created? Technology is innovation and languages are not different from any other piece of software in that case!</p>
+</li>
+<li>
+<p>a <strong>lot</strong> of improvements have been made on the language since then. I mean, you cannot honestly compare Groovy 1.0 with what Groovy 2.0 is. It’s now a mature, widely adopted language and reading such a quote should not prevent you from testing it by yourself.</p>
+</li>
+<li>
+<p>this is a personal comment, but definitely, I find Groovy <strong>much</strong> more readable than Scala. It was easy to make Java developers use Groovy, it’s not so easy to write Scala, and it’s even more difficult to debug other people’s Scala code…</p>
+</li>
+<li>
+<p>Groovy was never meant to replace Java. All we want is to make the life of developers easier and reintroduce <em>fun</em> in programming.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>One interesting thing to know is where I come from. Before working on Groovy for VMware, I was employed by a small French company named <a href="http://www.lingway.com">Lingway</a> where I introduced the usage of Groovy in several projects. Groovy was used in many contexts, but one thing that is worth noting is that the audience was pretty large: from developers to linguists. Developers used Groovy as a Java scripting tool, sometimes as an ETL processor and linguists used it in the form of a DSL for natural language processing. In the end, we wrote a high performance natural language processor which performed text extraction, named entity recognition, part-of-speech tagging, … just using DSL rules written in Groovy. We had performance issues with Groovy, but in the end, they were all fixed by rewriting classes in Java. Of course, none of the rules were written in Java, so the engine was mostly written in Java, but rules, which are the core of the extraction system, are all written in Groovy, and performance is very good (and it’s using Groovy 1.8 by the way). However, it’s true that it was quite frustrating to rewrite classes in Java when they would have been much shorter and readable if written in Groovy. Moreover, none of those classes were using any of the dynamic features of the language…</p>
+</div>
+<div class="paragraph">
+<p>Developers were Java developers. And some of them (who may recognize themselves reading this paper) were defintely not fans of dynamic typing. While I spent a lot of time advocating the advantages of Groovy over Java for readability and conciseness, in the end, if you end up using Groovy as a scripting language for Java and that you don’t use the dynamic features of the language, it is very legitimate to ask for static type checking, so that errors are catched early in the development process.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_it_s_optional">It’s optional!</h3>
+<div class="paragraph">
+<p>With Groovy 2, we want people to have <strong>choice</strong>. Groovy is a very elegant language that removes most of the boilerplate of Java while staying very close to it, grammar-wise, hence very easy to learn. But it was definitely a problem for us to see people choosing other languages because of the lack of a type checker, although we think Groovy is much more readable than a lot of its competitors. Now, you will have the choice. You will have the choice to type check your code, and explicitely choose not to use the dynamic features of the language, and you will even have the choice to statically compile your code (with its own semantics). This adresses the two main issues we’ve talked about here: failing early in the development process thanks to static type checking, and adressing episodic performance issues by statically compiling your code.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_insider">Insider</h3>
+<div class="paragraph">
+<p>Developing the static type checker was a very challenging task. I spent much less time on static compilation, which is an order of magnitude simpler than type checking. I learnt a lot doing this, and despite all the time spent in implementing that feature, I am pretty sure there are still bugs (in fact, I’m already aware of some), especially when it comes to generics. Oh man. Generics. I mean, I really like <em>using</em> generics and the kind of type inference they offer, but algorithms are damn complex. Type inference with generics <em>is</em> the real challenge. There were two problems that I had to face: first, the internal representation of generics in Groovy is not well suited for type inference, which makes algorithms unnecessary complex (complexity over complexity). Second problem was testing: although you think about a lot of cases, you only develop what you think of. We need testing and we need tests made by others. This is also why there were so many bug fixes in the RC phase: people tend to test the RC versions, not the betas, but this is life!</p>
+</div>
+<div class="paragraph">
+<p>If you’re interested in the internals, just be aware that the type checker is implemented as an AST transformation (yes!). So basically, it’s a (very) big transformation. The first step was to make it work, then make it right. Now, before making it fast (we didn’t talked about performance of the type checker itself, but it should be almost unnoticeable) I need to simplify code and, of course, fix the bugs!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_invoke_dynamic">Invoke Dynamic</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A small word on invoke dynamic support in Groovy 2. We must congratulate Jochen Theodorou for that, because he spent a lot of time working on a feature which is hidden for most users. But his work is an important milestone for the future of Groovy, and while we will work on improving the performance of invoke dynamic in the 2.x versions of Groovy (as well as the JVM folks are going to improve performance of invokedynamic in the JVM itself because it will be at the core of the upcoming lambdas in JDK 8), Groovy 3 will probably be a language heavily relying on this feature.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_get_it_and_test_it">Get it and test it!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last but important, here are some links:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://bit.ly/LV5N25">A detailed overview of Groovy 2 by Guillaume Laforge</a></p>
+</li>
+<li>
+<p><a href="http://groovy.codehaus.org/Download">Download and give a try to Groovy 2!</a></p>
+</li>
+<li>
+<p><a href="http://www.dzone.com/links/groovy_20_released_with_static_type_checking_and.html">Vote on DZone!</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

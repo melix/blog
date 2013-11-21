@@ -1,0 +1,673 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>JBake</title>
+    <link>http://jbake.org</link>
+    <atom:link href="http://jbake.org/feed.xml" rel="self" type="application/rss+xml" />
+    <description>JBake Bootstrap Template</description>
+    <language>en-gb</language>
+    <pubDate>jeu., 21 nov. 2013 13:38:56 +0100</pubDate>
+    <lastBuildDate>jeu., 21 nov. 2013 13:38:56 +0100</lastBuildDate>
+
+    <item>
+      <title>deck2pdf: Exporting HTML5 slide decks to PDF</title>
+      <link>http://jbake.org/2013/07/30/deck2pdf_exporting_html5_slide_decks.html</link>
+      <pubDate>mar., 30 juil. 2013 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">/2013/07/30/deck2pdf_exporting_html5_slide_decks.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_exporting_your_awesome_html5_presentation_to_pdf&quot;&gt;Exporting your awesome HTML5 presentation to PDF&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For some time now, I’ve started using &lt;a href=&quot;http://imakewebthings.com/deck.js/&quot;&gt;deck.js&lt;/a&gt; to write my talks. One of the reasons I do this is that it saves me &lt;strong&gt;lots&lt;/strong&gt; of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, &lt;a href=&quot;https://speakerdeck.com/&quot;&gt;SpeakerDeck&lt;/a&gt;, &lt;a href=&quot;http://www.slideshare.net/&quot;&gt;SlideShare&lt;/a&gt; or &lt;a href=&quot;http://www.parleys.com/&quot;&gt;Parleys&lt;/a&gt; all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_deck2pdf&quot;&gt;Deck2pdf&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? &lt;a href=&quot;https://github.com/melix/deck2pdf&quot;&gt;deck2pdf was born!&lt;/a&gt;. I started with something that was able to export my &lt;a href=&quot;http://imakewebthings.com/deck.js/&quot;&gt;deck.js&lt;/a&gt; presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, &lt;a href=&quot;https://github.com/melix/deck2pdf&quot;&gt;deck2pdf&lt;/a&gt; supports:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://imakewebthings.com/deck.js/&quot;&gt;deck.js&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://lab.hakim.se/reveal-js&quot;&gt;reveal.js&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://bartaz.github.io/impress.js&quot;&gt;impress.js&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;and &lt;a href=&quot;https://github.com/paulrouget/dzslides&quot;&gt;DZSlides&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the &lt;a href=&quot;http://imakewebthings.com/deck.js/&quot;&gt;deck.js&lt;/a&gt; profile is written:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;totalSlides=$.deck(&apos;getSlides&apos;).length
+nextSlide=$.deck(&apos;next&apos;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in &lt;a href=&quot;http://bartaz.github.io/impress.js&quot;&gt;impress.js&lt;/a&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;setup = {
+    js &apos;var api = impress();&apos;
+    js &apos;&apos;&apos;var $$ = function ( selector, context ) {
+        context = context || document;
+        return context.querySelectorAll(selector);
+    };&apos;&apos;&apos;
+    js &apos;&apos;&apos;var byId = function ( id ) {
+        return document.getElementById(id);
+    };&apos;&apos;&apos;
+}
+
+nextSlide = {
+    js(&apos;api.next()&apos;)
+}
+
+totalSlides = {
+    js (/$$(&quot;.step&quot;, byId(&apos;impress&apos;)).length/)
+}
+
+// longer pause because of transitions
+pause = 2000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, &lt;a href=&quot;https://github.com/melix/deck2pdf&quot;&gt;deck2pdf&lt;/a&gt; is open source and licensed under &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.html&quot;&gt;APL2&lt;/a&gt;. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
+    <item>
+      <title>GR8Conf Europe 2013 is over</title>
+      <link>http://jbake.org/2013/05/27/gr8conf_europe_2013_is_over.html</link>
+      <pubDate>lun., 27 mai 2013 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">/2013/05/27/gr8conf_europe_2013_is_over.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_gr8conf_europe_2013&quot;&gt;GR8Conf Europe 2013&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last week I spoke at &lt;a href=&quot;http://gr8conf.eu/index&quot;&gt;GR8Conf Europe&lt;/a&gt; for the second time. As last year, the content of the conference was really amazing and highly technical. While the conference started with a University day on May, 22, we took advantage of the conference to organize a Groovy DevCon the day before. A Groovy DevCon is basically a physical meeting for the Groovy Core developers, where we share ideas and eventually make decisions with regards to the future of Groovy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This year, several well-known Groovy gurus participated in the meeting:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://twitter.com/glaforge&quot;&gt;Guillaume Laforge&lt;/a&gt;, the Groovy project lead&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;http://[Jochen &amp;#8220;Blackdrag&amp;#8221; Theodorou], the Groovy technical lead&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://twitter.com/mittie&quot;&gt;Dierk Koenig&lt;/a&gt;, Groovy committer and main author of the famous Groovy in action book&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://twitter.com/aalmiray&quot;&gt;Andrés Almiray&lt;/a&gt;, the Griffon lead&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://twitter.com/CedricChampeau&quot;&gt;myself&lt;/a&gt;, Groovy Core committer&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But we had a special guest, &lt;a href=&quot;http://gr8conf.eu/Speakers/Juergen-Hoeller&quot;&gt;M. Juergen Hoeller of Spring fame&lt;/a&gt; himself!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The meeting was really useful. On my side, I was particularily happy with the discussions regarding Groovy and Java 8, where we eventually took the (long awaited for me) decision to provide some automatic coercion of closures to interfaces. Basically, this means that you would no longer have to write:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    interface Callback {
+        void execute()
+    }
+    void onEvent(Callback c) { c.execute() }
+
+    onEvent({println &apos;hello&apos;} as Callback)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But instead, you will be able to write directly:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    interface Callback {
+        void execute()
+    }
+    void onEvent(Callback c) { c.execute() }
+
+    onEvent {println &apos;hello&apos;}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This will lead to easier to read and maintain code. We discussed some limitations for the feature, but for a large number of cases, this would work directly. You can expect this feature to appear in Groovy 2.2.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_ast_transformations_unleashed&quot;&gt;AST transformations unleashed&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The University day was the occasion for me to give a workshop about AST transformations. For GR8Conf Europe, I had the chance to do it with &lt;a href=&quot;http://twitter.com/aalmiray&quot;&gt;Andrés Almiray&lt;/a&gt;, the Griffon lead, but also one of the most talented programmer of the Java community. Andrés started with a small introduction about AST transformations, then I continued the workshop with &lt;a href=&quot;https://github.com/melix/ast-workshop&quot;&gt;a series of exercises&lt;/a&gt; (that you can take for yourself). Unfortunately, two hours and a half didn’t give us enough time to complete all exercises but I was quite happy with the session. I really hope this gave ideas to some people in the room, and that it provided the necessary bits to get started. Note that if you missed it, I will give the same workshop at &lt;a href=&quot;http://gr8conf.us/index&quot;&gt;GR8Conf US in Minneapolis&lt;/a&gt;, so register now!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_type_checking_your_dsls&quot;&gt;Type checking your DSLs&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I gave my second talk on Friday, last day of the conference. It was named &lt;a href=&quot;http://gr8conf.us/Presentations/Type-checking-your-DSLs&quot;&gt;Type checking your DSLs&lt;/a&gt;. While I already gave this talk 3 times before (G&amp;amp;G exchange, Greach and Devoxx France), I always like to change some contents to adapt to the audience and have some novelties inside. Unfortunately, for technical reasons, this talk went really bad for me. I assume people felt it, but I was quite disconcerted. The reason is that most of my talk relies on commenting code, but that I wasn’t able to show it properly! Even if the projectors were supposed to support full-HD through HDMI, for some obscure reason, my laptop wasn’t able to &amp;#8220;discover&amp;#8221; the HDMI output, and I was stuck to a 1024x768 VGA output. Worse than that, on screen, the borders were cut. This was the first time this ever happened to me, and to be honest, it completely troubled me. I wasn’t able to show code properly, so I wasn’t able to keep track of what I wanted to say. This was a horrible experience, but I hope people get the idea, as I only managed to give a rough idea of what I wanted to say :-( You know, that feeling when you try to explain something, and that people look at you as if you were an extraterrestrial…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I will give the same talk at Minneapolis later this year, so I sincerely hope things will go better, especially because I really like this talk, which gives a lot of hints on the power of the language, combining several features available in Groovy 2.1. All the (uncut) slides are available &lt;a href=&quot;https://github.com/melix/gr8confeu2013&quot;&gt;on GitHub&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Going to GR8Conf for the second time was like last year an incredible experience. I had the chance to talk to lots of talented and famous developers of the Groovy community, as well as sharing with users, which is worth the trip. This gave me for example the occasion to talk to two GPars brains for the first time (Dierk Koenig and Vaclav Pech). I’d really like to thank Soren for organizing this, as well as the crew for all the goodness that we can see here. I’m really looking forward to go to the next edition!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
+    <item>
+      <title>Null-safe invocation and primitive types</title>
+      <link>http://jbake.org/2013/04/17/null_safe_invocation_and_primitive.html</link>
+      <pubDate>mer., 17 avr. 2013 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">/2013/04/17/null_safe_invocation_and_primitive.html</guid>
+      	<description>
+	&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_null_safe_method_invocation&quot;&gt;Null-safe method invocation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yesterday, I worked on &lt;a href=&quot;http://jira.codehaus.org/browse/GROOVY-6101&quot;&gt;a bug&lt;/a&gt; reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;class Person {
+   String name
+   int age
+}
+
+Person getPerson() { null }
+
+Person p = getPerson()
+
+def result = p?.age
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now the question is, what is the value of &lt;em&gt;result&lt;/em&gt;? If you run this in the Groovy console, the result would be &lt;em&gt;null&lt;/em&gt;. This is compatible with the assumption that the null-safe invocation operator (?.) always return null if the receiver of the message is null (here, &lt;em&gt;p&lt;/em&gt; is null, so result is null). The definition is pretty easy, but it gets more complicated if you slightly modify the code:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;int result = p?.age
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By explicitely setting the type to &lt;em&gt;int&lt;/em&gt;, executing this would throw an error, stating that you cannot convert &lt;em&gt;null&lt;/em&gt; to &lt;em&gt;int&lt;/em&gt;. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if &lt;em&gt;p&lt;/em&gt; is not null, the assignment is perfectly valid since &lt;em&gt;getAge()&lt;/em&gt; is expected to return a primitive type… This means that unlike the &amp;#8220;normal&amp;#8221; invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_dynamic_world&quot;&gt;The dynamic world&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What if the null-safe invoker was aware of the return type? In &amp;#8220;null-safe&amp;#8221;, you must think about what the &amp;#8220;safe&amp;#8221; part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the &lt;strong&gt;receiver&lt;/strong&gt; is null, then return null. This means that because &lt;em&gt;p&lt;/em&gt; is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was &lt;em&gt;getAge()&lt;/em&gt;, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a &lt;em&gt;default value&lt;/em&gt; compatible with the primitive type. This means that here, I would expect the null-safe invoker to return &lt;em&gt;0&lt;/em&gt;. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when &lt;em&gt;p?.age&lt;/em&gt; is executed, the target method hasn’t been chosen, because you need to know the runtime type of &lt;em&gt;p&lt;/em&gt; to determine what method will eventually be called. As &lt;em&gt;p&lt;/em&gt; is null, the dynamic runtime doesn’t know the type of &lt;em&gt;p&lt;/em&gt;, so has no idea that calling &lt;em&gt;age&lt;/em&gt; would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_static_world&quot;&gt;The static world&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now what if we’re in a pure static world? In that case, the method to be called is chosen at compile time, given the inferred type of &lt;em&gt;p&lt;/em&gt;. It means that unlike the dynamic runtime, the static compiler, at this point, knows that &lt;em&gt;p.age&lt;/em&gt; is &lt;em&gt;p.getAge()&lt;/em&gt; which returns a primitive type. So it is capable of handling the null-safe invocation with what I think is better, semantically speaking: &lt;em&gt;null-safe&lt;/em&gt; invocation only checks the receiver, and returns a value which depends on the return type of the method being invoked. So a static compiler is able to return &lt;em&gt;0&lt;/em&gt; instead of the non-pritive &lt;em&gt;null&lt;/em&gt;. What is funny is that I asked, on Twitter, what people expected from the result of &lt;em&gt;p?.getAge()&lt;/em&gt; if &lt;em&gt;p&lt;/em&gt; is null. Everybody answered &lt;em&gt;null&lt;/em&gt;. So it’s clear that my way of thinking is not mainstream, but I’m ok with that. I just find it awkward that an operator which is supposed to act on invocation is also capable of altering the return type…&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
+    <item>
+      <title>Les écoles sont-elles le problème ?</title>
+      <link>http://jbake.org/2013/03/26/les_écoles_sont_elles_le.html</link>
+      <pubDate>mar., 26 mars 2013 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">/2013/03/26/les_écoles_sont_elles_le.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme beaucoup, j’ai appris aujourd’hui la création d’une école de développement lancée par Xavier Niel. Mais dans cette annonce, j’ai été choqué par plusieurs choses, à commencer par cette citation:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Aujourd’hui, le système français ne marche pas. Il est coincé entre d’une part l’université, qui propose une formation pas toujours adaptée aux besoins des entreprises mais qui est gratuite et accessible au plus grand nombre, et d’autre part les écoles privées, chères, dont la formation est assez qualitative mais laisse sur le côté de la route le plus grand nombre de talents, voire de génies, que nous pourrions trouver en France.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Qu’est-ce qu’essaie de dire Xavier Niel ici ? Que seule les écoles privées sont capables de fournir une formation de qualité ? Que parce que l’Université est ouverte au plus grand nombre, la qualité n’est pas au rendez-vous ? Mais quid des IUT, quid des écoles d’ingénieur publiques (INSA, réseau Polytech’ dont je suis issu, …) ? Je ne doute pas que la citation ci-dessus ait volontairement omis ces organismes &lt;strong&gt;publics&lt;/strong&gt;, qui sont j’ose le croire capables de formations modernes, techniques et dont les professeurs sont au moins aussi dévoués que ceux du privé !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il ne s’agit pas non plus d’un problème de sélection de talents à l’entrée, car ici, contrairement à la Faculté qui se doit d’accueillir quiconque s’inscrit, les IUT et autres écoles d’ingénieur publics ont un processus de sélection à l’entrée. Et sur ce point, j’ai une petite anecdote à vous raconter. Il y a deux ans, lorsque j’ai changé d’entreprise, j’ai eu besoin de récupérer mon diplôme d’ingénieur (oui, parce qu’on me demandait de prouver que j’étais ingénieur) et je suis donc retourné à mon ancienne école, Polytech’Nantes, où j’ai croisé un ancien professeur. Au détour de la conversation, j’ai appris qu’il y avait &lt;strong&gt;moins&lt;/strong&gt; de candidats à l’entrée de l’école qu’il y a 10 ans. Visiblement, les &amp;#8220;nouvelles technologies&amp;#8221; n’attirent plus autant qu’avant. Ils avaient donc, à l’époque, un problème de sélection à l’entrée pour trouver des étudiants, tout simplement, sans parler de trouver des talents. A ce propos, je rejoins quand même Xavier Niel sur un point (du moins, si je lis entre les lignes). Les écoles d’ingénieur privées en France, on les choisit surtout parce que c’est marketing, ça fait bien sur un CV de sortir d’Epitech. Au passage, si tu es étudiant et que tu lis ces lignes, méfie toi des écoles qui ne donnent pas droit à un diplôme d’Etat en sortie, car comme tu l’as constaté, c’est utile… Ces écoles, on y entre souvent parce qu’on a les moyens de payer. Bref, c’est plus un investissement qu’un problème de qualité de formation… En pratique, il reste à démontrer qu’un ingénieur sorti d’une école privée est &amp;#8220;meilleur&amp;#8221; qu’un autre…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alors pour rire un peu, lisons &lt;a href=&quot;http://www.42.fr/wp-content/uploads/2013/03/programme-42.pdf&quot;&gt;le programme de l’école 42&lt;/a&gt;: Merise, XWindow, Corba, J2ME, que des technologies toutes neuves et incroyablement répandues dans l’industrie… j’avais les mêmes cours lorsque je suis rentré à l’IRESTE en 1999 ! Alors, certes, il y a du HTML5 au programme, de l’iOS et Android. En revanche, je cherche encore Spring, le framework alternatif à JEE le plus répandu dans l’industrie, Scala (ou encore Groovy, rêvons un peu). En clair, ce programme existe aussi dans n’importe quelle autre formation, y compris dans le public. Je vous conseille d’ailleurs, au sujet d’iOS, cet &lt;a href=&quot;https://plus.google.com/106143787836384076615/posts/Sb1yDrKsYcP&quot;&gt;&quot;&amp;gt;excellent post de Julien Ponge&lt;/a&gt; sur l’abandon de l’enseignement d’iOS à l’INSA Lyon (Ecole d’ingénieur publique, faut-il le rappeler). En clair, ce programme, si intéressant soit-il, n’a rien de révolutionnaire. C’est un classique qu’on trouve dans n’importe quelle école. Ce à quoi on pourrait me dire que ça n’est pas dans le programme mais dans la façon de l’enseigner que se trouve la clé, mais là, je demande à voir. Il y a des cours, il faut bien les suivre. Si c’est faire des projets annexes pour bidouiller, etc, c’est sympa, mais ça, on le fait depuis longtemps ailleurs aussi. Non, je ne vois pas trop…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le problème n’est donc certainement pas dans les programmes, ni dans la sélection. Ce qui m’amène à parler des raisons pour lesquelles les gens comme moi en viennent à choisir l’informatique. Je les divise en deux catégories:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;ceux qui sont passionnés, tombés dedans quand ils étaient petits: j’en fais partie. J’ai commencé à coder à 8 ans, je n’ai jamais arrêté depuis. C’est une passion autant qu’un boulot et rares sont ceux qui comme moi parviennent à combiner les deux.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ceux qui y vont parce qu’il y a du travail : on ne cesse de le répéter, on manque de main d’oeuvre dans l’informatique. Ca n’est (pour l’instant) pas trop mal payé, et donc on y va parce qu’on peut bien manger. J’en ai croisé beaucoup et j’en croise encore.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans la première catégorie, je classe les professeurs. S’il existe un vrai problème, ça n’est certainement pas l’enseigement, ni les programmes. Non, l’informatique souffre d’un problème de reconnaissance, et il existe à de multiples niveaux. Le premier, c’est celui de l’enseignement. Lorsque j’étais étudiant, j’ai commencé par faire un DEUG, puis j’ai choisi de ne pas suivre la voie de la recherche (doctorat) et de poursuivre en école d’ingénieur. Etait-ce le programme qui était en cause ? Non, certainement pas. Etait-ce le problème des classes surchargées et du fait de ne pas être choyé ? Non plus: j’étais extrêmement heureux de l’autonomie qu’ont les étudiants de Fac, tout comme j’étais totalement dans l’esprit de devoir travailler fortement à la maison pour compenser le manque de travaux &amp;#8220;individualisés&amp;#8221;. Non, le vrai problème, c’est le salaire. Le calcul était simple: en sortie d’école, je toucherai autant, voire plus, avec un diplôme d’ingénieur que mon prof à l’Université. Et lui était incontestablement plus compétent que moi. Alors, être professeur en France, aujourd’hui, c’est de la dévotion pure et simple. Je l’ai déjà dis en privé à certains, je le confirme : je vous admire les gars. Alors j’ai choisi l’école d’ingénieur (publique, pas question d’aller dans le privé). Là encore, je caricature un peu, l’idée de l’école était aussi qu’elle était plus proche du monde de l’entreprise et que la voie &amp;#8220;universitaire&amp;#8221; avec carrière définie à l’avance, les mutations et autres ne m’enchantait guère, mais ça c’est un autre débat…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, pour entrer, sélection à l’entrée. Il fallait montrer patte blanche, passer un entretien avec un professeur et un chef d’entreprise, avoir de bons résultats et faire partie des heureux élus (la sélection comptait 1/3 de l’université, 1/3 de l’IUT, 1/3 de prépas). Une fois entré, le plus dur est fait. On passe 3 ans à suivre ses cours, à s’améliorer, mais je regretterai toujours l’ambiance de la fac, les révisions autour d’un café, les impressions de polys, … Il est clair que les moyens de l’école étaient plus élevés, par rapport à la fac, et qu’on est entre de bonnes mains. A moins de faire l’idiot, difficile de ne pas en sortir avec un diplôme. Mon attachement à la fac et au monde de la recherche ne s’est pas arrêté à l’entrée à la fac, non, puisque j’ai décidé de faire en parallèle un DEA en informatique, possibilité qui était offerte par l’école à l’époque. On devait alors suivre des cours supplémentaires à la Fac. J’y ai appris beaucoup, de personnes brillantes. Alors, à l’école, j’ai aussi eu des professeurs moins &amp;#8220;bons&amp;#8221; que d’autres, mais franchement, même en entreprise, on trouve de sacrés boulets, ça n’a rien à voir avec le fait qu’on soit dans une école publique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans le cadre de mon double diplôme ingénieur/DEA, j’ai eu la chance de participer à la création d’une entreprise issue d’un projet de recherche, qui m’a embauchée à ma sortie d’école… Je n’aurais pas choisi un autre type d’entreprise. En particulier, je fuis les SSII et je cherche plutôt des éditeurs de logiciels.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pourquoi ce choix ? Parce que je pense que les SSII font partie du problème en France. La formation technique à l’école n’était pas un problème mais il est clair qu’on nous met dans un état d’esprit plus que douteux allant directement dans le sens des SSII. Des cours de management, c’est intéressant, mais pourquoi s’enfoncer dans ce modèle détestable qui consiste à croire qu’au bout de 2 ans, on n’est plus capable de développer et qu’il faut passer chef de projet ? Alors certes, la catégorie 2 des personnes dont j’ai parlé plus haut s’en accomodent très bien, mais il est stupide de croire qu’un bon ingénieur ferait un bon chef de projet, tout comme il est stupide de ne proposer des augmentations de salaires qu’en changeant de poste et en passant à un poste de management. Si les entreprises, SSII en tête, prenaient moins les ingénieurs pour de la chair à commercial, on s’en sortirait déjà beaucoup mieux (nous les ingénieurs, l’entreprise, elle, c’est moins sûr). Même après 2 ans d’expérience, on est très loin d’avoir un niveau de compétence suffisant pour égaler la productivité d’un senior. Les experts, ça existe, et il faut les respecter. Le vrai problème est là: le respect du développeur. Le choix de devenir développeur senior est très difficile en France, de part cet aspect social assez négatif (non mais allô quoi ? T’as 30 ans et t’es développeur ? Non mais allô !) et le fait qu’avec l’âge, on aimerait bien s’offrir une maison quand même…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Au sujet des SSII, j’ai une petite anecdote. Il y a quelques années, l’entreprise pour laquelle je travaillais se portait assez mal, et donc par précaution j’ai commencé à passer des entretiens d’embauche. J’ai mis mon CV sur &amp;#8220;Les Jeudis&amp;#8221; et à peine quelques heures plus tard, j’avais déjà décroché un entretien… dans une SSII. Comme il faut bien manger et que les offres des éditeurs ne courent pas les rues (à mon grand désespoir), je suis allé à cet entretien en le prenant comme un entraînement. Et heureusement. Pour l’entretien, j’ai été confronté à un potentiel futur &amp;#8220;supérieur&amp;#8221;, un commercial en fait qui m’a présenté cette &amp;#8220;grande SSII leader en France, n’embauchant que des dieux&amp;#8221; (je caricature à peine). D’une part, se dire qu’un ingénieur se trouve hiérarchiquement lié à un commercial me pose un sérieux problème. C’est qu’on vend un profil avant de vendre mes compétences. Il n’y avait aucun travail à me proposer. On m’a convonqué pour avoir un CV dans une base et le vendre à des clients. Ca n’est donc pas parce qu’il y avait un projet qu’on m’a convoqué, mais parce que potentiellement, je suis vendable. Alors, comme j’ai la chance d’être dans un domaine où il y a encore (un peu) de choix dans les offres d’emploi, non merci. Mais le plus choquant dans cet entretien, pour moi, ce fut la question finale, faite par ce commercial: &amp;#8220;pourriez-vous me résumer ce qu’on a dit dans cet entretien&amp;#8221;. J’ai trouvé cette question humiliante. Déjà, j’étais venu en me disant qu’on avait un projet à me proposer, mais non, je commercial ne savait même pas que je n’avais pas postulé, mais qu’on m’avait cordialement invité à passer un entretien. Ensuite, mon égo en a pris un coup par cette question, qui sous-entend que je ne suis pas assez professionnel pour avoir compris le discours élitiste et commercial que l’on m’avait longuement rabaché dans cet entretien. Le lissage et la lobotomisation avait déjà commencé. Evidemment, on ne m’a pas rappelé et je ne m’en porte pas plus mal.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ne soyons pas caricatural non plus, je suis certain d’être &amp;#8220;mal tombé&amp;#8221;, mais au final, j’avais mon opinion sur les SSII et cet entretien n’a fait que la conforter. Il existe sûrement des sociétés plus petites où on n’est pas uniquement un CV dans une base…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce qui m’amène à un dernier point. Je suis un amoureux de l’esprit open source. Aujourd’hui, j’ai la chance d’en vivre et j’aimerais que beaucoup plus de développeurs puissent le faire. Ne serait-ce que pour redécouvrir leur métier. J’ai toujours rêvé de travailler dans une entreprise faisant de l’open-source, et quand je dis faisant de l’open-source, je ne veux pas dire utilisant des projets open source, non, je veux dire qui contribue directement à des projets OSS. Cet esprit me vient probablement de tout petit, lorsqu’à 10 ans, j’achetais ces revues dont j’ai oublié le nom, où je pouvais recopier le code source d’un jeu sur mon CPC, et après de longues heures de recopie, être émerveillé par ce que je venais d’accomplir.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alors, oui, à l’époque, je n’inventais pas grand chose, mais je voulais et je pouvais bidouiller. Et je pense qu’il n’y a rien de plus instructif, en informatique, que la bidouille. Triturer du code, recopier, modifier, lorsqu’on est enfant, il n’y a rien de plus simple et on apprend énormément (aaaahhh, et donc là, je peux faire de l’overscan !). Il n’empêche qu’à une époque, j’ai eu besoin de structurer tout celà et que c’est à l’Université que ça s’est fait (comprendre les concepts qu’on manipule).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Au quotidien, l’open source tel que je le pratique à de nombreux avantages. D’abord, je suis consommateur. Je ne comprends pas ce que fait une fonction, j’ouvre le code, je le lis. Je peux aussi profiter du code et de l’expérience des autres (si tant est que la licence le permette). D’un autre côté, je contribue. Et en tant que développeur, je trouve que c’est extrêmement formateur. Lorsque j’ai commencé à développé sur Groovy, je pensais ne pas être mauvais (comme 90% des développeurs, je pense être meilleur que ma moyenne ;-)), pour autant, lorsque je lisais le code de nombreux projets open source, je me trouvais petit. Et encore aujourd’hui, je le suis, mais j’apprend. Faire de l’open-source, c’est par définition montrer son code à tout le monde, et en pratique, on n’aime pas spécialement montrer une mauvaise image de soi. Etre scruté par des milliers, voire millions d’yeux, c’est très formateur et ça pousse à s’améliorer. Ca ne veut pas dire qu’on ne fait pas de la m…, mais en tout cas, on la limite et si on en produit, on est vite rappelé à l’ordre… J’aime ce métier parce que je vois directement les résultats de ce que je produis : des utilisateurs contents (ou pas) et je n’ai rien à leur cacher. Bref, les qualités intrinsèques de mon &amp;#8220;produit&amp;#8221; passent avant toute chose. L’un des bons côtés de mon métier, c’est se balader dans une conférence et croiser quelqu’un qui vous dit que ce que vous avez fait lui a sauvé sa journée. C’est peut de chose, mais ça montre que le dev open source est avant tout tourné vers l’autre. Si je ne pouvais lire le code des autres, je ne mesurerais pas la marge de progression que j’ai et j’apprendrais beaucoup moins, ce qui signifie, au bout du compte, une qualité moindre et une dévalorisation générale du métier…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alors non, clairement, je ne pense pas que le problème, en France, ce soit les écoles. Je ne crois pas non plus que le problème soit les enseignants, ou le public vs le privé. Et je ne crois pas qu’on perde des talents à cause d’un problème de sélection. Non, le problème, c’est la reconnaissance du métier. Faire que les gens soient fiers de leur travail et puissent en vivre dignement. En particulier, le problème du salaire des profs est à mon humble avis critique et explique que la France laisse disparaître des talents dans les méandres des inter-contrats. Non, commençons par définir des projets, faciliter l’innovation, arrêter de penser franco-français (le financement public du &amp;#8220;Cloud Français&amp;#8221; est un pur gaspillage, à mon humble avis) et défendons au contraire ce qui permet de faire émerger les talents: ouverture, neutralité du net, reconnaissance du travail. Arrêtez de demander des stagiaires avec 5 ans d’expérience. Bref, faites nous rêver !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous faire rêver, effectivement, Xavier Niel sait le faire, on peut lui reconnaître ça. En pratique, je ne suis pas convaincu de la solution, parce que je ne suis pas convaincu que le problème soit là. A moins que de cette école n’émerge une technique nous permettant de lire des vidéos YouTube sans saccade :-)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
+    <item>
+      <title>Static builders inception</title>
+      <link>http://jbake.org/2013/02/13/static_builders_inception.html</link>
+      <pubDate>mer., 13 févr. 2013 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">/2013/02/13/static_builders_inception.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_documentation_is_good_for_everybody&quot;&gt;Documentation is good for everybody&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As part of the &lt;a href=&quot;http://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html&quot;&gt;Groovy documentation effort&lt;/a&gt;, I started writing documentation for several features of Groovy, including &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration&quot;&gt;compiler configuration&lt;/a&gt;, &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/Type+checking+extensions&quot;&gt;type checking extensions&lt;/a&gt;, and yesterday the &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation&quot;&gt;@DelegatesTo annotation&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation&quot;&gt;@DelegatesTo documentation&lt;/a&gt;, I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the following post, I will show you how I combined several features of Groovy 2.1 to provide an implementation of a statically compiled HTML builder: static compilation, @DelegatesTo, meta-annotations, custom type checking extensions and of course AST transformations, without having to write all the boilerplate necessary to make it type safe! Nothing less…&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_statically_compiled_markup_builder&quot;&gt;Statically compiled markup builder&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What if we could annotate a class as a markup builder, describe its schema, then, if a user wants to statically compile the builder usage, have a type-safe, statically compiled builder? That means, if you write this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;@groovy.transform.CompileStatic
+String build() {
+    def builder = new HTMLBuilder()
+    builder.html {
+        body {
+            p {
+                out &amp;lt;&amp;lt; &quot;Hello, this is &quot;
+                a(href:&apos;http://groovy.codehaus.org&apos;) { out &amp;lt;&amp;lt; &apos;Groovy&apos; }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then you want &lt;strong&gt;compile-time errors&lt;/strong&gt; if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation&quot;&gt;@DelegatesTo documentation&lt;/a&gt; showed that it was possible to create a statically checked (and statically compiled) builder.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There were two problems in the approach from the documentation:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;unnecessary repetitive/verbose code (inner classes)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;no ability to perform checks on the allowed attributes of a tag at &lt;strong&gt;compile-time&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_here_comes_the_statically_compiled_markup_builder_experiment&quot;&gt;Here comes the statically compiled markup builder experiment!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_night_hacker&quot;&gt;The night hacker&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So last night, I started an experiment to see if I could make things easier and after two hours of coding, I had indeed a first working implementation, which allowed me to define a schema for my builder, but didn’t check attributes yet.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Today, I spent several hours fixing bugs for Groovy 2.1.1, including some that prevented me from going further (including one with nasty classloading issues that prevented Gradle from loading some classes from my AST transformation…). After that, I could eventually fix my prototype and I now have a fully working implementation…&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_checking_out_the_sources&quot;&gt;Checking out the sources&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all, all the code is available on &lt;a href=&quot;https://github.com/melix/staticbuilder&quot;&gt;GitHub&lt;/a&gt;. It makes uses of the gradle wrapper, so all you need is to run:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    $ ./gradlew test
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_builder&quot;&gt;The builder&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Creating a statically checked builder is easy:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    import groovyx.transform.StaticMarkupBuilder
+
+    @StaticMarkupBuilder
+    class HTMLBuilder {
+        static schema = {
+            html {
+                head { title() }
+                body {
+                   p()
+                   a(attributes:[&apos;href&apos;, &apos;target&apos;])
+                }
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For examples of several builders, you can take a look at the &lt;a href=&quot;http://bit.ly/XAOvhJ&quot;&gt;unit test&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What is important here is that using the &lt;strong&gt;@StaticMarkupBuilder&lt;/strong&gt;, we are not using a builder, we are defining one:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a statically compiled builder&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;which accepts a predefined schema&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here, the schema is very simple. It says that at the top level, we can find the &lt;em&gt;html&lt;/em&gt; tag. This tag can include either a &lt;em&gt;head&lt;/em&gt; or a &lt;em&gt;body&lt;/em&gt; tag. Below body, you can find either &lt;em&gt;p&lt;/em&gt; or &lt;em&gt;a&lt;/em&gt;, and if it’s an &lt;em&gt;a&lt;/em&gt;, then the only allowed attributes are &lt;em&gt;href&lt;/em&gt; and &lt;em&gt;target&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It’s a very simple schema that of course doesn’t matches what you can do in HTML5, but remember that it’s a prototype aimed at showing off the amazing capabilities of Groovy 2.1.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To use it, you can do:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    @CompileStatic
+    void test() { // using a method to ensure that the builder will be statically compiled!
+        def out = new ByteArrayOutputStream()
+        def builder = new Builder3(out)
+        builder.html {
+            body {
+                p &apos;Hello, Groovy!&apos;
+            }
+        }
+        println out.toString()
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What we’re doing here is creating a builder inside a statically compiled portion of code (so that you can make sure that the builder usage is indeed statically compiled). If you run this code, it will show:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    Hello, Groovy!
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But what is really interesting is showing what would happen if you use a wrong tag:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    @CompileStatic
+    void test() { // using a method to ensure that the builder will be statically compiled!
+        def out = new ByteArrayOutputStream()
+        def builder = new Builder3(out)
+        builder.html {
+            bodyp { // compile-time error!
+                p &apos;Hello, Groovy!&apos;
+            }
+        }
+        println out.toString()
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here, Groovy will fail at compile-time!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;    Groovyc: [Static type checking] - Cannot find matching method groovyx.transform.StaticMarkupBuilderTest#bodyp(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
+    Groovyc: [Static type checking] - Cannot find matching method groovyx.transform.StaticMarkupBuilderTest#p(java.lang.String). Please check if the declared type is right and if the method exists.&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, the error message can be improved (there are ways to do this), but what is interesting is that you really fail before the test gets executed!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_behind_the_magic&quot;&gt;Behind the magic&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To acheive this first example, there are two things in action:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a meta-annotation, called &lt;em&gt;@StaticMarkupBuilder&lt;/em&gt; that will expand itself into &lt;em&gt;@CompileStatic&lt;/em&gt; and &lt;em&gt;StaticMarkupBuilderGenerator&lt;/em&gt;: this way, using a single annotation, I am saying that the builder will be statically compiled without having to use @CompileStatic explicitely. The second annotation is an AST transformation:&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;an AST transformation that transforms the schema definition into a set of inner-classes, close to what the documentation says&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The AST transformation is very powerful. Say you have this schema:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    static schema = {
+        html {}
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then the AST transformation will create an inner class called &lt;em&gt;HTMLBuilder$HtmlTag&lt;/em&gt;, then also create, in the &lt;em&gt;HTMLBuilder class&lt;/em&gt;, a method which name is &lt;em&gt;html&lt;/em&gt; and uses a closure… Of course, it will add the &lt;em&gt;@DelegatesTo&lt;/em&gt; annotation transparently, so the generated method signature will look like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For sub-tags, the principle is the same, but instead of generating the method in the HTMLBuilder class, it is added to the appropriate inner tag class… Of course, the AST transform does a bit more work:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;make the builder and each generated inner class extend a base class (&lt;em&gt;AbstractTag&lt;/em&gt;), this class defining how a tag should be rendered.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;generate methods for string only arguments (&lt;em&gt;p `text&apos;&lt;/em&gt;) or empty tags&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;generate a method for tags accepting attributes&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The latter is very important as it will help us demonstrate how we can also check that when the builder is used, the attributes being used are checked against a list of valid tags.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_the_attribute_checking_problem&quot;&gt;The attribute checking problem&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here, we have an interesting problem: our schema allows us to say that the &lt;em&gt;a&lt;/em&gt; tag only accepts &lt;em&gt;href&lt;/em&gt; and &lt;em&gt;target&lt;/em&gt; attributes. But can we prevent the user from using other attributes at &lt;strong&gt;compile-time?&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;    builder {
+        ...
+        a(notGood:&apos;invalid attribute&apos;) { out &amp;lt;&amp;lt; &apos;Link text&apos; }
+    }&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let’s see what happens if we don’t perform additional magic. When the builder is checked by the type checker, it will find a method named &lt;em&gt;a&lt;/em&gt;, which accepts a map and a closure as arguments. This method exists, so it passes compilation. This is bad, because we wanted a compile-time error here. We could have, when we generated the builder class, added a check into the &lt;em&gt;a&lt;/em&gt; method body that verifies that the map keys are in the authorized list, but it’s a runtime check and here we want a compile-time one…&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So we have a new challenge:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;how to make the authorized attributes list known when the builder usage is compiled?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;how to make the static compiler &lt;strong&gt;check&lt;/strong&gt; that the user only picks attributes from that list&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For the first part, my choice was to add an annotation in the map parameter of the generated method:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    void a(@CheckedAttributes([&apos;href&apos;,&apos;target&apos;]) Map attributes, @DelegatesTo(...) Closure code) { ... }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alright, so now we have the information available at runtime, when the compiler will select this method, the method will have an annotation that we can reflect to retrieve the list of attributes… Still, the compiler won’t use that information, so we’re doomed, right?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Not really, because Groovy 2.1 includes &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/Type+checking+extensions&quot;&gt;type checking extensions&lt;/a&gt;. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The code of this type checking extension can be found &lt;a href=&quot;http://bit.ly/Yryqb7&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We’re almost done! The only problem with this solution is that one has to annotate every method that uses our builder with @CompileStatic(extension=’groovyx/transform/StaticBuilderExtension.groovy’). This is not as cool as seeing the extension being automatically applied…&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_global_ast_transformations_to_the_rescue&quot;&gt;Global AST transformations to the rescue&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There’s one solution to this. We will use a global AST transformation here. Unlike local AST transformations that are triggered by seeing an annotation in the code, global AST transformations are automatically loaded by the compiler and applied to every class being compiled. Thanks to this feature, we will be able to scan classes being compiled and if we find something annotated with @CompileStatic, then change it to @CompileStatic(extensions=’…’). That’s all!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The code for such an annotation can be found &lt;a href=&quot;http://bit.ly/UfjmjQ&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You must remember that using global AST transformations have a significant impact on compilation times, since they are applied on every class, so always make sure you don’t use unnecessary transforms.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The main focus of this blog post wasn’t to describe in details how the AST transformation works, but rather show you how a smart combination of the features of Groovy 2.1 can allow you to perform tasks that would seem impossible, like type checking at compile-time the usage of a builder, statically compiling the code and eventually, performing checks on things that are normally unchecked by the compiler (arguments of a call).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the end, this example is not complete, of course:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;the definition of the schema is insufficient (what about tags that allow arbitrary tags, …)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;allowText attribute isn’t used yet&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the error messages can be improved (yes, it is possible to replace them with tags!)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the API can be improved for more fluency&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But what is more important is that using such techniques, I am pretty sure that someone even crazier than me could write a more complete implementation that would accept, say… a real schema (think of xsd)!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
+
+  </channel> 
+</rss>

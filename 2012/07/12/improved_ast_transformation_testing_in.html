@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Improved AST transformation testing in Groovy 2</h1>
+	</div>
+
+	<p><em>12 juillet 2012</em></p>
+	<p><em>Tags: </em>ast </em> groovy </em> programming </em> testing </em> transformation </p>
+
+	<p><div class="sect1">
+<h2 id="_structural_ast_testing">Structural (AST) testing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Since Groovy 1.6, the language provides a very nice feature called <a href="http://groovy.codehaus.org/Compile-time+Metaprogramming+-+AST+Transformations">AST transformations</a>. AST transformations allows you to hook into the compilation process in order to modify the internal representation of the source code at compile time. This internal representation, known as the Abstract Syntax Tree(AST) is a very powerful way to enhance the language or reduce verbosity of the code.</p>
+</div>
+<div class="paragraph">
+<p>The different releases of Groovy came with new AST transformations such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>@Log/@Log4j/@Slf4j</em>: transparently adding a logger to your class</p>
+</li>
+<li>
+<p><em>@ToString</em>: Generating a nice <em>toString</em> implementation for your class</p>
+</li>
+<li>
+<p><em>@EqualsAndHashCode</em>: Generating the famous <em>equals</em> and <em>hashcode</em> methods</p>
+</li>
+<li>
+<p><em>@Canonical</em>: Combining <em>@ToString</em> and <em>@EqualsAndHashCode</em></p>
+</li>
+<li>
+<p><em>@WithReadLock/@WithWriteLock</em>: for guarding method bodies with read/write locks (reentrant locks)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>and many more!</p>
+</div>
+<div class="paragraph">
+<p>Developing such AST transformations is very interesting but requires a deeper knowledge of the internal APIs of the Groovy language (specifically, the AST part). However, people who have developped such AST transformations know that testing them is a bit difficult:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The most useful tool is the <em>AST browser</em> which can be found in the <em>Groovy Console</em>. It allows you to &#8220;browse&#8221; the AST of the code which is in the console. This is very useful because it allows you to write the code you’d like to generate and see what AST structure you need to produce. Or you can use it the opposite way, looking for patterns of AST to recognize in order to transform them.</p>
+</li>
+<li>
+<p>Testing if the AST transform is successul can only be done externally, that is to say by testing that the effects of the transform are visible on a class. For example, testing the <em>@Log</em> AST transform consists in applying the transform on a test class, then add calls to <em>log</em> and see if they are successful.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>External testing is easy to do, but the main problem is that you no longer manipulate an AST: you manipulate classes which have already been generated. This is problematic for several reasons:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You can only test when your AST transform code is valid, that is to say that it doesn’t throw an error in the compilation process.</p>
+</li>
+<li>
+<p>The Groovy compilation process is separated into phases, and it is useful to add tests to check was exists in one phase, and what exists in another phase.</p>
+</li>
+<li>
+<p>You can only check easily things that introduce/remove fields or methods. It’s impossible to test, for example, an AST transform which doesn’t touch the AST…</p>
+</li>
+<li>
+<p>You cannot check for properties found in the AST</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The two last points were my major concern when I developped the type checker for Groovy 2. As you may know, the type checker is implemented in the form of an AST transformation which annotates the AST with node metadata. This node metadata is not visible in the AST browser and is of free form. In the case of the type checker, node metadata consists of type inference information. So, in that case, testing my AST transformation consisted of scripts with variables defined with certain types, and just checking that the compiler didn’t throw any error (or did throw an error). The problem is that you cannot check if the inferred type of a precise AST node is correct.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_improved_ast_transformation_testing">Improved AST transformation testing</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="__asttest">@ASTTest</h3>
+<div class="paragraph">
+<p>For that reason, Groovy 2.0 introduces a new AST transformation which is precisely aimed at testing AST transformations! This AST transformation is named <em>ASTTest</em> and allows you to execute assertions on the AST tree. Let’s take a simple example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>    for (int i in 1..n) {
+        @ASTTest(phase=INSTRUCTION_SELECTION, value= {
+            assert node.getNodeMetaData(DECLARATION_INFERRED_TYPE) == int_TYPE
+        })
+        def k = i
+    }
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This test is extracted from the type checker test suite. You can see:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>we’re annotating a declaration with <em>ASTTest</em></p>
+</li>
+<li>
+<p>we specify, as an annotation parameter, the compilation phase the test is expected to run</p>
+</li>
+<li>
+<p>and we specify code which will be executed on the annotated AST node</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In this case, <em>node</em> in the closure refers to the annotated AST node, that is to say, here, a <em>DeclarationExpression</em>. We’re calling <em>getNodeMetaData</em> which is a method defined on any AST node which allows to retrieve the node metadata that we talked about earlier. Here, we want to retrieve the type of the variable which is inferred by the type checker. Last and important, we add an assert statement to check that this inferred type corresponds to an <em>int</em>.</p>
+</div>
+<div class="paragraph">
+<p>If the assertion fails, the unit test will fail. This is very important, because we now have a mean to test the AST itself. I said it was impossible before, but in fact, it was possible but it required a lot of trickery such custom classloaders and so on…</p>
+</div>
+<div class="paragraph">
+<p>In Groovy 2.0.0, <em>ASTTest</em> does nothing more than this, but we have a problem: not every node in the AST can be annotated. We’re limited to what it is syntactically possible to annotate: classes, methods, types, packages, declarations, … If what you want to test is a node which doesn’t belong to that category, then you need to annotate a wrapping node (in most situations, a method) then &#8220;browse&#8221; manually to the node you want to test. For example, in the previous example, we could access the right hand side of the declaration expression using <em>node.rightExpression</em> and perform assertions on that.</p>
+</div>
+<div class="paragraph">
+<p>However, if you start from a method and try to access a particular node into the method body, I admit it is quite painful, because you have to check what is the exact AST tree which is generated by the compiler, then find a &#8220;path&#8221; to your node. And it is very easy to break this path just by adding a statement in the code, which makes the unit tests fragile.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_improving_asttest">Improving @ASTTest</h3>
+<div class="paragraph">
+<p>For that reason, I wrote an utility class which will allow you to perform &#8220;smart&#8221; lookups in the AST tree. This helper class is not available in Groovy 2.0.0 but it is easy to add and I will probably introduce it in the next release(<em>edit:</em> see <a href="https://jira.codehaus.org/browse/GROOVY-5597">GROOVY-5597</a>): it is called <em>LabelFinder</em>. The idea is that even if you cannot annotate everything in the code, it’s still very easy to add <em>labels</em> to your code. Then, Groovy may be able to search for a particular label and return to you the list of AST nodes which are defined on such a label:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>void foo() {
+    def x = 1
+    x++
+    forLoop:
+    for (int i=0; i
+Here, we added a forLoop label in the code, and we will use it as a lookup point for @ASTTest:
+
+@ASTTest(phase=SEMANTIC_ANALYSIS, value= {
+     lookup(node, 'forLoop').each {
+        assert it instanceof ForStatement
+     }
+})
+void foo() {
+    def x = 1
+    x++
+    forLoop:
+    for (int i=0; i
+The major advantage of this technique is that you don't suffer the structural code syndrom anymore: the test is not fragile with regards to AST changes anymore. If you introduce
+statements before the forLoop label, this won't change the result of the call to lookup. If you don't use such an utility, you would have to change, for example, the index
+of a statement in a block...
+In this example, I made use of a static import to reduce the verbosity of the test code. You may be interested in seeing the actual code of LabelFinder. It's actually quite simple:
+
+public class LabelFinder extends ClassCodeVisitorSupport {
+
+
+    public static List lookup(MethodNode node, String label) {
+        LabelFinder finder = new LabelFinder(label, null)
+        node.code.visit(finder)
+
+        finder.targets
+    }
+
+    public static List lookup(ClassNode node, String label) {
+        LabelFinder finder = new LabelFinder(label, null)
+        node.methods*.code*.visit(finder)
+        node.declaredConstructors*.code*.visit(finder)
+
+        finder.targets
+    }
+
+    private final String label
+    private final SourceUnit unit
+
+    private List targets = new LinkedList();
+
+    LabelFinder(final String label, final SourceUnit unit) {
+        this.label = label
+        this.unit = unit;
+    }
+
+    @Override
+    protected SourceUnit getSourceUnit() {
+        unit
+    }
+
+    @Override
+    protected void visitStatement(final Statement statement) {
+        super.visitStatement(statement)
+        if (statement.statementLabel==label) targets &lt;&lt; statement
+    }
+
+    List getTargets() {
+        return Collections.unmodifiableList(targets)
+    }
+}
+</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_enjoy">Enjoy!</h3>
+<div class="paragraph">
+<p>I hope you liked this little introduction to a simple yet powerful tool introduced in Groovy 2. In sincerely hope this will make the life of AST transformations developpers easier!</p>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

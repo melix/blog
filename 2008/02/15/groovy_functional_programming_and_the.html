@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy, functional programming and the curry method</h1>
+	</div>
+
+	<p><em>15 février 2008</em></p>
+	<p><em>Tags: </em>curry </em> functional </em> groovy </em> programming </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’m sure you have heard of functional programming, at least when you were sill a student (if you are, then you’re probably digging into it). The <a href="http://groovy.codehaus.org">Groovy language</a>, built on top of Java, provides means of dealing with functional programming. Moreover, it offers a <em>curry</em> method which allows powerful recursion mechanisms.</p>
+</div>
+<div class="paragraph">
+<p>For example, in maths, you’ll want to define the sum function of a list as the sum of the first element and the (recursive) sum of the rest of the list. Going further, you’ll want to define a meta function which defines the behaviour of the sum method :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>f(x1, x2, ...) = f(x1, f(x2, ...))</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That’s currying. Here’s a basic example which demonstrates this feature in Groovy. First, let’s define a reduce closure which takes as the first argument the function to be applied on the list of arguments :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def reduce
+reduce = { fn, params -&gt;
+    if (params.size()==1) return params[0]
+ fn(params[0], reduce(fn,params[1..
+
+Note that for the reduce function to be known inside the closure, you have to define it before (click here for details).
+
+Then we may define the sum() function as this :
+
+def sum = reduce.curry({ x,y -&gt; x+y })
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The sum method is a closure passed as a parameter to the curry method. Technically, it is equivalent to write a function where you replace the first parameter of the reduce closure with the sum closure. Now let’s see the result :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>println sum((1..10))
+
+--&gt; 55
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>More interesting, as the parameter types are not specified, you may also use our sum function as a string or list concatenation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>println sum(("a".."z"))
+
+--&gt; abcdefghijklmnopqrstuvwxyz
+
+println sum([(1..10),(11..20)])
+
+--&gt; [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I <strong>love</strong> Groovy ;)</p>
+</div>
+<div class="paragraph">
+<p>Addendum: You should also use this with caution, as it costs much in invocation time, and you should not use it for so simple functions (summing is a very bad example as the cost in time of the sum operation is much less that the method invocation cost). Furthermore, don’t forget that it is <strong>recursions</strong>, so too many parameters will drive you too a stack overflow error ;-)</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

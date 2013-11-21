@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Static type checking talk from Paris Groovy/Grails User Group</h1>
+	</div>
+
+	<p><em>22 janvier 2012</em></p>
+	<p><em>Tags: </em>checking </em> groovy </em> programming </em> static </em> type </p>
+
+	<p><div class="sect1">
+<h2 id="_static_type_checking_and_compilation_in_groovy_2_0">Static type checking and compilation in Groovy 2.0</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This week, I had an interesting 2 days work session at Paris (La Defense) with Guillaume Laforge, Jochen Theodorou and Rémi Forax as a guest star. On Thursday night, I talked about my work on <em>static type checking</em> and experimental <em>static compilation</em> at the <a href="http://www.meetup.com/Paris-Groovy-Grails/events/45108892/">Paris Groovy and Grails User Group</a>. Here are the slides:</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_some_comments">Some comments</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, a large part of the session was spent in explaining what static type checking implies in terms of semantics for a language like Groovy. I tried to explain that <em>by definition</em>, type checking a dynamic language is impossible, so you have to make decisions and drop support for dynamic features in that case. However, this is in most situations not a problem for people looking for static type checking, because what they need is to guarantee the behaviour of a program at runtime <strong>and</strong> compile time.</p>
+</div>
+<div class="paragraph">
+<p>The last part of the talk was spent in explaining the most important difference in behaviour between dynamic method dispatch and static method dispatch. This was necessary to introduce the experimental static compiler which should make its way in the next beta of Groovy 2.0. I tried to explain the three different options we have regarding static compilation and method dispatch:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java-like method dispatch, which has the main interest of being known of most people (at least, people who faced the problem once). This solution however has major drawbacks. In particular, it removes most of the interest of the flow typing mode, and requires extra verbosity which is the opposite of the Groovy philosophy.</p>
+</li>
+<li>
+<p>Dynamic-Groovy like method dispatch. Typically, this is wanted to avoid a &#8220;third language&#8221; (not Java, nor Groovy), and this is were you want a statically compiled Groovy program to behave at runtime like dynamic Groovy does. While this sounds interesting, it also has major problems. The first one is performance, which would be awful because we would have to introduce tons of &#8220;instanceof&#8221; checks at compile time to correctly dispatch methods. More complicated, this &#8220;instanceof cascade&#8221; would generate unreadable bytecode (think of parameter combinations) which would also be a major performance issue for CPUs (which, as Rémi said during the session, really do not like branching). Even worse, this wouldn’t work anymore if you subclass the statically compiled class because the new overloaded methods wouldn’t be known from the compiler. This is why I consider this solution the worse of all, though I understand people who want it. Last but not least, Groovy 2.0 will introduce <strong>InvokeDynamic</strong> support which should greatly improve performance of dynamic Groovy without loosing its semantics.</p>
+</li>
+<li>
+<p>The third solution I presented is the one currently implemented in the experimental compiler: inference based method dispatch. This definitely creates a third language in terms of dispatch semantics, but as the developer explicitly adds an annotation, he should be aware of the differences (which only occur when you have overloaded methods). Inference based dispatch also has the advantage of being &#8220;flow typing&#8221; compatible, and removes a lot of verbosity. It has my preference, which explains why this is what is implemented right now.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Our guest star Rémi Forax also suggested an alternative solution, which would in theory maintain the semantics of dynamic Groovy, though we are in a statically compiled world. The idea is that when the compiler detects an overloaded method, it should generate the appropriate instanceof checks and seal the class (to avoid it to be subclassed). But as we discussed that solution the next day, we found some cases where even in that situation, we wouldn’t be able to guarantee dynamic Groovy like behaviour without adding explicit guards on every static method call (in particular, changing the metaclass or detection of category usage). This would also lead in a major performance penalty (Rémi couldn’t avoid telling us that all answers to our problem are in InvokeDynamic, but still, we want to offer something for pre-Java 7 people).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_future">The future</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I ended the talk with a small view of what’s still to be done. There are still bugs in the static type checker (especially in loops where an overloaded method result is assigned to one of its parameters) and probably a lot more in the compiler. Eventually, I insisted on the fact that every point of both static type checking and static compilation <strong>are to be discussed with the community</strong>. While static type checking will most probably be part of Groovy 2.0, it’s still unsure about static compilation, and that’s why we would like you to answer the surveys that are in the presentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_toward_a_new_mop">Toward a new MOP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As this session was a gift for static types lovers, we also wanted to offer something for our dynamic language users. This came with a long discussion about a new MOP (also known as MOP 2.0). The result of the discussion will be published by Guillaume Laforge as a new GEP (Groovy Enhancement Proposal). Once again, community will be involved.</p>
+</div>
+<div class="paragraph">
+<p>Thanks a lot!</p>
+</div>
+<div class="paragraph">
+<p><em>French speaking users might also be interested in my talk at the <a href="http://www.nantesjug.org/">Nantes JUG</a> which introduced <a href="http://portal.sliderocket.com/vmware/Introduction-aux-DSLs-en-Groovy">DSLs in Groovy</a>.</em></p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

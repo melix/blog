@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>FreeMarker for Groovy</h1>
+	</div>
+
+	<p><em>03 août 2007</em></p>
+	<p><em>Tags: </em>freemarker </em> groovy </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>After finding out that <a href="http://www.jroller.com/melix/entry/replacing_velocity_with_groovy_jsmarty">Groovy templates would be great as a replacement for Velocity</a>, then thinking about <a href="http://www.jroller.com/melix/entry/grails_spring_and_templates_security">security issues</a>, I came to a third solution.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_freemarker_for_groovy">FreeMarker for Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add &#8220;tags&#8221; or &#8220;plugins&#8221; to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a <a href="http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html">transform</a> for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Beeing able to dynamically add plugins for a customer</p>
+</li>
+<li>
+<p>fix does nasty security issues by making the web designer unable to directly write Groovy code (the programmer creates plugins, then makes them available to a customer)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_does_it_work">How does it work ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Imagine your customer requires an URL Encoding text transform, and that FreeMarker does not offer this possibility. Then, you would just need to :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a plugin named <em>urlencoder</em> that implements the <em>IGroovyFreeMarkerPlugin</em> interface</p>
+</li>
+<li>
+<p>Copy this plugin into the Groovy FreeMarker template engine plugins directory</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Tell your customer how to use it :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The FreeMarker engine will then call your plugin and return the transform. Note that you may embed FreeMarker tags and variables : the transform content does not need to be plain text. For example :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now take a look a the plugin code itself:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import groovy.text.freemarker.IGroovyFreeMarkerPlugin
+
+class urlencoder implements IGroovyFreeMarkerPlugin {
+ String transform(Map params, String content) {
+  URLEncoder.encode(content);
+ }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here’s a sample groovy script that will show you how you can use the template engine :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import groovy.text.freemarker.FreeMarkerTemplateEngine
+
+def tpl = '''
+Hello, ${user.name}
+&lt;@groovy plugin="urlencoder" mode=user&gt;this is a test ${user.name}'''
+def engine = new FreeMarkerTemplateEngine("plugins")
+def binding = ["user" : ["name":"cedric"]]
+println engine.createTemplate(tpl).make(binding)
+</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_default_implementation_bonuses">Default implementation bonuses</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’ve built a rather simple implementation, but it still has some additional features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Template caching: instead of using the <em>createTemplate()</em> method, use the <em>createNamedTemplate()</em> one first. It will create a template and put it into the template cache, then use the <em>getNamedTemplate()</em> method to retrieve a cached template.</p>
+</li>
+<li>
+<p>Plugin loader: there’s a default implementation which reads plugins from a directory. Feel free to implement the <em>IGroovyFreeMarkerPluginLoader</em> if you want more complex loaders</p>
+</li>
+<li>
+<p>Plugin parameters: if the &lt;@groovy&gt; tag content is not sufficient, you may add parameters to the transform, and use them in the plugin thanks to the params map. For example : &lt;@groovy plugin=&#8220;temperatureconvertor&#8221; source=&#8220;celcius&#8221; dest=&#8220;kelvin&#8221;&gt;112</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_grabbing_the_code">Grabbing the code</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Binary: <a href="http://cedric.champeau.free.fr/freemarker/gfreemarker-0.1.0.jar">gfreemarker-0.1.0.jar</a></p>
+</li>
+<li>
+<p>Javadoc: <a href="http://cedric.champeau.free.fr/freemarker/gfreemarker-javadoc.zip">gfreemarker-javadoc.zip</a></p>
+</li>
+<li>
+<p>Sources (with IntelliJ IDEA project): <a href="http://cedric.champeau.free.fr/freemarker/GroovyFreeMarker.tar.gz">GroovyFreeMarker.tar.gz</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You will also need the latest <a href="http://cedric.champeau.free.fr/freemarker/freemarker.jar">freemarker.jar</a>. I will not have much time to work on this, so feel free to contribute !</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Apache CXF + Maven + Javamail + Log4J (update)</h1>
+	</div>
+
+	<p><em>14 février 2008</em></p>
+	<p><em>Tags: </em>apache </em> commons </em> cxf </em> email </em> javamail </em> maven </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I had much trouble trying to figure out why a project we moved to Apache CXF (for managing web services) suddenly started to send malformed emails. Basically, we use Commons email for sending emails to the administrator whenever a monitored service goes wrong.</p>
+</div>
+<div class="paragraph">
+<p>Everything went good until we moved our web service layer to the powerful <a href="http://incubator.apache.org/cxf">Apache CXF</a>. Instead of sending a well formed e-mail, the server suddenly started sending emails without subject nor correct sender. As we use Maven for building our project, and CXF makes use of Apache Geronimo Javamail/activation implementations, I immediatly suspected a buggy implementation of javamail.</p>
+</div>
+<div class="paragraph">
+<p>Instead of sending, in the <em>DATA</em> section of the email the following :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>DATA
+From: "I am the sender"
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Geronimo javamail implementation only sends what was actually set as the mail content :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>DATA
+the content of my mail
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I don’t know if it is a feature or a bug, but it really sucks (update : it’s neither feature nor bug, it’s a classpath messup, see the latest paragraph). To get rid of this mess, we had to exclude the geronimo dependencies from both <em>cxf-rt-core</em> and <em>cxf-rt-databinding-jaxb</em> modules. And, if like us you have a dependency on another module using CXF too, don’t forget to exclude from the parent module too.</p>
+</div>
+<div class="paragraph">
+<p>Basically, you shoud write something like this in your <em>pom.xml</em> file :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>
+   org.apache.cxf
+   cxf-rt-core
+   ${cxf.version}
+
+
+     org.apache.geronimo.specs
+     geronimo-javamail_1.4_spec
+
+
+     org.apache.geronimo.specs
+     geronimo-activation_1.1_spec
+
+
+
+
+   org.apache.cxf
+   cxf-rt-frontend-jaxws
+   ${cxf.version}
+
+
+   org.apache.cxf
+   cxf-rt-databinding-jaxb
+   ${cxf.version}
+
+
+     org.apache.geronimo.specs
+     geronimo-javamail_1.4_spec
+
+
+     org.apache.geronimo.specs
+     geronimo-activation_1.1_spec
+
+
+
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then, add the Sun javamail/activation implementations instead :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>
+   javax.mail
+   mail
+   1.4
+
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To the CXF team : <strong>please make those dependencies optional</strong>.</p>
+</div>
+<div class="paragraph">
+<p>To the Maven team : <strong>please add the global exclude feature so that we won’t have to specify excludes on each dependency !</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>Update:</strong> After filing a bug report on Geronimo, I’ve made further investigations. The problem is more complex than I first thought : if there were only the Geronimo dependencies, I would not have had the same error. Instead, I would have got a message telling me that it could not find the &#8220;SMTP transport&#8221;. I figured out that the problem was our log4j dependency, which depends on javax.mail. The Geronimo Spec mail API does not implement the SMTP transport : it is implemented in a separated artifact. So the SMTP transport that was used in my case what the one in the Javamail transitive dependency from log4j. The problem that seems to arise is that Geronimo is not compatible with the transport layer from Javamail : if you just order the classpath differently, all goes fine. It all depends on the library which is first loaded…</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

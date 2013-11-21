@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>deck2pdf: Exporting HTML5 slide decks to PDF</h1>
+	</div>
+
+	<p><em>30 juillet 2013</em></p>
+	<p><em>Tags: </em>deckjs </em> dzslides </em> html5 </em> impressjs </em> javascript </em> pdf </em> revealjs </em> slideshow </p>
+
+	<p><div class="sect1">
+<h2 id="_exporting_your_awesome_html5_presentation_to_pdf">Exporting your awesome HTML5 presentation to PDF</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For some time now, I’ve started using <a href="http://imakewebthings.com/deck.js/">deck.js</a> to write my talks. One of the reasons I do this is that it saves me <strong>lots</strong> of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).</p>
+</div>
+<div class="paragraph">
+<p>The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, <a href="https://speakerdeck.com/">SpeakerDeck</a>, <a href="http://www.slideshare.net/">SlideShare</a> or <a href="http://www.parleys.com/">Parleys</a> all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deck2pdf">Deck2pdf</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? <a href="https://github.com/melix/deck2pdf">deck2pdf was born!</a>. I started with something that was able to export my <a href="http://imakewebthings.com/deck.js/">deck.js</a> presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> supports:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://imakewebthings.com/deck.js/">deck.js</a></p>
+</li>
+<li>
+<p><a href="http://lab.hakim.se/reveal-js">reveal.js</a></p>
+</li>
+<li>
+<p><a href="http://bartaz.github.io/impress.js">impress.js</a></p>
+</li>
+<li>
+<p>and <a href="https://github.com/paulrouget/dzslides">DZSlides</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the <a href="http://imakewebthings.com/deck.js/">deck.js</a> profile is written:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>totalSlides=$.deck('getSlides').length
+nextSlide=$.deck('next')
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in <a href="http://bartaz.github.io/impress.js">impress.js</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>setup = {
+    js 'var api = impress();'
+    js '''var $$ = function ( selector, context ) {
+        context = context || document;
+        return context.querySelectorAll(selector);
+    };'''
+    js '''var byId = function ( id ) {
+        return document.getElementById(id);
+    };'''
+}
+
+nextSlide = {
+    js('api.next()')
+}
+
+totalSlides = {
+    js (/$$(".step", byId('impress')).length/)
+}
+
+// longer pause because of transitions
+pause = 2000
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Of course, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> is open source and licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">APL2</a>. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

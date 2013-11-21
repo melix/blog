@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Alternative to delegate pattern with cglib</h1>
+	</div>
+
+	<p><em>09 février 2008</em></p>
+	<p><em>Tags: </em>cglib </em> delegate </em> design </em> java </em> pattern </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This week I had some third party class I needed to override, but as in many cases, I had to use the delegate design pattern in order to be able to expand the class without modifying the 3rd party library.<br>
+ <br>
+ However, I came to a problem when the base class used the visitor pattern. The following snippet explains it all:<br></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class MyBaseClass implements AnInterface {
+
+...
+
+public void accept(Visitor visitor) {
+   visitor.visit(this);
+}
+
+...
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The problem is that if you delegate the doSomething() method, the object which will be passed to the visitor will be the delegate, not your implementation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class DelegatingClass implements AnInterface,AnotherInterface {
+...
+public void visit(Visitor visitor) {
+   delegate.visit(visitor); // ok, assume you can't do visitor.visit(this), that would be too easy. Imagine the delegate does more stuff or imagine another method like doSomething() { something.call(this); }
+}
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This leads to situations where the visited object is not the one you’d like to, and it breaks your algorithms where you assume the visited object is your implementation (which adds several features). Futhermore, there are situations when you can’t even delegate. For examples, when extending a class with final methods, or when you try to expand a class which is package protected (there are tons of examples like this in Apache Lucene). I’ve come to a solution using the <em>cglib</em> library. The idea is to create a proxy and dynamically extend the base class with your features. I’ve written a simple utility class which does it all :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>package com.lingway.cglib;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
+
+/**
+ * This utility class generates cglib proxies which delegates missing methods to instanciated
+ * objects.
+ * User: Cedric
+ * Date: 9 févr. 2008
+ * Time: 08:35:20
+ */
+public class AdvancedEnhancer {
+    /**
+     * Creates a new instance of a delegating object.
+     * @param aSuperClass super class of the generated object.
+     * @param someInterfaces interfaces generated object will implement.
+     * @param delegates delegates which implements the "missing" methods.
+     * @return Object&lt;/&gt; delegating object
+     */
+    public static Object enhanceWithInterfaces(
+            Class aSuperClass,
+            Class[] someInterfaces,
+            Object[] delegates) {
+
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(aSuperClass);
+        enhancer.setInterfaces(someInterfaces);
+        enhancer.setCallback(new InterfaceMethodInterceptor(delegates));
+        return enhancer.create();
+    }
+
+    /**
+     * A convenient creator which assumes a single interface to be implemented
+     * by a list of delegates. This allows removing explicit class casting.
+     * @param aSuperClass super class of the generated object.
+     * @param aTargetInterface target interface
+     * @param delegates delegates which implements the "missing" methods.
+     * @return T&lt;/&gt; delegating object implementing the T interface
+     */
+    @SuppressWarnings("unchecked")
+    public static
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And here’s an example of how it works. Pretty easy !</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>package com.lingway.cglib;
+
+/**
+ * A proof of concept of the "cglib delegate pattern"
+ * User: Cedric
+ * Date: 9 févr. 2008
+ * Time: 14:06:56
+ */
+public class ProofOfConcept {
+    public interface ISelf {
+        ISelf self(); // basically, returns "this", which is just for the POC :)
+    }
+
+    public interface IEcho {
+        void echo();
+    }
+
+    public interface IMixin extends ISelf,IEcho {}
+
+    public static class Self implements ISelf {
+        public ISelf self() {
+            return this;
+        }
+    }
+
+    public static class Echo implements IEcho {
+        public void echo() {
+            System.out.println("echo !");
+        }
+    }
+
+    public static void main(String[] args) {
+        IEcho echo = new Echo(); // these are the "additional features"
+        IMixin mixin = AdvancedEnhancer.enhanceWithTargetInterface(Self.class, IMixin.class, echo);
+        System.out.println("mixin.self (shows this is the proxy) = " + mixin.self());
+        mixin.echo();
+    }
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the previous example, I &#8220;enhance&#8221; the Self class with the features of the Echo class. This is really easy, and perfectly solves our problem. Note that technically, the delegate and the delegator are switched.<br>
+ <br>
+ Enjoy !</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

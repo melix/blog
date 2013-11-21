@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>NLP in Java : A language detector</h1>
+	</div>
+
+	<p><em>21 septembre 2008</em></p>
+	<p><em>Tags: </em>detection </em> java </em> jlangdetect </em> language </em> nlp </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>Check out the <a href="http://www.jroller.com/melix/entry/jlangdetect_0_3_released_with">latest version of the project</a></em></p>
+</div>
+<div class="paragraph">
+<p>Hi,</p>
+</div>
+<div class="paragraph">
+<p>Today I’m introducing a simple yet already working full Java language identifier. In natural language processing, there are tons of cases where you need to identify the language of a document first. While you’ll find most implementations in Perl, Java seems to be lacking in this domain.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jlangdetect_a_java_language_detector">JLangDetect : a Java language detector</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_introduction">Introduction</h3>
+<div class="paragraph">
+<p>JLangDetect is a pure Java implementation of a language detector. It provides a toolkit for training language recognition, and a simple implementation of a detector.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_to_use_it">How to use it</h3>
+<div class="paragraph">
+<p>To identify the language of a text, just pass in a string to the sensor. It will respond a language code :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>String lang = detector.detectLang(text, false);
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A detector is created this way :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>LangDetector detector = new LangDetector();
+detector.register("fr", frenchTree);
+detector.register("en", englishTree);
+</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_it_works">How it works ?</h3>
+<div class="paragraph">
+<p>JLangDetect is based on n-gram tokenization. Basically, texts are tokenized with different token sizes. For example, given the text &#8220;cat&#8221;, n-gram tokenization for 1 to 3 token sizes will produce the following tokens :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>c</p>
+</li>
+<li>
+<p>a</p>
+</li>
+<li>
+<p>t</p>
+</li>
+<li>
+<p>ca</p>
+</li>
+<li>
+<p>at</p>
+</li>
+<li>
+<p>cat</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The idea is to tokenize a large set of documents in a given language and record token statistics. When you need to identify a language, then you’ll tokenize it the same way, and you’ll be able to score the input string against several token stats.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_gram_tree">A gram-tree</h3>
+<div class="paragraph">
+<p>For now, JLangDetect stores token statistics in a memory-based structure called a <em>gram tree</em>. A gram tree will record the number of times a given n-gram is found in the document library (called <em>corpus</em>).</p>
+</div>
+<div class="paragraph">
+<p>There are ways to obtain a more compact representation, that will be likely found in future releases, but this one works like a charm. I’ve made it <em>Serializable</em> so that storing/reading from file system pre-compiled gram trees is easy.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing_jlangdetect">Testing JLangDetect</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_choosing_a_corpus">Choosing a corpus</h3>
+<div class="paragraph">
+<p>For my own tests, I’ve searched a corpus which would satisfy the best conditions for the JLangDetect algorithm. It includes :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the fact that the corpus size should be rather the same for every language</p>
+</li>
+<li>
+<p>if not, the characters used in the corpus should be rather different (for example, it’s easy to discriminate between french and russian, because they use different characters, however, if you want to differenciate french and english, you need more accurate n-gram statistics).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A &#8220;parallel corpus&#8221; is a good candidate for that : it’s a corpus for which the text is simply the same, translated in different languages. I’ve made my test using the <a href="http://www.statmt.org/europarl/">European Parliament Proceedings Parallel Corpus</a>. It covers the proceedings of the european parliament from 1996 to 2006, which is up to 40 million words per language.</p>
+</div>
+<div class="paragraph">
+<p>Translations exists for the following languages :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>danish (da)</p>
+</li>
+<li>
+<p>german (de)</p>
+</li>
+<li>
+<p>greek (el)</p>
+</li>
+<li>
+<p>english (en)</p>
+</li>
+<li>
+<p>spanish (es)</p>
+</li>
+<li>
+<p>finnish (fi)</p>
+</li>
+<li>
+<p>french (fr)</p>
+</li>
+<li>
+<p>italian (it)</p>
+</li>
+<li>
+<p>dutch (nl)</p>
+</li>
+<li>
+<p>portuguese (pt)</p>
+</li>
+<li>
+<p>swedish (sv)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You’ll find a precompiled version of this corpus at the bottom of this page, if you wish to use it with JLangDetect. On my computer with a quad-core processor (Q9450), it took less than 10 minutes to process the whole corpus, I’ve optimized the importer for multi-core systems.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accuracy">Accuracy</h3>
+<div class="paragraph">
+<p>JLangDetect, with the previous corpus, does really well with both short and long texts. However, it will do better with longer texts (if anyone can tell me in which language is written the word &#8220;chocolate&#8221;…).</p>
+</div>
+<div class="paragraph">
+<p>Here’s a simple output of JLangDetect. OK means language has been detected properly. Error means not.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>langof("un texte en français") = fr : OK
+langof("a text in english") = en : OK
+langof("un texto en español") = es : OK
+langof("un texte un peu plus long en français") = fr : OK
+langof("a text a little longer in english") = en : OK
+langof("a little longer text in english") = en : OK
+langof("un texto un poco mas longo en español") = es : OK
+langof("J'aime les bisounours !") = fr : OK
+langof("Bienvenue à Montmartre !") = fr : OK
+langof("Welcome to London !") = en : OK
+langof("un piccolo testo in italiano") = it : OK
+langof("een kleine Nederlandse tekst") = nl : OK
+langof("Matching sur des lexiques") = fr : OK
+langof("Matching on lexicons") = en : OK
+langof("Une première optimisation consiste à ne tester que les sous-chaînes de taille compatibles avec le lexique.") = fr : OK
+langof("A otimização é a primeira prova de que não sub-canais compatível com o tamanho do léxico.") = pt : OK
+langof("Ensimmäinen optimointi ei pidä testata, että osa-kanavien kanssa koko sanakirja.") = fi : OK
+langof("chocolate") = es : Error
+langof("some chocolate") = it : Error
+langof("eating some chocolate") = en : OK</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Update</strong> Chocolate is an error as I tagged it as english in my test case, but one could expect it to be spanish. It’s here to demonstrate the limits of the system for very short texts. As for &#8220;longo&#8221;, long time I’ve not written spanish. Bisounours is a french joke ;) Feel free to comment ;)</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_downloads">Downloads</h3>
+<div class="paragraph">
+<p>JLangDetect is licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0</a>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Binary : <a href="http://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1.jar">jlangdetect-0.1.jar</a></p>
+</li>
+<li>
+<p>Source: <a href="http://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1-sources.jar">jlangdetect-0.1-sources.jar</a></p>
+</li>
+<li>
+<p>Javadoc: <a href="http://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1-javadoc.jar">jlangdetect-0.1-javadoc.jar</a></p>
+</li>
+<li>
+<p>Europarl pre-compiled corpus: <a href="http://cedric.champeau.free.fr/jlangdetect/ngrams-europarl.zip">ngrams-europarl.zip</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

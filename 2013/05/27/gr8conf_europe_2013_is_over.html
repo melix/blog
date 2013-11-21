@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>GR8Conf Europe 2013 is over</h1>
+	</div>
+
+	<p><em>27 mai 2013</em></p>
+	<p><em>Tags: </em>gr8conf </em> groovy </em> programming </p>
+
+	<p><div class="sect1">
+<h2 id="_gr8conf_europe_2013">GR8Conf Europe 2013</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last week I spoke at <a href="http://gr8conf.eu/index">GR8Conf Europe</a> for the second time. As last year, the content of the conference was really amazing and highly technical. While the conference started with a University day on May, 22, we took advantage of the conference to organize a Groovy DevCon the day before. A Groovy DevCon is basically a physical meeting for the Groovy Core developers, where we share ideas and eventually make decisions with regards to the future of Groovy.</p>
+</div>
+<div class="paragraph">
+<p>This year, several well-known Groovy gurus participated in the meeting:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://twitter.com/glaforge">Guillaume Laforge</a>, the Groovy project lead</p>
+</li>
+<li>
+<p>http://[Jochen &#8220;Blackdrag&#8221; Theodorou], the Groovy technical lead</p>
+</li>
+<li>
+<p><a href="http://twitter.com/mittie">Dierk Koenig</a>, Groovy committer and main author of the famous Groovy in action book</p>
+</li>
+<li>
+<p><a href="http://twitter.com/aalmiray">Andrés Almiray</a>, the Griffon lead</p>
+</li>
+<li>
+<p><a href="http://twitter.com/CedricChampeau">myself</a>, Groovy Core committer</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>But we had a special guest, <a href="http://gr8conf.eu/Speakers/Juergen-Hoeller">M. Juergen Hoeller of Spring fame</a> himself!</p>
+</div>
+<div class="paragraph">
+<p>The meeting was really useful. On my side, I was particularily happy with the discussions regarding Groovy and Java 8, where we eventually took the (long awaited for me) decision to provide some automatic coercion of closures to interfaces. Basically, this means that you would no longer have to write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>    interface Callback {
+        void execute()
+    }
+    void onEvent(Callback c) { c.execute() }
+
+    onEvent({println 'hello'} as Callback)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But instead, you will be able to write directly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>    interface Callback {
+        void execute()
+    }
+    void onEvent(Callback c) { c.execute() }
+
+    onEvent {println 'hello'}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will lead to easier to read and maintain code. We discussed some limitations for the feature, but for a large number of cases, this would work directly. You can expect this feature to appear in Groovy 2.2.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ast_transformations_unleashed">AST transformations unleashed</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The University day was the occasion for me to give a workshop about AST transformations. For GR8Conf Europe, I had the chance to do it with <a href="http://twitter.com/aalmiray">Andrés Almiray</a>, the Griffon lead, but also one of the most talented programmer of the Java community. Andrés started with a small introduction about AST transformations, then I continued the workshop with <a href="https://github.com/melix/ast-workshop">a series of exercises</a> (that you can take for yourself). Unfortunately, two hours and a half didn’t give us enough time to complete all exercises but I was quite happy with the session. I really hope this gave ideas to some people in the room, and that it provided the necessary bits to get started. Note that if you missed it, I will give the same workshop at <a href="http://gr8conf.us/index">GR8Conf US in Minneapolis</a>, so register now!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_type_checking_your_dsls">Type checking your DSLs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I gave my second talk on Friday, last day of the conference. It was named <a href="http://gr8conf.us/Presentations/Type-checking-your-DSLs">Type checking your DSLs</a>. While I already gave this talk 3 times before (G&amp;G exchange, Greach and Devoxx France), I always like to change some contents to adapt to the audience and have some novelties inside. Unfortunately, for technical reasons, this talk went really bad for me. I assume people felt it, but I was quite disconcerted. The reason is that most of my talk relies on commenting code, but that I wasn’t able to show it properly! Even if the projectors were supposed to support full-HD through HDMI, for some obscure reason, my laptop wasn’t able to &#8220;discover&#8221; the HDMI output, and I was stuck to a 1024x768 VGA output. Worse than that, on screen, the borders were cut. This was the first time this ever happened to me, and to be honest, it completely troubled me. I wasn’t able to show code properly, so I wasn’t able to keep track of what I wanted to say. This was a horrible experience, but I hope people get the idea, as I only managed to give a rough idea of what I wanted to say :-( You know, that feeling when you try to explain something, and that people look at you as if you were an extraterrestrial…</p>
+</div>
+<div class="paragraph">
+<p>I will give the same talk at Minneapolis later this year, so I sincerely hope things will go better, especially because I really like this talk, which gives a lot of hints on the power of the language, combining several features available in Groovy 2.1. All the (uncut) slides are available <a href="https://github.com/melix/gr8confeu2013">on GitHub</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Going to GR8Conf for the second time was like last year an incredible experience. I had the chance to talk to lots of talented and famous developers of the Groovy community, as well as sharing with users, which is worth the trip. This gave me for example the occasion to talk to two GPars brains for the first time (Dierk Koenig and Vaclav Pech). I’d really like to thank Soren for organizing this, as well as the crew for all the goodness that we can see here. I’m really looking forward to go to the next edition!</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

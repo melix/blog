@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy @Bytecode AST transformation released</h1>
+	</div>
+
+	<p><em>16 janvier 2011</em></p>
+	<p><em>Tags: </em>asm </em> ast </em> bytecode </em> groovy </em> programming </em> transformation </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Following <a href="http://www.jroller.com/melix/entry/yes_fibonacci_in_groovy_can">my post about Fibonacci performance in Groovy</a>, Guillaume Laforge gently asked me to continue my work, so I’m releasing the first version of a Groovy AST transformation which allows you to write a method body directly as bytecode. There are several usages for this, but I think the most important is educational : it’s one of the simplest (if not the simplest) way of testing JVM bytecode.</p>
+</div>
+<div class="paragraph">
+<p>Here’s an example of what you may write :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>@groovyx.ast.bytecode.Bytecode
+int fib(int i) {
+    iload 1
+    iconst_2
+    if_icmpge l1
+    iload 1
+    _goto l2
+   l1
+    aload 0
+    iload 1
+    iconst_2
+    isub
+    invokevirtual '.fib', '(I)I'
+    aload 0
+    iload 1
+    iconst_1
+    isub
+    invokevirtual '.fib' ,'(I)I'
+    iadd
+   l2
+    ireturn
+}
+println fib(40)
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The documentation about how to write bytecode and the supported features are on the <a href="https://github.com/melix/groovy-bytecode-ast/wiki">project homepage at GitHub</a>. The source code is licensed under the Apache License version 2. If you find any bug or have feature requests, please fill in the <a href="https://github.com/melix/groovy-bytecode-ast/issues">bug tracker</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_downloads_and_sources">Downloads and sources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You must use the groovy-all version of Groovy for this AST transform to work. Then, download the following jar :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/downloads/melix/groovy-bytecode-ast/groovy-bytecode-ast-0.1.0.jar">groovy-bytecode-ast-0.1.0.jar</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Sources are built with <a href="http://gradle.org/">Gradle</a> and tests made with <a href="http://code.google.com/p/spock/">the Spock framework</a>. Unit tests are also a great source of documentation, do hot hesitate to check them out.</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

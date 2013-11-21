@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy Xmas gift : converting a number to its french writing</h1>
+	</div>
+
+	<p><em>23 décembre 2010</em></p>
+	<p><em>Tags: </em>french </em> fun </em> groovy </em> numbers </em> programming </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you ever studied French, you must have struggled with its writing of numbers. There are various exceptions which even for natives are not easy to deal with. Fortunately, here’s a Groovy script that will help you. Okay, I did this because I remembered about a similar exercise I had several years ago in Caml I solved using pattern matching. I was thinking about a solution in Groovy. Here’s the result :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>/**
+ * Convertit un nombre en lettres.
+ * Les règles d'écriture sont celles décrites sur http://www.miakinen.net/vrac/nombres
+ *
+ * @author Cédric Champeau (http://twitter.com/CedricChampeau)
+ *
+ */
+def digits = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf']
+def specials = ['dix','onze','douze','treize', 'quatorze', 'quinze','seize']
+def tens=[20:'vingt',30:'trente',40:'quarante',50:'cinquante',60:'soixante',80:'quatre-vingt',81:'quatre-vingt-un']
+def asLetters
+asLetters = { number -&gt;
+   number&lt;0?"moins ${asLetters(-number)}":
+   number&lt;10?digits[number]:
+   number&lt;17?specials[number-10]:
+   number&lt;20?"dix-${asLetters(number-10)}":
+   number==80?'quatre-vingts':
+   number&lt;100?tens[number]?:(
+       number&gt;69 &amp;&amp; number&lt;80?"soixante${number==71?' et ':'-'}${asLetters(number-60)}":
+       number&gt;89?"quatre-vingt-${asLetters(number-80)}":
+       (number%10==1)?"${asLetters(number-1)}${number&lt;70?' et un':asLetters(number-70)}":"${(number-number%10)==80?'quatre-vingt':asLetters(number-number%10)}-${asLetters(number%10)}"):
+   number==100?'cent':
+   number&lt;1000?"${((int)(number/100))&gt;1?(asLetters((int)number/100)+' '):''}cent${number%100==0?'s':' '+asLetters(number%100)}":
+   number==1000?'mille':
+   number&lt;1000000 &amp;&amp; ((number/1000)&gt;1 &amp;&amp; ((int)number/1000)%100==0)?"${asLetters((int)number/100000)} cent mille${number%1000==0?'':' '+asLetters(number%1000)}":
+   number&lt;1000000?"${((int)(number/1000))&gt;1?(asLetters((int)number/1000)+' '):''}mille${number%1000==0?'':' '+asLetters(number%1000)}":
+   number&lt;1000000000?"${number/1000000 as int==80?('quatre-vingt'+(number%1000000&gt;0?'':'s')):asLetters((int)(number/1000000))} million${((int)(number/1000000))&gt;1?'s':''}${number%1000000&gt;0?' '+asLetters((int)number%1000000):''}":
+   "${number/1000000000 as int==80?('quatre-vingt'+(number%1000000000&gt;0?'':'s')):asLetters((int)(number/1000000000))} milliard${((int)(number/1000000000))&gt;1?'s':''}${number%1000000000&gt;0?' '+asLetters((int)number%1000000000):''}"
+}
+(1..100).each { println "$it : ${asLetters(it)}" }
+[200,210,300,1100,1200,1999,1342,
+1001,1011,2000,2011,-2100,2101,2222,2999,12000,12101,54122,
+80000,122000,999999,154322,1154322,13154399,177412666451
+,100000000,10000000001,200001,80000000,80000001,80000000000,80000000001,300000,
+82015, 200000,200000000].each { println "$it : ${asLetters(it)}"}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>Edit: Fixed &#8220;80&#8221; written &#8220;quatre-vingt&#8221;. Sorry about the inline indenter, but copy/paste it and you’ll have a better rendering or <a href="http://groovyconsole.appspot.com/script/362001">check this</a></em></p>
+</div>
+<div class="paragraph">
+<p>The next step would be to make it even more groovy. But it showed me Groovy misses some interesting features of Caml : pattern matching is interesting as it deals with multiple left hand side patterns, where closures only allow one signature with a single parameter. Here, I used indenting and over-used the ternary operator to emulate this behaviour.</p>
+</div>
+<div class="paragraph">
+<p>Imagine you could write something like this :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def asLetters = { (..&lt;0) -&gt; "moins ${asLetters(-it}"
+ | (0..10) -&gt; digits[it]
+ | it&lt;17 -&gt; specials[number-10]
+ | ...
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What do you think ? Would it be more readable ?</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>The strange Hibernate version numbers</h1>
+	</div>
+
+	<p><em>21 août 2008</em></p>
+	<p><em>Tags: </em>hibernate </em> opensource </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I am fascinated with Hibernate version numbers. Have you noticed how uncommon they are ? In the open source community, almost every project follows the same rules :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>project-MAJOR.minor.bugfix</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For example :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>commons-io-1.2.3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>spring-core-2.0.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If necessary, you may append release specific modifiers :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>alpha version : -alpha1, -alpha2, …</p>
+</li>
+<li>
+<p>beta version : -beta1, -beta2, …</p>
+</li>
+<li>
+<p>release candidate : -rc1, …</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Hibernate does not follow those conventions. You may find :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>hibernate-3.2.0.cr1 : why not hibernate-3.2.0-rc1 ?</p>
+</li>
+<li>
+<p>hibernate-3.3.0.ga : why not hibernate-3.3.0 ?</p>
+</li>
+<li>
+<p>hibernate-3.3.0.SP1 : why not hibernate-3.3.1 ?</p>
+</li>
+<li>
+<p>hibernate-search-3.1.0.Beta1 : why not hibernate-search-3.1.0-beta1 ?</p>
+</li>
+<li>
+<p>…</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you are used to Maven, then you must have been annoyed with it, as the <a href="http://repo1.maven.org/maven2/org/hibernate/hibernate/">resulting artifacts never follow the same conventions</a> (with or without dash, uppercase or not, …).</p>
+</div>
+<div class="paragraph">
+<p>Pretty frustrating. As a widely used library, I would expect Hibernate to follow the most common versioning schemes…</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

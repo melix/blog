@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Using Groovy to play with invokedynamic</h1>
+	</div>
+
+	<p><em>31 janvier 2013</em></p>
+	<p><em>Tags: </em>asm </em> bytecode </em> groovy </em> invokedynamic </p>
+
+	<p><div class="sect1">
+<h2 id="_invokedynamic_and_groovy_2">InvokeDynamic and Groovy 2</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>JVM language implementors, especially those working on dynamic languages like Groovy, welcome the arrival of invokedynamic in Java 7. InvokeDynamic is a new JVM instruction that was introduced to make our life easier. While this is only partially true, because we have to maintain backwards compatibility including older JVMs (Groovy still runs with JDK 1.5, for example), using invokedynamic to implement a dynamic language on the JVM is undoubtfully the way to go.</p>
+</div>
+<div class="paragraph">
+<p>Groovy 2.0 came with initial support for invokedynamic and the recently released Groovy 2.1.0 pushes support one step further by completing the implementation (in Groovy 2.1, if you compile code with invokedynamic support, the call site caching technique that regular Groovy uses to make dynamic calls faster is removed). What invokedynamic brings to Groovy 2.1 is basically improved performance. One has to know that talking about performance is always polemical and invokedynamic performance is even more difficult, because from one JVM version to another, you can have significantly different results. The JVM is still not perfectly optimized for invokedynamic. However, you may know that Java 8 will introduce lambdas to the language and the implementation of such a feature heavily relies on invokedynamic, so the JVM implementors are doomed to improve performance of invokedynamic!</p>
+</div>
+<div class="paragraph">
+<p>As a reminder, people wanting to test a Groovy runtime that uses invokedynamic have two things to do:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>use the <em>groovy-indy</em> jar which includes support for invokedynamic</p>
+</li>
+<li>
+<p>compile classes with the -indy flag</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you try to compile Groovy classes with -indy and the &#8220;normal&#8221; jar, you would have an error saying that indy is not supported, but if you compile a Groovy class using the indy jar <em>without</em> activating the -indy flag, then classes would be compiled with call site caching instead of invokedynamic. While this might be suprising, there are good reasons for that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>invokedynamic support classes are only available in JDK 1.7+. That alone wouldn’t be a big deal as we could have worked around using stubs</p>
+</li>
+<li>
+<p>the Groovy core classes are, sometimes, written in Groovy, so we use a &#8220;bootstrap&#8221; compiler to compile Groovy classes. In the -indy jar, core Groovy classes written in Groovy are compiled with invokedynamic, not call site caching. Therefore, we produce JDK 1.7+ bytecode only. Since Groovy is compatible with JDK 1.5, if we activated indy for all, you would have had incompatible classes for older JVMs.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In this blog post, however, I will <strong>not</strong> talk about how Groovy 2 uses invokedynamic, but rather how you can use Groovy to test invokedynamic by yourself and start playing with the API without too much hassle.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_groovy_as_a_sandbox_for_invokedynamic">Using Groovy as a sandbox for invokedynamic</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_the_bytecode_ast_transformation">The @Bytecode AST transformation</h3>
+<div class="paragraph">
+<p>Two years ago already, I released a new AST transformation for Groovy called the <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a>. Basically, the idea was that if you thought you were smarter than the compiler, you could write bytecode as a method body had have the compiler write it. Started as a joke, some people found a lot of interested in it (some others thought I opened the box of Pandora) but my idea has always been that it was an amazing tool for teaching.</p>
+</div>
+<div class="paragraph">
+<p>What I’m going to show you, here, is an extension of the <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a> that supports the invokedynamic instruction. The main reason to use this annotation is that there is <strong>no way of generating invokedynamic instructions</strong> using regular Java code. The only way to do this is to use a library like ASM. However, the ASM library is not easy to handle and it’s a pity that you have to spend time on bytecode generation tools just to be able to test invokedynamic. With the <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a>, you now have a way of testing bytecode that makes use of invokedynamic very easily.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setting_up">Setting up</h3>
+<div class="paragraph">
+<p>First of all, support for invokedynamic in <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode</a> is still experimental. You’ll have to build the jar by yourself, but don’t worry, it’s very easy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ git clone https://github.com/melix/groovy-bytecode-ast.git
+$ cd groovy-bytecode-ast
+$ ./gradlew jar
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you already have Gradle 1.4 installed, the build should only take a few seconds, otherwise Gradle will be downloaded for you.</p>
+</div>
+<div class="paragraph">
+<p>Now, we’re going to create a Groovy project with a simple script that we’re going to run with invokedynamic. Althought this is not mandatory, I strongly suggest you to use the Gradle wrapper (which avoids installing Gradle everywhere), so we’ll just take advantage of the fact that the bytecode transformation is built with the wrapper to create a new project without having to install Gradle 1.4!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ cd ..
+$ mkdir bytecodetest; cd bytecodetest
+$ cp -Rp ../groovy-bytecode-ast/gradle* .
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we’ve just copied the Gradle wrapper into a empty project, now we’re going to populate it. Open your favorite editor and paste the following code in a <em>build.gradle</em> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>apply plugin: 'groovy'
+apply plugin:'application'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.1.0:indy'
+    compile fileTree(dir: 'lib', include: '*.jar')
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+[compileGroovy.groovyOptions,compileTestGroovy.groovyOptions]*.with {
+    fork = true
+    useAnt = true
+    optimizationOptions = [ indy: true, 'int': false]
+    encoding = 'UTF-8'
+}
+
+mainClassName = 'Main'
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What does this build file do? Basically, we’re using the Groovy plugin to compile Groovy files, including the &#8220;indy&#8221; version of Groovy 2.1.0 (note the &#8216;indy&#8217; classifier in the dependency and the fact we’re using the -all version of Groovy as it’s the only one compatible with @Bytecode) and configuring compilation so that it makes use of invokedynamic. The &#8220;application&#8221; plugin will allow us to run our script directly from Gradle once it’s compiled. For that, we’re just using a &#8220;Main&#8221; class.</p>
+</div>
+<div class="paragraph">
+<p>Last step is to copy the @Bytecode jar into the &#8220;lib&#8221; directory of your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ mkdir -p src/main/groovy
+$ mkdir lib
+$ cp ../groovy-bytecode-ast/build/libs/*.jar lib
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we’re ready to create our first script! Create the src/main/groovy/Main.groovy file with the following content:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>println 'Hello, indy Groovy!'
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the build:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ gradlew run
+:compileJava UP-TO-DATE
+:compileGroovy
+:processResources UP-TO-DATE
+:classes
+:run
+Hello, indy Groovy!
+
+BUILD SUCCESSFUL
+
+Total time: 5.291 secs
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Congratulations! At this point, you have generated a Groovy script which does compile using the invokedynamic version of Groovy. You can verify that it’s the case dumping the generated bytecode:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ javap -v build/classes/main/Main.class
+public java.lang.Object run();
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=1, args_size=1
+         0: aload_0
+         1: ldc           #55                 // String Hello, indy Groovy!
+         3: invokedynamic #61,  0             // InvokeDynamic #1:invoke:(LMain;Ljava/lang/String;)Ljava/lang/Object;
+         8: areturn
+
+[...]
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Excellent! Now, I said that our focus wasn’t testing Groovy with invokedynamic, but rather the opposite: testing <em>invokedynamic using Groovy</em>. For this, what we would like to do is generating a method which introduces an invokedynamic call and wire the target method by ourselves. For example, take this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>int bar() { 666 }
+
+int foo() { bar() }
+
+10.times {
+   println foo()
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>the foo() just delegates to &#8220;bar&#8221;. Now, instead of letting Groovy generate the bytecode for us, we want to generate the invokedynamic instruction by ourselves, then write the bootstrap method that will hardwire the link between bar() and foo().</p>
+</div>
+<div class="paragraph">
+<p>First, we need a bootstrap method. The role of this method is, when an invokedynamic instruction is found, to setup the <em>callsite</em>, that is to say create a link between a method call in bytecode and an actual target method being executed. That is to say that with invokedynamic, the relation between a call site and the method that will effectively be called is done at <em>runtime</em>, not compile time.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
+    new ConstantCallSite(lookup.findVirtual(Main, 'bar', MethodType.methodType(int)))
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, we’re creating a <em>constant call site</em>, which means that once a target method is chosen, it will <strong>never</strong> change for this call site. We’re linking our call site to a virtual method on the Main class, called &#8216;bar&#8217; and returning an &#8216;int&#8217;.</p>
+</div>
+<div class="paragraph">
+<p>Now, instead of letting Groovy do the job, let’s generate the method body by ourselves, so replace the foo() method with the following code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>@Bytecode
+int foo() {
+    aload 0
+    invokedynamic 'experiment', '(LMain;)I', [H_INVOKESTATIC, 'Main', 'bootstrap', [CallSite, Lookup, String, MethodType]]
+    ireturn
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Uh! That’s bytecode! Yes, and actually, it also hides all the complexity of the ASM library thanks to a nice Groovy DSL. The first instruction, <em>aload 0</em> just loads the receiver on stack, that is to say <em>`&#8216;this&#8217;'</em>. The second instruction is our method call, the one we want to be linked to bar() and eventually, <em>ireturn</em> takes the result of the call and returns it as an int.</p>
+</div>
+<div class="paragraph">
+<p>Let’s explain a bit what are the arguments of the invokedynamic method call. The first one is a label. You can put whatever you want in this, as long as it helps you. It’s often interesting if you have to debug your code, but it can also contain information that you want to have at hand when you will select the target method. The second one is the signature of the method you will call. Here, we say it’s a method on Main that returns an int. The last argument is a method handle to the bootstrap method. We’re saying that it’s a static method (INVOKESTATIC) found on the &#8216;Main&#8217; class, named &#8216;bootstrap&#8217; and accepting the arguments of types [CallSite, Lookup, String, MethodType]. Invoke dynamic supports more arguments for the bootstrap method, but it’s not discussed here. Putting it altogether:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import groovyx.ast.bytecode.Bytecode
+import java.lang.invoke.*;
+import java.lang.invoke.MethodHandles.Lookup;
+import static groovyjarjarasm.asm.Opcodes.*
+import static java.lang.invoke.MethodHandles.*
+
+public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
+    new ConstantCallSite(lookup.findVirtual(Main, 'bar', MethodType.methodType(int)))
+}
+
+int bar() { 666 }
+
+@Bytecode
+int foo() {
+    aload 0
+    invokedynamic 'experiment', '(LMain;)I', [H_INVOKESTATIC, 'Main', 'bootstrap', [CallSite, Lookup, String, MethodType]]
+    ireturn
+}
+
+10.times {
+    println foo() // prints 666
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let’s run it!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ ./gradlew run
+:run
+666
+666
+666
+666
+666
+666
+666
+666
+666
+666
+
+BUILD SUCCESSFUL
+
+Total time: 5.762 secs
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And we did it! The link between the invokedynamic call site and our bar() method is dynamic, handled by our bootstrap method. To convince yourself, let’s just add a new method called baz():</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>int baz() { 123 }
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And now, replace, in the boostrap method, &#8216;bar&#8217; with &#8216;baz&#8217;. Run the build again, and see what happens:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>$ ./gradlew run
+:run
+123
+123
+123
+123
+123
+123
+123
+123
+123
+123
+
+BUILD SUCCESSFUL
+
+Total time: 5.693 secs
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Easy? Now you’re ready to play with the invokedynamic API. For example, our next challenge was to call bar() and baz() alternatively. For that, your friend is going to be the MutableCallSite class, instead of ConstantCallSite. The difference between the two is that a MutableCallSite allows the target method handle to be changed over time. Here’s our code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import groovy.transform.CompileStatic
+import groovyx.ast.bytecode.Bytecode
+import java.lang.invoke.*;
+import java.lang.invoke.MethodHandles.Lookup;
+import static groovyjarjarasm.asm.Opcodes.*
+import static java.lang.invoke.MethodHandles.*
+
+public static MethodHandle findMethod(Lookup lookup, String name) {
+    lookup.findVirtual(Main, name, MethodType.methodType(int))
+}
+
+public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
+    def (bar,baz) = ['bar','baz'].collect { findMethod(lookup, it) }
+    def callsite = new ConstantCallSite(
+            insertArguments(
+                    lookup.findVirtual(Main, 'selectAndCall',
+                            MethodType.methodType(Object, MutableCallSite, MethodHandle, MethodHandle))
+                    , 1, new MutableCallSite(type), bar, baz).asType(type)
+    )
+    callsite
+}
+
+@CompileStatic
+public def selectAndCall(MutableCallSite callSite, MethodHandle bar, MethodHandle baz) {
+    callSite.with {
+        target = (target.is(bar))?baz:bar;
+        dynamicInvoker().invokeWithArguments(this)
+    }
+}
+
+int bar() { 666 }
+int baz() { 123 }
+
+@Bytecode
+int foo() {
+    aload 0
+    invokedynamic 'experiment', '(LMain;)I', [H_INVOKESTATIC, 'Main', 'bootstrap', [CallSite, Lookup, String, MethodType]]
+    ireturn
+}
+
+10.times {
+    println foo() // prints 666 and 123 alternatively
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now run this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>./gradlew run
+:run
+666
+123
+666
+123
+666
+123
+666
+123
+666
+123
+
+BUILD SUCCESSFUL
+
+Total time: 6.002 secs
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let’s explain a bit what we did… Calling a different method each time requires us to change the target handle. However, the bootstrap method is only called <strong>once</strong>. The trick, here, is to create a handle to a new method, here <em>selectAndCall</em>, that takes our <em>MutableCallSite</em> as an argument. Then, we create a <em>ConstantCallSite</em> for which the target method is this method with the first argument <em>bound</em> to our mutable call site. This means that instead of calling bar() or baz() directly, we’ll be calling selectAndCall which will change the target method <em>then</em> call the bar() or baz() method.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this post, we’ve explained to you how you can leverage Groovy to test the invokedynamic API by yourself. I spent several months working on static type checking and static compilation for Groovy, without finding too much time to work with invoke dynamic. The next major version of Groovy should come with a new MOP (meta-object protocol) that heavily relies on the invokedynamic API, so this &#8220;tool&#8221; is also a good way for me to learn the API and play with it very easily. I hope this will be useful for you too!</p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

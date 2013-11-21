@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JBake Bootstrap Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/asciidoctor.css" rel="stylesheet">
+    <link href="/css/base.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">                
+                <li><a href="/about.html">About</a></li>
+                <li><a href="feed.xml">Feed</a></li>                
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Experience feedback on Groovy</h1>
+	</div>
+
+	<p><em>27 juillet 2010</em></p>
+	<p><em>Tags: </em>grails </em> groovy </em> intellij </em> java </em> scala </p>
+
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>(lecteurs francophones, vous pouvez consulter la <a href="http://www.jroller.com/melix/entry/retour_d_exp%C3%A9rience_groovy">version française ici</a>)</em></p>
+</div>
+<div class="paragraph">
+<p>On the occasion of the 3rd anniversary of this blog, I wanted to write a special post. It appears that it will be special in two ways. First, it’s the first one to be published in both French and English. Second, this article is about a language which slowly took a large place in my everyday work for the last years, I mean Groovy. I hope this post will interest you, and will help those who hesitate on using this language industrially to make their choice : I’ll try to show off the pros and cons, and as usual, discussion is open : I encourage you to write comments. I will focus on the industrial consequences of choosing Groovy more than the technical issues, though both are related.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_once_upon_a_time">Once upon a time</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Groovy adoption at Lingway wasn’t made in one day. I joined the team in a special circumstance, as the company I was working for was bought by Lingway. At this time, we already used to integrate scripting languages to allow easier customizations, but their usage was rather limited. I had made the choice to integrate both Mozilla Rhino and BeanShell, but not Groovy. Why ? Well the reason is quite simple : I had missed it.</p>
+</div>
+<div class="paragraph">
+<p>At Lingway, in the context of rewriting Perl components to Java and improving them, I was driven by the idea of using scripting languages to make things easier to customize. Particularly, there were two main use cases :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the need to parametrize data acquisition workflows for our main product, Lingway Knowledge Management</p>
+</li>
+<li>
+<p>the design of a new content extraction engine for documents written in natural language</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It was by that time, reading posts about <em>closures</em> (the lack of) in Java that I discovered Groovy. It was the beginning of a long love story ! What Groovy allowed to do perfectly suited my requirements :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a language on the JVM</p>
+</li>
+<li>
+<p>able to use Java libraries, and, very important, usable from Java libraries (also known as cross compilation)</p>
+</li>
+<li>
+<p>a dynamic language supporting closures</p>
+</li>
+<li>
+<p>ability to write DSLs (Domain Specific Languages)</p>
+</li>
+<li>
+<p>a clear and simple syntax which would allow people not aware of development to write scripts</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Those two use cases, which lead to a global adoption of Groovy in our components/products, will allow me to illustrate the pros and cons of this language in an industrial context.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_syntax_matters">Syntax matters</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If there were one thing to highlight as a key factor of Groovy’s adoption, it would definitely be syntax. Groovy offerts over other JVM languages like Scala or Clojure, major advantages :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a syntax 95%-compatible with Java : it greatly reduces the learning curve since any Java developer will be able to code in Groovy without having to know nor understand the subtleties of this language. In a reduced team where there’s not much time allowed for learning, it is very important.</p>
+</li>
+<li>
+<p>precious add-ons : utility methods/classes which simplifies the usage of standard JDK Apis and makes code more compact</p>
+</li>
+<li>
+<p>usage of closures, which allows us to focus on algorithmics more than syntax</p>
+</li>
+<li>
+<p>a dynamic type system, which allows newbies to avoid thinking about types</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let’s come back on the last point : I have already said that I planned to use Groovy in edge cases where &#8220;users&#8221; were not &#8220;computer aware&#8221;. While this term is quite unfair, it does hide what I consider now as a great success in the introduction of Groovy. The challenge was dared, but it worked : at Lingway, we have three profile types in our technical team : first, developers - like me -, coming from software engineering. Second, consultants, who are trained for programming, but have lower pure technical skills : their main abilities are transforming customer needs into parametrization. Those are the people who write our workflows. Last but not least, linguists, who for most only know about computers as tools : they don’t know anything about programming languages and software engineering. However, thanks to Groovy, all those three profiles are able to collaborate on a single platform, a single language. The ability for Groovy to simplify at most syntax and the ability to create DSLs is amazing.</p>
+</div>
+<div class="paragraph">
+<p>Let’s take a real example, in the context of acquisition workflows A java programmer would have written (correctly) the following :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>Map inputMap = new HashMap()
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Title, "Hello, World !");
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Body,"Groovy is cool !");
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,com.lingway.lkm.db.corpus.bean.languages.LanguageKind.ENGLISH);
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Usage of Groovy in workflows allows us to simplify it to :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>inputMap = [
+   title: "Hello, World !"
+   body: "Groovy is cool !"
+   language: "en"
+]
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This way of doing allows the workflow &#8220;code&#8221; to be much more readable. It allows us to focus on what to do, not on how to do. This is extremely important and allows us to save time : it is easier to read and maintain. Moreover, it is not required to be an expert to understand what it does : no need to know what a HashMap is. No need to even know that you actually need to instanciate one. Let’s see another example where we would like to sum up the numbers contained in a flat file (one number per line). Our Java developper would have written the following :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>File file = new File("/tmp/data.txt");
+int total = 0;
+try {
+ BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
+ String line;
+ while ((line=reader.readLine())!=null) {
+  if (line.length()&gt;0) total += Integer.valueOf(line);
+ }
+ reader.close();
+} catch (IOException e) {
+ // this must never happen, and if it does, I don't know what to do
+}
+System.out.println("total = " + total);
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In Groovy, you’d just write this :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def total = 0
+new File("/tmp/data.txt").eachLine("utf-8") { line -&gt;
+   if (line) total += line as int
+}
+println "Total : $total"
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From 13 lines, we fall to 4. Those 4 lines only focus on what to do. At worse, you’ll have to explain to your interlocutor what <em>eachLine</em> or <em>as int</em> does, and you’re done. Likely, Groovy is the perfect candidate for simplifying the usage of Java APIs. One of my favorite example is taken from the Gaelyk documentation, a simplified web framework based on Groovy :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>mail.send sender: "app-admin-email-AT-gmail-DOT-com",
+   to: "recipient-AT-somecompany-DOT-com",
+   subject: "Hello",
+   textBody: "Hello, how are you doing? -- MrG",
+   attachment: [data: "Chapter 1, Chapter 2".bytes, fileName: "outline.txt"]
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here’s an example of a &#8220;mini-DSL&#8221;, dedicated to sending e-mails. How could one imagine something simpler ? When you actually know about the verbosity of the Javamail API, it’s no match…</p>
+</div>
+<div class="paragraph">
+<p>So, thanks to Groovy’s adaptability, we were able to :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>make our workflows readable</p>
+</li>
+<li>
+<p>write a DSL dedicated to linguistic extraction rules. This language is the core of our internal data extraction tool, and is mainly used by our linguists</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>About that, the strengths of Groovy in such a tool are multiple :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>it allows non developers to write rules which are compiled to bytecode then executed by the JVM</p>
+</li>
+<li>
+<p>when the DSL is not sufficient, linguists may ask the developers for help. The latter would then write chunks of Groovy code which perform complex operations</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Therefore, what is possible is not limited to what the DSL allows. It is something particularly important to understand : if we had chosen to write a classical DSL, a rule based engine which would use its own syntax, then we would probably have achieved a higher level of readability, but we would also have had to :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>either write an interpreter (simple solution) or a compiler (complex one) for our rules</p>
+</li>
+<li>
+<p>develop new versions of the language as new needs are discovered</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With Groovy, you just skip those steps, and you just earn an extra : it’s just code. Even if linguists actually write rules, there’s nothing that prevents us from writing regular code inside. The whole language is usable…</p>
+</div>
+<div class="paragraph">
+<p>A funny thing is that as time passes by, linguists show an increasing curiosity towards the &#8220;code&#8221; part of rules. They naturally aim at factorizing rules : the language becomes structuring and leads to better code quality !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_barriers">The barriers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So far I’ve been particularly enthusiast about Groovy. However, it’s not that simple, and there are things that are get complicated. I’ll split the barriers into two categories : technical barriers and humain barriers. Don’t neglect any of them.</p>
+</div>
+<div class="sect2">
+<h3 id="_technical_barriers">Technical barriers</h3>
+<div class="paragraph">
+<p>The first technical barrier we encountered was performance. Release after release, Groovy becomes faster and I can tell you that the current versions are really fast. However, don’t expect miracles. In particular, in the context of our extraction engine, we had a very important performance expectation. The objective, for example, was to be able to perform a complete resume parsing and data extraction (name, surname, personal data, experiences, trainings, …) from a binary document (Word,…) within a second. If the core of our engine had been written in Groovy, there’s no chance that we could have reached such a performance. That’s why we decided to write the critical parts in pure Java, while the domain code is written in Groovy (leading to a DSL). This way we have a good trade-off between performance and readability.</p>
+</div>
+<div class="paragraph">
+<p>So, if writing code in Groovy is really easy thanks to its syntax, it is just also easy to write slow code. I remember a parser written in Groovy which read the XML configuration file of our engine. This code was written in Groovy because the <em>XmlSlurper</em> makes it really easy to read XML files. Whatever, the Java code was 20 times as fast as the Groovy version… (admittedly, almost 20 times longer). Another example about the curious default type used by Groovy in decimal computations :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>def num = 1.1
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The type associated to <em>num</em> is not, as one would expect, <em>float</em> nor <em>double</em>, it’s <em>BigDecimal</em>. As a direct consequence, every benchmark found on the web about Groovy falls into this trap. You just have to strongly type your code to make performance acceptable (and more). For a language which simplifies life by avoiding strong typing, it seems curious and just mystifies the principal of least surprise (for the curious, there’s an explanation for that, as the Groovy developers chose to apply the principal of least surprise to the result of computations more than on the types : using <em>BigDecimal</em> allows computations to be exact).</p>
+</div>
+<div class="paragraph">
+<p>Using Groovy code from Java leads to another barrier : since the natural way of coding in Groovy is to weakly type, Groovy generated APIs only take <em>Object</em> as parameters. Those APIs are just unusable, so if your Groovy code is intended to be used from Java, you’ll have to make the effort to strongly type.</p>
+</div>
+<div class="paragraph">
+<p>Another barrier is directly related to the global adoption of Groovy in the technical team. The success of Groovy makes that we wish to introduce it everywhere. However, when different components include different versions of Groovy, you take the risk of compatibility issues. Happily, unlike the Scala language for example, Groovy maintains binary compatibility between one version and another. I greatly reduces the risks when upgrading.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_human_barriers">Human barriers</h3>
+<div class="paragraph">
+<p>Curiously, the main barriers encountered during the adoption of Groovy were not technical but humain. And more curiously, the ones I faced did not come from people I expected. I expected linguists to rebel, it were developers !</p>
+</div>
+<div class="paragraph">
+<p>To understand properly, you must understand that developers are Lingway all have nearly 10 years of experience. I can modestly say that they are good (if not very) developers. As good developers, they use good tools : I cannot understand when people use <em>vi</em> or <em>Emacs</em> to code : the main strength of Java has never been the language, but rather its tools. At Lingway, we use <em>IntelliJ IDEA</em>. This IDE is for me the best IDE available on the market for Java development. We’ve used it for long, and getting back to Eclipse would be worse than a curse for us. With a strongly types language like Java, and even more with the addition of generics, code is understandable (but rather noisy) : you actually know, reading the code, that this collection actually contains that type of objects. The compiler will complain if you try to use different content, and if you use an intelligent IDE, without having to compile, it will indicate to you what are the possible choices for what method, depending on the context. As time goes, the programmer develops what I call the &#8220;completion frenzy&#8221; : you actually pass most of your time pressing the CTRL+space or CTRL+Q key combinations. It’s no use to read javadoc, since my IDE will gently indicate me what the method expects at what position. When you intensively practice that, you may reach an incredible productivity.</p>
+</div>
+<div class="paragraph">
+<p>In that context, the transition to Groovy looks like a regression : being widely sub-typed (and I’m fighting to make understand that weakly typed doesn’t mean untyped), it’s most of time impossible to know what a method/closure/map expects as a parameter without reading the documentation. However, when we come to documentation, we can find the best, like the worse. Even your IDE is useless : it doesn’t have enough hints to help you. Most of CTRL+space calls are headed for failure : it leads to an incredible frustration.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, developers just tend to come back the natural way : Java developers &#8220;Java-ize&#8221; their code, instead of Groovyfying it. We loose readability for ease of development. It’s quite paradoxical and I try to fight against this, but it’s difficult to challenge : I just think that unless you are a very curious and open developer, you’ll find it frustrating to fly visually. It’s just like getting 10 years back.</p>
+</div>
+<div class="paragraph">
+<p>I must admit I have not succeeded to perfectly initiate the Groovy spirit to the team. Some make resist while others make efforts but it’s a question of feeling first : it’s very hard to fight against natural tendencies.</p>
+</div>
+<div class="paragraph">
+<p>Recently, we started using <em>Grails</em> for an application of e-reputation analysis. This development is still in progress, and once again, I made a bet to try to developer faster. For now, I’m really satisfied of the result which leads to an unprecedented productivity. However, frustrations are not gone : the IDE support is far from perfect and widely insufficient : almost no completion, no differentiation between dynamic methods which are added by default to every object and service methods, for example. There’s not much more completion for <em>render</em> parameters. For <em>taglibs</em>, the standard completion is insufficient and there’s no way for the IDE to actually help because Grails taglibs definition miss metadata about required attributes and so on. You just actually have to open multiple Grails help web pages to get it right.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conlusion">Conlusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Through this post, I tried to show off the industrial usage of Groovy, integrated in many components which actually are in production (in our case, for more than 3 years). The global balance is positive, but you really don’t have to neglect the barriers of the integration of Groovy. Particularly, Groovy doesn’t escape one of the most complicated activities : driving change. A programmer which is too comfortable with Java will have difficulties to embrace the language and will sometimes be awfully insincere just to justify his own choices, guided by personal comfort : scarifying readability for tools. This is not unjustifiable, since I often find myself cursing the lack of completion from my IDE. This is not enough to change my mind about Groovy : this is surely one of the best thing that happened to Java for the last 10 years… A language to recommand, and I hope it’ll spread widely !</p>
+</div>
+<div class="paragraph">
+<p><em>(for my english-speaking audience, my english is not perfect, do not hesitate to correct me)</em></p>
+</div>
+</div>
+</div></p>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nb-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>
