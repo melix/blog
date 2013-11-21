@@ -1,0 +1,384 @@
+= Performance of coercion vs closures in Groovy 2.2
+Cédric Champeau
+2013-11-22
+:jbake-type: post
+:jbake-tags: groovy, coercion, performance, gbench
+:jbake-status: published
+:source-highlighter: prettify
+:id: coercion_vs_direct
+
+To inaugurate this new blog, I will discuss the topic of coercion performance in Groovy. Especially, you might now
+that Groovy 2.2 http://docs.codehaus.org/display/GROOVY/Groovy+2.2+release+notes[introduced implicit closure coercion].
+If you don't know what closure coercion is, or just what _coercion_ alone is, let's start with a reminder.
+
+== Casting vs coercion
+=== Casting
+
+In an object oriented language like http://groovy.codehaus.org[Groovy], variables are typed. Even if Groovy is a dynamic
+language, each variable has a type at runtime. Even if Groovy shares the same typing model as Java, there's almost no
+need for casting in Groovy.
+
+Casting in Java is necessary because it's a statically typed language, so if you want to call a method defined on the
+`Person` class on an object which is declared as type `Object`, you *have* to do a cast:
+
+[source,java]
+----
+String pretty(Object o) {
+    if (o instanceof Person) {
+	return ((Person)o).getName(); // <1>
+    }
+}
+----
+<1> (Person) is an explicit cast
+
+in Groovy, casting is not necessary because we rely on runtime types and dynamic invocation. This means that this code is
+equivalent to this in Groovy:
+
+[source,groovy]
+----
+String pretty(o) {
+    o.name // <1>
+}
+----
+<1> casting isn't required
+
+Casting is only possible within the type hierarchy. That is, you can cast any object to any subtype (or interface) and it's
+you're responsability to make sure (for example using `instanceof`) that the runtime type will be correct. If you don't, you
+may have the famous `ClassCastException` error at runtime.
+
+=== Coercion
+
+For types which are not in the same hierarchy, Groovy provides an alternative mechanism called _coercion_. Coercion is very
+handy because it basically allows you to convert an object of some type into an object of another, in general incompatible, type.
+
+A good example is converting a `File` to a `String[]` corresponding to the lines of a text file. In groovy, you can write:
+
+[source,groovy]
+----
+def lines = file as String[]
+----
+
+Obviously, if you had written:
+
+[source,groovy]
+----
+def lines = (String[]) file
+----
+
+then it would have produced a `ClassCastException`. Basically, a cast is (almost) a no-op, while coercion involves any kind of
+treatment. It is also possible to implement your own coercion rules, by implementing the `asType` method:
+
+[source,groovy]
+----
+class Person {
+   String name
+   int age
+   def asType(Class target) {
+      if (List==target) {
+         [name,age]
+      }
+   }
+}
+def p = new Person(name:'Austin Powers', age:50)
+assert p as List == ['Austin Powers', 50]
+----
+
+=== Closure coercion
+
+One of the most widely used features of Groovy is closure coercion. It's an easy way to implement interfaces. For example, giving
+the following interface:
+
+[source,groovy]
+----
+interface Predicate {
+    boolean apply(Object target)
+}
+----
+
+You can implement it using coercion:
+
+[source,groovy]
+----
+Predicate filter = { it.length() > 3 } as Predicate
+----
+
+This is especially interesting when the interface is used as a method call parameter:
+
+[source,groovy]
+----
+List filter(List source, Predicate predicate) {
+   source.findAll { predicate.apply(it) } // <1>
+}
+----
+<1> note that this example doesn't really make sense since it's the role of findAll to apply a closure as predicate!
+
+So you can call the method without having to create an anonymous abstract class:
+
+[source,groovy]
+----
+def items = filter(['foo','bar', 'foobar'], {
+    it.length()>3
+} as Predicate)
+assert items == ['foobar']
+----
+
+=== Implicit closure coercion in Groovy 2.2
+
+With the release of Groovy 2.2, closure coercion can be implicit, in case the target is a SAM (single abstract method) type. That is to say that the target type must have a single abstract method, which is the case for many functional interfaces (like `Predicate` here) and abstract classes. So the example can be further simplified:
+
+[source,groovy]
+----
+def items = filter(source) { it.length()>3 } // <1>
+assert items == ['foobar']
+----
+<1> note that `as Predicate` is not needed anymore!
+
+Can it be easier? Probably not, but maybe you noticed that this is close to what Java 8 will allow with lambdas:
+
+[source,groovy]
+----
+List<String> items = filter(source, String str -> str.length()>3)
+----
+
+Now you must be aware of some subtle differences with Java 8. One is that closures are *not* lambdas but instances of the `Closure` class (a subclass of `Closure`, to be precise), while lambdas are converted at *compile time* and can be directly implemented, for example, as methods (simple case) or anonymous inner classes. This difference implies that if you have:
+
+[source,groovy]
+----
+def method(Closure c) { ... }
+def method(SAMType arg) { ... }
+----
+
+Then if you pass a closure as argument:
+
+[source,groovy]
+----
+method { ...do something... }
+----
+
+then the method which is chosen is the version which accepts a `Closure`, not the version accepting a `SAMType`. But since `Closure` implements `Runnable` and `Callable`, the same is true for those two interfaces:
+
+[source,groovy]
+----
+def method(Runnable c) { ... }
+def method(SAMType arg) { ... }
+method { ...do something... } // will call method(Runnable)
+----
+
+This means that if you want to call the `SAMType` version, you still have to use explicit coercion:
+
+[source,groovy]
+----
+method { ...do something... } as SAMType
+----
+
+Now that we exposed the basics of closure coercion, let's come to the topic that gave its name to this blog post: performance.
+
+== Performance of coercion vs closure
+=== GBench
+
+We will discuss here the impact of using closure coercion and compare the cost of implicit/explicit closure coercion as compared with calling a method which directly accepts a closure. For that, let's start with the tool we're going to use: https://code.google.com/p/gbench/[GBench].
+
+https://code.google.com/p/gbench/[GBench] is a project I really like and that I use a lot. It's meant for micro-benchmarking. We know that micro-benchmarks are bad, but in some cases, they are useful. https://code.google.com/p/gbench/[GBench] makes them a little better by providing a framework that does all the boring stuff that you have to do when micro-benchmarking:
+
+* setting up timers
+* warm up
+* repeat the execution of the same code N times
+* generation of a report
+
+All this using a nice DSL. If you want to write benchmarks, time execution of some process in your Groovy program, make sure to use it, it's just the perfect tool.
+
+=== Measurements
+
+Now let's proceed with the measurements. We want to compute the cost of:
+
+* directly accepting a closure as an argument
+* coercing the closure to a SAM type then calling
+
+For that, we're just defining a very simple SAM type and two helper methods:
+
+[source,groovy]
+----
+interface SAMType {
+    void apply()
+}
+ 
+@groovy.transform.CompileStatic
+void direct(Closure c) { c.call() } 
+
+@groovy.transform.CompileStatic
+void coercion(SAMType s) { s.apply() } 
+----
+
+The two methods that will be called are compiled statically so that we made direct method calls inside the method body. This allows us to measure precisely the cost of calling the method, rather than the cost of dynamic dispatch. The measurements are made using this code:
+
+[source,groovy]
+----
+Closure cachedClosure = { 'do something' }
+SAMType cachedSAMType = { 'do something' }
+ 
+@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+def r = benchmark {
+      'explicit coercion' {
+          coercion { 'do something' } as SAMType
+      }
+      'implicit coercion' {
+          coercion { 'do something' }
+      }
+      'direct closure' {
+          direct { 'do something' }
+      }
+      'cached SAM type' {
+          coercion cachedSAMType
+      }
+      'cached closure' {
+          direct cachedClosure
+      }
+  }
+  r.prettyPrint()
+----
+
+You can see that we are testing 5 cases here:
+
+* `explicit coercion` calls the method accepting a `SAMType` with explicit coercion of a closure into a `SAMType`
+* `implicit coercion` does the same, without `as SAMType`
+* `direct closure` calls the method accepting a `Closure`. This means that this version will *not* involve any conversion.
+* `cached SAM type` calls the `SAMType` version of the method with a coerced closure which is defined *outside* of the scope of the benchmark method
+* `cached closure` calls the `Closure` version of the method with a closure which is defined *outside* of the scope of the benchmark method
+
+The last two versions are interesting because as I explained before, https://code.google.com/p/gbench/[GBench] automatically repeats the execution of the code N times. This means that this code:
+
+[source,groovy]
+----
+SAMType cachedSAMType = { 'do something' }
+// ...
+'cached SAM type' {
+    coercion cachedSAMType
+}
+----
+
+is more or less equivalent to:
+
+[source,groovy]
+----
+SAMType cachedSAMType = { 'do something' }
+// ...
+10000.times {
+    coercion cachedSAMType
+}
+----
+
+So here is the result of the execution of this benchmark:
+
+----
+Environment
+===========
+* Groovy: 2.2.0-rc-3
+* JVM: Java HotSpot(TM) 64-Bit Server VM (23.5-b02, Oracle Corporation)
+    * JRE: 1.7.0_09
+    * Total Memory: 679.4375 MB
+    * Maximum Memory: 1765.375 MB
+* OS: Linux (3.8.0-22-generic, amd64)
+
+Options
+=======
+* Warm Up: Auto (- 60 sec)
+* CPU Time Measurement: On
+
+                   user  system   cpu  real
+
+explicit coercion  1258       0  1258  1259
+implicit coercion  1102      12  1114  1115
+direct closure      318       5   323   324
+cached SAM type     263       0   263   265
+cached closure      259       0   259   261
+----
+
+What you can see from those results is that:
+
+* using implicit closure coercion is slightly faster than explicit closure coercion
+* having a method which accepts directly a closure can significantly improve performance (almost 4x faster dispatch!)
+* using a cached closure or a cached SAM type is fast in any case
+
+Note that using cached closures is not something that is specific to Groovy: it would be true for any Java code too, if you consider a coerced closure as an anonymous inner class. Each time the method is called, you create a *new instance* of the closure (or, in Java, the anonymous inner class). So moving the definition of the closure (or anonymous inner class) outside the loop and you will reuse the *same instance*, dramatically improving performance.
+
+We must explain what performance we're talking about here: the closure does nothing special here, just returning a dummy string. So the cost of the treatment is almost null. What if the code actually does something? Would the differences be so important? To check that, we will modify the code:
+
+[source,groovy]
+----
+interface SAMType {
+    void apply()
+}
+ 
+@groovy.transform.CompileStatic
+void coercion(SAMType s) { s.apply() }
+ 
+@groovy.transform.CompileStatic
+void direct(Closure c) { c.call() }
+
+void doSomething() {
+   Thread.sleep(100)
+} 
+ 
+Closure cachedClosure = { doSomething() }
+SAMType cachedSAMType = { doSomething() }
+ 
+@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+def r = benchmark {
+      'explicit coercion' {
+          coercion { doSomething() } as SAMType
+      }
+      'implicit coercion' {
+          coercion { doSomething() }
+      }
+      'direct closure' {
+          direct { doSomething() }
+      }
+      'cached SAM type' {
+          coercion cachedSAMType
+      }
+      'cached closure' {
+          direct cachedClosure
+      }
+  }
+  r.prettyPrint()
+----
+
+In this version, we simulate a long running process with `Thread.sleep(100)`. The results are shown below:
+
+----
+                     user  system     cpu       real
+
+explicit coercion  248621       0  248621  100329258
+implicit coercion  208407       0  208407  100273428
+direct closure          0  166932  166932  100238245
+cached SAM type         0  157406  157406  100232334
+cached closure          0  160848  160848  100214197
+----
+
+Note that it's better to look at the `real` column here, since `Thread.sleep` doesn't consume any CPU. What is interesting here is that now, there's almost no difference between each version. This is simply explained: the cost of the treatment exceeds the cost of instantiating a closure and coercing it.
+
+== Conclusion
+
+So given those figures, what can we conclude? First of all, one of the interests of implicit closure coercion is that previously (before Groovy 2.2), if you wanted users to avoid explicit coercion, you had to write a method accepting a closure:
+
+[source,groovy]
+----
+// real method
+void addListener(Listener listener) { ... }
+// convenience method to avoid explicit coercion from user code
+void addListener(Closure cl) { addListener(cl as Listener) }
+----
+
+The problem is that you double the number of methods here, so implicit closure coercion is a big bonus here. But our figures showed that calling a method accepting a closure is much faster, so you have a dilemn here: should you keep the closure version or not? The second benchmark gives a first answer: you shouldn't remove the `Closure` version only if you know that the treatment in the closure is *very* fast. As soon as business code in the closure is a bit complex, it's not worth it and you can remove the `Closure` version. This means that in the vast majority of cases, you can remove it without problem.
+
+In fact, there's one more case where you'd want to keep the `Closure` version: if you manipulate the closure before calling it, like changing the delegate:
+
+[source,groovy]
+----
+void doSomething(SAMType arg) { ... }
+void doSomething(Closure cl) {
+   def clone = cl.rehydrate(delegate,this,this)
+   doSomething(clone as SAMType)
+----
+
+Hope things are clearer for you now!
