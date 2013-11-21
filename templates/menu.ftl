@@ -7,11 +7,11 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/">Cédric Champeau's blog</a>
+            <a class="brand" href="/blog">Cédric Champeau's blog</a>
             <div class="nav-collapse collapse">
               <ul class="nav">                
-                <li><a href="/about.html">About</a></li>
-                <li><a href="${config.feed_file}">Feed</a></li>                
+                <li><a href="/blog/about.html">About</a></li>
+                <li><a href="/blog/${config.feed_file}">Feed</a></li>                
               </ul>
             </div><!--/.nav-collapse -->
           </div>
