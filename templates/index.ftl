@@ -12,6 +12,7 @@
   			<p>${post.date?string("dd MMMM yyyy")}</p>
 			<p><em>Tags: <#list post.tags as tag></em>${tag} </#list></p>
   			<p>${post.body}</p>
+			<p><a href="/blog${post.uri}#disqus_thread">Comments</a></p>
   		</#if>
   	</#list>
 	
