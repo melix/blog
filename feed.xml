@@ -6,9 +6,48 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>jeu., 21 nov. 2013 14:45:59 +0100</pubDate>
-    <lastBuildDate>jeu., 21 nov. 2013 14:45:59 +0100</lastBuildDate>
+    <pubDate>jeu., 21 nov. 2013 15:01:02 +0100</pubDate>
+    <lastBuildDate>jeu., 21 nov. 2013 15:01:02 +0100</lastBuildDate>
 
+    <item>
+      <title>A new home!</title>
+      <link>http://melix.github.io/blog//2013/11/21/a_new_home.html</link>
+      <pubDate>jeu., 21 nov. 2013 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">/2013/11/21/a_new_home.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Goodbye JRoller, welcome GitHub! Eventually, I migrated my blog to &lt;a href=&quot;http://pages.github.com/&quot;&gt;GitHub pages&lt;/a&gt;. It is a now a statically generated website.
+What is interesting here is how I migrated contents from my &lt;a href=&quot;http://jroller.com/melix&quot;&gt;old blog&lt;/a&gt;. I used a &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy&lt;/a&gt; script which
+downloaded the old pages, converted them into &lt;a href=&quot;http://asciidoctor.org&quot;&gt;Asciidoctor&lt;/a&gt; format so that they can be statically processed by &lt;a href=&quot;http://jbake.org&quot;&gt;JBake&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Should you need something similar, I pushed this little toy here: &lt;a href=&quot;https://github.com/melix/jroller-export&quot;&gt;https://github.com/melix/jroller-export&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now the export is quite raw, there are probably minor rendering issues to fix, or broken links, and I still have to integrate:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;twitter/google+ share buttons&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;comments&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But this is another story!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last but not least, this blog is also published on GitHub and all posts are published under &lt;a href=&quot;http://creativecommons.org/licenses/by-nc-sa/2.0/en/&quot;&gt;Creative Commons by-nb-sa&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>deck2pdf: Exporting HTML5 slide decks to PDF</title>
       <link>http://melix.github.io/blog//2013/07/30/deck2pdf_exporting_html5_slide_decks.html</link>
@@ -320,349 +359,6 @@ def result = p?.age
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Nous faire rêver, effectivement, Xavier Niel sait le faire, on peut lui reconnaître ça. En pratique, je ne suis pas convaincu de la solution, parce que je ne suis pas convaincu que le problème soit là. A moins que de cette école n’émerge une technique nous permettant de lire des vidéos YouTube sans saccade :-)&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Static builders inception</title>
-      <link>http://melix.github.io/blog//2013/02/13/static_builders_inception.html</link>
-      <pubDate>mer., 13 févr. 2013 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">/2013/02/13/static_builders_inception.html</guid>
-      	<description>
-	&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_documentation_is_good_for_everybody&quot;&gt;Documentation is good for everybody&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As part of the &lt;a href=&quot;http://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html&quot;&gt;Groovy documentation effort&lt;/a&gt;, I started writing documentation for several features of Groovy, including &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration&quot;&gt;compiler configuration&lt;/a&gt;, &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/Type+checking+extensions&quot;&gt;type checking extensions&lt;/a&gt;, and yesterday the &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation&quot;&gt;@DelegatesTo annotation&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation&quot;&gt;@DelegatesTo documentation&lt;/a&gt;, I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the following post, I will show you how I combined several features of Groovy 2.1 to provide an implementation of a statically compiled HTML builder: static compilation, @DelegatesTo, meta-annotations, custom type checking extensions and of course AST transformations, without having to write all the boilerplate necessary to make it type safe! Nothing less…&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_statically_compiled_markup_builder&quot;&gt;Statically compiled markup builder&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What if we could annotate a class as a markup builder, describe its schema, then, if a user wants to statically compile the builder usage, have a type-safe, statically compiled builder? That means, if you write this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;@groovy.transform.CompileStatic
-String build() {
-    def builder = new HTMLBuilder()
-    builder.html {
-        body {
-            p {
-                out &amp;lt;&amp;lt; &quot;Hello, this is &quot;
-                a(href:&apos;http://groovy.codehaus.org&apos;) { out &amp;lt;&amp;lt; &apos;Groovy&apos; }
-            }
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then you want &lt;strong&gt;compile-time errors&lt;/strong&gt; if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation&quot;&gt;@DelegatesTo documentation&lt;/a&gt; showed that it was possible to create a statically checked (and statically compiled) builder.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There were two problems in the approach from the documentation:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;unnecessary repetitive/verbose code (inner classes)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;no ability to perform checks on the allowed attributes of a tag at &lt;strong&gt;compile-time&lt;/strong&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_here_comes_the_statically_compiled_markup_builder_experiment&quot;&gt;Here comes the statically compiled markup builder experiment!&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_the_night_hacker&quot;&gt;The night hacker&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So last night, I started an experiment to see if I could make things easier and after two hours of coding, I had indeed a first working implementation, which allowed me to define a schema for my builder, but didn’t check attributes yet.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Today, I spent several hours fixing bugs for Groovy 2.1.1, including some that prevented me from going further (including one with nasty classloading issues that prevented Gradle from loading some classes from my AST transformation…). After that, I could eventually fix my prototype and I now have a fully working implementation…&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_checking_out_the_sources&quot;&gt;Checking out the sources&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First of all, all the code is available on &lt;a href=&quot;https://github.com/melix/staticbuilder&quot;&gt;GitHub&lt;/a&gt;. It makes uses of the gradle wrapper, so all you need is to run:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    $ ./gradlew test
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_the_builder&quot;&gt;The builder&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Creating a statically checked builder is easy:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    import groovyx.transform.StaticMarkupBuilder
-
-    @StaticMarkupBuilder
-    class HTMLBuilder {
-        static schema = {
-            html {
-                head { title() }
-                body {
-                   p()
-                   a(attributes:[&apos;href&apos;, &apos;target&apos;])
-                }
-            }
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For examples of several builders, you can take a look at the &lt;a href=&quot;http://bit.ly/XAOvhJ&quot;&gt;unit test&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What is important here is that using the &lt;strong&gt;@StaticMarkupBuilder&lt;/strong&gt;, we are not using a builder, we are defining one:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;a statically compiled builder&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;which accepts a predefined schema&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Here, the schema is very simple. It says that at the top level, we can find the &lt;em&gt;html&lt;/em&gt; tag. This tag can include either a &lt;em&gt;head&lt;/em&gt; or a &lt;em&gt;body&lt;/em&gt; tag. Below body, you can find either &lt;em&gt;p&lt;/em&gt; or &lt;em&gt;a&lt;/em&gt;, and if it’s an &lt;em&gt;a&lt;/em&gt;, then the only allowed attributes are &lt;em&gt;href&lt;/em&gt; and &lt;em&gt;target&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It’s a very simple schema that of course doesn’t matches what you can do in HTML5, but remember that it’s a prototype aimed at showing off the amazing capabilities of Groovy 2.1.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To use it, you can do:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    @CompileStatic
-    void test() { // using a method to ensure that the builder will be statically compiled!
-        def out = new ByteArrayOutputStream()
-        def builder = new Builder3(out)
-        builder.html {
-            body {
-                p &apos;Hello, Groovy!&apos;
-            }
-        }
-        println out.toString()
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What we’re doing here is creating a builder inside a statically compiled portion of code (so that you can make sure that the builder usage is indeed statically compiled). If you run this code, it will show:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    Hello, Groovy!
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But what is really interesting is showing what would happen if you use a wrong tag:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    @CompileStatic
-    void test() { // using a method to ensure that the builder will be statically compiled!
-        def out = new ByteArrayOutputStream()
-        def builder = new Builder3(out)
-        builder.html {
-            bodyp { // compile-time error!
-                p &apos;Hello, Groovy!&apos;
-            }
-        }
-        println out.toString()
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Here, Groovy will fail at compile-time!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;    Groovyc: [Static type checking] - Cannot find matching method groovyx.transform.StaticMarkupBuilderTest#bodyp(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
-    Groovyc: [Static type checking] - Cannot find matching method groovyx.transform.StaticMarkupBuilderTest#p(java.lang.String). Please check if the declared type is right and if the method exists.&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Of course, the error message can be improved (there are ways to do this), but what is interesting is that you really fail before the test gets executed!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_behind_the_magic&quot;&gt;Behind the magic&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To acheive this first example, there are two things in action:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;a meta-annotation, called &lt;em&gt;@StaticMarkupBuilder&lt;/em&gt; that will expand itself into &lt;em&gt;@CompileStatic&lt;/em&gt; and &lt;em&gt;StaticMarkupBuilderGenerator&lt;/em&gt;: this way, using a single annotation, I am saying that the builder will be statically compiled without having to use @CompileStatic explicitely. The second annotation is an AST transformation:&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;an AST transformation that transforms the schema definition into a set of inner-classes, close to what the documentation says&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The AST transformation is very powerful. Say you have this schema:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    static schema = {
-        html {}
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then the AST transformation will create an inner class called &lt;em&gt;HTMLBuilder$HtmlTag&lt;/em&gt;, then also create, in the &lt;em&gt;HTMLBuilder class&lt;/em&gt;, a method which name is &lt;em&gt;html&lt;/em&gt; and uses a closure… Of course, it will add the &lt;em&gt;@DelegatesTo&lt;/em&gt; annotation transparently, so the generated method signature will look like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For sub-tags, the principle is the same, but instead of generating the method in the HTMLBuilder class, it is added to the appropriate inner tag class… Of course, the AST transform does a bit more work:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;make the builder and each generated inner class extend a base class (&lt;em&gt;AbstractTag&lt;/em&gt;), this class defining how a tag should be rendered.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;generate methods for string only arguments (&lt;em&gt;p `text&apos;&lt;/em&gt;) or empty tags&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;generate a method for tags accepting attributes&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The latter is very important as it will help us demonstrate how we can also check that when the builder is used, the attributes being used are checked against a list of valid tags.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_the_attribute_checking_problem&quot;&gt;The attribute checking problem&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Here, we have an interesting problem: our schema allows us to say that the &lt;em&gt;a&lt;/em&gt; tag only accepts &lt;em&gt;href&lt;/em&gt; and &lt;em&gt;target&lt;/em&gt; attributes. But can we prevent the user from using other attributes at &lt;strong&gt;compile-time?&lt;/strong&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;    builder {
-        ...
-        a(notGood:&apos;invalid attribute&apos;) { out &amp;lt;&amp;lt; &apos;Link text&apos; }
-    }&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let’s see what happens if we don’t perform additional magic. When the builder is checked by the type checker, it will find a method named &lt;em&gt;a&lt;/em&gt;, which accepts a map and a closure as arguments. This method exists, so it passes compilation. This is bad, because we wanted a compile-time error here. We could have, when we generated the builder class, added a check into the &lt;em&gt;a&lt;/em&gt; method body that verifies that the map keys are in the authorized list, but it’s a runtime check and here we want a compile-time one…&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So we have a new challenge:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;how to make the authorized attributes list known when the builder usage is compiled?&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;how to make the static compiler &lt;strong&gt;check&lt;/strong&gt; that the user only picks attributes from that list&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For the first part, my choice was to add an annotation in the map parameter of the generated method:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;    void a(@CheckedAttributes([&apos;href&apos;,&apos;target&apos;]) Map attributes, @DelegatesTo(...) Closure code) { ... }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Alright, so now we have the information available at runtime, when the compiler will select this method, the method will have an annotation that we can reflect to retrieve the list of attributes… Still, the compiler won’t use that information, so we’re doomed, right?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Not really, because Groovy 2.1 includes &lt;a href=&quot;http://docs.codehaus.org/display/GROOVY/Type+checking+extensions&quot;&gt;type checking extensions&lt;/a&gt;. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The code of this type checking extension can be found &lt;a href=&quot;http://bit.ly/Yryqb7&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We’re almost done! The only problem with this solution is that one has to annotate every method that uses our builder with @CompileStatic(extension=’groovyx/transform/StaticBuilderExtension.groovy’). This is not as cool as seeing the extension being automatically applied…&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_global_ast_transformations_to_the_rescue&quot;&gt;Global AST transformations to the rescue&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There’s one solution to this. We will use a global AST transformation here. Unlike local AST transformations that are triggered by seeing an annotation in the code, global AST transformations are automatically loaded by the compiler and applied to every class being compiled. Thanks to this feature, we will be able to scan classes being compiled and if we find something annotated with @CompileStatic, then change it to @CompileStatic(extensions=’…’). That’s all!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The code for such an annotation can be found &lt;a href=&quot;http://bit.ly/UfjmjQ&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You must remember that using global AST transformations have a significant impact on compilation times, since they are applied on every class, so always make sure you don’t use unnecessary transforms.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The main focus of this blog post wasn’t to describe in details how the AST transformation works, but rather show you how a smart combination of the features of Groovy 2.1 can allow you to perform tasks that would seem impossible, like type checking at compile-time the usage of a builder, statically compiling the code and eventually, performing checks on things that are normally unchecked by the compiler (arguments of a call).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the end, this example is not complete, of course:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;the definition of the schema is insufficient (what about tags that allow arbitrary tags, …)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;allowText attribute isn’t used yet&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;the error messages can be improved (yes, it is possible to replace them with tags!)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;the API can be improved for more fluency&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But what is more important is that using such techniques, I am pretty sure that someone even crazier than me could write a more complete implementation that would accept, say… a real schema (think of xsd)!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
