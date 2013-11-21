@@ -1,0 +1,22 @@
+= A new home!
+Cédric Champeau
+2013-11-21
+:jbake-type: post
+:jbake-tags: blog, asciidoctor, jbake
+:jbake-status: published
+:source-highlighter: prettify
+
+Goodbye JRoller, welcome GitHub! Eventually, I migrated my blog to http://pages.github.com/[GitHub pages]. It is a now a statically generated website.
+What is interesting here is how I migrated contents from my http://jroller.com/melix[old blog]. I used a http://groovy.codehaus.org[Groovy] script which
+downloaded the old pages, converted them into http://asciidoctor.org[Asciidoctor] format so that they can be statically processed by http://jbake.org[JBake].
+
+Should you need something similar, I pushed this little toy here: https://github.com/melix/jroller-export
+
+Now the export is quite raw, there are probably minor rendering issues to fix, or broken links, and I still have to integrate:
+
+* twitter/google+ share buttons
+* comments
+
+But this is another story!
+
+Last but not least, this blog is also published on GitHub and all posts are published under http://creativecommons.org/licenses/by-nc-sa/2.0/en/[Creative Commons by-nb-sa].
