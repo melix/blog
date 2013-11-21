@@ -54,6 +54,512 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2013/11/22/coercion_vs_direct.html"><h1>Performance of coercion vs closures in Groovy 2.2</h1></a>
+  			<p>22 novembre 2013</p>
+			<p><em>Tags: </em>groovy </em> coercion </em> performance </em> gbench </p>
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>To inaugurate this new blog, I will discuss the topic of coercion performance in Groovy. Especially, you might now
+that Groovy 2.2 <a href="http://docs.codehaus.org/display/GROOVY/Groovy+2.2+release+notes">introduced implicit closure coercion</a>.
+If you don&#8217;t know what closure coercion is, or just what <em>coercion</em> alone is, let&#8217;s start with a reminder.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_casting_vs_coercion">Casting vs coercion</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_casting">Casting</h3>
+<div class="paragraph">
+<p>In an object oriented language like <a href="http://groovy.codehaus.org">Groovy</a>, variables are typed. Even if Groovy is a dynamic
+language, each variable has a type at runtime. Even if Groovy shares the same typing model as Java, there&#8217;s almost no
+need for casting in Groovy.</p>
+</div>
+<div class="paragraph">
+<p>Casting in Java is necessary because it&#8217;s a statically typed language, so if you want to call a method defined on the
+<code>Person</code> class on an object which is declared as type <code>Object</code>, you <strong>have</strong> to do a cast:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>String pretty(Object o) {
+    if (o instanceof Person) {
+	return ((Person)o).getName(); <b>(1)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>(Person) is an explicit cast</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>in Groovy, casting is not necessary because we rely on runtime types and dynamic invocation. This means that this code is
+equivalent to this in Groovy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>String pretty(o) {
+    o.name <b>(1)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>casting isn&#8217;t required</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Casting is only possible within the type hierarchy. That is, you can cast any object to any subtype (or interface) and it&#8217;s
+you&#8217;re responsability to make sure (for example using <code>instanceof</code>) that the runtime type will be correct. If you don&#8217;t, you
+may have the famous <code>ClassCastException</code> error at runtime.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_coercion">Coercion</h3>
+<div class="paragraph">
+<p>For types which are not in the same hierarchy, Groovy provides an alternative mechanism called <em>coercion</em>. Coercion is very
+handy because it basically allows you to convert an object of some type into an object of another, in general incompatible, type.</p>
+</div>
+<div class="paragraph">
+<p>A good example is converting a <code>File</code> to a <code>String[]</code> corresponding to the lines of a text file. In groovy, you can write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def lines = file as String[]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obviously, if you had written:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def lines = (String[]) file</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then it would have produced a <code>ClassCastException</code>. Basically, a cast is (almost) a no-op, while coercion involves any kind of
+treatment. It is also possible to implement your own coercion rules, by implementing the <code>asType</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>class Person {
+   String name
+   int age
+   def asType(Class target) {
+      if (List==target) {
+         [name,age]
+      }
+   }
+}
+def p = new Person(name:'Austin Powers', age:50)
+assert p as List == ['Austin Powers', 50]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_closure_coercion">Closure coercion</h3>
+<div class="paragraph">
+<p>One of the most widely used features of Groovy is closure coercion. It&#8217;s an easy way to implement interfaces. For example, giving
+the following interface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>interface Predicate {
+    boolean apply(Object target)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can implement it using coercion:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>Predicate filter = { it.length() &gt; 3 } as Predicate</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is especially interesting when the interface is used as a method call parameter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>List filter(List source, Predicate predicate) {
+   source.findAll { predicate.apply(it) } <b>(1)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>note that this example doesn&#8217;t really make sense since it&#8217;s the role of findAll to apply a closure as predicate!</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>So you can call the method without having to create an anonymous abstract class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def items = filter(['foo','bar', 'foobar'], {
+    it.length()&gt;3
+} as Predicate)
+assert items == ['foobar']</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implicit_closure_coercion_in_groovy_2_2">Implicit closure coercion in Groovy 2.2</h3>
+<div class="paragraph">
+<p>With the release of Groovy 2.2, closure coercion can be implicit, in case the target is a SAM (single abstract method) type. That is to say that the target type must have a single abstract method, which is the case for many functional interfaces (like <code>Predicate</code> here) and abstract classes. So the example can be further simplified:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def items = filter(source) { it.length()&gt;3 } <b>(1)</b>
+assert items == ['foobar']</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>note that <code>as Predicate</code> is not needed anymore!</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Can it be easier? Probably not, but maybe you noticed that this is close to what Java 8 will allow with lambdas:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>List&lt;String&gt; items = filter(source, String str -&gt; str.length()&gt;3)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you must be aware of some subtle differences with Java 8. One is that closures are <strong>not</strong> lambdas but instances of the <code>Closure</code> class (a subclass of <code>Closure</code>, to be precise), while lambdas are converted at <strong>compile time</strong> and can be directly implemented, for example, as methods (simple case) or anonymous inner classes. This difference implies that if you have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def method(Closure c) { ... }
+def method(SAMType arg) { ... }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then if you pass a closure as argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>method { ...do something... }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then the method which is chosen is the version which accepts a <code>Closure</code>, not the version accepting a <code>SAMType</code>. But since <code>Closure</code> implements <code>Runnable</code> and <code>Callable</code>, the same is true for those two interfaces:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def method(Runnable c) { ... }
+def method(SAMType arg) { ... }
+method { ...do something... } // will call method(Runnable)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This means that if you want to call the <code>SAMType</code> version, you still have to use explicit coercion:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>method { ...do something... } as SAMType</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now that we exposed the basics of closure coercion, let&#8217;s come to the topic that gave its name to this blog post: performance.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_performance_of_coercion_vs_closure">Performance of coercion vs closure</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_gbench">GBench</h3>
+<div class="paragraph">
+<p>We will discuss here the impact of using closure coercion and compare the cost of implicit/explicit closure coercion as compared with calling a method which directly accepts a closure. For that, let&#8217;s start with the tool we&#8217;re going to use: <a href="https://code.google.com/p/gbench/">GBench</a>.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://code.google.com/p/gbench/">GBench</a> is a project I really like and that I use a lot. It&#8217;s meant for micro-benchmarking. We know that micro-benchmarks are bad, but in some cases, they are useful. <a href="https://code.google.com/p/gbench/">GBench</a> makes them a little better by providing a framework that does all the boring stuff that you have to do when micro-benchmarking:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>setting up timers</p>
+</li>
+<li>
+<p>warm up</p>
+</li>
+<li>
+<p>repeat the execution of the same code N times</p>
+</li>
+<li>
+<p>generation of a report</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All this using a nice DSL. If you want to write benchmarks, time execution of some process in your Groovy program, make sure to use it, it&#8217;s just the perfect tool.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_measurements">Measurements</h3>
+<div class="paragraph">
+<p>Now let&#8217;s proceed with the measurements. We want to compute the cost of:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>directly accepting a closure as an argument</p>
+</li>
+<li>
+<p>coercing the closure to a SAM type then calling</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For that, we&#8217;re just defining a very simple SAM type and two helper methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>interface SAMType {
+    void apply()
+}
+
+@groovy.transform.CompileStatic
+void direct(Closure c) { c.call() }
+
+@groovy.transform.CompileStatic
+void coercion(SAMType s) { s.apply() }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The two methods that will be called are compiled statically so that we made direct method calls inside the method body. This allows us to measure precisely the cost of calling the method, rather than the cost of dynamic dispatch. The measurements are made using this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>Closure cachedClosure = { 'do something' }
+SAMType cachedSAMType = { 'do something' }
+
+@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+def r = benchmark {
+      'explicit coercion' {
+          coercion { 'do something' } as SAMType
+      }
+      'implicit coercion' {
+          coercion { 'do something' }
+      }
+      'direct closure' {
+          direct { 'do something' }
+      }
+      'cached SAM type' {
+          coercion cachedSAMType
+      }
+      'cached closure' {
+          direct cachedClosure
+      }
+  }
+  r.prettyPrint()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can see that we are testing 5 cases here:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>explicit coercion</code> calls the method accepting a <code>SAMType</code> with explicit coercion of a closure into a <code>SAMType</code></p>
+</li>
+<li>
+<p><code>implicit coercion</code> does the same, without <code>as SAMType</code></p>
+</li>
+<li>
+<p><code>direct closure</code> calls the method accepting a <code>Closure</code>. This means that this version will <strong>not</strong> involve any conversion.</p>
+</li>
+<li>
+<p><code>cached SAM type</code> calls the <code>SAMType</code> version of the method with a coerced closure which is defined <strong>outside</strong> of the scope of the benchmark method</p>
+</li>
+<li>
+<p><code>cached closure</code> calls the <code>Closure</code> version of the method with a closure which is defined <strong>outside</strong> of the scope of the benchmark method</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The last two versions are interesting because as I explained before, <a href="https://code.google.com/p/gbench/">GBench</a> automatically repeats the execution of the code N times. This means that this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>SAMType cachedSAMType = { 'do something' }
+// ...
+'cached SAM type' {
+    coercion cachedSAMType
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is more or less equivalent to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>SAMType cachedSAMType = { 'do something' }
+// ...
+10000.times {
+    coercion cachedSAMType
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So here is the result of the execution of this benchmark:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Environment
+===========
+* Groovy: 2.2.0-rc-3
+* JVM: Java HotSpot(TM) 64-Bit Server VM (23.5-b02, Oracle Corporation)
+    * JRE: 1.7.0_09
+    * Total Memory: 679.4375 MB
+    * Maximum Memory: 1765.375 MB
+* OS: Linux (3.8.0-22-generic, amd64)
+
+Options
+=======
+* Warm Up: Auto (- 60 sec)
+* CPU Time Measurement: On
+
+                   user  system   cpu  real
+
+explicit coercion  1258       0  1258  1259
+implicit coercion  1102      12  1114  1115
+direct closure      318       5   323   324
+cached SAM type     263       0   263   265
+cached closure      259       0   259   261</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What you can see from those results is that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>using implicit closure coercion is slightly faster than explicit closure coercion</p>
+</li>
+<li>
+<p>having a method which accepts directly a closure can significantly improve performance (almost 4x faster dispatch!)</p>
+</li>
+<li>
+<p>using a cached closure or a cached SAM type is fast in any case</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that using cached closures is not something that is specific to Groovy: it would be true for any Java code too, if you consider a coerced closure as an anonymous inner class. Each time the method is called, you create a <strong>new instance</strong> of the closure (or, in Java, the anonymous inner class). So moving the definition of the closure (or anonymous inner class) outside the loop and you will reuse the <strong>same instance</strong>, dramatically improving performance.</p>
+</div>
+<div class="paragraph">
+<p>We must explain what performance we&#8217;re talking about here: the closure does nothing special here, just returning a dummy string. So the cost of the treatment is almost null. What if the code actually does something? Would the differences be so important? To check that, we will modify the code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>interface SAMType {
+    void apply()
+}
+
+@groovy.transform.CompileStatic
+void coercion(SAMType s) { s.apply() }
+
+@groovy.transform.CompileStatic
+void direct(Closure c) { c.call() }
+
+void doSomething() {
+   Thread.sleep(100)
+}
+
+Closure cachedClosure = { doSomething() }
+SAMType cachedSAMType = { doSomething() }
+
+@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+def r = benchmark {
+      'explicit coercion' {
+          coercion { doSomething() } as SAMType
+      }
+      'implicit coercion' {
+          coercion { doSomething() }
+      }
+      'direct closure' {
+          direct { doSomething() }
+      }
+      'cached SAM type' {
+          coercion cachedSAMType
+      }
+      'cached closure' {
+          direct cachedClosure
+      }
+  }
+  r.prettyPrint()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this version, we simulate a long running process with <code>Thread.sleep(100)</code>. The results are shown below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                     user  system     cpu       real
+
+explicit coercion  248621       0  248621  100329258
+implicit coercion  208407       0  208407  100273428
+direct closure          0  166932  166932  100238245
+cached SAM type         0  157406  157406  100232334
+cached closure          0  160848  160848  100214197</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that it&#8217;s better to look at the <code>real</code> column here, since <code>Thread.sleep</code> doesn&#8217;t consume any CPU. What is interesting here is that now, there&#8217;s almost no difference between each version. This is simply explained: the cost of the treatment exceeds the cost of instantiating a closure and coercing it.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So given those figures, what can we conclude? First of all, one of the interests of implicit closure coercion is that previously (before Groovy 2.2), if you wanted users to avoid explicit coercion, you had to write a method accepting a closure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>// real method
+void addListener(Listener listener) { ... }
+// convenience method to avoid explicit coercion from user code
+void addListener(Closure cl) { addListener(cl as Listener) }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The problem is that you double the number of methods here, so implicit closure coercion is a big bonus here. But our figures showed that calling a method accepting a closure is much faster, so you have a dilemn here: should you keep the closure version or not? The second benchmark gives a first answer: you shouldn&#8217;t remove the <code>Closure</code> version only if you know that the treatment in the closure is <strong>very</strong> fast. As soon as business code in the closure is a bit complex, it&#8217;s not worth it and you can remove the <code>Closure</code> version. This means that in the vast majority of cases, you can remove it without problem.</p>
+</div>
+<div class="paragraph">
+<p>In fact, there&#8217;s one more case where you&#8217;d want to keep the <code>Closure</code> version: if you manipulate the closure before calling it, like changing the delegate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>void doSomething(SAMType arg) { ... }
+void doSomething(Closure cl) {
+   def clone = cl.rehydrate(delegate,this,this)
+   doSomething(clone as SAMType)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Hope things are clearer for you now!</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2013/11/22/coercion_vs_direct.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2013/11/21/a_new_home.html"><h1>A new home!</h1></a>
   			<p>21 novembre 2013</p>
 			<p><em>Tags: </em>blog </em> asciidoctor </em> jbake </p>
@@ -265,61 +771,6 @@ pause = 2000
 </div>
 </div></p>
 			<p><a href="/blog/2013/05/27/gr8conf_europe_2013_is_over.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2013/04/17/null_safe_invocation_and_primitive.html"><h1>Null-safe invocation and primitive types</h1></a>
-  			<p>17 avril 2013</p>
-			<p><em>Tags: </em>groovy </em> null </em> programming </p>
-  			<p><div class="sect2">
-<h3 id="_null_safe_method_invocation">Null-safe method invocation</h3>
-<div class="paragraph">
-<p>Yesterday, I worked on <a href="http://jira.codehaus.org/browse/GROOVY-6101">a bug</a> reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>class Person {
-   String name
-   int age
-}
-
-Person getPerson() { null }
-
-Person p = getPerson()
-
-def result = p?.age
-</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now the question is, what is the value of <em>result</em>? If you run this in the Groovy console, the result would be <em>null</em>. This is compatible with the assumption that the null-safe invocation operator (?.) always return null if the receiver of the message is null (here, <em>p</em> is null, so result is null). The definition is pretty easy, but it gets more complicated if you slightly modify the code:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>int result = p?.age
-</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>By explicitely setting the type to <em>int</em>, executing this would throw an error, stating that you cannot convert <em>null</em> to <em>int</em>. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if <em>p</em> is not null, the assignment is perfectly valid since <em>getAge()</em> is expected to return a primitive type… This means that unlike the &#8220;normal&#8221; invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_the_dynamic_world">The dynamic world</h3>
-<div class="paragraph">
-<p>What if the null-safe invoker was aware of the return type? In &#8220;null-safe&#8221;, you must think about what the &#8220;safe&#8221; part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the <strong>receiver</strong> is null, then return null. This means that because <em>p</em> is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was <em>getAge()</em>, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a <em>default value</em> compatible with the primitive type. This means that here, I would expect the null-safe invoker to return <em>0</em>. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when <em>p?.age</em> is executed, the target method hasn’t been chosen, because you need to know the runtime type of <em>p</em> to determine what method will eventually be called. As <em>p</em> is null, the dynamic runtime doesn’t know the type of <em>p</em>, so has no idea that calling <em>age</em> would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_the_static_world">The static world</h3>
-<div class="paragraph">
-<p>Now what if we’re in a pure static world? In that case, the method to be called is chosen at compile time, given the inferred type of <em>p</em>. It means that unlike the dynamic runtime, the static compiler, at this point, knows that <em>p.age</em> is <em>p.getAge()</em> which returns a primitive type. So it is capable of handling the null-safe invocation with what I think is better, semantically speaking: <em>null-safe</em> invocation only checks the receiver, and returns a value which depends on the return type of the method being invoked. So a static compiler is able to return <em>0</em> instead of the non-pritive <em>null</em>. What is funny is that I asked, on Twitter, what people expected from the result of <em>p?.getAge()</em> if <em>p</em> is null. Everybody answered <em>null</em>. So it’s clear that my way of thinking is not mainstream, but I’m ok with that. I just find it awkward that an operator which is supposed to act on invocation is also capable of altering the return type…</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_conclusion">Conclusion</h3>
-<div class="paragraph">
-<p>Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)</p>
-</div>
-</div></p>
-			<p><a href="/blog/2013/04/17/null_safe_invocation_and_primitive.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
