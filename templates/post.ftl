@@ -14,7 +14,7 @@
 <div id="disqus_thread"></div>
     <script type="text/javascript">
         var disqus_shortname = 'melixblog';
-
+	var disqus_identifier = '${content.id}';
         /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

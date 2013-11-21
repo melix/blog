@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: grails, groovy, security, spring
 :jbake-status: published
 :source-highlighter: prettify
+:id: grails_spring_and_templates_security
 
 In my http://www.jroller.com/melix/entry/replacing_velocity_with_groovy_jsmarty[previous post], I was thinking about using Groovy SimpleTemplateEngine as a replacement for Velocity. The main idea was to be able to create arbitrary functions for use in the template without having to rebuild my application (and expose a utility class). I’ve been told about taking a look at http://freemarker.org[_FreeMarker_], but the problem is quite the same : some operations may not be written by a web designer. I’ll take a simple example : for a customer, we needed to be able to take a simple string, and convert it in an URL encoded string. To do that, I had to expose and utility tool which was able to do URL encoding, and rebuild and application. As far as I have seen, FreeMarker functions do not allow that kind of manipulation either (I _may_ be wrong, feel free to correct me).
 

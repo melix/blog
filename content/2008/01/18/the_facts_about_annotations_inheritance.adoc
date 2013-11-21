@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: annotations, inheritance, java
 :jbake-status: published
 :source-highlighter: prettify
+:id: the_facts_about_annotations_inheritance
 
 Following my post about http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance[the behaviour of annotations in an inheritance model], http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance#comments[Mike Kaufman made a very interesting comment]. The *truth*, as I said, is that annotations are *technically* inherited only if the annotation definition itself is annotated with _@Inherited_.
 

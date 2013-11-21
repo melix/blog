@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: closure, groovy
 :jbake-status: published
 :source-highlighter: prettify
+:id: coding_a_groovy_closure_in
 
 Today I just wanted to share a simple trick that’s not well documented in Groovy : in a project which mixes Java and Groovy code, I’ve faced a problem where I wanted to use a Groovy method in Java which took a _Closure_ as a parameter. Here’s how to do it. Actually, it’s quite simple :
 

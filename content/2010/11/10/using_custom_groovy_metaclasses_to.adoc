@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: groovy, performance, programming
 :jbake-status: published
 :source-highlighter: prettify
+:id: using_custom_groovy_metaclasses_to
 
 Groovy is a dynamic language by nature. This means, in Groovy, that method dispatches are controlled by metaclasses. This is really powerful, and allows nice tricks like the ``method missing'' or ``property missing'' calls that are used in many DSLs. The metaclass dictates what behaviour is expected whenever a call to a property or a method is made.
 

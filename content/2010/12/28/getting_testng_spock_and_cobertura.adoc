@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: cobertura, maven, spock, testng
 :jbake-status: published
 :source-highlighter: prettify
+:id: getting_testng_spock_and_cobertura
 
 Cobertura, TestNG and Maven play well together. However, I had problems when I started migrating some tests to http://code.google.com/p/spock/[the Spock framework]. Long story short, Spock uses JUnit internally, not TestNG, and the surefire plugin only triggers tests for one of those frameworks at a time. Therefore, if you mix TestNG with Spock, you’ll run with problems where your Spock tests won’t be started automatically by Maven, and eventually, Cobertura will never generate test coverage for the corresponding classes.
 

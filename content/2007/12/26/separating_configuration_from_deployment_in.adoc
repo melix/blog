@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: configuration, j2ee, java, spring, tomcat, web
 :jbake-status: published
 :source-highlighter: prettify
+:id: separating_configuration_from_deployment_in
 
 Since I write web applications, I’ve always been struggling with a very basic problem. Basically, I refuse to write, and tell my coworkers too, applications which require a compilation for each customer. This seems common sense, but it is really critical when building applications which require a high level of customization. The second problem is about *upgrading applications*.
 

@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: idea, intellij, performance, tip
 :jbake-status: published
 :source-highlighter: prettify
+:id: tip_find_try_catch_performance
 
 Advanced Java programmers are aware that _try/catch_ statements cost many CPU cycles, so it is generally a bad idea to catch exceptions in loop statements. Moreover, even with profilers, it may be hard to find out that a _try/catch_ statement is responsible for a performance bottleneck : you have to take a look at your code, and figure out whether it should be optimized or not. In many cases, you should definitely avoid using _try/catch_ statements in loops.
 

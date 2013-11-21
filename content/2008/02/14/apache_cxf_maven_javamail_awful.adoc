@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: apache, commons, cxf, email, javamail, maven
 :jbake-status: published
 :source-highlighter: prettify
+:id: apache_cxf_maven_javamail_awful
 
 I had much trouble trying to figure out why a project we moved to Apache CXF (for managing web services) suddenly started to send malformed emails. Basically, we use Commons email for sending emails to the administrator whenever a monitored service goes wrong.
 

@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: 7, java
 :jbake-status: published
 :source-highlighter: prettify
+:id: java_7_idea_change_default
 
 Apart from closures I eventually doubt will be integrated into Java 7, there’s something I’d really like to see, althought it introduces a (small yet easily fixable) change : I think the default *source file encoding* should be the same for all platforms. Thumbs up for UTF-8, since it is able to represent most of characters for every language (for exotic characters, you still may use \uxxxx notation).
 

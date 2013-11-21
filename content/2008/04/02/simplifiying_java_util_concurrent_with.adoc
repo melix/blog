@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: concurrent, groovy, java
 :jbake-status: published
 :source-highlighter: prettify
+:id: simplifiying_java_util_concurrent_with
 
 Ever wondered how to simplify _java.util.concurrent_ usage with Groovy ? Here’s a simple example of what can be easily done using closures. The following code executes several closures in parallel and waits upon completion before resuming the script.
 

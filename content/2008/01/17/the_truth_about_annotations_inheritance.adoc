@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: annotations, inheritance, java
 :jbake-status: published
 :source-highlighter: prettify
+:id: the_truth_about_annotations_inheritance
 
 I’ve read tons of articles about the subject : are annotations inherited or not ? Java 5 annotations are powerful, but you must understand what you do. Annotating a class does not necessarily mean that a subclass will keep the annotation. So, are they inherited or not ? The truth is that if you *want* your annotations to be inherited, you *must* specify it. Here’s a simple JUnit 4.4 test case to show you the concept.
 

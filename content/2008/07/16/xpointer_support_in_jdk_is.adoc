@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: java, jdk, xinclude, xpointer
 :jbake-status: published
 :source-highlighter: prettify
+:id: xpointer_support_in_jdk_is
 
 There are some days when you want to kill people who don’t document their code, and some where you just want to kill those who silently ignore specifications. Today, I’ve spent hours digging into the source code of the Sun JDK (1.5) in order to find out why one of my XML inclusions did not work. Worse, there wasn’t a single warning, nor a single error in the console…
 

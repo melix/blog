@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: cglib, delegate, design, java, pattern
 :jbake-status: published
 :source-highlighter: prettify
+:id: alternative_to_delegate_pattern_with
 
 This week I had some third party class I needed to override, but as in many cases, I had to use the delegate design pattern in order to be able to expand the class without modifying the 3rd party library. +
   +
