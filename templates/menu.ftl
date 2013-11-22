@@ -11,6 +11,7 @@
             <div class="nav-collapse collapse">
               <ul class="nav">                
                 <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
                 <li><a href="/blog/${config.feed_file}">Feed</a></li>                
               </ul>
             </div><!--/.nav-collapse -->
