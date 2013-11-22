@@ -46,5 +46,6 @@
   ga('send', 'pageview');
 
 </script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>
