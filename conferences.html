@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cédric Champeau's blog: Getting TestNG, Spock and Cobertura to work together with Maven</title>
+    <title>Cédric Champeau's blog: My conferences</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -28,7 +28,7 @@
     </head>
   <body>
     <div id="wrap">
-	
+
 	<!-- Fixed navbar -->
       <div class="navbar navbar-fixed-top">
         <div class="navbar-inner">
@@ -52,199 +52,36 @@
       <div class="container">
 	
 	<div class="page-header">
-		<h1>Getting TestNG, Spock and Cobertura to work together with Maven</h1>
+		<h1>My conferences</h1>
 	</div>
 
-	<p><em>28 décembre 2010</em></p>
-	<p><em>Tags: </em>cobertura </em> maven </em> spock </em> testng </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2010/12/28/getting_testng_spock_and_cobertura.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2010/12/28/getting_testng_spock_and_cobertura.html"></div>
+	<p><em>22 novembre 2013</em></p>
 
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Cobertura, TestNG and Maven play well together. However, I had problems when I started migrating some tests to <a href="http://code.google.com/p/spock/">the Spock framework</a>. Long story short, Spock uses JUnit internally, not TestNG, and the surefire plugin only triggers tests for one of those frameworks at a time. Therefore, if you mix TestNG with Spock, you’ll run with problems where your Spock tests won’t be started automatically by Maven, and eventually, Cobertura will never generate test coverage for the corresponding classes.</p>
+<p>I am giving talks to JUGs and conferences, mainly about the <a href="http://groovy.codehaus.org">Groovy language</a> (and related topics like <a href="http://gradle.org">Gradle</a>, <a href="http://docs.spockframework.org/en/latest/">Spock</a>, DSLs, &#8230;).</p>
 </div>
 <div class="paragraph">
-<p>I have found different proposals for fixing this problem, but only one worked for me, so here’s my working pom.xml :</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>
-...
-
-                1.7.6
-  0.5-groovy-1.7
-  1.2
-
-...
-
-
-
-   org.testng
-   testng
-   5.8
-   test
-   jdk15
-
-
-   org.codehaus.groovy
-   groovy-all
-   ${groovy.version}
-
-
-     junit
-     junit
-
-
-     org.apache.ant
-     ant
-
-
-     org.apache.ant
-     ant-launcher
-
-
-     jline
-     jline
-
-
-
-
-
-   org.spockframework
-   spock-core
-   ${spock.version}
-   test
-
-
-
-   org.codehaus.gmaven.runtime
-   gmaven-runtime-1.7
-   ${gmaven.version}
-
-
-     org.codehaus.groovy
-     groovy-all
-
-
-
-...
-
-
-
-
-
-    org.codehaus.gmaven
-    gmaven-plugin
-    ${gmaven.version}
-
-
-
-       1.7
-
-
-       generateStubs
-       compile
-       generateTestStubs
-       testCompile
-
-
-
-
-
-
-    org.apache.maven.plugins
-    maven-surefire-plugin
-    2.7.1
-
-
-      test
-
-       test
-
-
-       none:none
-
-
-
-      test-testng
-      test
-
-       test
-
-
-       none:none
-
-
-
-
-
-    org.spockframework
-    spock-maven
-    ${spock.version}
-
-
-
-       find-specs
-
-
-
-
-
-    org.codehaus.mojo
-    cobertura-maven-plugin
-    2.4
-
-
-      cobertura-test
-      package
-
-       cobertura
-
-
-
-        false
-
-
-
-
-      cobertura-clean
-      clean
-
-       clean
-
-
-
-
-
-
-</code></pre>
+<p>Here you can find a detailed page on conferences I gave and upcoming events.</p>
 </div>
 </div>
-<div class="paragraph">
-<p>The trick is to add two executions of the surefire plugin, as <a href="http://bit.ly/ePc0oG">indicated here</a>, but forcing the plugin version to 2.7.1. Also, adding two dependencies to the surefire plugin, as suggested by <a href="http://twitter.com/#!/krosenvold/status/19442054924861441">Kristian Rosenvold</a> didn’t work for me. My pom.xml file also includes the necessary configuration for GMaven to work with Groovy 1.7 instead of 1.6 by default.</p>
 </div>
+<div class="sect1">
+<h2 id="_next_events">Next events</h2>
+<div class="sectionbody">
+<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-template-detailed lanyrd-type-all lanyrd-context-future lanyrd-number-20" rel="me">See my conferences on Lanyrd</a></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_past_events">Past events</h2>
+<div class="sectionbody">
+<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-template-detailed lanyrd-type-all lanyrd-context-past lanyrd-number-20" rel="me">See my conferences on Lanyrd</a></div>
 </div>
 </div></p>
 
-<div id="disqus_thread"></div>
-    <script type="text/javascript">
-        var disqus_shortname = 'melixblog';
-	var disqus_identifier = 'getting_testng_spock_and_cobertura';
-        /* * * DON'T EDIT BELOW THIS LINE * * */
-        (function() {
-            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-        })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
 	<hr>
-	
+
 		</div>
 		<div id="push"></div>
     </div>
