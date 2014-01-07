@@ -6,9 +6,523 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>ven., 22 nov. 2013 20:11:17 +0100</pubDate>
-    <lastBuildDate>ven., 22 nov. 2013 20:11:17 +0100</lastBuildDate>
+    <pubDate>mar., 7 janv. 2014 17:57:14 +0100</pubDate>
+    <lastBuildDate>mar., 7 janv. 2014 17:57:14 +0100</lastBuildDate>
 
+    <item>
+      <title>Closure parameter type inference for Groovy</title>
+      <link>http://melix.github.io/blog//2014/01/closure_param_inference.html</link>
+      <pubDate>mar., 7 janv. 2014 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">/2014/01/closure_param_inference.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s start 2014 with a new blog post about a long standing request since we introduced static type checking in Groovy 2: closure parameter type inference.
+Before we start, let me wish you a happy new year and a lot of open source contributions!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_type_checking_closure_parameter_types&quot;&gt;Type checking closure parameter types&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To illustrate the problem, let&amp;#8217;s start with this very simple, standard, Groovy code:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;void test() {
+    assert [&apos;foo&apos;,&apos;bar&apos;,&apos;baz&apos;].collect { it.toUpperCase() } == [&apos;FOO&apos;,&apos;BAR&apos;,&apos;BAZ&apos;]
+}
+test()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This code compiles and runs perfectly fine. Now if you want the &lt;em&gt;test&lt;/em&gt; method to be type safe, you can annotate it with &lt;em&gt;@TypeChecked&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;import groovy.transform.TypeChecked
+
+@TypeChecked
+void test() {
+    assert [&apos;foo&apos;,&apos;bar&apos;,&apos;baz&apos;].collect { it.toUpperCase() } == [&apos;FOO&apos;,&apos;BAR&apos;,&apos;BAZ&apos;]
+}
+test()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you compile this, you will notice that the compiler fails with an error:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;[Static type checking] - Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.
+ at line: 5, column: 42&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Fixing this requires an explicit closure parameter type:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;import groovy.transform.TypeChecked
+
+@TypeChecked
+void test() {
+    assert [&apos;foo&apos;,&apos;bar&apos;,&apos;baz&apos;].collect { String it -&amp;gt; it.toUpperCase() } == [&apos;FOO&apos;,&apos;BAR&apos;,&apos;BAZ&apos;]
+}
+test()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The problem comes from the &lt;em&gt;collect&lt;/em&gt; method, which accepts a &lt;code&gt;Closure&lt;/code&gt;. In Groovy, a &lt;code&gt;Closure&lt;/code&gt; is a block of code which may capture variables, but it is also
+represented as an object of the class &lt;code&gt;Closure&lt;/code&gt;. This is a different concept from Java 8 lambdas, which have no &lt;em&gt;Lambda&lt;/em&gt; class, for example. A Java 8 lambda can
+be considered as purely syntactic sugar, which is interpreted as an interface implementation at compile time, although a &lt;code&gt;Closure&lt;/code&gt; can be manipulated. To illustrate
+this, let&amp;#8217;s compare the signatures of &lt;em&gt;collect&lt;/em&gt; (in Groovy) and &lt;code&gt;Map&lt;/code&gt; (in Java 8) which correspond to the same concept:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;items of the source list are of type T and converted to type U using the closure&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;&amp;lt;R&amp;gt; Stream&amp;lt;R&amp;gt; map(Function&amp;lt;? super T, ? extends R&amp;gt; mapper); &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Function is an interface, the lambda expression will be converted into this target interface&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Java 8 equivalent would therefore be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;list.stream().map((it)-&amp;gt;it.toUpperCase()).collect(Collectors.toList()); &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;we&amp;#8217;re not using the smarter method reference notation here, to illustrate the concept&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, Java allows the same thing as Groovy but doesn&amp;#8217;t require an explicit type. The reason is that for Java, there&amp;#8217;s no ambiguity:
+it makes use of &lt;em&gt;target typing&lt;/em&gt;. Since a lambda is targetting an interface, the type of the parameters can be inferred from the interface type.
+In Groovy, we can&amp;#8217;t do this, because &lt;code&gt;Closure&lt;/code&gt; is not an interface. It is a class which can be manipulated. At this point, you may wonder why
+we don&amp;#8217;t do the same as in Java, and there are several reasons:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;historical reason first, &lt;code&gt;Closure&lt;/code&gt; was one of the key features of the language, 10 years ago!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a single class, &lt;code&gt;Closure&lt;/code&gt;, is enough for &lt;strong&gt;all&lt;/strong&gt; usages of an open block. We don&amp;#8217;t need Function, Consumer, BiFunction, &amp;#8230; So we can dramatically
+reduce the amount of &quot;design interfaces&quot;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;last but not least, &lt;em&gt;Closures&lt;/em&gt; support various delegation strategies. This is something Java (or even Scala) is totally unable to do. &lt;code&gt;Closure&lt;/code&gt; can
+be &lt;em&gt;cloned&lt;/em&gt;, &lt;em&gt;curried&lt;/em&gt;, &lt;em&gt;trampolined&lt;/em&gt;, &amp;#8230; and it always returns an instance of another &lt;code&gt;Closure&lt;/code&gt;. This closure can change the delegate, which is the
+key for nice builder like DSLs. The delegate is used whenever a method call in a closure doesn&amp;#8217;t have an explicit receiver. For example:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;mail {
+   from &apos;austin.powers@groovy.baby&apos;
+   to &apos;mini.me@evil.com&apos;
+   subject &apos;Attention please!&apos;
+   body &apos;...&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this DSL, the &lt;em&gt;from&lt;/em&gt;, &lt;em&gt;to&lt;/em&gt;, &lt;em&gt;subject&lt;/em&gt; and &lt;em&gt;body&lt;/em&gt; method calls are done on the &lt;em&gt;delegate&lt;/em&gt;. Being able to set the &lt;em&gt;delegate&lt;/em&gt; absolutely requires a
+&lt;code&gt;Closure&lt;/code&gt; class. The implementation of the mail method may have something like:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class EmailSpecification {
+    void from(String sender) { ... }
+    void to(String to) { ... }
+    void subject(String subject) { ... }
+    void body(String body) { ... }
+    void mail(Closure mail) {
+       def mailSpec = mail.clone()
+       mailSpec.delegate = this
+       mailSpec()
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The problem with this approach is that if the closure requires parameters, like in the &lt;em&gt;collect&lt;/em&gt; case, the Java type system, as well as the Groovy type
+system (which is the same), isn&amp;#8217;t expressive enough to let you define them:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;We could like to say that Closure returns a U, but also that it consumes a T&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course the first option that was studied was defining lots of &lt;code&gt;Closure&lt;/code&gt; interfaces, corresponding to the various number of arguments (up to some arbitrary limit):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure1&amp;lt;T,U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Closure1 is a kind of closure which accepts a single argument and returns a value&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While this works, it has several drawbacks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;it requires a lot of arbitrary, totally useless in a dynamic context, number of interfaces/classes to define closures&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it doesn&amp;#8217;t solve the case of polymorphic closures&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_polymorphic_closures&quot;&gt;Polymorphic closures&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Polywhat? In Groovy, closures can be polymorphic. To illustrate the concept, let&amp;#8217;s take a look at a common method that iterates on map entries:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def map = [key1: &apos;value 1&apos;, key2: &apos;value2&apos;]
+map.each { k,v -&amp;gt; println &quot;Key is $k, value is $v&quot; } &lt;b&gt;(1)&lt;/b&gt;
+map.each { e -&amp;gt; println &quot;Key is ${e.key], value is ${e.value}&quot; } &lt;b&gt;(2)&lt;/b&gt;
+map.each { println &quot;Key is ${it.key], value is ${it.value}&quot; } &lt;b&gt;(3)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;version where the map entry is automatically converted into a key and value arguments&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;version where the closure takes a single, &lt;code&gt;Map.Entry&lt;/code&gt; argument&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;version with an implicit argument, it, is a &lt;code&gt;Map.Entry&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In all cases, it is always the &lt;strong&gt;same&lt;/strong&gt; method which is called, that is to say &lt;em&gt;each(Closure)&lt;/em&gt; on a &lt;code&gt;Map&lt;/code&gt;. The signature of this method is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;K,V&amp;gt; each(Map&amp;lt;K,V&amp;gt; self, Closure&amp;lt;?&amp;gt; onEachEntry)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, the return type of the closure doesn&amp;#8217;t help here, and just reading that signature, you have absolutely no way to guess that the closure
+will accept either a &lt;code&gt;Map.Entry&lt;/code&gt; or a pair of &lt;code&gt;K,V&lt;/code&gt;. Nor does the compiler. At best, your IDE knows it, and it does because it is hardcoded! This is
+exactly why the compiler fails, and also why so many people think it&amp;#8217;s &lt;a href=&quot;https://jira.codehaus.org/browse/GROOVY-5924&quot;&gt;a bug&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Not convinced? Let&amp;#8217;s make the same signature more cryptic:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;Dead,Pool&amp;gt; magneto(Map&amp;lt;Dead,Pool&amp;gt; self, Closure&amp;lt;?&amp;gt; professorX)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now can you guess what &lt;em&gt;professorX&lt;/em&gt; accepts as parameters? ;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_tweaking_the_type_system&quot;&gt;Tweaking the type system&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We have discussed several options and we took the time to think about it, and after the last Groovy DevCon, which took place just before the
+&lt;a href=&quot;http://skillsmatter.com/event-details/home/groovy-grails-exchange-2013&quot;&gt;Groovy and Grails eXchange 2013&lt;/a&gt; in London, I decided to work on an implementation.
+For Groovy 2.1, we had introduced &lt;em&gt;@DelegatesTo&lt;/em&gt; for closures, to be able to help the compiler in the case we described above (hinting at the delegate type)
+but we were still missing parameter type inference. My guess was that it was possible to do something similar to what &lt;em&gt;@DelegatesTo&lt;/em&gt; does, but for parameter
+types.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_annotating_closures&quot;&gt;Annotating closures&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The idea is to annotate closures so that the compiler can fetch the information and infer the argument types from the context. In the case of a simple method
+accepting a closure, a simple annotation could do:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;em&gt;@ClosureParams&lt;/em&gt; annotation is here to instruct the compiler that the closure will accept either an &lt;em&gt;implicit&lt;/em&gt; or &lt;em&gt;explicit&lt;/em&gt; parameter of type &lt;em&gt;String&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;doSomething {
+   it.toUpperCase()
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When the compiler determines that the method which will be called is &lt;em&gt;doSomething&lt;/em&gt; (remember that this is only possible if type checking is activated), then an
+additional lookup on the &lt;em&gt;doSomething&lt;/em&gt; signature can be done, and we can retrieve the list of expected parameter types from the closure annotation. Success!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well, not really:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;we still don&amp;#8217;t support polymorphic closures&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;generics, GENERICS, aaahhhh, GENERICS!&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_introducing_generics&quot;&gt;Introducing&amp;#8230; generics!&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To make things a bit more complicated, we have generics. Don&amp;#8217;t get me wrong. From a user perspective, generics are very good because they make the code more readable
+and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5&amp;#8230;). The typical case is the &lt;em&gt;collect&lt;/em&gt; example that we used initially:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this case, we want to say that the closure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;is monomorphic&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;accepts a single parameter of type T&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and the problem is&amp;#8230; how to express this? One might think that you could write:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, @ClosureParams(T) Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;but the truth is that the JVM doesn&amp;#8217;t support placeholders as annotation values, nor does it support parametrized types (like &lt;code&gt;@Foo(List&amp;lt;T&amp;gt;&lt;/code&gt;)). This tells us that the simple strategy doesn&amp;#8217;t work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_solution&quot;&gt;The solution&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The solution we propose is to decouple the declaration of the parameter types from the type itself. In other words, instead of declaring the types in the annotation, we will declare an object
+which is used as a hint to compute the types &lt;strong&gt;at compile time&lt;/strong&gt;. In the case of &lt;em&gt;collect&lt;/em&gt;, we end up with this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T,E&amp;gt; List&amp;lt;T&amp;gt; collect(List&amp;lt;E&amp;gt; self, @ClosureParams(FirstParam.FirstGenericType.class) Closure&amp;lt;? extends T&amp;gt; transform)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this case, &lt;code&gt;FirstParam.FirstGenericType&lt;/code&gt; doesn&amp;#8217;t represent the type itself. It&amp;#8217;s a hint used by the compiler, which says &quot;the type of the argument is the type of the first generic type of the first parameter&quot;. In this case, the first parameter is &lt;code&gt;List&amp;lt;E&amp;gt;&lt;/code&gt;, so the first generic type is &lt;code&gt;E&lt;/code&gt;. This means that if you call the method with a &lt;code&gt;List&amp;lt;String&amp;gt;&lt;/code&gt;, now the compiler can infer that &lt;code&gt;E&lt;/code&gt; is a &lt;code&gt;String&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_type_hints&quot;&gt;Type hints&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this point, you may actually think that this &quot;solution&quot; is a bit complex. However, you have to remember that this kind of work is only necessary if you want to support type inference, so it is really only necessary if you use type checking. This makes this a tool primarily aimed at framework builders. In particular, lots of frameworks are written in Java (including Groovy itself), so the syntax &lt;strong&gt;has&lt;/strong&gt; to be compatible with Java. Second, there&amp;#8217;s no need to define one &lt;code&gt;FirstParam.FirstGenericType&lt;/code&gt; class per method. The same class can be reused for all cases where it makes sense. Remember that it doesn&amp;#8217;t represent the type of the parameters but a way to fetch the type (one level of indirection).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To make things easier for framework writers, the &lt;a href=&quot;https://github.com/groovy/groovy-core/pull/307&quot;&gt;candidate implementation&lt;/a&gt; provides a set of predefined hint classes that should fit most of
+the use cases. Let&amp;#8217;s go through the list:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_firstparam&quot;&gt;FirstParam&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;code&gt;FirstParam&lt;/code&gt; is a hint that says that the expected parameter type corresponds to the first parameter of the method call, like in:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The closure accepts a single parameter of type &lt;code&gt;BigInteger&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_firstparam_firstgenerictype&quot;&gt;FirstParam.FirstGenericType&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This hint is used when the type to use is not the type of the parameter, but the type of the first generic type of the first argument, like in:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T,E&amp;gt; Collection&amp;lt;T&amp;gt; collect(Collection&amp;lt;E&amp;gt; self, Collection&amp;lt;T&amp;gt; collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure&amp;lt;? extends T&amp;gt; transform)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that if you have a &lt;code&gt;Collection&lt;/code&gt; defined like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class PersonList extends LinkedList&amp;lt;Person&amp;gt; {}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and that you call collect:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;list.collect { it.name }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;the compiler will be capable of inferring that the type of the first generic type is actually a &lt;code&gt;Person&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;code&gt;FirstParam&lt;/code&gt; also supports &lt;code&gt;SecondGenericType&lt;/code&gt; and &lt;code&gt;ThirdGenericType&lt;/code&gt;. You can also find &lt;code&gt;SecondParam&lt;/code&gt; and &lt;code&gt;ThirdParam&lt;/code&gt; which follow the same structure.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_mapentryorkeyvalue&quot;&gt;MapEntryOrKeyValue&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This hint is used for cases where the closure may accept a &lt;code&gt;Map.Entry&lt;/code&gt; or a &lt;em&gt;key,value&lt;/em&gt; pair, which is quite common in the Groovy GDK, like &lt;em&gt;each&lt;/em&gt; on maps:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;K, V&amp;gt; Map&amp;lt;K, V&amp;gt; each(Map&amp;lt;K, V&amp;gt; self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It is an example of polymorphic closure. This hint does all the job of telling that the parameter types may be a &lt;code&gt;K,V&lt;/code&gt; pair or a &lt;code&gt;Map.Entry&amp;lt;K,V&amp;gt;&lt;/code&gt;. For that, it expects the map to be the first parameter of the method.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_simpletype&quot;&gt;SimpleType&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Simple type can be used for monomorphic closures, in the cases the closure accepts parameters of a non-parametrized type. In this case, you need to use an option to specify the fully qualified name, like in this example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options=&quot;byte&quot;) Closure closure)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this example, the closure accepts a single parameter of type &lt;code&gt;byte&lt;/code&gt;. For a non primitive type, you need the fully qualified name:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options=&quot;java.lang.String&quot;) Closure predicate)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If the closure accepts multiple arguments then you need options to be an array:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={&quot;java.io.ObjectInputStream&quot;,&quot;java.io.ObjectOutputStream&quot;}) Closure&amp;lt;T&amp;gt; closure)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_fromstring&quot;&gt;FromString&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The last predefined hint can be used whenever none of the previous hints is suitable. A good example is the &lt;em&gt;sort&lt;/em&gt; method on a collection, which takes a closure which either accepts a single
+parameter of type &lt;code&gt;T&lt;/code&gt; (where &lt;code&gt;T&lt;/code&gt; is the component type) or two parameters of type &lt;code&gt;T&lt;/code&gt; in which case we have a comparator-style closure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; List&amp;lt;T&amp;gt; sort(Collection&amp;lt;T&amp;gt; self, @ClosureParams(value=FromString.class, options={&quot;T&quot;,&quot;T,T&quot;} Closure c)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, in this example, the &lt;em&gt;options&lt;/em&gt; map defines two possible signatures. The string literal are used at compile time to match those of the method signature. Since it involves much more work for the compiler, it is not recommanded to use &lt;code&gt;FromString&lt;/code&gt; if other options are available, because it would be slower at compile time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_future_work&quot;&gt;Future work&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The candidate implementation is available on &lt;a href=&quot;https://github.com/groovy/groovy-core/pull/307&quot;&gt;GitHub&lt;/a&gt;. It works pretty well, and honestly, I couldn&amp;#8217;t come with any better idea. One very good point of this implementation is that it is Java friendly. You can annotate classes written in pure Java and the Groovy compiler would be able to use the extra information. In the future, we could probably support a nicer syntax for Groovy, but it would require a grammar change, which is not planned until Groovy 3. For example, we could write this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; List&amp;lt;T&amp;gt; sort(Collection&amp;lt;T&amp;gt; self, Closure&amp;lt;T or T,T -&amp;gt; ?&amp;gt; c)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which would totally avoid the &quot;ugliness&quot; of the annotation, while using the same backing tool.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last thing, do not hesitate to comment on this blog about the solution we found. Of course, it took some time, and the discussions can be found here:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://groovy.329449.n5.nabble.com/TypeChecked-type-inference-does-not-work-with-closure-td5709972.html#a5709981&quot;&gt;an example of user complaint&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://groovy.329449.n5.nabble.com/Closure-parameter-types-inference-td4978037.html&quot;&gt;Initial, not satisfying, solution, two years ago&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://groovy.329449.n5.nabble.com/Closure-parameter-type-inference-td5717804.html&quot;&gt;discussion about this solution&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Thanks to everybody who participated in the discussion, and, of course, thank you for your comments if any: this is still a &lt;em&gt;candidate&lt;/em&gt; solution, so if you come with any better idea, I&amp;#8217;m open!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Performance of coercion vs closures in Groovy 2.2</title>
       <link>http://melix.github.io/blog//2013/11/22/coercion_vs_direct.html</link>
@@ -738,65 +1252,6 @@ pause = 2000
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Going to GR8Conf for the second time was like last year an incredible experience. I had the chance to talk to lots of talented and famous developers of the Groovy community, as well as sharing with users, which is worth the trip. This gave me for example the occasion to talk to two GPars brains for the first time (Dierk Koenig and Vaclav Pech). I’d really like to thank Soren for organizing this, as well as the crew for all the goodness that we can see here. I’m really looking forward to go to the next edition!&lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Null-safe invocation and primitive types</title>
-      <link>http://melix.github.io/blog//2013/04/17/null_safe_invocation_and_primitive.html</link>
-      <pubDate>mer., 17 avr. 2013 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">/2013/04/17/null_safe_invocation_and_primitive.html</guid>
-      	<description>
-	&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_null_safe_method_invocation&quot;&gt;Null-safe method invocation&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yesterday, I worked on &lt;a href=&quot;http://jira.codehaus.org/browse/GROOVY-6101&quot;&gt;a bug&lt;/a&gt; reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;class Person {
-   String name
-   int age
-}
-
-Person getPerson() { null }
-
-Person p = getPerson()
-
-def result = p?.age
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now the question is, what is the value of &lt;em&gt;result&lt;/em&gt;? If you run this in the Groovy console, the result would be &lt;em&gt;null&lt;/em&gt;. This is compatible with the assumption that the null-safe invocation operator (?.) always return null if the receiver of the message is null (here, &lt;em&gt;p&lt;/em&gt; is null, so result is null). The definition is pretty easy, but it gets more complicated if you slightly modify the code:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;int result = p?.age
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;By explicitely setting the type to &lt;em&gt;int&lt;/em&gt;, executing this would throw an error, stating that you cannot convert &lt;em&gt;null&lt;/em&gt; to &lt;em&gt;int&lt;/em&gt;. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if &lt;em&gt;p&lt;/em&gt; is not null, the assignment is perfectly valid since &lt;em&gt;getAge()&lt;/em&gt; is expected to return a primitive type… This means that unlike the &amp;#8220;normal&amp;#8221; invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_the_dynamic_world&quot;&gt;The dynamic world&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What if the null-safe invoker was aware of the return type? In &amp;#8220;null-safe&amp;#8221;, you must think about what the &amp;#8220;safe&amp;#8221; part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the &lt;strong&gt;receiver&lt;/strong&gt; is null, then return null. This means that because &lt;em&gt;p&lt;/em&gt; is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was &lt;em&gt;getAge()&lt;/em&gt;, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a &lt;em&gt;default value&lt;/em&gt; compatible with the primitive type. This means that here, I would expect the null-safe invoker to return &lt;em&gt;0&lt;/em&gt;. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when &lt;em&gt;p?.age&lt;/em&gt; is executed, the target method hasn’t been chosen, because you need to know the runtime type of &lt;em&gt;p&lt;/em&gt; to determine what method will eventually be called. As &lt;em&gt;p&lt;/em&gt; is null, the dynamic runtime doesn’t know the type of &lt;em&gt;p&lt;/em&gt;, so has no idea that calling &lt;em&gt;age&lt;/em&gt; would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_the_static_world&quot;&gt;The static world&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now what if we’re in a pure static world? In that case, the method to be called is chosen at compile time, given the inferred type of &lt;em&gt;p&lt;/em&gt;. It means that unlike the dynamic runtime, the static compiler, at this point, knows that &lt;em&gt;p.age&lt;/em&gt; is &lt;em&gt;p.getAge()&lt;/em&gt; which returns a primitive type. So it is capable of handling the null-safe invocation with what I think is better, semantically speaking: &lt;em&gt;null-safe&lt;/em&gt; invocation only checks the receiver, and returns a value which depends on the return type of the method being invoked. So a static compiler is able to return &lt;em&gt;0&lt;/em&gt; instead of the non-pritive &lt;em&gt;null&lt;/em&gt;. What is funny is that I asked, on Twitter, what people expected from the result of &lt;em&gt;p?.getAge()&lt;/em&gt; if &lt;em&gt;p&lt;/em&gt; is null. Everybody answered &lt;em&gt;null&lt;/em&gt;. So it’s clear that my way of thinking is not mainstream, but I’m ok with that. I just find it awkward that an operator which is supposed to act on invocation is also capable of altering the return type…&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 	</description>
