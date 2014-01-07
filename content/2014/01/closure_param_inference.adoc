@@ -1,0 +1,360 @@
+= Closure parameter type inference for Groovy
+Cédric Champeau
+2014-01-07
+:jbake-type: post
+:jbake-tags: groovy, closure, type checking, inference
+:jbake-status: published
+:source-highlighter: prettify
+:id: closure_param_inference
+
+Let's start 2014 with a new blog post about a long standing request since we introduced static type checking in Groovy 2: closure parameter type inference.
+Before we start, let me wish you a happy new year and a lot of open source contributions!
+
+== Type checking closure parameter types
+
+To illustrate the problem, let's start with this very simple, standard, Groovy code:
+
+[source,groovy]
+----
+void test() {
+    assert ['foo','bar','baz'].collect { it.toUpperCase() } == ['FOO','BAR','BAZ']
+}
+test()
+----
+
+This code compiles and runs perfectly fine. Now if you want the _test_ method to be type safe, you can annotate it with _@TypeChecked_:
+
+[source,groovy]
+----
+import groovy.transform.TypeChecked
+
+@TypeChecked
+void test() {
+    assert ['foo','bar','baz'].collect { it.toUpperCase() } == ['FOO','BAR','BAZ']
+}
+test() 
+----
+
+If you compile this, you will notice that the compiler fails with an error:
+
+----
+[Static type checking] - Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.
+ at line: 5, column: 42
+----
+
+Fixing this requires an explicit closure parameter type:
+
+[source,groovy]
+----
+import groovy.transform.TypeChecked
+
+@TypeChecked
+void test() {
+    assert ['foo','bar','baz'].collect { String it -> it.toUpperCase() } == ['FOO','BAR','BAZ']
+}
+test() 
+----
+
+
+The problem comes from the _collect_ method, which accepts a `Closure`. In Groovy, a `Closure` is a block of code which may capture variables, but it is also
+represented as an object of the class `Closure`. This is a different concept from Java 8 lambdas, which have no _Lambda_ class, for example. A Java 8 lambda can
+be considered as purely syntactic sugar, which is interpreted as an interface implementation at compile time, although a `Closure` can be manipulated. To illustrate
+this, let's compare the signatures of _collect_ (in Groovy) and `Map` (in Java 8) which correspond to the same concept:
+
+[source,groovy]
+----
+public static <T,U> List<U> collect(List<T> source, Closure<U> closure) <1>
+----
+<1> items of the source list are of type T and converted to type U using the closure
+
+[source,java]
+----
+<R> Stream<R> map(Function<? super T, ? extends R> mapper); <1>
+----
+<1> Function is an interface, the lambda expression will be converted into this target interface
+
+The Java 8 equivalent would therefore be:
+
+[source,java]
+----
+list.stream().map((it)->it.toUpperCase()).collect(Collectors.toList()); <1>
+----
+<1> we're not using the smarter method reference notation here, to illustrate the concept
+
+As you can see, Java allows the same thing as Groovy but doesn't require an explicit type. The reason is that for Java, there's no ambiguity:
+it makes use of _target typing_. Since a lambda is targetting an interface, the type of the parameters can be inferred from the interface type.
+In Groovy, we can't do this, because `Closure` is not an interface. It is a class which can be manipulated. At this point, you may wonder why
+we don't do the same as in Java, and there are several reasons:
+
+* historical reason first, `Closure` was one of the key features of the language, 10 years ago!
+* a single class, `Closure`, is enough for *all* usages of an open block. We don't need Function, Consumer, BiFunction, ... So we can dramatically
+reduce the amount of "design interfaces"
+* last but not least, _Closures_ support various delegation strategies. This is something Java (or even Scala) is totally unable to do. `Closure` can
+be _cloned_, _curried_, _trampolined_, ... and it always returns an instance of another `Closure`. This closure can change the delegate, which is the
+key for nice builder like DSLs. The delegate is used whenever a method call in a closure doesn't have an explicit receiver. For example:
+
+[source,groovy]
+----
+mail {
+   from 'austin.powers@groovy.baby'
+   to 'mini.me@evil.com'
+   subject 'Attention please!'
+   body '...'
+}
+----
+
+In this DSL, the _from_, _to_, _subject_ and _body_ method calls are done on the _delegate_. Being able to set the _delegate_ absolutely requires a
+`Closure` class. The implementation of the mail method may have something like:
+
+[source,groovy]
+----
+class EmailSpecification {
+    void from(String sender) { ... }
+    void to(String to) { ... }
+    void subject(String subject) { ... }
+    void body(String body) { ... }
+    void mail(Closure mail) {
+       def mailSpec = mail.clone()
+       mailSpec.delegate = this
+       mailSpec()
+    }
+}
+----
+
+The problem with this approach is that if the closure requires parameters, like in the _collect_ case, the Java type system, as well as the Groovy type
+system (which is the same), isn't expressive enough to let you define them:
+
+[source,groovy]
+----
+public static <T,U> List<U> collect(List<T> source, Closure<U> closure) <1>
+----
+<1> We could like to say that Closure returns a U, but also that it consumes a T
+
+Of course the first option that was studied was defining lots of `Closure` interfaces, corresponding to the various number of arguments (up to some arbitrary limit):
+
+[source,groovy]
+----
+public static <T,U> List<U> collect(List<T> source, Closure1<T,U> closure) <1>
+----
+<1> Closure1 is a kind of closure which accepts a single argument and returns a value
+
+While this works, it has several drawbacks:
+
+* it requires a lot of arbitrary, totally useless in a dynamic context, number of interfaces/classes to define closures
+* it doesn't solve the case of polymorphic closures
+
+== Polymorphic closures
+
+Polywhat? In Groovy, closures can be polymorphic. To illustrate the concept, let's take a look at a common method that iterates on map entries:
+
+[source,groovy]
+----
+def map = [key1: 'value 1', key2: 'value2']
+map.each { k,v -> println "Key is $k, value is $v" } <1>
+map.each { e -> println "Key is ${e.key], value is ${e.value}" } <2>
+map.each { println "Key is ${it.key], value is ${it.value}" } <3>
+----
+<1> version where the map entry is automatically converted into a key and value arguments
+<2> version where the closure takes a single, `Map.Entry` argument
+<3> version with an implicit argument, it, is a `Map.Entry`
+
+In all cases, it is always the *same* method which is called, that is to say _each(Closure)_ on a `Map`. The signature of this method is:
+
+[source,groovy]
+----
+public static <K,V> each(Map<K,V> self, Closure<?> onEachEntry)
+----
+
+Of course, the return type of the closure doesn't help here, and just reading that signature, you have absolutely no way to guess that the closure
+will accept either a `Map.Entry` or a pair of `K,V`. Nor does the compiler. At best, your IDE knows it, and it does because it is hardcoded! This is
+exactly why the compiler fails, and also why so many people think it's https://jira.codehaus.org/browse/GROOVY-5924[a bug].
+
+Not convinced? Let's make the same signature more cryptic:
+
+[source,groovy]
+----
+public static <Dead,Pool> magneto(Map<Dead,Pool> self, Closure<?> professorX)
+----
+
+Now can you guess what _professorX_ accepts as parameters? ;)
+
+== Tweaking the type system
+
+We have discussed several options and we took the time to think about it, and after the last Groovy DevCon, which took place just before the
+http://skillsmatter.com/event-details/home/groovy-grails-exchange-2013[Groovy and Grails eXchange 2013] in London, I decided to work on an implementation.
+For Groovy 2.1, we had introduced _@DelegatesTo_ for closures, to be able to help the compiler in the case we described above (hinting at the delegate type)
+but we were still missing parameter type inference. My guess was that it was possible to do something similar to what _@DelegatesTo_ does, but for parameter
+types.
+
+=== Annotating closures
+
+The idea is to annotate closures so that the compiler can fetch the information and infer the argument types from the context. In the case of a simple method
+accepting a closure, a simple annotation could do:
+
+[source,groovy]
+----
+void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }
+----
+
+The _@ClosureParams_ annotation is here to instruct the compiler that the closure will accept either an _implicit_ or _explicit_ parameter of type _String_:
+
+[source,groovy]
+----
+doSomething {
+   it.toUpperCase()
+}
+----
+
+When the compiler determines that the method which will be called is _doSomething_ (remember that this is only possible if type checking is activated), then an
+additional lookup on the _doSomething_ signature can be done, and we can retrieve the list of expected parameter types from the closure annotation. Success!
+
+Well, not really:
+
+* we still don't support polymorphic closures
+* generics, GENERICS, aaahhhh, GENERICS!
+
+=== Introducing... generics!
+
+To make things a bit more complicated, we have generics. Don't get me wrong. From a user perspective, generics are very good because they make the code more readable
+and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5...). The typical case is the _collect_ example that we used initially:
+
+[source,groovy]
+----
+public static <T,U> List<U> collect(List<T> source, Closure<U> closure) <1>
+----
+
+In this case, we want to say that the closure:
+
+* is monomorphic
+* accepts a single parameter of type T
+
+and the problem is... how to express this? One might think that you could write:
+
+[source,groovy]
+----
+public static <T,U> List<U> collect(List<T> source, @ClosureParams(T) Closure<U> closure) <1>
+----
+
+but the truth is that the JVM doesn't support placeholders as annotation values, nor does it support parametrized types (like `@Foo(List<T>`)). This tells us that the simple strategy doesn't work.
+
+== The solution
+
+The solution we propose is to decouple the declaration of the parameter types from the type itself. In other words, instead of declaring the types in the annotation, we will declare an object
+which is used as a hint to compute the types *at compile time*. In the case of _collect_, we end up with this:
+
+[source,java]
+----
+public static <T,E> List<T> collect(List<E> self, @ClosureParams(FirstParam.FirstGenericType.class) Closure<? extends T> transform)
+----
+
+In this case, `FirstParam.FirstGenericType` doesn't represent the type itself. It's a hint used by the compiler, which says "the type of the argument is the type of the first generic type of the first parameter". In this case, the first parameter is `List<E>`, so the first generic type is `E`. This means that if you call the method with a `List<String>`, now the compiler can infer that `E` is a `String`.
+
+=== Type hints
+
+At this point, you may actually think that this "solution" is a bit complex. However, you have to remember that this kind of work is only necessary if you want to support type inference, so it is really only necessary if you use type checking. This makes this a tool primarily aimed at framework builders. In particular, lots of frameworks are written in Java (including Groovy itself), so the syntax *has* to be compatible with Java. Second, there's no need to define one `FirstParam.FirstGenericType` class per method. The same class can be reused for all cases where it makes sense. Remember that it doesn't represent the type of the parameters but a way to fetch the type (one level of indirection).
+
+To make things easier for framework writers, the https://github.com/groovy/groovy-core/pull/307[candidate implementation] provides a set of predefined hint classes that should fit most of
+the use cases. Let's go through the list:
+
+==== FirstParam
+
+`FirstParam` is a hint that says that the expected parameter type corresponds to the first parameter of the method call, like in:
+
+[source,java]
+----
+public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)
+----
+
+The closure accepts a single parameter of type `BigInteger`.
+
+==== FirstParam.FirstGenericType
+
+This hint is used when the type to use is not the type of the parameter, but the type of the first generic type of the first argument, like in:
+
+[source,java]
+----
+public static <T,E> Collection<T> collect(Collection<E> self, Collection<T> collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure<? extends T> transform)
+----
+
+Note that if you have a `Collection` defined like this:
+
+[source,groovy]
+----
+class PersonList extends LinkedList<Person> {}
+----
+
+and that you call collect:
+
+[source,groovy]
+----
+list.collect { it.name }
+----
+
+the compiler will be capable of inferring that the type of the first generic type is actually a `Person`.
+
+`FirstParam` also supports `SecondGenericType` and `ThirdGenericType`. You can also find `SecondParam` and `ThirdParam` which follow the same structure.
+
+==== MapEntryOrKeyValue
+
+This hint is used for cases where the closure may accept a `Map.Entry` or a _key,value_ pair, which is quite common in the Groovy GDK, like _each_ on maps:
+
+[source,java]
+----
+public static <K, V> Map<K, V> each(Map<K, V> self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)
+----
+
+It is an example of polymorphic closure. This hint does all the job of telling that the parameter types may be a `K,V` pair or a `Map.Entry<K,V>`. For that, it expects the map to be the first parameter of the method.
+
+==== SimpleType
+
+Simple type can be used for monomorphic closures, in the cases the closure accepts parameters of a non-parametrized type. In this case, you need to use an option to specify the fully qualified name, like in this example:
+
+[source,java]
+----
+public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options="byte") Closure closure)
+----
+
+In this example, the closure accepts a single parameter of type `byte`. For a non primitive type, you need the fully qualified name:
+
+[source,java]
+----
+public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options="java.lang.String") Closure predicate)
+----
+
+If the closure accepts multiple arguments then you need options to be an array:
+
+[source,java]
+----
+public static <T> T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={"java.io.ObjectInputStream","java.io.ObjectOutputStream"}) Closure<T> closure)
+----
+
+==== FromString
+
+The last predefined hint can be used whenever none of the previous hints is suitable. A good example is the _sort_ method on a collection, which takes a closure which either accepts a single
+parameter of type `T` (where `T` is the component type) or two parameters of type `T` in which case we have a comparator-style closure:
+
+[source,java]
+----
+public static <T> List<T> sort(Collection<T> self, @ClosureParams(value=FromString.class, options={"T","T,T"} Closure c)
+----
+
+As you can see, in this example, the _options_ map defines two possible signatures. The string literal are used at compile time to match those of the method signature. Since it involves much more work for the compiler, it is not recommanded to use `FromString` if other options are available, because it would be slower at compile time.
+
+== Future work
+
+The candidate implementation is available on https://github.com/groovy/groovy-core/pull/307[GitHub]. It works pretty well, and honestly, I couldn't come with any better idea. One very good point of this implementation is that it is Java friendly. You can annotate classes written in pure Java and the Groovy compiler would be able to use the extra information. In the future, we could probably support a nicer syntax for Groovy, but it would require a grammar change, which is not planned until Groovy 3. For example, we could write this:
+
+[source,groovy]
+----
+public static <T> List<T> sort(Collection<T> self, Closure<T or T,T -> ?> c)
+----
+
+Which would totally avoid the "ugliness" of the annotation, while using the same backing tool.
+
+Last thing, do not hesitate to comment on this blog about the solution we found. Of course, it took some time, and the discussions can be found here:
+
+* http://groovy.329449.n5.nabble.com/TypeChecked-type-inference-does-not-work-with-closure-td5709972.html#a5709981[an example of user complaint]
+* http://groovy.329449.n5.nabble.com/Closure-parameter-types-inference-td4978037.html[Initial, not satisfying, solution, two years ago]
+* http://groovy.329449.n5.nabble.com/Closure-parameter-type-inference-td5717804.html[discussion about this solution]
+
+Thanks to everybody who participated in the discussion, and, of course, thank you for your comments if any: this is still a _candidate_ solution, so if you come with any better idea, I'm open!
