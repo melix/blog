@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -30,24 +30,24 @@
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
 		<li><a href="/blog/conferences.html">Conferences</a></li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -136,7 +136,7 @@ def result = p?.age
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
       </div>
     </div>
     
