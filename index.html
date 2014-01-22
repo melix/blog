@@ -68,6 +68,46 @@
 		<h2>Next conferences</h2>
 		<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-number-3 lanyrd-context-future" rel="me">My conferences on Lanyrd</a></div>
 	</div>
+  			<a href="/blog/2014/01/jlangdetect-github.html"><h1>JLangDetect 0.4 released and moved to GitHub</h1></a>
+  			<p>22 janvier 2014</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/detection.html">detection</a> 
+	
+		<a href="/blog/tags/europarl.html"> europarl</a> 
+	
+		<a href="/blog/tags/java.html"> java</a> 
+	
+		<a href="/blog/tags/jlangdetect.html"> jlangdetect</a> 
+	
+		<a href="/blog/tags/language.html"> language</a> 
+	
+		<a href="/blog/tags/nlp.html"> nlp</a> 
+	
+		<a href="/blog/tags/github.html"> github</a> 
+	</p>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-text="JLangDetect 0.4 released and moved to GitHub" data-url="http://melix.github.io/blog/2014/01/jlangdetect-github.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/01/jlangdetect-github.html"></div>
+
+  			<p><div class="sect1">
+<h2 id="_a_new_era">A new era</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Back in 2011, I initiated a project called <code>JLangDetect</code>, a language detection library for the JVM. At that time, I was working for
+a company that made NLP tools and I started this as a pet project on my free time. I made it available as open source software and
+people started to use it, so I was pretty happy at that time to see a project I initiated being actually used in production!</p>
+</div>
+<div class="paragraph">
+<p>While I don&#8217;t have the need for such a library now that I work on the Groovy language, some people are still using it. At the first
+place, a friend of mine, Freddy Rabiller, took time to upgrade it. A new version has been released (0.4) and the project is now
+available on <a href="https://github.com/melix/jlangdetect">GitHub</a>.</p>
+</div>
+<div class="paragraph">
+<p>A big thank to Freddy, who will probably take the lead of development on this project now!</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2014/01/jlangdetect-github.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/01/closure_param_inference.html"><h1>Closure parameter type inference for Groovy</h1></a>
   			<p>07 janvier 2014</p>
 			<p><em>Tags: </em>
@@ -1153,107 +1193,6 @@ downloaded the old pages, converted them into <a href="http://asciidoctor.org">A
 </div>
 </div></p>
 			<p><a href="/blog/2013/11/21/a_new_home.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html"><h1>deck2pdf: Exporting HTML5 slide decks to PDF</h1></a>
-  			<p>30 juillet 2013</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/deckjs.html">deckjs</a> 
-	
-		<a href="/blog/tags/dzslides.html"> dzslides</a> 
-	
-		<a href="/blog/tags/html5.html"> html5</a> 
-	
-		<a href="/blog/tags/impressjs.html"> impressjs</a> 
-	
-		<a href="/blog/tags/javascript.html"> javascript</a> 
-	
-		<a href="/blog/tags/pdf.html"> pdf</a> 
-	
-		<a href="/blog/tags/revealjs.html"> revealjs</a> 
-	
-		<a href="/blog/tags/slideshow.html"> slideshow</a> 
-	</p>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="deck2pdf: Exporting HTML5 slide decks to PDF" data-url="http://melix.github.io/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html"></div>
-
-  			<p><div class="sect1">
-<h2 id="_exporting_your_awesome_html5_presentation_to_pdf">Exporting your awesome HTML5 presentation to PDF</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>For some time now, I’ve started using <a href="http://imakewebthings.com/deck.js/">deck.js</a> to write my talks. One of the reasons I do this is that it saves me <strong>lots</strong> of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).</p>
-</div>
-<div class="paragraph">
-<p>The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, <a href="https://speakerdeck.com/">SpeakerDeck</a>, <a href="http://www.slideshare.net/">SlideShare</a> or <a href="http://www.parleys.com/">Parleys</a> all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_deck2pdf">Deck2pdf</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? <a href="https://github.com/melix/deck2pdf">deck2pdf was born!</a>. I started with something that was able to export my <a href="http://imakewebthings.com/deck.js/">deck.js</a> presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> supports:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="http://imakewebthings.com/deck.js/">deck.js</a></p>
-</li>
-<li>
-<p><a href="http://lab.hakim.se/reveal-js">reveal.js</a></p>
-</li>
-<li>
-<p><a href="http://bartaz.github.io/impress.js">impress.js</a></p>
-</li>
-<li>
-<p>and <a href="https://github.com/paulrouget/dzslides">DZSlides</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the <a href="http://imakewebthings.com/deck.js/">deck.js</a> profile is written:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>totalSlides=$.deck('getSlides').length
-nextSlide=$.deck('next')
-</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in <a href="http://bartaz.github.io/impress.js">impress.js</a>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>setup = {
-    js 'var api = impress();'
-    js '''var $$ = function ( selector, context ) {
-        context = context || document;
-        return context.querySelectorAll(selector);
-    };'''
-    js '''var byId = function ( id ) {
-        return document.getElementById(id);
-    };'''
-}
-
-nextSlide = {
-    js('api.next()')
-}
-
-totalSlides = {
-    js (/$$(".step", byId('impress')).length/)
-}
-
-// longer pause because of transitions
-pause = 2000
-</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Of course, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> is open source and licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">APL2</a>. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
