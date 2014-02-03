@@ -156,27 +156,27 @@ to our build.
 
 === Publishing to GitHub Pages
 
-Open `build.gradle` and add this configuration:
+Create a new file named `publish.gradle` with the following contents:
 
 [source,groovy]
-.build.gradle
+.publish.gradle
 ----
 buildscript {
-
-  ...
+  repositories {
+      jcenter()
+  }
 
   dependencies {
     classpath 'org.ajoberstar:gradle-git:0.6.3'     <1>
-    ...
   }
 }
 
 apply plugin: 'github-pages'                        <2>
 
 githubPages {
-  repoUri = 'git@github.com:yourname/blog.git'      <3>
+  repoUri = 'git@github.com:youtname/blog.git'      <3>
   pages {
-     from(jbake.output) {
+     from(file('build/jbake')) {
      	into '.'                                    <4>
      }
   }
@@ -187,22 +187,25 @@ githubPages {
 <3> configure your GitHub repository URL
 <4> tells the plugin to upload the contents of the `build/jbake` directory
 
+Then modify the main `build.gradle` file by adding the following task:
+
+[source,groovy]
+----
+task publish(type: GradleBuild) {           <1>
+    buildFile = 'publish.gradle'
+    tasks = ['publishGhPages']
+}
+----
+<1> we're using a separate, sub-build to avoid a classpath issue with JNA
+
 Now if you do:
 
 ----
-./gradlew publishGhPages
+./gradlew publish
 ----
 
 Gradle will pick the contents of the `output/jbake` directory, add it to the `gh-pages` branch and push it to GitHub,
 all in one step! A few seconds later, you should see the result on github.io!
-
-Last but not least, you can make sure that you will render the pages before uploading by adding this line to your build:
-
-[source,groovy]
-.build.gradle
-----
-publishGhPages.dependsOn jbake
-----
 
 One last thing: this configuration does *not* add the sources to your git repository. It only deals with the output,
 so you still need to add the source files, commit them and push them to GitHub. This is of course optional if you

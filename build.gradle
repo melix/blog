@@ -1,20 +1,17 @@
-apply plugin: 'idea'
-
 buildscript {
   repositories {
       mavenLocal()
       mavenCentral()   
+      jcenter()
   }
 
   dependencies { 
-    classpath 'org.ajoberstar:gradle-git:0.6.3' 
     classpath 'me.champeau.gradle:jbake-gradle-plugin:0.1-SNAPSHOT'
     classpath 'org.asciidoctor:asciidoctor-java-integration:0.1.4'
     classpath 'org.freemarker:freemarker:2.3.19'
   }
 }
 
-apply plugin: 'github-pages'
 apply plugin: 'jbake'
 
 jbake {
@@ -23,13 +20,7 @@ jbake {
    clearCache = true
 }
 
-githubPages {
-  repoUri = 'git@github.com:melix/blog.git'
-  pages {
-     from(jbake.output) {
-     	into '.'
-     }
-  }
+task publish(type: GradleBuild) {
+    buildFile = 'publish.gradle'
+    tasks = ['publishGhPages']
 }
-
-publishGhPages.dependsOn jbake
