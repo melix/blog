@@ -1,17 +1,35 @@
+apply plugin: 'idea'
+
 buildscript {
-  repositories { mavenCentral() }
-  dependencies { classpath 'org.ajoberstar:gradle-git:0.6.3' }
+  repositories {
+      mavenLocal()
+      mavenCentral()   
+  }
+
+  dependencies { 
+    classpath 'org.ajoberstar:gradle-git:0.6.3' 
+    classpath 'me.champeau.gradle:jbake-gradle-plugin:0.1-SNAPSHOT'
+    classpath 'org.asciidoctor:asciidoctor-java-integration:0.1.4'
+    classpath 'org.freemarker:freemarker:2.3.19'
+  }
 }
 
 apply plugin: 'github-pages'
+apply plugin: 'jbake'
+
+jbake {
+   input = file('src/jbake')
+   output = file('build/jbake')
+   clearCache = true
+}
 
 githubPages {
   repoUri = 'git@github.com:melix/blog.git'
   pages {
-     from(file('output')) {
+     from(jbake.output) {
      	into '.'
      }
   }
 }
 
-
+publishGhPages.dependsOn jbake

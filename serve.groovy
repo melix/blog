@@ -22,7 +22,7 @@ def resource_handler = new ResourceHandler()
 resource_handler.directoriesListed = true
 resource_handler.welcomeFiles = ['index.html']
 
-resource_handler.resourceBase = 'output'
+resource_handler.resourceBase = 'build/jbake'
 
 def context = new ContextHandler()
 context.handler = resource_handler

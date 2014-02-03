@@ -1,0 +1,219 @@
+= Authoring your blog on GitHub with JBake and Gradle
+Cédric Champeau
+2014-02-03
+:jbake-type: post
+:jbake-tags: github,jbake,gradle,asciidoctor,blog
+:jbake-status: published
+:source-highlighter: prettify
+:id: jbake_github_blog_toolception
+:jb: http://www.jbake.org[JBake]
+:gradle: http://www.gradle.org[Gradle]
+:icons: font
+
+A few weeks ago, I started this new blog and decided to host it on GitHub. I already explained
+link:/2013/11/21/a_new_home.html[how I migrated contents from JRoller], but I didn't really
+the tool behind publishing. In this post, I will show you how easy it is, now that I have
+improved my toolchain with {gradle}!
+
+== JBake
+
+{jb} is a static site generator. When I chose this tool for my blog,
+what attracted me is actually that it runs on the JVM, so I already had the idea of automating
+stuff with {gradle}.
+
+Since then, I have submitted several pull requests to the project, and we're actually thinking
+of using it to build the next Groovy website. {jb} has good chances to
+become the "Jekyll of the JVM" and already supports multiple markup languages (markdown, asciidoc)
+as well as multiple template engines (http://freemarker.org/[FreeMarker] in 2.2.1, http://groovy.codehaus.org[Groovy]
+and http://www.thymeleaf.org/[Thymeleaf] in 2.3.0).
+
+The idea behind {jb} is very simple: contents is written using a markup language and "baked"
+with template engines into actual HTML. Everything is generated statically and you can upload the generated site
+wherever you want.
+
+On the other side, GitHub offers a nice tool to publish pages: http://pages.github.com/[GitHub Pages], so we can
+have both the sources of our blog and the output of bakery in the same repository. So the initial process looked
+like this:
+
+. create a new page in `content` directory
+. run `jbake` command, check the result, eventually make changes
+. `git add page.adoc` to add the new page to the sources
+. `git commit -a` to commit the page to the `master` branch, corresponding to the sources of the blog
+. `git checkout gh-pages` to switch to the GitHub pages branch
+. `cp -R output/* .` to copy the contents of the output directory at the root of the GitHub pages
+. `git add page.html` to add the new page to the GitHub pages branch
+. `git commit -a` to commit the contents to GitHub pages
+. `git push origin master` to push the sources to GitHub
+. `git push origin gh-pages` to push the generated pages to GitHub pages
+
+I published my first blog posts like this, and it's not that complicated, but it involves a lot of manual steps, so I
+came up with a Gradle plugin to make this much easier, that is, focusing on contents, period!
+
+== Gradle to the rescue!
+=== Prerequisites
+
+We're going to setup a project that will allow you to publish to GitHub pages in one step, using {gradle}. For that,
+we will need:
+
+* an empty _blog_ repository that you created on GitHub
+* {jb} to setup the initial JBake project structure
+* {gradle} 1.10 (previous versions should work too)
+* The https://github.com/jbake-org/jbake-gradle-plugin[JBake plugin for Gradle], will be downloaded automatically
+* The https://github.com/ajoberstar/gradle-git[Git plugin for Gradle], will be downloaded automatically
+
+=== Building JBake
+
+This step will become optional when JBake 2.3.0 will be out (or a snapshot of {jb} will be published). Meanwhile, you
+need to install a local version of {jb} into your local Maven repository. Don't worry, this will be easy, you will
+only need Maven (hey, too bad {jb} doesn't use Gradle ;)):
+
+----
+git clone https://github.com/jbake-org/jbake.git
+cd jbake
+mvn install
+----
+
+That's all!
+
+=== Setting up a project
+
+First step consists in creating the initial project layout:
+
+----
+git init                                                            <1>
+git remote add origin <your github remote url>                      <2>
+mkdir -p src/jbake                                                  <3>
+gradle init                                                         <4>
+git add build.gradle gradle gradlew gradlew.bat settings.gradle src <5>
+cd src/jbake
+jbake -i                                                            <6>
+----
+<1> initializes the git repository
+<2> add your remote
+<3> we will put JBake sources into that directory
+<4> installs the Gradle wrapper into the repository
+<5> adds Gradle wrapper and initial structure into Git
+<6> initializes the default JBake directory layout
+
+=== Using Gradle to render pages
+
+At this point, your `src/jbake` directory contains the classic {jb} folder contents:
+
+----
+src
+ |-- jbake
+       |-- assets    : static assets (images, css, ...)
+       |-- content   : blog posts, ...
+       |-- templates : HTML templates (by default, uses FreeMarker)
+----
+
+Replace the contents of `build.gradle` with the following:
+
+[source,groovy]
+.build.gradle
+----
+
+buildscript {
+  repositories {
+      mavenLocal() // needed to use the local JBake 2.3.0 build
+      jcenter()
+  }
+
+  dependencies {
+    classpath 'me.champeau.gradle:jbake-gradle-plugin:0.1-SNAPSHOT' <1>
+    classpath 'org.asciidoctor:asciidoctor-java-integration:0.1.4'  <2>
+    classpath 'org.freemarker:freemarker:2.3.19'                    <3>
+  }
+}
+
+apply plugin: 'jbake'                                               <4>
+----
+<1> import the JBake plugin
+<2> if you write pages using the Asciidoctor format, this is necessary
+<3> if you use the Freemarker template engine, this is necessary
+<4> then apply the plugin
+
+By default, the plugin will look for JBake sources in `src/jbake` and generate the site into `build/jbake`.
+
+=== Generating the output
+
+Now that this is applied, you can generate the site by running the following command:
+
+----
+./gradlew -i jbake
+----
+
+after the rendering step, you should now have a new directory:
+
+----
+build
+  |-- jbake
+----
+
+into which you will find the generated HTML contents. At this point, you could choose to upload those files
+to an FTP server, for example, but since we want to host our pages on GitHub, we need to add some configuration
+to our build.
+
+=== Publishing to GitHub Pages
+
+Open `build.gradle` and add this configuration:
+
+[source,groovy]
+.build.gradle
+----
+buildscript {
+
+  ...
+
+  dependencies {
+    classpath 'org.ajoberstar:gradle-git:0.6.3'     <1>
+    ...
+  }
+}
+
+apply plugin: 'github-pages'                        <2>
+
+githubPages {
+  repoUri = 'git@github.com:yourname/blog.git'      <3>
+  pages {
+     from(jbake.output) {
+     	into '.'                                    <4>
+     }
+  }
+}
+----
+<1> use the gradle-git plugin
+<2> apply the plugin
+<3> configure your GitHub repository URL
+<4> tells the plugin to upload the contents of the `build/jbake` directory
+
+Now if you do:
+
+----
+./gradlew publishGhPages
+----
+
+Gradle will pick the contents of the `output/jbake` directory, add it to the `gh-pages` branch and push it to GitHub,
+all in one step! A few seconds later, you should see the result on github.io!
+
+Last but not least, you can make sure that you will render the pages before uploading by adding this line to your build:
+
+[source,groovy]
+.build.gradle
+----
+publishGhPages.dependsOn jbake
+----
+
+One last thing: this configuration does *not* add the sources to your git repository. It only deals with the output,
+so you still need to add the source files, commit them and push them to GitHub. This is of course optional if you
+don't want to publish the sources... If you decide to make them public, then you can also use the git plugin to do it
+automatically!
+
+== Conclusion
+
+In this post, we've shown you how you can leverage {jb} and {gradle} to publish a blog on GitHub. The setup is really
+easy, so I hope more people will follow that way and contribute to Open Source too!
+
+Of course, this post has been published using the procedure described on this page, so I used {jb} and {gradle} to blog
+about how to publish a blog on https://github.com/melix/blog[GitHub] using {jb} and {Gradle}! Like my friend Andres Almiray
+would say, that's a https://twitter.com/aalmiray/status/429236158321950720[toolception]!
