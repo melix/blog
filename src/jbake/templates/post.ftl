@@ -13,8 +13,16 @@
 	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog${content.uri}" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog${content.uri}"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog${content.uri}" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog${content.uri}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
 
 	<p>${content.body}</p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog${content.uri}" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog${content.uri}"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog${content.uri}" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog${content.uri}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
