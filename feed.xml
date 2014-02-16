@@ -6,9 +6,558 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>mer., 5 févr. 2014 10:04:31 +0100</pubDate>
-    <lastBuildDate>mer., 5 févr. 2014 10:04:31 +0100</lastBuildDate>
+    <pubDate>dim., 16 févr. 2014 22:01:17 +0100</pubDate>
+    <lastBuildDate>dim., 16 févr. 2014 22:01:17 +0100</lastBuildDate>
 
+    <item>
+      <title>A fast markup template engine for Groovy (part 1 of 2)</title>
+      <link>http://melix.github.io/blog//2014/02/markuptemplateengine.html</link>
+      <pubDate>dim., 16 févr. 2014 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">/2014/02/markuptemplateengine.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Recently, I was &lt;a href=&quot;https://twitter.com/CedricChampeau/status/431131840788041728&quot;&gt;surprised&lt;/a&gt; no-one had the idea of developping a template engine relying on the Groovy &lt;a href=&quot;http://groovy.codehaus.org/Creating+XML+using+Groovy&amp;#8217;s+MarkupBuilder&quot;&gt;MarkupBuilder&lt;/a&gt;. Working on &lt;a href=&quot;http://jbake.org/&quot;&gt;JBake&lt;/a&gt; made me take a look at existing template engines for Java again, something I hadn&amp;#8217;t done for years, and even if new technologies like &lt;a href=&quot;http://www.thymeleaf.org/&quot;&gt;Thymeleaf&lt;/a&gt; or &lt;a href=&quot;http://jknack.github.io/handlebars.java/gettingStarted.html&quot;&gt;Handlebars&lt;/a&gt; exist, not of them are as practical to use as the markup builder.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_an_interesting_experiment&quot;&gt;An interesting experiment&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For that reason, I started working on a new template engine leveraging Groovy. The primary focus of this template engine would be XML-like markup (XHTML, HTML5, XML, &amp;#8230;), but in theory, it can be used to render anything. The basic idea is that you can write a template which looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {
+    body {
+        yield message			&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;message&lt;/em&gt; is a template variable&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;which renders to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint html language-html&quot;&gt;&lt;code&gt;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;It works!&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;My first implementation was done quickly done and was leveraging the &lt;a href=&quot;http://groovy.codehaus.org/gapi/groovy/xml/StreamingMarkupBuilder.html&quot;&gt;StreamingMarkupBuilder&lt;/a&gt;. It wasn&amp;#8217;t very difficult to write, but it had a problem: in general, builders are quite slow, so not very suitable for templating engines, where you should render a page as fast as possible. To check this, I wrote a simple micro-benchmark, which compared my template engine with Freemarker:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;@Grab(group=&apos;org.gperfutils&apos;, module=&apos;gbench&apos;, version=&apos;0.4.2-groovy-2.1&apos;)
+@Grab(&apos;org.freemarker:freemarker:2.3.9&apos;)
+import groovy.text.markup.MarkupTemplateEngine
+import freemarker.template.*
+
+MarkupTemplateEngine engine = new MarkupTemplateEngine()
+def mkpTemplate1 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(&apos;It works!&apos;)
+}
+&apos;&apos;&apos;
+def mkpTemplate2 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(text)
+}
+&apos;&apos;&apos;
+
+def mkpTemplate3 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(text.toUpperCase())
+}
+&apos;&apos;&apos;
+
+def cfg = new Configuration()
+def ftlTemplate1 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;It works!&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+def ftlTemplate2 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;${text}&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+def ftlTemplate3 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;${text?upper_case}&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+def r = benchmark {
+    &apos;MarkupTemplateEngine (simple, no binding)&apos; { mkpTemplate1.make([:]).writeTo(new StringWriter()) }
+    &apos;Freemarker (simple, no binding)&apos; { ftlTemplate1.process([:], new StringWriter()) }
+    &apos;MarkupTemplateEngine (simple binding)&apos; { mkpTemplate2.make([text:&apos;Hello&apos;]).writeTo(new StringWriter()) }
+    &apos;Freemarker (simple binding)&apos; { ftlTemplate2.process([text:&apos;Hello&apos;], new StringWriter()) }
+    &apos;MarkupTemplateEngine (simple toUpper)&apos; { mkpTemplate3.make([text:&apos;Hello&apos;]).writeTo(new StringWriter()) }
+    &apos;Freemarker (simple toUpper)&apos; { ftlTemplate3.process([text:&apos;Hello&apos;], new StringWriter()) }
+}
+
+r.prettyPrint()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I expected my template engine to be slower, yet I didn&amp;#8217;t expect it to be &lt;strong&gt;that&lt;/strong&gt; slow:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;                                            user  system    cpu   real
+
+MarkupTemplateEngine (simple, no binding)  23038       0  23038  23059
+Freemarker (simple, no binding)              385       0    385    392
+MarkupTemplateEngine (simple binding)      26221       0  26221  26244
+Freemarker (simple binding)                 1037       1   1038   1046
+MarkupTemplateEngine (simple toUpper)      26895       0  26895  26929
+Freemarker (simple toUpper)                 1161       0   1161   1171&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As wisdom says, make it work, make it right, then make it fast. I already had it working and it did what I wanted, so the next logical step would therefore be optimizing&amp;#8230; But before I show you the results of that steps, let&amp;#8217;s take a look at the features I have implemented so far.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_features&quot;&gt;Features&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I am quite happy with the current feature set, which I think is good enough for a public review. Here is a quick list.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_builder_syntax&quot;&gt;builder syntax&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;html {
+   head {
+      meta(charset:&apos;utf-8&apos;)
+      title(&apos;Page title&apos;)
+   }
+}&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Renders to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint html language-html&quot;&gt;&lt;code&gt;&amp;lt;html&amp;gt;&amp;lt;head&amp;gt;&amp;lt;meta charset=&quot;utf-8&quot;&amp;gt;&amp;lt;title&amp;gt;Page title&amp;lt;/title&amp;gt;&amp;lt;/head&amp;gt;&amp;lt;/body&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For that, the code to initialize the template engine is quite simple (note that you can use it in Java too):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate1 = engine.createTemplate &apos;&apos;&apos;
+html {
+   head {
+      meta(charset:&apos;utf-8&apos;)
+      title(&apos;Page title&apos;)
+   }
+}
+&apos;&apos;&apos;
+
+def model = [:]
+
+mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_groovy_goodness&quot;&gt;Groovy goodness&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;ul {
+   persons.each { p -&amp;gt;
+   	li(p.name)
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With the following model:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def model = [persons: [new Person(name:&apos;Bob&apos;), new Person(name:&apos;Alice&apos;)]]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Renders to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint html language-html&quot;&gt;&lt;code&gt;&amp;lt;ul&amp;gt;&amp;lt;li&amp;gt;Bob&amp;lt;/li&amp;gt;&amp;lt;li&amp;gt;Alice&amp;lt;/li&amp;gt;&amp;lt;/ul&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_template_inclusion&quot;&gt;template inclusion&lt;/h3&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_inclusion_of_another_template&quot;&gt;inclusion of another template&lt;/h4&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {
+   include template: &apos;includes/header.tpl&apos;
+   include template: &apos;includes/body.tpl&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_inclusion_of_escaped_text&quot;&gt;inclusion of escaped text&lt;/h4&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {
+   div(class:&apos;post&apos;) {
+   	include escaped: &apos;content/text.txt&apos;
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_inclusion_of_unescaped_text&quot;&gt;inclusion of unescaped text&lt;/h4&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {
+   div(class:&apos;post&apos;) {
+   	include unescaped: &apos;content/raw.txt&apos;
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_automatic_escaping_of_user_input&quot;&gt;automatic escaping of user input&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By default, variables read from the model will be escaped. For example, given the following model:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def model = [text:&apos;&amp;lt;html&amp;gt;&apos;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and the following template:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;p(text)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then the result will be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;&amp;lt;p&amp;gt;&amp;amp;lt;html&amp;amp;gt;&amp;lt;/p&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It is possible to avoid escaping by prefixing the variable name with &lt;code&gt;unescaped.&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;p(unescaped.text)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_automatic_indentation&quot;&gt;automatic indentation&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Automatic indentation allows the programmer to get rid of indent instructions. For the following template:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {
+   newLine()
+   body {
+newLine()
+p(&apos;Auto indent in action!&apos;)
+newLine()
+   }
+   newLine()
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The result without automatic indent is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint html language-html&quot;&gt;&lt;code&gt;&amp;lt;html&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;p&amp;gt;Auto indent in action!&amp;lt;/p&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If auto-indent is activated, then the output is changed to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint html language-html&quot;&gt;&lt;code&gt;&amp;lt;html&amp;gt;
+    &amp;lt;body&amp;gt;
+        &amp;lt;p&amp;gt;Auto indent in action!&amp;lt;/p&amp;gt;
+    &amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_automatic_new_lines&quot;&gt;automatic new lines&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The previous example was nice, but you have a lot of &lt;code&gt;newLine&lt;/code&gt; method calls. Activating auto-newline will use the open blocks to introduce newLines automatically. That means that you can change the template to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {
+   body {
+p(&apos;Auto indent in action!&apos;)
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;which is much more readable! To understand how it works, let&amp;#8217;s slightly change the template, by moving the &lt;code&gt;body&lt;/code&gt; block to the same line as &lt;code&gt;html&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;html {   body {
+p(&apos;Auto indent in action!&apos;)
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;in that case, the output is modified accordingly:
+-&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint html language-html&quot;&gt;&lt;code&gt;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;
+        &amp;lt;p&amp;gt;Auto indent in action!&amp;lt;/p&amp;gt;
+    &amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This means that new lines are really added where you have them in source code!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_optional_type_checking_of_model&quot;&gt;optional type checking of model&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Imagine the following model:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class User {
+   Long id
+   String name
+}
+
+def model = [user: new User(id: 123, name: &apos;Cedric&apos;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and the following code to create a template:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def template = engine.createTemplate &apos;&apos;&apos;
+p &quot;User id: $user.id Name: $user.name Age: $user.age&quot;
+&apos;&apos;&apos;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The template is compiled fine, but if you try to render it, it will fail:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;template.make(model).writeTo(new PrintWriter(System.out)) 	&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;fails with groovy.lang.MissingPropertyException: No such property: age for class: User&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To avoid failing at render time, you can use a type checked mode:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def template = engine.createTypeCheckedModelTemplate &apos;&apos;&apos;	&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+p &quot;User id: $user.id Name: $user.name Age: $user.age&quot;
+&apos;&apos;&apos;, [user: &apos;User&apos;]						&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;use &lt;em&gt;createTypeCheckedModelTemplate&lt;/em&gt; instead of &lt;em&gt;createTemplate&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;provide model type information&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And this time, compilation of the template will fail directly:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;[Static type checking] - No such property: age for class: User&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This means that it won&amp;#8217;t wait for an actual template to be rendered for failing, which is a feature some people like (yes, I&amp;#8217;m looking at you, Play! Framework ;)). Now that we&amp;#8217;ve showed a quick list of those features (there are more, like helper methods in model, &amp;#8230;), what about performance? Is it worth it? I thought Groovy, and builders, were slow?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_statically_compiled_templates&quot;&gt;Statically compiled templates&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I had already played with &lt;a href=&quot;/blog/2013/02/13/static_builders_inception.html&quot;&gt;static builders&lt;/a&gt; in the past, and we also have this very nice feature of static type checking extensions in Groovy 2.1. In Groovy 2.2, type checking extensions were extended to static compilation&amp;#8230; So my first idea was to get rid of the &lt;code&gt;StreamingMarkupBuilder&lt;/code&gt;, which is good but not really suited for optimizations. And before I explain the implementation details, here is the result of a more complete benchmark, using my latest implementation:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;@Grab(group=&apos;org.gperfutils&apos;, module=&apos;gbench&apos;, version=&apos;0.4.2-groovy-2.1&apos;)
+@Grab(&apos;org.freemarker:freemarker:2.3.9&apos;)
+import groovy.text.markup.MarkupTemplateEngine
+import freemarker.template.*
+
+MarkupTemplateEngine engine = new MarkupTemplateEngine()
+def mkpTemplate1 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(&apos;It works!&apos;)
+}
+&apos;&apos;&apos;
+def mkpTemplate2 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(text)
+}
+&apos;&apos;&apos;
+
+def mkpTemplate3 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(text.toUpperCase())
+}
+&apos;&apos;&apos;
+
+def mkpTemplate3_typed = engine.createTemplate &apos;&apos;&apos;
+html {
+    body(((String)text).toUpperCase())
+}
+&apos;&apos;&apos;
+
+def mkpTemplate4 = engine.createTemplate &apos;&apos;&apos;
+html {
+    body {
+        ul {
+            persons.each {
+                li(&quot;$text $it&quot;)
+            }
+        }
+    }
+}
+&apos;&apos;&apos;
+
+def mkpTemplate4_typed = engine.createTemplate &apos;&apos;&apos;
+List&amp;lt;String&amp;gt; pList = (List&amp;lt;String&amp;gt;) persons
+String txt = text
+html {
+    body {
+        ul {
+            for (String p: pList) {
+                li(&quot;$txt $p&quot;)
+            }
+        }
+    }
+}
+&apos;&apos;&apos;
+
+def model = [text:&apos;Hello&apos;, persons:[&apos;Cedric&apos;,&apos;Guillaume&apos;,&apos;Jochen&apos;,&apos;Pascal&apos;,&apos;Paul&apos;]]
+
+def cfg = new Configuration()
+def ftlTemplate1 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;It works!&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+def ftlTemplate2 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;${text}&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+def ftlTemplate3 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;${text?upper_case}&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+def ftlTemplate4 = new Template(&quot;name&quot;, new StringReader(&apos;&apos;&apos;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;&amp;lt;ul&amp;gt;&amp;lt;#list persons as person&amp;gt;&amp;lt;li&amp;gt;${text} ${person}&amp;lt;/#list&amp;gt;&amp;lt;/ul&amp;gt;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&apos;&apos;&apos;), cfg);
+
+def r = benchmark {
+    &apos;MarkupTemplateEngine (simple, no binding)&apos; { mkpTemplate1.make([:]).writeTo(new StringWriter()) }
+    &apos;Freemarker (simple, no binding)&apos; { ftlTemplate1.process([:], new StringWriter()) }
+    &apos;MarkupTemplateEngine (simple binding)&apos; { mkpTemplate2.make(model).writeTo(new StringWriter()) }
+    &apos;Freemarker (simple binding)&apos; { ftlTemplate2.process(model, new StringWriter()) }
+    &apos;MarkupTemplateEngine (simple toUpper)&apos; { mkpTemplate3.make(model).writeTo(new StringWriter()) }
+    &apos;Freemarker (simple toUpper)&apos; { ftlTemplate3.process(model, new StringWriter()) }
+    &apos;MarkupTemplateEngine (typed toUpper)&apos; { mkpTemplate3_typed.make(model).writeTo(new StringWriter()) }
+    &apos;MarkupTemplateEngine loop&apos; { mkpTemplate4.make(model).writeTo(new StringWriter()) }
+    &apos;MarkupTemplateEngine typed for loop&apos; { mkpTemplate4_typed.make(model).writeTo(new StringWriter()) }
+    &apos;FreeMarker loop&apos; {  ftlTemplate4.process(model, new StringWriter()) }
+}
+
+r.prettyPrint()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;                                           user  system   cpu  real
+
+MarkupTemplateEngine (simple, no binding)   609       0   609   615
+Freemarker (simple, no binding)             400       0   400   410
+MarkupTemplateEngine (simple binding)       628       3   631   631
+Freemarker (simple binding)                 864       0   864   877
+MarkupTemplateEngine (simple toUpper)       681       0   681   690
+Freemarker (simple toUpper)                 972       0   972   986
+MarkupTemplateEngine (typed toUpper)        696       3   699   706
+MarkupTemplateEngine loop                  2927      12  2939  2949
+MarkupTemplateEngine typed for loop        2579       0  2579  2615
+FreeMarker loop                            2862       0  2862  2894&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, there is a &lt;strong&gt;huge&lt;/strong&gt; difference. For non trivial templates, the markup template engine is even faster than Freemarker! To acheive such performance, all templates are compiled into bytecode, but also make use of static compilation, type checking extensions, AST transformations, &amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the next part, I will describe the techniques I used to implement this engine. Meanwhile, let me know what you think of it. If you feel brave, you can test it by checking out the sources on my fork:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;git clone -b markup-template-engine https://github.com/melix/groovy-core.git
+./gradlew console	&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;will compile Groovy and open a Groovy console where you can test the template engine&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Authoring your blog on GitHub with JBake and Gradle</title>
       <link>http://melix.github.io/blog//2014/02/hosting-jbake-github.html</link>
@@ -1419,45 +1968,6 @@ void doSomething(Closure cl) {
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Hope things are clearer for you now!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>A new home!</title>
-      <link>http://melix.github.io/blog//2013/11/21/a_new_home.html</link>
-      <pubDate>jeu., 21 nov. 2013 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">/2013/11/21/a_new_home.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Goodbye JRoller, welcome GitHub! Eventually, I migrated my blog to &lt;a href=&quot;http://pages.github.com/&quot;&gt;GitHub pages&lt;/a&gt;. It is a now a statically generated website.
-What is interesting here is how I migrated contents from my &lt;a href=&quot;http://jroller.com/melix&quot;&gt;old blog&lt;/a&gt;. I used a &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy&lt;/a&gt; script which
-downloaded the old pages, converted them into &lt;a href=&quot;http://asciidoctor.org&quot;&gt;Asciidoctor&lt;/a&gt; format so that they can be statically processed by &lt;a href=&quot;http://jbake.org&quot;&gt;JBake&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Should you need something similar, I pushed this little toy here: &lt;a href=&quot;https://github.com/melix/jroller-export&quot;&gt;https://github.com/melix/jroller-export&lt;/a&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now the export is quite raw, there are probably minor rendering issues to fix, or broken links, and I still have to integrate:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;twitter/google+ share buttons&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;comments&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But this is another story!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last but not least, this blog is also published on GitHub and all posts are published under &lt;a href=&quot;http://creativecommons.org/licenses/by-nc-sa/2.0/en/&quot;&gt;Creative Commons by-nb-sa&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
