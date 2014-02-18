@@ -1,0 +1,597 @@
+= A fast markup template engine for Groovy (part 2 of 2)
+Cédric Champeau
+2014-02-17
+:jbake-type: post
+:jbake-tags: groovy,template,freemarker,markupbuilder,html
+:jbake-status: published
+:source-highlighter: prettify
+:id: markup_template_engine_part_2
+:icons: font
+
+In this post, I will discuss the implementations details for the markup template engine I have described in a link:/blog/2014/02/markuptemplateengine.html[previous post].
+
+== Compiling templates
+=== The MarkupTemplateEngine class
+
+Even if my first implementation of the markup template engine was relying on `StreamingMarkupBuilder`, the technique used to compile templates into bytecode is actually the same after all optimizations. It relies on:
+
+* a http://groovy.codehaus.org/api/groovy/lang/GroovyClassLoader.html[GroovyClassLoader] to create and cache template classes
+* a http://groovy.codehaus.org/api/org/codehaus/groovy/control/CompilerConfiguration.html[CompilerConfiguration] to customize compilation
+
+The various template engines that Groovy provide extend the http://groovy.codehaus.org/api/groovy/text/TemplateEngine.html[TemplateEngine] class. All template engines must implement the `createTemplate` method which returns an instance of http://groovy.codehaus.org/api/groovy/text/Template.html[Template]. My first idea, here, was therefore to have a template engine which holds a `GroovyClassLoader`, and compiles scripts as `Template` instances. For thread safety reasons and to avoid compiling the same template again and again, I instead chose a slightly different approach, which is to compile the scripts, and cache the resulting class into a field of the `StreamingMarkupBuilderTemplate` class:
+
+[code,groovy]
+----
+    private class StreamingMarkupBuilderTemplate implements Template {
+        final Class<BaseTemplate> templateClass;							<1>
+
+        public StreamingMarkupBuilderTemplate(final Reader reader) {
+            templateClass = groovyClassLoader.parseClass(
+		new GroovyCodeSource(reader, "GeneratedMarkupTemplate" + counter.getAndIncrement(), ""));
+        }
+
+        public StreamingMarkupBuilderTemplate(final URL resource) throws IOException {
+            templateClass = groovyClassLoader.parseClass(new GroovyCodeSource(resource));
+        }
+
+        public Writable make() {
+            return make(Collections.emptyMap());							<2>
+        }
+
+        public Writable make(final Map binding) {
+            return DefaultGroovyMethods.newInstance(templateClass, 
+		new Object[]{MarkupTemplateEngine.this, binding, templateConfiguration});		<3>
+        }
+    }
+----
+<1> `templateClass` corresponds to the user script, compiled as a template class
+<2> `make` binds a model to the template
+<3> `make` instantiates a new template and binds the model to it
+
+The `bind` method is very important. It returns a `Writable` which will trigger template rendering when `writeTo` is called. Therefore, nothing is rendered until the `Writable#writeTo` method is called. The only thing that `bind` does is instantiating a new template. As we are using a cached class, there's no compilation involved anymore, so the template is compiled once for all.
+
+=== The BaseTemplate class
+
+As you can see, the user script is compiled into a class which extends `BaseTemplate`. This means that the following script:
+
+[code,groovy]
+.page.tpl
+----
+html {
+   body {
+      p("I'm a template")
+   }
+}
+----
+
+compiles to a class extending `BaseTemplate`. If you are familiar with `GroovyClassLoader` or `GroovyShell`, you should actually know that normally, a script compiles to a class extending http://groovy.codehaus.org/api/groovy/lang/Script.html[Script]. In our case, we don't want to extend `Script`, because it does things that we don't want, such as overriding `getProperty` or using a `Binding` class, or even having the semantics of a Groovy script. Furthermore, it doesn't allow us to have a custom constructor to have private final fields. So the first step of our compilation process is actually to change the super class of the compiled script. The next step is to create a constructor that takes our model and the template configuration as parameters, as seen in the `make` method. Last but not least, since the script being compiled defines a `run` method (which is abstract in `Script`) corresponding to the script body, we will perform additional code transformations on this specific method.
+
+[source,groovy]
+----
+@Override
+    public void call(final SourceUnit source, final GeneratorContext context, final ClassNode classNode) throws CompilationFailedException {
+        if (classNode.isScriptBody()) {							<1>
+            classNode.setSuperClass(MarkupTemplateEngine.BASETEMPLATE_CLASSNODE);	<2>
+            createConstructor(classNode);						<3>
+            transformRunMethod(classNode, source);					<4>
+        }
+    }
+----
+<1> a Groovy script may contain multiple class, so we need to check if the current class is actually the script body
+<2> we change the super class from `Script` to `BaseTemplate`
+<3> we create a new constructor
+<4> we perform code modifications on the script body
+
+== Implementing the builder
+
+The `transformRunMethod` method is actually an example of how to implement a Groovy DSL using AST transformations. The goal of this method is to alter the AST (abstract syntax tree), so that some method calls in source code, for example, are actually rewritten. It is also the starting point of performance optimizations. This is actually very important. For example, one of the transformations will change:
+
+[source,groovy]
+----
+p(text)
+----
+
+into:
+
+[source,groovy]
+----
+p(getModel().get("text"))
+----
+
+Technically speaking, there is no need to do such a change: we could rely on `BaseTemplate` implementing `propertyMissing` to resolve missing variables (here, `text`) and delegate the call to its internal `model` field. However, this can be particularily slow, especially in builders where there are lots of nested closures, which involve a very long call chain. By doing this change, we transform a so-called `DynamicVariable` (`text`) into something that can be resolved statically (`getModel` is declared in `BaseTemplate` and is of type `Map`). Slowly, we're making a switch towards *statically compilable* code... but we're not there yet.
+
+In classic builder code, compiling this would work and eventually, when the `p` method is called, the meta-object protocol goes into action and eventually calls the `methodMissing` method on the `BaseTemplate` class if it is defined. So to make our code work, all we have to do is to write that method:
+
+[source,groovy]
+.BaseTemplate.java
+----
+    public Object methodMissing(String tagName, Object args) throws IOException {
+        Object o = model.get(tagName);
+        if (args instanceof Object[]) {
+            final Writer wrt = out;
+            TagData tagData = new TagData(args).invoke();
+            Object body = tagData.getBody();
+            writeIndent();
+            wrt.write('<');
+            wrt.write(tagName);
+            writeAttributes(tagData.getAttributes());
+            if (body != null) {
+                wrt.write('>');
+                writeBody(body);
+                writeIndent();
+                wrt.write("</");
+                wrt.write(tagName);
+                wrt.write('>');
+            } else {
+                if (configuration.isExpandEmptyElements()) {
+                    wrt.write("></");
+                    wrt.write(tagName);
+                    wrt.write('>');
+                } else {
+                    wrt.write("/>");
+                }
+            }
+        }
+        return this;
+    }
+----
+
+We can test that this code works by rendering a simple template:
+
+[source,groovy]
+----
+import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTemplate '''
+html {
+    body {
+	p(text)
+    }
+}
+'''
+def model = [text:'It works!']
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))
+----
+
+What is nice is that we can also rely on the template configuration to perform different transformations. For example, there's an optional `autoEscape` flag which tells if variables read from the model should be automatically escaped. If the flag is set to false, the following code:
+
+[source,groovy]
+----
+text
+----
+
+is transformed into:
+
+[source,groovy]
+----
+getModel().get("text")
+----
+
+but if the flag is set to true, the generated code is:
+
+[source,groovy]
+----
+yield(getModel().get("text"))
+----
+
+where `yield` is the method which will escape contents... So it's a very flexible way to perform parametrized transformations of templates! The same technique is used to:
+
+* transform `include (template|escaped|unescaped):'path/to/template'` into `include(Groovy|Escaped|Unescaped)('/path/to/template')
+* transform `unescaped.foo` into `getModel().get("foo")`
+* transform `':XXX'()` method calls into `methodMissing('XXX', ...)`. This gives a way to render tags which have the same name as helper methods like `yield`. In that case, the user can write `':yield'()` to create a tag `<yield>` instead of calling the `yield` method for example. 
+
+== Statically compiling templates
+
+=== Oops, I did it again!
+
+Going further towards statically compilable code requires additional trickery. In the previous example, we still have a call (`p(...)`) which is _unresolved_, goes through the MOP and eventually calls `methodMissing`. The same way we converted the `text` variable into a dynamic call, we can make it statically compilable. Since the method which would eventually be called would be `methodMissing`, instead of going through the MOP, since we know that this particular method will always be called in our case, we can directly make the change, and hardwire it. The resulting code would look like this:
+
+[source,groovy]
+----
+methodMissing("p", new Object[]{getModel().get("text")})
+----
+
+This change can be made in our transformer, like we did the `getModel` change. However, we will see that we have a serious problem with that. Meanwhile, let's show how we can trigger static compilation of templates. This can be done easily by injecting the `@CompileStatic` annotation through `CompilerConfiguration`:
+
+[source,groovy]
+----
+compilerConfiguration.addCompilationCustomizers(new TemplateASTTransformer(tplConfig)); 		<1>
+compilerConfiguration.addCompilationCustomizers(
+                new ASTTransformationCustomizer(CompileStatic.class));					<2>
+----
+<1> apply the AST transformations to rewrite unresolved variables and method missing
+<2> apply `@CompileStatic` to the template
+
+We can try the template engine using the same code as before:
+
+[source,groovy]
+----
+import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTemplate '''
+html {
+    body {
+    p(text)
+    }
+}
+'''
+def model = [text:'It works!']
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))
+----
+
+And it works! So what is the problem? Actually, there are multiple issues. The first one is that you can't call existing methods anymore! For example, we can't call the `yield` method because it has been converted too:
+
+[source,groovy]
+----
+yield 'Some text'
+----
+
+gets converted into:
+
+[source,groovy]
+----
+methodMissing("yield", new Object[] {"Some <text to escape>"})
+----
+
+and eventually generates this:
+
+[source,xml]
+----
+<yield>Some <text to escape></yield>
+----
+
+Is it the end of the story? Can't we really statically compile our templates and make them super fast? Well, no, of course! 
+
+This is where all the magic begins. Solving this problem requires being able to make a difference between calls to methods which *exist* (like `yield`) and calls to methods which are not defined (like `html`). And guess what, Groovy has a very nice tool whose responsability is *exactly* this: static type checking and by extension, static compilation.
+
+So let's start by removing the code which transforms the method calls into `methodMissing` calls, and try to compile the following template:
+
+[source,groovy]
+----
+import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTemplate '''
+html {
+    body {
+        yield text
+    }
+}
+'''
+def model = [text:'Text <to be escaped>']
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))
+----
+
+Since we kept static compilation, it will fail, but it will give us interesting information:
+
+----
+[Static type checking] - Cannot find matching method GeneratedMarkupTemplate6#html(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
+ at line: 2, column: 1
+
+[Static type checking] - Cannot find matching method GeneratedMarkupTemplate6#body(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
+ at line: 3, column: 5
+----
+
+What we see is that the two errors are precisely the methods that we want to directly wire to `methodMissing`. The `yield` method has been recognized, so the type checker did the job for us. It is telling us: "ok guys, there are two method calls I know nothing about. Those are `html` and `body`. Please do something or I can't compile it.".
+
+That's nice, but how can I help the compiler?
+
+=== Type checking extensions
+
+Well, this is precisely why type checking extensions were added in Groovy 2.1. They allow the programmer to help the compiler when he knows about a method call that the type checker isn't able to resolve. You can give hints and tell "ok, this method exists, and it returns an object of type Foo". In Groovy 2.2, this mechanism was extended to static compilation, which opens another chapter in the incredible extensibility that Groovy has to offer.
+
+Writing type checking extensions require a bit of knowledge of the Groovy AST (abstract syntax tree), so anyone who ever wrote an AST transformation in Groovy should be capable of writing a type checking extension. Actually, it is even easier, and the process is described http://docs.codehaus.org/display/GROOVY/Type+checking+extensions[here]. In our case, we will start leveraging a feature of Groovy 2.2 will allows us to mix dynamic code with statically compiled code. That is to say that the only thing that our extension is going to do is saying "when you don't know what a method call does, perform a dynamic invocation".
+
+When we added this to Groovy 2.2, we really didn't want to make "mixed" mode a first class citizen in static compilation, because it defeats the idea of catching typos, which is one of the things people expect most from a type checking system. So this "mixed" mode is actually activated by type checking extensions. This means that the only method calls which will be made dynamic will be those that the programmer knows about, and really wants to convert to dynamic calls. It is an important difference, because we want the developper to be *aware* of what he is doing.
+
+That said, how can we implement that? It's actually pretty easy. The first thing to do is to write the code which will help the compiler:
+
+[source,groovy]
+----
+methodNotFound { receiver, name, argList, argTypes, call ->	<1>
+    if (call.lineNumber > 0) {					<2>
+        if (call.implicitThis) {				<3>
+            return makeDynamic(call, OBJECT_TYPE)		<4>
+        }
+    }
+}
+----
+<1> react to the `methodNotFound` event, thrown by the type checker
+<2> make sure the event is called on user code, that is to say code for which there's an associated line number
+<3> make sure that only calls which are on an "implicit this" are made dynamic (see below)
+<4> instruct the compiler to perform a dynamic call here
+
+Point 3 is actually important. We said that we wanted the developper to be aware of which calls he want to make dynamic. This is the kind of guards that you might want to add. In builder-style code, only method calls for which there's no explicit receiver should be considered as method creating tags. For example, if you write `this.foo`, there is an *explicit* `this` receiver, and we don't want to convert that call. Instead, we want to let the compiler report an error.
+
+Now that the extension is written, we still have to load it. There are two ways of loading type checking extensions: using scripts (Groovy 2.1) or precompiled type checking extensions (Groovy 2.2+). In my case, I wanted to use precompiled type checking extensions, to avoid paying the cost of compiling the type checking extension at runtime. This can be done by wrapping the extension script into a class extending `GroovyTypeCheckingExtensionSupport.TypeCheckingDSL`:
+
+[source,groovy]
+----
+class MarkupTemplateTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
+
+    @Override
+    Object run() {
+	methodNotFound { receiver, name, argList, argTypes, call ->
+		...    	
+	}
+    }
+}
+----
+
+Then the extension can be loaded by slightly changing the way we activate `@CompileStatic`:
+
+[source,groovy]
+----
+compilerConfiguration.addCompilationCustomizers(
+        new ASTTransformationCustomizer(
+            Collections.singletonMap("extensions","groovy.text.markup.MarkupTemplateTypeCheckingExtension"), <1>
+            CompileStatic.class));									     <2>
+----
+<1> create the map of arguments for the `@CompileStatic` AST transformation
+<2> apply `@CompileStatic`
+
+== Improving performance
+
+With the type checking extension, we've now instructed the compiler to perform *dynamic* calls when it finds tag methods. All other calls, which were resolved statically, are made static. This is nice, but we are still paying the price of the meta-object protocol here, and there's no reason to go through a dynamic path were we want the target method to be `methodMissing` in any case. So, how can we solve that?
+
+WARNING: Before going further, you have to be warned. What I am going to show you is things that I wouldn't recommand for beginners in AST transformations. We're going to update the AST *just before it is going to generate bytecode*. This is very late in the compilation process, meaning that you are walking along a thin rope without net! Traditional AST transformations run much earlier in the compilation process, and the compiler will do a lot of things for you (like resolving methods, variables, ...). Here, it is so late that all those things have already been done, so you have to do it all yourself!
+
+Now let the fun begin! The idea is quite simple actually. Instead of relying on `makeDynamic`, we will transform the calls into direct calls to `methodMissing`. The type checking extension API doesn't let you do this (it's not meant to transform the AST), so you have to do it yourself. This involves multiple steps:
+
+* when we start visiting a method, create an empty list of method calls that will need to be transformed
+* when an unresolved call is found and that it matches our criteria, put that call into the list
+* after the method has been visited, trigger a transformer which will transform all calls in the list
+
+The first step requires an extra block:
+
+[source,groovy]
+----
+beforeVisitMethod {		<1>
+   newScope {			<2>
+      builderCalls = []		<3>
+   }
+}
+----
+<1> we're entering a new method body
+<2> `newScope` pushes a "type checking scope" on stack, where you can put user data
+<3> add the `builderCalls` method to this scope
+
+Then you can add the method calls to be transformed this way:
+
+[source,groovy]
+----
+methodNotFound { receiver, name, argList, argTypes, call ->
+    if (call.lineNumber > 0) {
+        if (call.implicitThis) {
+            currentScope.builderCalls << call
+            return makeDynamic(call, OBJECT_TYPE)
+        }
+    }
+}
+----
+
+And triggering the AST transformation can be done in an `afterVisitMethod` block:
+
+[source,groovy]
+----
+afterVisitMethod { mn ->							<1>
+   scopeExit {									<2>
+      new BuilderMethodReplacer(context.source, builderCalls).visitMethod(mn)	<3>
+   }
+}
+----
+<1> when we exit a method body
+<2> pop the current scope from stack
+<3> trigger an AST transformation which will visit this method knowing which calls need to be transformed
+
+Of course, we still miss the transformation code. For that, we need a class which extends http://groovy.codehaus.org/api/org/codehaus/groovy/ast/ClassCodeExpressionTransformer.html[ClassCodeExpressionTransformer] :
+
+[source,groovy]
+----
+    private static class BuilderMethodReplacer extends ClassCodeExpressionTransformer {
+
+        private static final MethodNode METHOD_MISSING = ClassHelper.make(BaseTemplate).getMethods('methodMissing')[0]		<1>
+
+        private final SourceUnit unit;
+        private final Set<MethodCallExpression> callsToBeReplaced;
+
+        BuilderMethodReplacer(SourceUnit unit, Collection<MethodCallExpression> calls) {
+            this.unit = unit
+            this.callsToBeReplaced = calls as Set;
+        }
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            unit
+        }
+
+        @Override
+        void visitClosureExpression(final ClosureExpression expression) {
+            super.visitClosureExpression(expression)
+        }
+
+        @Override
+        public Expression transform(final Expression exp) {
+            if (callsToBeReplaced.contains(exp)) {									<2>
+                def args = exp.arguments instanceof TupleExpression ? exp.arguments.expressions : [exp.arguments]
+                args*.visit(this)
+                // replace with direct call to methodMissing
+                def call = new MethodCallExpression(									<3>
+                        new VariableExpression("this"),
+                        "methodMissing",
+                        new ArgumentListExpression(
+                                new ConstantExpression(exp.getMethodAsString()),
+                                new ArrayExpression(
+                                        OBJECT_TYPE,
+                                        [* args]
+                                )
+                        )
+                )
+                call.implicitThis = true
+                call.safe = exp.safe
+                call.spreadSafe = exp.spreadSafe
+                call.methodTarget = METHOD_MISSING									<4>
+                call													<5>
+            } else if (exp instanceof ClosureExpression) {
+                exp.code.visit(this)
+                super.transform(exp)
+            } else {
+                super.transform(exp)
+            }
+        }
+    }
+----
+<1> find the method which will eventually be called, `methodMissing` and keep a handle on it
+<2> when an expression is visited, we check if it is a method call which should be replaced
+<3> create a new method call
+<4> link the call to its target method (very important if you don't want to crash the compiler!)
+<5> return the new method call
+
+And we're done! Of course, I didn't say it was trivial nor easy, yet, it is possible, and now, all methods supposed to create a tag are directly wired to `methodMissing`, meaning that they are now statically compiled!
+
+== More things to fix...
+
+You may think that all problems are solved, but in fact, there are still issues with this code. Imagine the following template:
+
+[source,groovy]
+----
+p(text.toUpperCase())
+----
+
+If you compile it, it will fail with:
+
+[source,groovy]
+----
+Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.
+----
+
+The reason is that we compile the template statically. While we instructed the compiler that `text` is in fact `getModel().get("text")`, it is still unable to know what is the return type of this call. Then, it assumes that it returns an `Object`, and if you try to call `toUpperCase` on an `Object`, the method doesn't exist... This can easily be solved, by making all unresolved method calls dynamic. This means that the template compilation will never throw such errors anymore, but it will instead make a dynamic call. Problem solved.
+
+Well, almost.
+
+What if I do this?
+
+[source,groovy]
+----
+p(((String)text).toUpperCase())
+----
+
+Then, by adding a cast, the static compiler is able to resolve the method call. Instead of doing a dynamic call, like it would with our extension, it will perform a direct method call, which will be faster! This means that if you add types, by casting, to your template, rendering can be made faster.
+
+This is an interesting idea, but it is not really user friendly. So the last thing I added to the type checking extension is actually an optional, "type checked" mode. If this mode is activated, then the programmer is supposed to tell which are the types of the elements found into the binding. Here, the developper would have to declare that `text` is of type String:
+
+[source,groovy]
+----
+import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTypeCheckedModelTemplate '''				<1>
+p {
+   yield text.toUpperCase()								<2>
+}
+''', [text:'String']
+def model = [text:'Text <to be escaped>']						<3>
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))
+----
+<1> use `createTypeCheckedModelTemplate` instead of `createTemplate`
+<2> you can use `text.toUpperCase()` without an explicit cast
+<3> because the model was declared using a simple map
+
+This mode is actually very interesting if you want to report template errors at _template compilation_ time. Instead of having an error when the template is rendered, the error will occur at compile time. So, for example, if we change the model declaration from:
+
+[source,groovy]
+----
+[text:'String']
+----
+
+to
+
+[source,groovy]
+----
+[text:'Integer']
+----
+
+template compilation will now fail with:
+
+----
+[Static type checking] - Cannot find matching method java.lang.Integer#toUpperCase(). Please check if the declared type is right and if the method exists.
+----
+
+What is really interesting is that you can declare "complex" models, like:
+
+[source,groovy]
+----
+[persons:'List<Person>', posts:[List<Post>]]
+----
+
+and have the template statically compiled! The implementation details of that mode are a bit complex, but you can take a look at the https://github.com/melix/groovy-core/commit/30096837f8494d64d249a3341efca7ea66bb816f[commit] if you want to have some hint (don't hesitate to ask me if you want me to explain how it works).
+
+== And more features!
+
+Last but not least, the template engine implements automatic indent and automatic new lines. The first one is quite easy to implement, as it only requires wrapping the supplied `Writer` into an `IndentWriter`. But adding automatic new lines is a bit trickier, because we want to rely on the layout of the source code to actually add behavior! Let me explain that again with examples. If you have:
+
+[source,groovy]
+----
+div {
+  p('text')
+}
+----
+
+we want to render:
+
+[source,html]
+----
+<div>
+    <p>Text</p>
+</div>
+----
+
+But if we have:
+
+[source,groovy]
+----
+div {  p('text') }
+----
+
+We want to render:
+
+[source,html]
+----
+<div><p>Text</p></div>
+----
+
+The problem is that our templates are actually Groovy code... And new lines are not significant. They are not even visible in the AST, so how can we implement such a feature?! The answer relies in each AST node... They all carry line and column number information. So, by comparing, in a `ClosureExpression`, the line number of the closure itself with the line number of its first code statement, we can determine if there was a new line in source code! The same way, we can check if the last line number of the closure is greater than the line number of the last statement, and if so, introduce a new line... So, in the first example, the code is actually transformed into:
+
+[source,groovy]
+----
+div {
+  newLine()
+  p('text')
+  newLine()
+}
+----
+
+And that's it!
+
+== Conclusion
+
+In this (long) blog post, I have demonstrated various techniques that allowed me to transform a slow, dynamic builder based template engine into a fast, statically compiled, template engine with optional user model type checking and unique features like automatic new line insertions. It goes far beyond what the `StreamingMarkupBuilder` has to offer and demonstrates that compile time metaprogramming can be used in Groovy to provide advanced features. Of course, no one would expect you to create such code from the beginning. If you https://github.com/melix/groovy-core/commits/markup-template-engine[take a look at the branch commits], you will definitely see that I went step by step. And eventually, I will issue a pull request when I think that the code is ready for prime time. I am not sure yet this should make into core groovy, or instead if it should go into an external project. Ideas are welcome!
+
+I still have to make some changes, like not reporting errors if the type checking mode is not active (and always going through dynamic mode in that case) and probably write more benchmarks, but I'm really looking forward to read what you think. Oh yes, one last thing: congratulations if you read that post throughfully!
+
+
+

@@ -1,0 +1,460 @@
+= A fast markup template engine for Groovy (part 1 of 2)
+Cédric Champeau
+2014-02-16
+:jbake-type: post
+:jbake-tags: groovy,template,freemarker,markupbuilder,html
+:jbake-status: published
+:source-highlighter: prettify
+:id: markup_template_engine_part_1
+:icons: font
+
+Recently, I was https://twitter.com/CedricChampeau/status/431131840788041728[surprised] no-one had the idea of developping a template engine relying on the Groovy http://groovy.codehaus.org/Creating+XML+using+Groovy's+MarkupBuilder[MarkupBuilder]. Working on http://jbake.org/[JBake] made me take a look at existing template engines for Java again, something I hadn't done for years, and even if new technologies like http://www.thymeleaf.org/[Thymeleaf] or http://jknack.github.io/handlebars.java/gettingStarted.html[Handlebars] exist, not of them are as practical to use as the markup builder.
+
+== An interesting experiment
+
+For that reason, I started working on a new template engine leveraging Groovy. The primary focus of this template engine would be XML-like markup (XHTML, HTML5, XML, ...), but in theory, it can be used to render anything. The basic idea is that you can write a template which looks like this:
+
+[source,groovy]
+----
+html {
+    body {
+        yield message			<1>
+    }
+}
+----
+<1> 'message' is a template variable
+
+which renders to:
+
+[source,html]
+----
+<html><body>It works!</body></html>
+----
+
+My first implementation was done quickly done and was leveraging the http://groovy.codehaus.org/gapi/groovy/xml/StreamingMarkupBuilder.html[StreamingMarkupBuilder]. It wasn't very difficult to write, but it had a problem: in general, builders are quite slow, so not very suitable for templating engines, where you should render a page as fast as possible. To check this, I wrote a simple micro-benchmark, which compared my template engine with Freemarker:
+
+[source,groovy]
+----
+@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+@Grab('org.freemarker:freemarker:2.3.9')
+import groovy.text.markup.MarkupTemplateEngine
+import freemarker.template.*
+ 
+MarkupTemplateEngine engine = new MarkupTemplateEngine()
+def mkpTemplate1 = engine.createTemplate '''
+html {
+    body('It works!')
+}
+'''
+def mkpTemplate2 = engine.createTemplate '''
+html {
+    body(text)
+}
+'''
+ 
+def mkpTemplate3 = engine.createTemplate '''
+html {
+    body(text.toUpperCase())
+}
+'''
+ 
+def cfg = new Configuration()
+def ftlTemplate1 = new Template("name", new StringReader('''<html><body>It works!</body></html>'''), cfg);
+def ftlTemplate2 = new Template("name", new StringReader('''<html><body>${text}</body></html>'''), cfg);
+def ftlTemplate3 = new Template("name", new StringReader('''<html><body>${text?upper_case}</body></html>'''), cfg);
+def r = benchmark {
+    'MarkupTemplateEngine (simple, no binding)' { mkpTemplate1.make([:]).writeTo(new StringWriter()) }
+    'Freemarker (simple, no binding)' { ftlTemplate1.process([:], new StringWriter()) }
+    'MarkupTemplateEngine (simple binding)' { mkpTemplate2.make([text:'Hello']).writeTo(new StringWriter()) }
+    'Freemarker (simple binding)' { ftlTemplate2.process([text:'Hello'], new StringWriter()) }
+    'MarkupTemplateEngine (simple toUpper)' { mkpTemplate3.make([text:'Hello']).writeTo(new StringWriter()) }
+    'Freemarker (simple toUpper)' { ftlTemplate3.process([text:'Hello'], new StringWriter()) }
+}
+ 
+r.prettyPrint()
+----
+
+I expected my template engine to be slower, yet I didn't expect it to be *that* slow:
+
+----
+                                            user  system    cpu   real
+
+MarkupTemplateEngine (simple, no binding)  23038       0  23038  23059
+Freemarker (simple, no binding)              385       0    385    392
+MarkupTemplateEngine (simple binding)      26221       0  26221  26244
+Freemarker (simple binding)                 1037       1   1038   1046
+MarkupTemplateEngine (simple toUpper)      26895       0  26895  26929
+Freemarker (simple toUpper)                 1161       0   1161   1171
+----
+
+As wisdom says, make it work, make it right, then make it fast. I already had it working and it did what I wanted, so the next logical step would therefore be optimizing... But before I show you the results of that steps, let's take a look at the features I have implemented so far.
+
+== Features
+
+I am quite happy with the current feature set, which I think is good enough for a public review. Here is a quick list.
+
+=== builder syntax
+
+[code,groovy]
+----
+html {
+   head {
+      meta(charset:'utf-8')
+      title('Page title')
+   }
+}
+----
+
+Renders to:
+
+[source,html]
+----
+<html><head><meta charset="utf-8"><title>Page title</title></head></body>
+----
+
+For that, the code to initialize the template engine is quite simple (note that you can use it in Java too):
+
+[source,groovy]
+----
+import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate1 = engine.createTemplate '''
+html {
+   head {
+      meta(charset:'utf-8')
+      title('Page title')
+   }
+}
+'''
+
+def model = [:]
+
+mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))
+----
+
+=== Groovy goodness
+
+[source,groovy]
+----
+ul {
+   persons.each { p ->
+   	li(p.name)
+   }
+}
+----
+
+With the following model:
+
+[source,groovy]
+----
+def model = [persons: [new Person(name:'Bob'), new Person(name:'Alice')]]
+----
+
+Renders to:
+
+[source,html]
+<ul><li>Bob</li><li>Alice</li></ul>
+
+=== template inclusion
+==== inclusion of another template
+
+[source,groovy]
+----
+html {
+   include template: 'includes/header.tpl'
+   include template: 'includes/body.tpl'
+}
+----
+
+==== inclusion of escaped text
+
+[source,groovy]
+----
+html {
+   div(class:'post') {
+   	include escaped: 'content/text.txt'
+   }
+}
+----
+
+==== inclusion of unescaped text
+
+[source,groovy]
+----
+html {
+   div(class:'post') {
+   	include unescaped: 'content/raw.txt'
+   }
+}
+----
+
+==== automatic escaping of user input
+
+By default, variables read from the model will be escaped. For example, given the following model:
+
+[source,groovy]
+----
+def model = [text:'<html>']
+----
+
+and the following template:
+
+[source,groovy]
+----
+p(text)
+----
+
+Then the result will be:
+
+[source,groovy]
+----
+<p>&lt;html&gt;</p>
+----
+
+It is possible to avoid escaping by prefixing the variable name with `unescaped.`:
+
+[source,groovy]
+----
+p(unescaped.text)
+----
+
+==== automatic indentation
+
+Automatic indentation allows the programmer to get rid of indent instructions. For the following template:
+
+[source,groovy]
+----
+html {
+   newLine()
+   body {
+newLine()
+p('Auto indent in action!')
+newLine()
+   }
+   newLine()
+}
+----
+
+The result without automatic indent is:
+
+[source,html]
+----
+<html>
+<body>
+<p>Auto indent in action!</p>
+</body>
+</html> 
+----
+
+If auto-indent is activated, then the output is changed to:
+
+[source,html]
+----
+<html>
+    <body>
+        <p>Auto indent in action!</p>
+    </body>
+</html> 
+----
+
+==== automatic new lines
+
+The previous example was nice, but you have a lot of `newLine` method calls. Activating auto-newline will use the open blocks to introduce newLines automatically. That means that you can change the template to:
+
+[source,groovy]
+----
+html {
+   body {
+p('Auto indent in action!')
+   }
+}
+----
+
+which is much more readable! To understand how it works, let's slightly change the template, by moving the `body` block to the same line as `html`:
+
+[source,groovy]
+----
+html {   body {
+p('Auto indent in action!')
+   }
+}
+----
+
+in that case, the output is modified accordingly:
+-
+[source,html]
+----
+<html><body>
+        <p>Auto indent in action!</p>
+    </body>
+</html> 
+----
+
+This means that new lines are really added where you have them in source code!
+
+==== optional type checking of model
+
+Imagine the following model:
+
+[source,groovy]
+----
+class User {
+   Long id
+   String name
+}
+
+def model = [user: new User(id: 123, name: 'Cedric')]
+----
+
+and the following code to create a template:
+
+[source,groovy]
+----
+def template = engine.createTemplate '''
+p "User id: $user.id Name: $user.name Age: $user.age"
+'''
+----
+
+The template is compiled fine, but if you try to render it, it will fail:
+
+[source,groovy]
+----
+template.make(model).writeTo(new PrintWriter(System.out)) 	<1>
+----
+<1> fails with groovy.lang.MissingPropertyException: No such property: age for class: User
+
+To avoid failing at render time, you can use a type checked mode:
+
+[source,groovy]
+----
+def template = engine.createTypeCheckedModelTemplate '''	<1>
+p "User id: $user.id Name: $user.name Age: $user.age"
+''', [user: 'User']						<2>
+----
+<1> use _createTypeCheckedModelTemplate_ instead of _createTemplate_
+<2> provide model type information
+
+And this time, compilation of the template will fail directly:
+
+----
+[Static type checking] - No such property: age for class: User
+----
+
+This means that it won't wait for an actual template to be rendered for failing, which is a feature some people like (yes, I'm looking at you, Play! Framework ;)). Now that we've showed a quick list of those features (there are more, like helper methods in model, ...), what about performance? Is it worth it? I thought Groovy, and builders, were slow?
+
+== Statically compiled templates
+
+I had already played with link:/blog/2013/02/13/static_builders_inception.html[static builders] in the past, and we also have this very nice feature of static type checking extensions in Groovy 2.1. In Groovy 2.2, type checking extensions were extended to static compilation... So my first idea was to get rid of the `StreamingMarkupBuilder`, which is good but not really suited for optimizations. And before I explain the implementation details, here is the result of a more complete benchmark, using my latest implementation:
+
+[source,groovy]
+----
+@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+@Grab('org.freemarker:freemarker:2.3.9')
+import groovy.text.markup.MarkupTemplateEngine
+import freemarker.template.*
+ 
+MarkupTemplateEngine engine = new MarkupTemplateEngine()
+def mkpTemplate1 = engine.createTemplate '''
+html {
+    body('It works!')
+}
+'''
+def mkpTemplate2 = engine.createTemplate '''
+html {
+    body(text)
+}
+'''
+ 
+def mkpTemplate3 = engine.createTemplate '''
+html {
+    body(text.toUpperCase())
+}
+'''
+ 
+def mkpTemplate3_typed = engine.createTemplate '''
+html {
+    body(((String)text).toUpperCase())
+}
+'''
+ 
+def mkpTemplate4 = engine.createTemplate '''
+html {
+    body {
+        ul {
+            persons.each {
+                li("$text $it")
+            }
+        }
+    }
+}
+'''
+ 
+def mkpTemplate4_typed = engine.createTemplate '''
+List<String> pList = (List<String>) persons
+String txt = text
+html {
+    body {
+        ul {
+            for (String p: pList) {
+                li("$txt $p")
+            }
+        }
+    }
+}
+'''
+ 
+def model = [text:'Hello', persons:['Cedric','Guillaume','Jochen','Pascal','Paul']]
+ 
+def cfg = new Configuration()
+def ftlTemplate1 = new Template("name", new StringReader('''<html><body>It works!</body></html>'''), cfg);
+def ftlTemplate2 = new Template("name", new StringReader('''<html><body>${text}</body></html>'''), cfg);
+def ftlTemplate3 = new Template("name", new StringReader('''<html><body>${text?upper_case}</body></html>'''), cfg);
+def ftlTemplate4 = new Template("name", new StringReader('''<html><body><ul><#list persons as person><li>${text} ${person}</#list></ul></body></html>'''), cfg);
+ 
+def r = benchmark {
+    'MarkupTemplateEngine (simple, no binding)' { mkpTemplate1.make([:]).writeTo(new StringWriter()) }
+    'Freemarker (simple, no binding)' { ftlTemplate1.process([:], new StringWriter()) }
+    'MarkupTemplateEngine (simple binding)' { mkpTemplate2.make(model).writeTo(new StringWriter()) }
+    'Freemarker (simple binding)' { ftlTemplate2.process(model, new StringWriter()) }
+    'MarkupTemplateEngine (simple toUpper)' { mkpTemplate3.make(model).writeTo(new StringWriter()) }
+    'Freemarker (simple toUpper)' { ftlTemplate3.process(model, new StringWriter()) }
+    'MarkupTemplateEngine (typed toUpper)' { mkpTemplate3_typed.make(model).writeTo(new StringWriter()) }
+    'MarkupTemplateEngine loop' { mkpTemplate4.make(model).writeTo(new StringWriter()) }
+    'MarkupTemplateEngine typed for loop' { mkpTemplate4_typed.make(model).writeTo(new StringWriter()) }
+    'FreeMarker loop' {  ftlTemplate4.process(model, new StringWriter()) }
+}
+ 
+r.prettyPrint()
+----
+
+----
+                                           user  system   cpu  real
+
+MarkupTemplateEngine (simple, no binding)   609       0   609   615
+Freemarker (simple, no binding)             400       0   400   410
+MarkupTemplateEngine (simple binding)       628       3   631   631
+Freemarker (simple binding)                 864       0   864   877
+MarkupTemplateEngine (simple toUpper)       681       0   681   690
+Freemarker (simple toUpper)                 972       0   972   986
+MarkupTemplateEngine (typed toUpper)        696       3   699   706
+MarkupTemplateEngine loop                  2927      12  2939  2949
+MarkupTemplateEngine typed for loop        2579       0  2579  2615
+FreeMarker loop                            2862       0  2862  2894
+----
+
+As you can see, there is a *huge* difference. For non trivial templates, the markup template engine is even faster than Freemarker! To acheive such performance, all templates are compiled into bytecode, but also make use of static compilation, type checking extensions, AST transformations, ...
+
+In the next part, I will describe the techniques I used to implement this engine. Meanwhile, let me know what you think of it. If you feel brave, you can test it by checking out the sources on my fork:
+
+----
+git clone -b markup-template-engine https://github.com/melix/groovy-core.git
+./gradlew console	<1>
+----
+<1> will compile Groovy and open a Groovy console where you can test the template engine
+
+
+
