@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cédric Champeau's blog<#if content??>: ${content.title}</#if></title>
+    <title>Cédric Champeau's blog<#if content.title??>: ${content.title}</#if></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
