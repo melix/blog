@@ -1,0 +1,220 @@
+= Groovy on Android
+Cédric Champeau
+2014-06-05
+:jbake-type: post
+:jbake-tags: groovy,android,swift,gr8conf
+:jbake-status: published
+:source-highlighter: prettify
+:id: groovy_on_android
+:gr8conf: http://gr8conf.eu[GR8Conf Europe]
+:groovylang: http://groovy.codehaus.org[Groovy language]
+:gradle: http://www.gradle.org[Gradle]
+:swiftlang: https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html[Swift language]
+:icons: font
+
+Yesterday ended {gr8conf}, a {groovylang} conference in Copenhagen that was once again a successful event.
+I want to talk the crew again for this, and of course the {groovylang} community which is so friendly and always helpful. This year
+turned out to be very special for me, because just two days after the announcement by Apple of the {swiftlang}, I was talking about
+running Groovy on Android! As Guillaume Laforge http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy[noticed], there
+are a lot of similarities between the {swiftlang} and {groovylang}.
+
+The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
+better candidate than {groovylang} here.
+
+== The presentation
+
+Should you be interested in the slides, you can find them below. Since it was presented at {gr8conf}, it gives a bit of history of the changes needed to
+have the runtime working on Android too:
+
+++++
+<script async class="speakerdeck-embed" data-id="e8e58fc0cdee0131f20616308848c4b8" data-ratio="1.6" src="//speakerdeck.com/assets/embed.js"></script>
+++++
+
+For those of you who are new to Groovy, you have to know that this language is derived from Java, meaning that the learning curve is almost 0, but it also
+removes a lot of its verbosity and adds a lot of features to it, such as closures (similar to lambdas in Java 8, but Java 8 is not available for Android
+developers), builders, runtime and compile-time metaprogramming.
+
+As an example of how Groovylang can be used to reduce the verbosity of Java on Android, I will take a simple example: asynchronous tasks. Asynchronous tasks
+are required as soon as a task takes too much time to be executed on the UI thread. That is the case, by default, for any network based operations, in order
+to guarantee that the UI remains snappy even if network is slow or unavailable. The problem is that those asynchronous tasks are incredibly verbose. You have
+to write a lot of code, that I would tend to name "inner class hell", just for this. Let's imagine that you need to parse a JSON feed, then update the UI
+accordingly. Then you would have to write something like this (no kidding):
+
+[source,java]
+----
+public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	new FeedTask().execute("http://path/to/feed");
+    } 
+
+    class FeedTask extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... params) {
+            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
+            HttpPost httppost = new HttpPost(params[0]);
+
+            InputStream inputStream = null;
+            String result = null;
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+
+                inputStream = entity.getContent();
+                // json is UTF-8 by default
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
+
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                result = sb.toString();
+            } catch (Exception e) {
+                // Oops
+            } finally {
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (Exception squish) {
+                }
+            }
+            StringBuilder speakers = null;
+            try {
+                JSONObject jObject = new JSONObject(result);
+                JSONArray jArray = jObject.getJSONArray("speakers");
+                speakers = new StringBuilder();
+                for (int i = 0; i < jArray.length(); i++) {
+                    speakers.append(jArray.getString(i));
+                    speakers.append(" ");
+                }
+            } catch (JSONException e) {
+                // do something?
+            }
+            return speakers.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            mTextView.setText(s);
+        }
+    }
+}
+----
+
+So now, let's see the equivalent in Groovy (no kidding either):
+
+[source,groovy]
+----
+public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	Fluent.async {
+            def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
+            json.speakers.join(' ')
+        } then {
+	    mTextView.setText(it)
+        }
+    } 
+}
+----
+
+I think you can start to see the advantage of using Groovy in your own Android projects. Of course, the `Fluent` class that I'm using here
+is a support class which I implemented in my https://github.com/melix/gr8confagenda[first Android project] (which is open sourced btw), but it's
+really simple and gives an example of how Android users could benefit from Groovification of their APIs.
+
+=== Feeling the pain
+
+This is actually a key point of my talk: I hadn't written any Android application before this talk, and I definitely wanted to be able to write
+an application in Groovy on Android. Why? Because it's been some time already that I use Groovy everyday, and there's no turning back. I wanted
+to feel the pain of the Java developers on Android, so that I can write better tools for them. And that's actually where you, as a user, come
+in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn't be complicated a breeze.
+This is exactly the point. My example with `Fluent` is *one* example of simplification of usages of Android APIs, but you have many more to invent,
+especially because *you* must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc...
+
+=== The beginning of a new era
+
+In upcoming posts, I will try to demonstrate that we're just at the beginning. Some people are already asking for a {swift} alternative for Android.
+It's there guys, you have it, so spread the word and let's make it happen! I am convinced that it is the beginning of a new era for Android and Groovy.
+Google already switched their main build system to Gradle, which is, by the way, using Groovy, so I think it's time to move over and show your love!
+
+All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:
+
+* https://github.com/melix/gr8confagenda
+
+_Update: build instructions_
+
+If you want to try it by yourself, here's how you can do it. First of all, official support for Android will be in Groovy 2.4. Before the first beta,
+you'll have to build it from sources, and here is the quickest way:
+
+----
+git clone https://github.com/melix/groovy-core.git --branch master
+cd groovy-core
+./gradlew -PskipIndy=true install
+----
+
+Then you can clone the sample application:
+
+----
+cd ..
+git clone https://github.com/melix/gr8confagenda.git
+----
+
+This contains a project that you can open using http://developer.android.com/sdk/installing/studio.html[Android Studio].
+
+If you want to use the {groovylang} in your own Android project, a requirement is that it is using Gradle. If so, you can update your `build.gradle` file
+as is:
+
+[source,groovy]
+.build.gradle
+----
+android {
+   ...
+   packagingOptions {
+        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/groovy-release-info.properties'
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy:2.4.0-SNAPSHOT:grooid'
+    // the following dependency is necessary if you want JSON support
+    compile ('org.codehaus.groovy:groovy-json:2.4.0-SNAPSHOT') {
+        transitive = false
+    }
+}
+
+// add support for Groovy to existing configurations
+android.applicationVariants.all {
+    task "groovy${name}Compile"(type: GroovyCompile) {
+        source = javaCompile.source + fileTree('src/main/java').include('**/*.groovy')
+        destinationDir = javaCompile.destinationDir
+        classpath = javaCompile.classpath
+        groovyClasspath = classpath
+        sourceCompatibility = '1.6'
+        targetCompatibility = '1.6'
+        doFirst {
+            def runtimeJars = plugins.findPlugin(com.android.build.gradle.AppPlugin).runtimeJars
+            classpath = files(runtimeJars) + classpath
+        }
+    }
+    javaCompile.dependsOn("groovy${name}Compile")
+    javaCompile.enabled = false
+}
+
+----
+
+And that's all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!
+
