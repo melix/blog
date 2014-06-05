@@ -6,9 +6,174 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>mar., 3 juin 2014 00:01:43 +0200</pubDate>
-    <lastBuildDate>mar., 3 juin 2014 00:01:43 +0200</lastBuildDate>
+    <pubDate>jeu., 5 juin 2014 19:04:20 +0200</pubDate>
+    <lastBuildDate>jeu., 5 juin 2014 19:04:20 +0200</lastBuildDate>
 
+    <item>
+      <title>Groovy on Android</title>
+      <link>http://melix.github.io/blog/2014/06/grooid.html</link>
+      <pubDate>jeu., 5 juin 2014 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2014/06/grooid.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yesterday ended &lt;a href=&quot;http://gr8conf.eu&quot;&gt;GR8Conf Europe&lt;/a&gt;, a &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; conference in Copenhagen that was once again a successful event.
+I want to talk the crew again for this, and of course the &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; community which is so friendly and always helpful. This year
+turned out to be very special for me, because just two days after the announcement by Apple of the &lt;a href=&quot;https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html&quot;&gt;Swift language&lt;/a&gt;, I was talking about
+running Groovy on Android! As Guillaume Laforge &lt;a href=&quot;http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy&quot;&gt;noticed&lt;/a&gt;, there
+are a lot of similarities between the &lt;a href=&quot;https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html&quot;&gt;Swift language&lt;/a&gt; and &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
+better candidate than &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; here.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_presentation&quot;&gt;The presentation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Should you be interested in the slides, you can find them below. Since it was presented at &lt;a href=&quot;http://gr8conf.eu&quot;&gt;GR8Conf Europe&lt;/a&gt;, it gives a bit of history of the changes needed to
+have the runtime working on Android too:&lt;/p&gt;
+&lt;/div&gt;
+&lt;script async class=&quot;speakerdeck-embed&quot; data-id=&quot;e8e58fc0cdee0131f20616308848c4b8&quot; data-ratio=&quot;1.6&quot; src=&quot;//speakerdeck.com/assets/embed.js&quot;&gt;&lt;/script&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For those of you who are new to Groovy, you have to know that this language is derived from Java, meaning that the learning curve is almost 0, but it also
+removes a lot of its verbosity and adds a lot of features to it, such as closures (similar to lambdas in Java 8, but Java 8 is not available for Android
+developers), builders, runtime and compile-time metaprogramming.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As an example of how Groovylang can be used to reduce the verbosity of Java on Android, I will take a simple example: asynchronous tasks. Asynchronous tasks
+are required as soon as a task takes too much time to be executed on the UI thread. That is the case, by default, for any network based operations, in order
+to guarantee that the UI remains snappy even if network is slow or unavailable. The problem is that those asynchronous tasks are incredibly verbose. You have
+to write a lot of code, that I would tend to name &quot;inner class hell&quot;, just for this. Let&amp;#8217;s imagine that you need to parse a JSON feed, then update the UI
+accordingly. Then you would have to write something like this (no kidding):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	new FeedTask().execute(&quot;http://path/to/feed&quot;);
+    }
+
+    class FeedTask extends AsyncTask&amp;lt;String, Void, String&amp;gt; {
+        protected String doInBackground(String... params) {
+            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
+            HttpPost httppost = new HttpPost(params[0]);
+
+            InputStream inputStream = null;
+            String result = null;
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+
+                inputStream = entity.getContent();
+                // json is UTF-8 by default
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, &quot;UTF-8&quot;), 8);
+                StringBuilder sb = new StringBuilder();
+
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append(&quot;\n&quot;);
+                }
+                result = sb.toString();
+            } catch (Exception e) {
+                // Oops
+            } finally {
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (Exception squish) {
+                }
+            }
+            StringBuilder speakers = null;
+            try {
+                JSONObject jObject = new JSONObject(result);
+                JSONArray jArray = jObject.getJSONArray(&quot;speakers&quot;);
+                speakers = new StringBuilder();
+                for (int i = 0; i &amp;lt; jArray.length(); i++) {
+                    speakers.append(jArray.getString(i));
+                    speakers.append(&quot; &quot;);
+                }
+            } catch (JSONException e) {
+                // do something?
+            }
+            return speakers.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            mTextView.setText(s);
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So now, let&amp;#8217;s see the equivalent in Groovy (no kidding either):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	Fluent.async {
+            def json = new JsonSlurper().parse([:], new URL(&apos;http://path/to/feed&apos;), &apos;utf-8&apos;)
+            json.speakers.join(&apos; &apos;)
+        } then {
+	    mTextView.setText(it)
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I think you can start to see the advantage of using Groovy in your own Android projects. Of course, the &lt;code&gt;Fluent&lt;/code&gt; class that I&amp;#8217;m using here
+is a support class which I implemented in my &lt;a href=&quot;https://github.com/melix/gr8confagenda&quot;&gt;first Android project&lt;/a&gt; (which is open sourced btw), but it&amp;#8217;s
+really simple and gives an example of how Android users could benefit from Groovification of their APIs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_feeling_the_pain&quot;&gt;Feeling the pain&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is actually a key point of my talk: I hadn&amp;#8217;t written any Android application before this talk, and I definitely wanted to be able to write
+an application in Groovy on Android. Why? Because it&amp;#8217;s been some time already that I use Groovy everyday, and there&amp;#8217;s no turning back. I wanted
+to feel the pain of the Java developers on Android, so that I can write better tools for them. And that&amp;#8217;s actually where you, as a user, come
+in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn&amp;#8217;t be complicated a breeze.
+This is exactly the point. My example with &lt;code&gt;Fluent&lt;/code&gt; is &lt;strong&gt;one&lt;/strong&gt; example of simplification of usages of Android APIs, but you have many more to invent,
+especially because &lt;strong&gt;you&lt;/strong&gt; must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_beginning_of_a_new_era&quot;&gt;The beginning of a new era&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In upcoming posts, I will try to demonstrate that we&amp;#8217;re just at the beginning. Some people are already asking for a {swift} alternative for Android.
+It&amp;#8217;s there guys, you have it, so spread the word and let&amp;#8217;s make it happen! I am convinced that it is the beginning of a new era for Android and Groovy.
+Google already switched their main build system to Gradle, which is, by the way, using Groovy, so I think it&amp;#8217;s time to move over and show your love!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/melix/gr8confagenda&quot;&gt;https://github.com/melix/gr8confagenda&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>A fast markup template engine for Groovy (part 2 of 2)</title>
       <link>http://melix.github.io/blog/2014/02/markuptemplateengine_part2.html</link>
@@ -1791,520 +1956,6 @@ available on &lt;a href=&quot;https://github.com/melix/jlangdetect&quot;&gt;GitH
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;A big thank to Freddy, who will probably take the lead of development on this project now!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Closure parameter type inference for Groovy</title>
-      <link>http://melix.github.io/blog/2014/01/closure_param_inference.html</link>
-      <pubDate>mar., 7 janv. 2014 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2014/01/closure_param_inference.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s start 2014 with a new blog post about a long standing request since we introduced static type checking in Groovy 2: closure parameter type inference.
-Before we start, let me wish you a happy new year and a lot of open source contributions!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_type_checking_closure_parameter_types&quot;&gt;Type checking closure parameter types&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To illustrate the problem, let&amp;#8217;s start with this very simple, standard, Groovy code:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;void test() {
-    assert [&apos;foo&apos;,&apos;bar&apos;,&apos;baz&apos;].collect { it.toUpperCase() } == [&apos;FOO&apos;,&apos;BAR&apos;,&apos;BAZ&apos;]
-}
-test()&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This code compiles and runs perfectly fine. Now if you want the &lt;em&gt;test&lt;/em&gt; method to be type safe, you can annotate it with &lt;em&gt;@TypeChecked&lt;/em&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;import groovy.transform.TypeChecked
-
-@TypeChecked
-void test() {
-    assert [&apos;foo&apos;,&apos;bar&apos;,&apos;baz&apos;].collect { it.toUpperCase() } == [&apos;FOO&apos;,&apos;BAR&apos;,&apos;BAZ&apos;]
-}
-test()&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If you compile this, you will notice that the compiler fails with an error:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;[Static type checking] - Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.
- at line: 5, column: 42&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Fixing this requires an explicit closure parameter type:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;import groovy.transform.TypeChecked
-
-@TypeChecked
-void test() {
-    assert [&apos;foo&apos;,&apos;bar&apos;,&apos;baz&apos;].collect { String it -&amp;gt; it.toUpperCase() } == [&apos;FOO&apos;,&apos;BAR&apos;,&apos;BAZ&apos;]
-}
-test()&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The problem comes from the &lt;em&gt;collect&lt;/em&gt; method, which accepts a &lt;code&gt;Closure&lt;/code&gt;. In Groovy, a &lt;code&gt;Closure&lt;/code&gt; is a block of code which may capture variables, but it is also
-represented as an object of the class &lt;code&gt;Closure&lt;/code&gt;. This is a different concept from Java 8 lambdas, which have no &lt;em&gt;Lambda&lt;/em&gt; class, for example. A Java 8 lambda can
-be considered as purely syntactic sugar, which is interpreted as an interface implementation at compile time, although a &lt;code&gt;Closure&lt;/code&gt; can be manipulated. To illustrate
-this, let&amp;#8217;s compare the signatures of &lt;em&gt;collect&lt;/em&gt; (in Groovy) and &lt;code&gt;Map&lt;/code&gt; (in Java 8) which correspond to the same concept:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;colist arabic&quot;&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;items of the source list are of type T and converted to type U using the closure&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;&amp;lt;R&amp;gt; Stream&amp;lt;R&amp;gt; map(Function&amp;lt;? super T, ? extends R&amp;gt; mapper); &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;colist arabic&quot;&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;Function is an interface, the lambda expression will be converted into this target interface&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The Java 8 equivalent would therefore be:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;list.stream().map((it)-&amp;gt;it.toUpperCase()).collect(Collectors.toList()); &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;colist arabic&quot;&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;we&amp;#8217;re not using the smarter method reference notation here, to illustrate the concept&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As you can see, Java allows the same thing as Groovy but doesn&amp;#8217;t require an explicit type. The reason is that for Java, there&amp;#8217;s no ambiguity:
-it makes use of &lt;em&gt;target typing&lt;/em&gt;. Since a lambda is targetting an interface, the type of the parameters can be inferred from the interface type.
-In Groovy, we can&amp;#8217;t do this, because &lt;code&gt;Closure&lt;/code&gt; is not an interface. It is a class which can be manipulated. At this point, you may wonder why
-we don&amp;#8217;t do the same as in Java, and there are several reasons:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;historical reason first, &lt;code&gt;Closure&lt;/code&gt; was one of the key features of the language, 10 years ago!&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;a single class, &lt;code&gt;Closure&lt;/code&gt;, is enough for &lt;strong&gt;all&lt;/strong&gt; usages of an open block. We don&amp;#8217;t need Function, Consumer, BiFunction, &amp;#8230; So we can dramatically
-reduce the amount of &quot;design interfaces&quot;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;last but not least, &lt;em&gt;Closures&lt;/em&gt; support various delegation strategies. This is something Java (or even Scala) is totally unable to do. &lt;code&gt;Closure&lt;/code&gt; can
-be &lt;em&gt;cloned&lt;/em&gt;, &lt;em&gt;curried&lt;/em&gt;, &lt;em&gt;trampolined&lt;/em&gt;, &amp;#8230; and it always returns an instance of another &lt;code&gt;Closure&lt;/code&gt;. This closure can change the delegate, which is the
-key for nice builder like DSLs. The delegate is used whenever a method call in a closure doesn&amp;#8217;t have an explicit receiver. For example:&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;mail {
-   from &apos;austin.powers@groovy.baby&apos;
-   to &apos;mini.me@evil.com&apos;
-   subject &apos;Attention please!&apos;
-   body &apos;...&apos;
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this DSL, the &lt;em&gt;from&lt;/em&gt;, &lt;em&gt;to&lt;/em&gt;, &lt;em&gt;subject&lt;/em&gt; and &lt;em&gt;body&lt;/em&gt; method calls are done on the &lt;em&gt;delegate&lt;/em&gt;. Being able to set the &lt;em&gt;delegate&lt;/em&gt; absolutely requires a
-&lt;code&gt;Closure&lt;/code&gt; class. The implementation of the mail method may have something like:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class EmailSpecification {
-    void from(String sender) { ... }
-    void to(String to) { ... }
-    void subject(String subject) { ... }
-    void body(String body) { ... }
-    void mail(Closure mail) {
-       def mailSpec = mail.clone()
-       mailSpec.delegate = this
-       mailSpec()
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The problem with this approach is that if the closure requires parameters, like in the &lt;em&gt;collect&lt;/em&gt; case, the Java type system, as well as the Groovy type
-system (which is the same), isn&amp;#8217;t expressive enough to let you define them:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;colist arabic&quot;&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;We could like to say that Closure returns a U, but also that it consumes a T&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Of course the first option that was studied was defining lots of &lt;code&gt;Closure&lt;/code&gt; interfaces, corresponding to the various number of arguments (up to some arbitrary limit):&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure1&amp;lt;T,U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;colist arabic&quot;&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;Closure1 is a kind of closure which accepts a single argument and returns a value&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;While this works, it has several drawbacks:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;it requires a lot of arbitrary, totally useless in a dynamic context, number of interfaces/classes to define closures&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;it doesn&amp;#8217;t solve the case of polymorphic closures&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_polymorphic_closures&quot;&gt;Polymorphic closures&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Polywhat? In Groovy, closures can be polymorphic. To illustrate the concept, let&amp;#8217;s take a look at a common method that iterates on map entries:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def map = [key1: &apos;value 1&apos;, key2: &apos;value2&apos;]
-map.each { k,v -&amp;gt; println &quot;Key is $k, value is $v&quot; } &lt;b&gt;(1)&lt;/b&gt;
-map.each { e -&amp;gt; println &quot;Key is ${e.key], value is ${e.value}&quot; } &lt;b&gt;(2)&lt;/b&gt;
-map.each { println &quot;Key is ${it.key], value is ${it.value}&quot; } &lt;b&gt;(3)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;colist arabic&quot;&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;version where the map entry is automatically converted into a key and value arguments&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;version where the closure takes a single, &lt;code&gt;Map.Entry&lt;/code&gt; argument&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;version with an implicit argument, it, is a &lt;code&gt;Map.Entry&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In all cases, it is always the &lt;strong&gt;same&lt;/strong&gt; method which is called, that is to say &lt;em&gt;each(Closure)&lt;/em&gt; on a &lt;code&gt;Map&lt;/code&gt;. The signature of this method is:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;K,V&amp;gt; each(Map&amp;lt;K,V&amp;gt; self, Closure&amp;lt;?&amp;gt; onEachEntry)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Of course, the return type of the closure doesn&amp;#8217;t help here, and just reading that signature, you have absolutely no way to guess that the closure
-will accept either a &lt;code&gt;Map.Entry&lt;/code&gt; or a pair of &lt;code&gt;K,V&lt;/code&gt;. Nor does the compiler. At best, your IDE knows it, and it does because it is hardcoded! This is
-exactly why the compiler fails, and also why so many people think it&amp;#8217;s &lt;a href=&quot;https://jira.codehaus.org/browse/GROOVY-5924&quot;&gt;a bug&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Not convinced? Let&amp;#8217;s make the same signature more cryptic:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;Dead,Pool&amp;gt; magneto(Map&amp;lt;Dead,Pool&amp;gt; self, Closure&amp;lt;?&amp;gt; professorX)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now can you guess what &lt;em&gt;professorX&lt;/em&gt; accepts as parameters? ;)&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_tweaking_the_type_system&quot;&gt;Tweaking the type system&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We have discussed several options and we took the time to think about it, and after the last Groovy DevCon, which took place just before the
-&lt;a href=&quot;http://skillsmatter.com/event-details/home/groovy-grails-exchange-2013&quot;&gt;Groovy and Grails eXchange 2013&lt;/a&gt; in London, I decided to work on an implementation.
-For Groovy 2.1, we had introduced &lt;em&gt;@DelegatesTo&lt;/em&gt; for closures, to be able to help the compiler in the case we described above (hinting at the delegate type)
-but we were still missing parameter type inference. My guess was that it was possible to do something similar to what &lt;em&gt;@DelegatesTo&lt;/em&gt; does, but for parameter
-types.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_annotating_closures&quot;&gt;Annotating closures&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The idea is to annotate closures so that the compiler can fetch the information and infer the argument types from the context. In the case of a simple method
-accepting a closure, a simple annotation could do:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The &lt;em&gt;@ClosureParams&lt;/em&gt; annotation is here to instruct the compiler that the closure will accept either an &lt;em&gt;implicit&lt;/em&gt; or &lt;em&gt;explicit&lt;/em&gt; parameter of type &lt;em&gt;String&lt;/em&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;doSomething {
-   it.toUpperCase()
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;When the compiler determines that the method which will be called is &lt;em&gt;doSomething&lt;/em&gt; (remember that this is only possible if type checking is activated), then an
-additional lookup on the &lt;em&gt;doSomething&lt;/em&gt; signature can be done, and we can retrieve the list of expected parameter types from the closure annotation. Success!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Well, not really:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;we still don&amp;#8217;t support polymorphic closures&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;generics, GENERICS, aaahhhh, GENERICS!&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_introducing_generics&quot;&gt;Introducing&amp;#8230; generics!&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To make things a bit more complicated, we have generics. Don&amp;#8217;t get me wrong. From a user perspective, generics are very good because they make the code more readable
-and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5&amp;#8230;). The typical case is the &lt;em&gt;collect&lt;/em&gt; example that we used initially:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this case, we want to say that the closure:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;is monomorphic&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;accepts a single parameter of type T&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;and the problem is&amp;#8230; how to express this? One might think that you could write:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T,U&amp;gt; List&amp;lt;U&amp;gt; collect(List&amp;lt;T&amp;gt; source, @ClosureParams(T) Closure&amp;lt;U&amp;gt; closure) &lt;b&gt;(1)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;but the truth is that the JVM doesn&amp;#8217;t support placeholders as annotation values, nor does it support parametrized types (like &lt;code&gt;@Foo(List&amp;lt;T&amp;gt;&lt;/code&gt;)). This tells us that the simple strategy doesn&amp;#8217;t work.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_the_solution&quot;&gt;The solution&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The solution we propose is to decouple the declaration of the parameter types from the type itself. In other words, instead of declaring the types in the annotation, we will declare an object
-which is used as a hint to compute the types &lt;strong&gt;at compile time&lt;/strong&gt;. In the case of &lt;em&gt;collect&lt;/em&gt;, we end up with this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T,E&amp;gt; List&amp;lt;T&amp;gt; collect(List&amp;lt;E&amp;gt; self, @ClosureParams(FirstParam.FirstGenericType.class) Closure&amp;lt;? extends T&amp;gt; transform)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this case, &lt;code&gt;FirstParam.FirstGenericType&lt;/code&gt; doesn&amp;#8217;t represent the type itself. It&amp;#8217;s a hint used by the compiler, which says &quot;the type of the argument is the type of the first generic type of the first parameter&quot;. In this case, the first parameter is &lt;code&gt;List&amp;lt;E&amp;gt;&lt;/code&gt;, so the first generic type is &lt;code&gt;E&lt;/code&gt;. This means that if you call the method with a &lt;code&gt;List&amp;lt;String&amp;gt;&lt;/code&gt;, now the compiler can infer that &lt;code&gt;E&lt;/code&gt; is a &lt;code&gt;String&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_type_hints&quot;&gt;Type hints&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At this point, you may actually think that this &quot;solution&quot; is a bit complex. However, you have to remember that this kind of work is only necessary if you want to support type inference, so it is really only necessary if you use type checking. This makes this a tool primarily aimed at framework builders. In particular, lots of frameworks are written in Java (including Groovy itself), so the syntax &lt;strong&gt;has&lt;/strong&gt; to be compatible with Java. Second, there&amp;#8217;s no need to define one &lt;code&gt;FirstParam.FirstGenericType&lt;/code&gt; class per method. The same class can be reused for all cases where it makes sense. Remember that it doesn&amp;#8217;t represent the type of the parameters but a way to fetch the type (one level of indirection).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To make things easier for framework writers, the &lt;a href=&quot;https://github.com/groovy/groovy-core/pull/307&quot;&gt;candidate implementation&lt;/a&gt; provides a set of predefined hint classes that should fit most of
-the use cases. Let&amp;#8217;s go through the list:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_firstparam&quot;&gt;FirstParam&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;code&gt;FirstParam&lt;/code&gt; is a hint that says that the expected parameter type corresponds to the first parameter of the method call, like in:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The closure accepts a single parameter of type &lt;code&gt;BigInteger&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_firstparam_firstgenerictype&quot;&gt;FirstParam.FirstGenericType&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This hint is used when the type to use is not the type of the parameter, but the type of the first generic type of the first argument, like in:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T,E&amp;gt; Collection&amp;lt;T&amp;gt; collect(Collection&amp;lt;E&amp;gt; self, Collection&amp;lt;T&amp;gt; collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure&amp;lt;? extends T&amp;gt; transform)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Note that if you have a &lt;code&gt;Collection&lt;/code&gt; defined like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class PersonList extends LinkedList&amp;lt;Person&amp;gt; {}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;and that you call collect:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;list.collect { it.name }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;the compiler will be capable of inferring that the type of the first generic type is actually a &lt;code&gt;Person&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;code&gt;FirstParam&lt;/code&gt; also supports &lt;code&gt;SecondGenericType&lt;/code&gt; and &lt;code&gt;ThirdGenericType&lt;/code&gt;. You can also find &lt;code&gt;SecondParam&lt;/code&gt; and &lt;code&gt;ThirdParam&lt;/code&gt; which follow the same structure.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_mapentryorkeyvalue&quot;&gt;MapEntryOrKeyValue&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This hint is used for cases where the closure may accept a &lt;code&gt;Map.Entry&lt;/code&gt; or a &lt;em&gt;key,value&lt;/em&gt; pair, which is quite common in the Groovy GDK, like &lt;em&gt;each&lt;/em&gt; on maps:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;K, V&amp;gt; Map&amp;lt;K, V&amp;gt; each(Map&amp;lt;K, V&amp;gt; self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It is an example of polymorphic closure. This hint does all the job of telling that the parameter types may be a &lt;code&gt;K,V&lt;/code&gt; pair or a &lt;code&gt;Map.Entry&amp;lt;K,V&amp;gt;&lt;/code&gt;. For that, it expects the map to be the first parameter of the method.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_simpletype&quot;&gt;SimpleType&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Simple type can be used for monomorphic closures, in the cases the closure accepts parameters of a non-parametrized type. In this case, you need to use an option to specify the fully qualified name, like in this example:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options=&quot;byte&quot;) Closure closure)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this example, the closure accepts a single parameter of type &lt;code&gt;byte&lt;/code&gt;. For a non primitive type, you need the fully qualified name:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options=&quot;java.lang.String&quot;) Closure predicate)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If the closure accepts multiple arguments then you need options to be an array:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={&quot;java.io.ObjectInputStream&quot;,&quot;java.io.ObjectOutputStream&quot;}) Closure&amp;lt;T&amp;gt; closure)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_fromstring&quot;&gt;FromString&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The last predefined hint can be used whenever none of the previous hints is suitable. A good example is the &lt;em&gt;sort&lt;/em&gt; method on a collection, which takes a closure which either accepts a single
-parameter of type &lt;code&gt;T&lt;/code&gt; (where &lt;code&gt;T&lt;/code&gt; is the component type) or two parameters of type &lt;code&gt;T&lt;/code&gt; in which case we have a comparator-style closure:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; List&amp;lt;T&amp;gt; sort(Collection&amp;lt;T&amp;gt; self, @ClosureParams(value=FromString.class, options={&quot;T&quot;,&quot;T,T&quot;} Closure c)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As you can see, in this example, the &lt;em&gt;options&lt;/em&gt; map defines two possible signatures. The string literal are used at compile time to match those of the method signature. Since it involves much more work for the compiler, it is not recommanded to use &lt;code&gt;FromString&lt;/code&gt; if other options are available, because it would be slower at compile time.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_future_work&quot;&gt;Future work&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The candidate implementation is available on &lt;a href=&quot;https://github.com/groovy/groovy-core/pull/307&quot;&gt;GitHub&lt;/a&gt;. It works pretty well, and honestly, I couldn&amp;#8217;t come with any better idea. One very good point of this implementation is that it is Java friendly. You can annotate classes written in pure Java and the Groovy compiler would be able to use the extra information. In the future, we could probably support a nicer syntax for Groovy, but it would require a grammar change, which is not planned until Groovy 3. For example, we could write this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; List&amp;lt;T&amp;gt; sort(Collection&amp;lt;T&amp;gt; self, Closure&amp;lt;T or T,T -&amp;gt; ?&amp;gt; c)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Which would totally avoid the &quot;ugliness&quot; of the annotation, while using the same backing tool.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last thing, do not hesitate to comment on this blog about the solution we found. Of course, it took some time, and the discussions can be found here:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://groovy.329449.n5.nabble.com/TypeChecked-type-inference-does-not-work-with-closure-td5709972.html#a5709981&quot;&gt;an example of user complaint&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://groovy.329449.n5.nabble.com/Closure-parameter-types-inference-td4978037.html&quot;&gt;Initial, not satisfying, solution, two years ago&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://groovy.329449.n5.nabble.com/Closure-parameter-type-inference-td5717804.html&quot;&gt;discussion about this solution&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Thanks to everybody who participated in the discussion, and, of course, thank you for your comments if any: this is still a &lt;em&gt;candidate&lt;/em&gt; solution, so if you come with any better idea, I&amp;#8217;m open!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

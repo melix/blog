@@ -80,6 +80,183 @@
 		<h2>Next conferences</h2>
 		<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-number-3 lanyrd-context-future" rel="me">My conferences on Lanyrd</a></div>
 	</div>
+  			<a href="/blog/2014/06/grooid.html"><h1>Groovy on Android</h1></a>
+  			<p>05 juin 2014</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	
+		<a href="/blog/tags/android.html">android</a> 
+	
+		<a href="/blog/tags/swift.html">swift</a> 
+	
+		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
+	</p>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Groovy on Android" data-url="http://melix.github.io/blog2014/06/grooid.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog2014/06/grooid.html"></div>
+		        <script id='fbvpgng2014/06/grooid.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog2014/06/grooid.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/06/grooid.html');</script>
+
+			<script type="IN/Share" data-url="http://melix.github.io/blog2014/06/grooid.html" data-counter="right"></script>
+			<div class="fb-like" data-href="http://melix.github.io/blog2014/06/grooid.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yesterday ended <a href="http://gr8conf.eu">GR8Conf Europe</a>, a <a href="http://groovy.codehaus.org">Groovy language</a> conference in Copenhagen that was once again a successful event.
+I want to talk the crew again for this, and of course the <a href="http://groovy.codehaus.org">Groovy language</a> community which is so friendly and always helpful. This year
+turned out to be very special for me, because just two days after the announcement by Apple of the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a>, I was talking about
+running Groovy on Android! As Guillaume Laforge <a href="http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy">noticed</a>, there
+are a lot of similarities between the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a> and <a href="http://groovy.codehaus.org">Groovy language</a>.</p>
+</div>
+<div class="paragraph">
+<p>The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
+better candidate than <a href="http://groovy.codehaus.org">Groovy language</a> here.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_presentation">The presentation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Should you be interested in the slides, you can find them below. Since it was presented at <a href="http://gr8conf.eu">GR8Conf Europe</a>, it gives a bit of history of the changes needed to
+have the runtime working on Android too:</p>
+</div>
+<script async class="speakerdeck-embed" data-id="e8e58fc0cdee0131f20616308848c4b8" data-ratio="1.6" src="//speakerdeck.com/assets/embed.js"></script>
+<div class="paragraph">
+<p>For those of you who are new to Groovy, you have to know that this language is derived from Java, meaning that the learning curve is almost 0, but it also
+removes a lot of its verbosity and adds a lot of features to it, such as closures (similar to lambdas in Java 8, but Java 8 is not available for Android
+developers), builders, runtime and compile-time metaprogramming.</p>
+</div>
+<div class="paragraph">
+<p>As an example of how Groovylang can be used to reduce the verbosity of Java on Android, I will take a simple example: asynchronous tasks. Asynchronous tasks
+are required as soon as a task takes too much time to be executed on the UI thread. That is the case, by default, for any network based operations, in order
+to guarantee that the UI remains snappy even if network is slow or unavailable. The problem is that those asynchronous tasks are incredibly verbose. You have
+to write a lot of code, that I would tend to name "inner class hell", just for this. Let&#8217;s imagine that you need to parse a JSON feed, then update the UI
+accordingly. Then you would have to write something like this (no kidding):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	new FeedTask().execute("http://path/to/feed");
+    }
+
+    class FeedTask extends AsyncTask&lt;String, Void, String&gt; {
+        protected String doInBackground(String... params) {
+            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
+            HttpPost httppost = new HttpPost(params[0]);
+
+            InputStream inputStream = null;
+            String result = null;
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+
+                inputStream = entity.getContent();
+                // json is UTF-8 by default
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
+
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                result = sb.toString();
+            } catch (Exception e) {
+                // Oops
+            } finally {
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (Exception squish) {
+                }
+            }
+            StringBuilder speakers = null;
+            try {
+                JSONObject jObject = new JSONObject(result);
+                JSONArray jArray = jObject.getJSONArray("speakers");
+                speakers = new StringBuilder();
+                for (int i = 0; i &lt; jArray.length(); i++) {
+                    speakers.append(jArray.getString(i));
+                    speakers.append(" ");
+                }
+            } catch (JSONException e) {
+                // do something?
+            }
+            return speakers.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            mTextView.setText(s);
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So now, let&#8217;s see the equivalent in Groovy (no kidding either):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	Fluent.async {
+            def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
+            json.speakers.join(' ')
+        } then {
+	    mTextView.setText(it)
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I think you can start to see the advantage of using Groovy in your own Android projects. Of course, the <code>Fluent</code> class that I&#8217;m using here
+is a support class which I implemented in my <a href="https://github.com/melix/gr8confagenda">first Android project</a> (which is open sourced btw), but it&#8217;s
+really simple and gives an example of how Android users could benefit from Groovification of their APIs.</p>
+</div>
+<div class="sect2">
+<h3 id="_feeling_the_pain">Feeling the pain</h3>
+<div class="paragraph">
+<p>This is actually a key point of my talk: I hadn&#8217;t written any Android application before this talk, and I definitely wanted to be able to write
+an application in Groovy on Android. Why? Because it&#8217;s been some time already that I use Groovy everyday, and there&#8217;s no turning back. I wanted
+to feel the pain of the Java developers on Android, so that I can write better tools for them. And that&#8217;s actually where you, as a user, come
+in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn&#8217;t be complicated a breeze.
+This is exactly the point. My example with <code>Fluent</code> is <strong>one</strong> example of simplification of usages of Android APIs, but you have many more to invent,
+especially because <strong>you</strong> must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&#8230;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_beginning_of_a_new_era">The beginning of a new era</h3>
+<div class="paragraph">
+<p>In upcoming posts, I will try to demonstrate that we&#8217;re just at the beginning. Some people are already asking for a {swift} alternative for Android.
+It&#8217;s there guys, you have it, so spread the word and let&#8217;s make it happen! I am convinced that it is the beginning of a new era for Android and Groovy.
+Google already switched their main build system to Gradle, which is, by the way, using Groovy, so I think it&#8217;s time to move over and show your love!</p>
+</div>
+<div class="paragraph">
+<p>All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/melix/gr8confagenda">https://github.com/melix/gr8confagenda</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog2014/06/grooid.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/02/markuptemplateengine_part2.html"><h1>A fast markup template engine for Groovy (part 2 of 2)</h1></a>
   			<p>18 février 2014</p>
 			<p><em>Tags: </em>
@@ -1883,50 +2060,6 @@ would say, that&#8217;s a <a href="https://twitter.com/aalmiray/status/429236158
 </div>
 </div></p>
 			<p><a href="/blog2014/02/hosting-jbake-github.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2014/01/jlangdetect-github.html"><h1>JLangDetect 0.4 released and moved to GitHub</h1></a>
-  			<p>22 janvier 2014</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/detection.html">detection</a> 
-	
-		<a href="/blog/tags/europarl.html"> europarl</a> 
-	
-		<a href="/blog/tags/java.html"> java</a> 
-	
-		<a href="/blog/tags/jlangdetect.html"> jlangdetect</a> 
-	
-		<a href="/blog/tags/language.html"> language</a> 
-	
-		<a href="/blog/tags/nlp.html"> nlp</a> 
-	
-		<a href="/blog/tags/github.html"> github</a> 
-	</p>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="JLangDetect 0.4 released and moved to GitHub" data-url="http://melix.github.io/blog2014/01/jlangdetect-github.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog2014/01/jlangdetect-github.html"></div>
-		        <script id='fbvpgng2014/01/jlangdetect-github.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog2014/01/jlangdetect-github.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/01/jlangdetect-github.html');</script>
-
-			<script type="IN/Share" data-url="http://melix.github.io/blog2014/01/jlangdetect-github.html" data-counter="right"></script>
-			<div class="fb-like" data-href="http://melix.github.io/blog2014/01/jlangdetect-github.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
-
-  			<p><div class="sect1">
-<h2 id="_a_new_era">A new era</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Back in 2011, I initiated a project called <code>JLangDetect</code>, a language detection library for the JVM. At that time, I was working for
-a company that made NLP tools and I started this as a pet project on my free time. I made it available as open source software and
-people started to use it, so I was pretty happy at that time to see a project I initiated being actually used in production!</p>
-</div>
-<div class="paragraph">
-<p>While I don&#8217;t have the need for such a library now that I work on the Groovy language, some people are still using it. At the first
-place, a friend of mine, Freddy Rabiller, took time to upgrade it. A new version has been released (0.4) and the project is now
-available on <a href="https://github.com/melix/jlangdetect">GitHub</a>.</p>
-</div>
-<div class="paragraph">
-<p>A big thank to Freddy, who will probably take the lead of development on this project now!</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog2014/01/jlangdetect-github.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
