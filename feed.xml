@@ -6,8 +6,8 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>jeu., 5 juin 2014 19:04:20 +0200</pubDate>
-    <lastBuildDate>jeu., 5 juin 2014 19:04:20 +0200</lastBuildDate>
+    <pubDate>jeu., 5 juin 2014 21:29:05 +0200</pubDate>
+    <lastBuildDate>jeu., 5 juin 2014 21:29:05 +0200</lastBuildDate>
 
     <item>
       <title>Groovy on Android</title>
@@ -168,6 +168,84 @@ Google already switched their main build system to Gradle, which is, by the way,
 &lt;p&gt;&lt;a href=&quot;https://github.com/melix/gr8confagenda&quot;&gt;https://github.com/melix/gr8confagenda&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;Update: build instructions&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you want to try it by yourself, here&amp;#8217;s how you can do it. First of all, official support for Android will be in Groovy 2.4. Before the first beta,
+you&amp;#8217;ll have to build it from sources, and here is the quickest way:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;git clone https://github.com/melix/groovy-core.git --branch master
+cd groovy-core
+./gradlew -PskipIndy=true install&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then you can clone the sample application:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;cd ..
+git clone https://github.com/melix/gr8confagenda.git&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This contains a project that you can open using &lt;a href=&quot;http://developer.android.com/sdk/installing/studio.html&quot;&gt;Android Studio&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you want to use the &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; in your own Android project, a requirement is that it is using Gradle. If so, you can update your &lt;code&gt;build.gradle&lt;/code&gt; file
+as is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;android {
+   ...
+   packagingOptions {
+        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
+        exclude &apos;META-INF/LICENSE.txt&apos;
+        exclude &apos;META-INF/groovy-release-info.properties&apos;
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile &apos;org.codehaus.groovy:groovy:2.4.0-SNAPSHOT:grooid&apos;
+    // the following dependency is necessary if you want JSON support
+    compile (&apos;org.codehaus.groovy:groovy-json:2.4.0-SNAPSHOT&apos;) {
+        transitive = false
+    }
+}
+
+// add support for Groovy to existing configurations
+android.applicationVariants.all {
+    task &quot;groovy${name}Compile&quot;(type: GroovyCompile) {
+        source = javaCompile.source + fileTree(&apos;src/main/java&apos;).include(&apos;**/*.groovy&apos;)
+        destinationDir = javaCompile.destinationDir
+        classpath = javaCompile.classpath
+        groovyClasspath = classpath
+        sourceCompatibility = &apos;1.6&apos;
+        targetCompatibility = &apos;1.6&apos;
+        doFirst {
+            def runtimeJars = plugins.findPlugin(com.android.build.gradle.AppPlugin).runtimeJars
+            classpath = files(runtimeJars) + classpath
+        }
+    }
+    javaCompile.dependsOn(&quot;groovy${name}Compile&quot;)
+    javaCompile.enabled = false
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And that&amp;#8217;s all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

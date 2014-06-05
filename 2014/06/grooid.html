@@ -249,6 +249,84 @@ Google already switched their main build system to Gradle, which is, by the way,
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p><em>Update: build instructions</em></p>
+</div>
+<div class="paragraph">
+<p>If you want to try it by yourself, here&#8217;s how you can do it. First of all, official support for Android will be in Groovy 2.4. Before the first beta,
+you&#8217;ll have to build it from sources, and here is the quickest way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/melix/groovy-core.git --branch master
+cd groovy-core
+./gradlew -PskipIndy=true install</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you can clone the sample application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cd ..
+git clone https://github.com/melix/gr8confagenda.git</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This contains a project that you can open using <a href="http://developer.android.com/sdk/installing/studio.html">Android Studio</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you want to use the <a href="http://groovy.codehaus.org">Groovy language</a> in your own Android project, a requirement is that it is using Gradle. If so, you can update your <code>build.gradle</code> file
+as is:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>android {
+   ...
+   packagingOptions {
+        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/groovy-release-info.properties'
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy:2.4.0-SNAPSHOT:grooid'
+    // the following dependency is necessary if you want JSON support
+    compile ('org.codehaus.groovy:groovy-json:2.4.0-SNAPSHOT') {
+        transitive = false
+    }
+}
+
+// add support for Groovy to existing configurations
+android.applicationVariants.all {
+    task "groovy${name}Compile"(type: GroovyCompile) {
+        source = javaCompile.source + fileTree('src/main/java').include('**/*.groovy')
+        destinationDir = javaCompile.destinationDir
+        classpath = javaCompile.classpath
+        groovyClasspath = classpath
+        sourceCompatibility = '1.6'
+        targetCompatibility = '1.6'
+        doFirst {
+            def runtimeJars = plugins.findPlugin(com.android.build.gradle.AppPlugin).runtimeJars
+            classpath = files(runtimeJars) + classpath
+        }
+    }
+    javaCompile.dependsOn("groovy${name}Compile")
+    javaCompile.enabled = false
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And that&#8217;s all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!</p>
+</div>
 </div>
 </div>
 </div></p>
