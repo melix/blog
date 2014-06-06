@@ -21,7 +21,7 @@
 					<h3>${post.date?string("MMMM yyyy")}</h3>
 				</#if> 
 				
-				<h4>${post.date?string("dd MMMM")} - <a href="/blog${post.uri}">${post.title}</a></h4>
+				<h4>${post.date?string("dd MMMM")} - <a href="/blog/${post.uri}">${post.title}</a></h4>
 				<#assign last_month = post.date?string("MMMM yyyy")>
 			</#list>
 		</div>
