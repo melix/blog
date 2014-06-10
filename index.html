@@ -80,6 +80,117 @@
 		<h2>Next conferences</h2>
 		<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-number-3 lanyrd-context-future" rel="me">My conferences on Lanyrd</a></div>
 	</div>
+  			<a href="/blog/2014/06/grooid2.html"><h1>Groovy on Android, technical details</h1></a>
+  			<p>10 juin 2014</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	
+		<a href="/blog/tags/android.html">android</a> 
+	
+		<a href="/blog/tags/swift.html">swift</a> 
+	
+		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
+	</p>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Groovy on Android, technical details" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/06/grooid2.html"></div>
+		        <script id='fbvpgng2014/06/grooid2.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/06/grooid2.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/06/grooid2.html');</script>
+
+			<script type="IN/Share" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-counter="right"></script>
+			<div class="fb-like" data-href="http://melix.github.io/blog/2014/06/grooid2.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In my previous <a href="http://melix.github.io/blog/2014/06/grooid.html">post</a>, I have introduced how we could now use the <a href="http://groovy.codehaus.org">Groovy language</a> to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_compiling_groovy">Compiling Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="http://groovy.codehaus.org">Groovy language</a> is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it&#8217;s always compiled. This means that in Groovy, you have two options: either a class is compiled to a <code>.class</code> file and used like any other class file on the JVM, using the <code>groovyc</code> compiler instead of <code>javac</code>, or a class can be compiled <strong>at runtime</strong>, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is <strong>not</strong> an interpreted language: everything is turned into bytecode.</p>
+</div>
+<div class="sect2">
+<h3 id="_a_classic_android_application">A classic Android application</h3>
+<div class="paragraph">
+<p>Since the Dalvik VM doesn&#8217;t use the same bytecode as the JVM, Android requires a bit of work in order to compile and execute Java programs. A special tool, called <em>dex</em>, is responsible for converting the JVM bytecode into Dalvik bytecode, and compile it into a <code>classes.dex</code> file. This is illustrated in the following schema:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="compilation_process_normal.png" alt="Classic Android compilation process">
+</div>
+</div>
+<div class="paragraph">
+<p>In our case, we&#8217;re using the Gradle build tool, which is now the default for Android projects, so Gradle is responsible for this chain. Java sources are compiled into <code>.class</code> files, then those classes are processed by the <code>dex</code> tool, which converts bytecode for all classes and packages everything into a <code>classes.dex</code> file. Some additional steps can be done (such as calling ProGuard to reduce the size of the package), but in the end, an APK is produced, which is the deliverable application. When deployed on the device, there&#8217;s nothing else to do than loading the classes and executing the application.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see how the process differs in case of a Groovy application.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_an_application_written_in_groovy">An application written in Groovy</h3>
+<div class="paragraph">
+<p>In this case, we have <code>.groovy</code> files, corresponding to Groovy sources, but we may also have <code>.java</code> files. In the end, the process looks very similar:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="compilation_process_groovy.png" alt="Groovy Android compilation process">
+</div>
+</div>
+<div class="paragraph">
+<p>This schema exactly illustrates how the <a href="https://github.com/melix/gr8confagenda">GR8Conf Agenda</a> application is compiled. All is done at <strong>compile time</strong>, and nothing more at runtime. Groovy sources are compiled into JVM bytecode, which is in turn converted into Dalvik bytecode using <code>dex</code>. There&#8217;s absolutely no difference with Java, apart from the compiler, which is able to process both Groovy and Java sources!</p>
+</div>
+<div class="paragraph">
+<p>One noticeable difference that some people have already reported to me is that since we embed the Groovy runtime, the number of method descriptors used in the <code>classes.dex</code> file is significantly higher than with an application written in pure Java. From my early tests, a Groovy application would consume around 8k methods, without optimizations. The <code>classes.dex</code> file has a limit of 65536 methods, so this is something you have to keep in mind. Anyway, I am not an Android specialist, but there seem to be workarounds available, like the <code>multi-dex</code> option.</p>
+</div>
+<div class="paragraph">
+<p>In the end, Groovy is not different from any other library you would embed in your application, it&#8217;s "just" an additional jar. I also mentionned the fact that I recommended to use <code>@CompileStatic</code> on your classes. There&#8217;s a good reason for that. If you don&#8217;t, the classes that you will compile will use the <strong>dynamic runtime</strong> of Groovy. This is unlikely what you want on a mobile application, especially because on Android, it would use reflection, implying a major performance drop. On a normal JVM, Groovy would use call site caching techniques, like generation of classes at runtime or invokedynamic to improve performance. This is <strong>not</strong> possible on Android, so places where you use dynamic features of Groovy should be limited to small parts of the application, called not frequently. A good example would be the use of a builder for the UI. Builders are a very nice feature of Groovy, and for a UI, it would only be called once when the activity is loaded.</p>
+</div>
+<div class="paragraph">
+<p>Using <code>@CompileStatic</code>, you will ensure that your classes are <strong>statically compiled</strong>, meaning that all method calls are resolved at compile time, leading to dramatically improved performance, very close, if not equal, to that of Java (depending on how you write your code, as usual, because idiomatic Groovy might not always be the fastest implementation).</p>
+</div>
+<div class="paragraph">
+<p>In any case, you must recall that the first application that I wrote does not use a single class generated at runtime. Even if you remove all <code>@CompileStatic</code> annotations, it would use the dynamic runtime, but <strong>without</strong> creating classes at runtime.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_runtime_scripting">Runtime scripting</h3>
+<div class="paragraph">
+<p>One of the difficulties of adapting the <a href="http://groovy.codehaus.org">Groovy language</a> is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="compilation_process_runtime.png" alt="Groovy Android compilation process at runtime">
+</div>
+</div>
+<div class="paragraph">
+<p>You can have an application, written in Groovy or not, but in the end, <strong>once the application is running</strong>, you have Groovy source code that you want to execute. Then it needs to compile the classes, call <code>dex</code> <strong>directly on the device</strong>, package the result into a <code>jar</code> file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow.</p>
+</div>
+<div class="paragraph">
+<p>This process is demonstrated in <a href="https://github.com/melix/grooidshell-example">this application</a>, which replicates the behavior of the well-known <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell">GroovyShell</a> but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.</p>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img src="groovy-scripting.png" alt="Compiling Groovy at runtime">
+</div>
+</div>
+<div class="paragraph">
+<p>Subsequent compilations take much less time (around ~500ms), but the fact of having to dex files and write them to the filesystem is a performance killer. In anycase, this shows that it is possible, and even that you could rely on it for an application that would handle scripts. It would be possible, for example, to cache the jar files in order to avoid recompiling them&#8230;</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this post, I gave further details on how Groovy gets running onto an Android device. In a future post, I will give you more details about how you can get started with your own project. I will maybe give <a href="https://github.com/pledbrook/lazybones">Lazybones</a>, a project bootstraping tool, more love in the next days ;-)</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2014/06/grooid2.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/06/grooid.html"><h1>Groovy on Android</h1></a>
   			<p>05 juin 2014</p>
 			<p><em>Tags: </em>
@@ -1765,385 +1876,6 @@ FreeMarker loop                            2862       0  2862  2894</pre>
 </div>
 </div></p>
 			<p><a href="/blog/2014/02/markuptemplateengine.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2014/02/hosting-jbake-github.html"><h1>Authoring your blog on GitHub with JBake and Gradle</h1></a>
-  			<p>03 février 2014</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/github.html">github</a> 
-	
-		<a href="/blog/tags/jbake.html">jbake</a> 
-	
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/asciidoctor.html">asciidoctor</a> 
-	
-		<a href="/blog/tags/blog.html">blog</a> 
-	</p>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Authoring your blog on GitHub with JBake and Gradle" data-url="http://melix.github.io/blog/2014/02/hosting-jbake-github.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/02/hosting-jbake-github.html"></div>
-		        <script id='fbvpgng2014/02/hosting-jbake-github.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/02/hosting-jbake-github.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/02/hosting-jbake-github.html');</script>
-
-			<script type="IN/Share" data-url="http://melix.github.io/blog/2014/02/hosting-jbake-github.html" data-counter="right"></script>
-			<div class="fb-like" data-href="http://melix.github.io/blog/2014/02/hosting-jbake-github.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
-
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>A few weeks ago, I started this new blog and decided to host it on GitHub. I already explained
-<a href="/blog/2013/11/21/a_new_home.html">how I migrated contents from JRoller</a>, but I didn&#8217;t really
-the tool behind publishing. In this post, I will show you how easy it is, now that I have
-improved my toolchain with <a href="http://www.gradle.org">Gradle</a>!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_jbake">JBake</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="http://www.jbake.org">JBake</a> is a static site generator. When I chose this tool for my blog,
-what attracted me is actually that it runs on the JVM, so I already had the idea of automating
-stuff with <a href="http://www.gradle.org">Gradle</a>.</p>
-</div>
-<div class="paragraph">
-<p>Since then, I have submitted several pull requests to the project, and we&#8217;re actually thinking
-of using it to build the next Groovy website. <a href="http://www.jbake.org">JBake</a> has good chances to
-become the "Jekyll of the JVM" and already supports multiple markup languages (markdown, asciidoc)
-as well as multiple template engines (<a href="http://freemarker.org/">FreeMarker</a> in 2.2.1, <a href="http://groovy.codehaus.org">Groovy</a>
-and <a href="http://www.thymeleaf.org/">Thymeleaf</a> in 2.3.0).</p>
-</div>
-<div class="paragraph">
-<p>The idea behind <a href="http://www.jbake.org">JBake</a> is very simple: contents is written using a markup language and "baked"
-with template engines into actual HTML. Everything is generated statically and you can upload the generated site
-wherever you want.</p>
-</div>
-<div class="paragraph">
-<p>On the other side, GitHub offers a nice tool to publish pages: <a href="http://pages.github.com/">GitHub Pages</a>, so we can
-have both the sources of our blog and the output of bakery in the same repository. So the initial process looked
-like this:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>create a new page in <code>content</code> directory</p>
-</li>
-<li>
-<p>run <code>jbake</code> command, check the result, eventually make changes</p>
-</li>
-<li>
-<p><code>git add page.adoc</code> to add the new page to the sources</p>
-</li>
-<li>
-<p><code>git commit -a</code> to commit the page to the <code>master</code> branch, corresponding to the sources of the blog</p>
-</li>
-<li>
-<p><code>git checkout gh-pages</code> to switch to the GitHub pages branch</p>
-</li>
-<li>
-<p><code>cp -R output/* .</code> to copy the contents of the output directory at the root of the GitHub pages</p>
-</li>
-<li>
-<p><code>git add page.html</code> to add the new page to the GitHub pages branch</p>
-</li>
-<li>
-<p><code>git commit -a</code> to commit the contents to GitHub pages</p>
-</li>
-<li>
-<p><code>git push origin master</code> to push the sources to GitHub</p>
-</li>
-<li>
-<p><code>git push origin gh-pages</code> to push the generated pages to GitHub pages</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>I published my first blog posts like this, and it&#8217;s not that complicated, but it involves a lot of manual steps, so I
-came up with a Gradle plugin to make this much easier, that is, focusing on contents, period!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_gradle_to_the_rescue">Gradle to the rescue!</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_prerequisites">Prerequisites</h3>
-<div class="paragraph">
-<p>We&#8217;re going to setup a project that will allow you to publish to GitHub pages in one step, using <a href="http://www.gradle.org">Gradle</a>. For that,
-we will need:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>an empty <em>blog</em> repository that you created on GitHub</p>
-</li>
-<li>
-<p><a href="http://www.jbake.org">JBake</a> to setup the initial JBake project structure</p>
-</li>
-<li>
-<p><a href="http://www.gradle.org">Gradle</a> 1.10 (previous versions should work too)</p>
-</li>
-<li>
-<p>The <a href="https://github.com/jbake-org/jbake-gradle-plugin">JBake plugin for Gradle</a>, will be downloaded automatically</p>
-</li>
-<li>
-<p>The <a href="https://github.com/ajoberstar/gradle-git">Git plugin for Gradle</a>, will be downloaded automatically</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_building_jbake">Building JBake</h3>
-<div class="paragraph">
-<p>This step will become optional when JBake 2.3.0 will be out (or a snapshot of <a href="http://www.jbake.org">JBake</a> will be published). Meanwhile, you
-need to install a local version of <a href="http://www.jbake.org">JBake</a> into your local Maven repository. Don&#8217;t worry, this will be easy, you will
-only need Maven (hey, too bad <a href="http://www.jbake.org">JBake</a> doesn&#8217;t use Gradle ;)):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>git clone https://github.com/jbake-org/jbake.git
-cd jbake
-mvn install</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>That&#8217;s all!</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_setting_up_a_project">Setting up a project</h3>
-<div class="paragraph">
-<p>First step consists in creating the initial project layout:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>git init                                                            <i class="conum" data-value="1"></i><b>(1)</b>
-git remote add origin &lt;your github remote url&gt;                      <i class="conum" data-value="2"></i><b>(2)</b>
-mkdir -p src/jbake                                                  <i class="conum" data-value="3"></i><b>(3)</b>
-gradle init                                                         <i class="conum" data-value="4"></i><b>(4)</b>
-git add build.gradle gradle gradlew gradlew.bat settings.gradle src <i class="conum" data-value="5"></i><b>(5)</b>
-cd src/jbake
-jbake -i                                                            <i class="conum" data-value="6"></i><b>(6)</b></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>initializes the git repository</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>add your remote</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>we will put JBake sources into that directory</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>installs the Gradle wrapper into the repository</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>adds Gradle wrapper and initial structure into Git</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>initializes the default JBake directory layout</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_using_gradle_to_render_pages">Using Gradle to render pages</h3>
-<div class="paragraph">
-<p>At this point, your <code>src/jbake</code> directory contains the classic <a href="http://www.jbake.org">JBake</a> folder contents:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>src
- |-- jbake
-       |-- assets    : static assets (images, css, ...)
-       |-- content   : blog posts, ...
-       |-- templates : HTML templates (by default, uses FreeMarker)</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Replace the contents of <code>build.gradle</code> with the following:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>
-buildscript {
-  repositories {
-      mavenLocal() // needed to use the local JBake 2.3.0 build
-      jcenter()
-  }
-
-  dependencies {
-    classpath 'me.champeau.gradle:jbake-gradle-plugin:0.1-SNAPSHOT' <i class="conum" data-value="1"></i><b>(1)</b>
-    classpath 'org.asciidoctor:asciidoctor-java-integration:0.1.4'  <i class="conum" data-value="2"></i><b>(2)</b>
-    classpath 'org.freemarker:freemarker:2.3.19'                    <i class="conum" data-value="3"></i><b>(3)</b>
-  }
-}
-
-apply plugin: 'jbake'                                               <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>import the JBake plugin</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>if you write pages using the Asciidoctor format, this is necessary</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>if you use the Freemarker template engine, this is necessary</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>then apply the plugin</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>By default, the plugin will look for JBake sources in <code>src/jbake</code> and generate the site into <code>build/jbake</code>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_generating_the_output">Generating the output</h3>
-<div class="paragraph">
-<p>Now that this is applied, you can generate the site by running the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>./gradlew -i jbake</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>after the rendering step, you should now have a new directory:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>build
-  |-- jbake</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>into which you will find the generated HTML contents. At this point, you could choose to upload those files
-to an FTP server, for example, but since we want to host our pages on GitHub, we need to add some configuration
-to our build.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_publishing_to_github_pages">Publishing to GitHub Pages</h3>
-<div class="paragraph">
-<p>Create a new file named <code>publish.gradle</code> with the following contents:</p>
-</div>
-<div class="listingblock">
-<div class="title">publish.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>buildscript {
-  repositories {
-      jcenter()
-  }
-
-  dependencies {
-    classpath 'org.ajoberstar:gradle-git:0.6.3'     <i class="conum" data-value="1"></i><b>(1)</b>
-  }
-}
-
-apply plugin: 'github-pages'                        <i class="conum" data-value="2"></i><b>(2)</b>
-
-githubPages {
-  repoUri = 'git@github.com:youtname/blog.git'      <i class="conum" data-value="3"></i><b>(3)</b>
-  pages {
-     from(file('build/jbake')) {
-     	into '.'                                    <i class="conum" data-value="4"></i><b>(4)</b>
-     }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>use the gradle-git plugin</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>apply the plugin</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>configure your GitHub repository URL</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>tells the plugin to upload the contents of the <code>build/jbake</code> directory</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Then modify the main <code>build.gradle</code> file by adding the following task:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>task publish(type: GradleBuild) {           <i class="conum" data-value="1"></i><b>(1)</b>
-    buildFile = 'publish.gradle'
-    tasks = ['publishGhPages']
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>we&#8217;re using a separate, sub-build to avoid a classpath issue with JNA</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Now if you do:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>./gradlew publish</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Gradle will pick the contents of the <code>output/jbake</code> directory, add it to the <code>gh-pages</code> branch and push it to GitHub,
-all in one step! A few seconds later, you should see the result on github.io!</p>
-</div>
-<div class="paragraph">
-<p>One last thing: this configuration does <strong>not</strong> add the sources to your git repository. It only deals with the output,
-so you still need to add the source files, commit them and push them to GitHub. This is of course optional if you
-don&#8217;t want to publish the sources&#8230; If you decide to make them public, then you can also use the git plugin to do it
-automatically!</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In this post, we&#8217;ve shown you how you can leverage <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a> to publish a blog on GitHub. The setup is really
-easy, so I hope more people will follow that way and contribute to Open Source too!</p>
-</div>
-<div class="paragraph">
-<p>Of course, this post has been published using the procedure described on this page, so I used <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a> to blog
-about how to publish a blog on <a href="https://github.com/melix/blog">GitHub</a> using <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a>! Like my friend Andres Almiray
-would say, that&#8217;s a <a href="https://twitter.com/aalmiray/status/429236158321950720">toolception</a>!</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2014/02/hosting-jbake-github.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	

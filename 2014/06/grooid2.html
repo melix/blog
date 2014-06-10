@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Groovy on Android, technical details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    </head>
+  <body>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+ lang: en_US
+</script>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy on Android, technical details</h1>
+	</div>
+
+	<p><em>10 juin 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/android.html">android</a> 
+	</em>
+		<a href="/blog/tags/swift.html">swift</a> 
+	</em>
+		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
+	</p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/06/grooid2.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/06/grooid2.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2014/06/grooid2.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In my previous <a href="http://melix.github.io/blog/2014/06/grooid.html">post</a>, I have introduced how we could now use the <a href="http://groovy.codehaus.org">Groovy language</a> to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_compiling_groovy">Compiling Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="http://groovy.codehaus.org">Groovy language</a> is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it&#8217;s always compiled. This means that in Groovy, you have two options: either a class is compiled to a <code>.class</code> file and used like any other class file on the JVM, using the <code>groovyc</code> compiler instead of <code>javac</code>, or a class can be compiled <strong>at runtime</strong>, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is <strong>not</strong> an interpreted language: everything is turned into bytecode.</p>
+</div>
+<div class="sect2">
+<h3 id="_a_classic_android_application">A classic Android application</h3>
+<div class="paragraph">
+<p>Since the Dalvik VM doesn&#8217;t use the same bytecode as the JVM, Android requires a bit of work in order to compile and execute Java programs. A special tool, called <em>dex</em>, is responsible for converting the JVM bytecode into Dalvik bytecode, and compile it into a <code>classes.dex</code> file. This is illustrated in the following schema:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="compilation_process_normal.png" alt="Classic Android compilation process">
+</div>
+</div>
+<div class="paragraph">
+<p>In our case, we&#8217;re using the Gradle build tool, which is now the default for Android projects, so Gradle is responsible for this chain. Java sources are compiled into <code>.class</code> files, then those classes are processed by the <code>dex</code> tool, which converts bytecode for all classes and packages everything into a <code>classes.dex</code> file. Some additional steps can be done (such as calling ProGuard to reduce the size of the package), but in the end, an APK is produced, which is the deliverable application. When deployed on the device, there&#8217;s nothing else to do than loading the classes and executing the application.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see how the process differs in case of a Groovy application.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_an_application_written_in_groovy">An application written in Groovy</h3>
+<div class="paragraph">
+<p>In this case, we have <code>.groovy</code> files, corresponding to Groovy sources, but we may also have <code>.java</code> files. In the end, the process looks very similar:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="compilation_process_groovy.png" alt="Groovy Android compilation process">
+</div>
+</div>
+<div class="paragraph">
+<p>This schema exactly illustrates how the <a href="https://github.com/melix/gr8confagenda">GR8Conf Agenda</a> application is compiled. All is done at <strong>compile time</strong>, and nothing more at runtime. Groovy sources are compiled into JVM bytecode, which is in turn converted into Dalvik bytecode using <code>dex</code>. There&#8217;s absolutely no difference with Java, apart from the compiler, which is able to process both Groovy and Java sources!</p>
+</div>
+<div class="paragraph">
+<p>One noticeable difference that some people have already reported to me is that since we embed the Groovy runtime, the number of method descriptors used in the <code>classes.dex</code> file is significantly higher than with an application written in pure Java. From my early tests, a Groovy application would consume around 8k methods, without optimizations. The <code>classes.dex</code> file has a limit of 65536 methods, so this is something you have to keep in mind. Anyway, I am not an Android specialist, but there seem to be workarounds available, like the <code>multi-dex</code> option.</p>
+</div>
+<div class="paragraph">
+<p>In the end, Groovy is not different from any other library you would embed in your application, it&#8217;s "just" an additional jar. I also mentionned the fact that I recommended to use <code>@CompileStatic</code> on your classes. There&#8217;s a good reason for that. If you don&#8217;t, the classes that you will compile will use the <strong>dynamic runtime</strong> of Groovy. This is unlikely what you want on a mobile application, especially because on Android, it would use reflection, implying a major performance drop. On a normal JVM, Groovy would use call site caching techniques, like generation of classes at runtime or invokedynamic to improve performance. This is <strong>not</strong> possible on Android, so places where you use dynamic features of Groovy should be limited to small parts of the application, called not frequently. A good example would be the use of a builder for the UI. Builders are a very nice feature of Groovy, and for a UI, it would only be called once when the activity is loaded.</p>
+</div>
+<div class="paragraph">
+<p>Using <code>@CompileStatic</code>, you will ensure that your classes are <strong>statically compiled</strong>, meaning that all method calls are resolved at compile time, leading to dramatically improved performance, very close, if not equal, to that of Java (depending on how you write your code, as usual, because idiomatic Groovy might not always be the fastest implementation).</p>
+</div>
+<div class="paragraph">
+<p>In any case, you must recall that the first application that I wrote does not use a single class generated at runtime. Even if you remove all <code>@CompileStatic</code> annotations, it would use the dynamic runtime, but <strong>without</strong> creating classes at runtime.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_runtime_scripting">Runtime scripting</h3>
+<div class="paragraph">
+<p>One of the difficulties of adapting the <a href="http://groovy.codehaus.org">Groovy language</a> is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="compilation_process_runtime.png" alt="Groovy Android compilation process at runtime">
+</div>
+</div>
+<div class="paragraph">
+<p>You can have an application, written in Groovy or not, but in the end, <strong>once the application is running</strong>, you have Groovy source code that you want to execute. Then it needs to compile the classes, call <code>dex</code> <strong>directly on the device</strong>, package the result into a <code>jar</code> file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow.</p>
+</div>
+<div class="paragraph">
+<p>This process is demonstrated in <a href="https://github.com/melix/grooidshell-example">this application</a>, which replicates the behavior of the well-known <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell">GroovyShell</a> but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.</p>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img src="groovy-scripting.png" alt="Compiling Groovy at runtime">
+</div>
+</div>
+<div class="paragraph">
+<p>Subsequent compilations take much less time (around ~500ms), but the fact of having to dex files and write them to the filesystem is a performance killer. In anycase, this shows that it is possible, and even that you could rely on it for an application that would handle scripts. It would be possible, for example, to cache the jar files in order to avoid recompiling them&#8230;</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this post, I gave further details on how Groovy gets running onto an Android device. In a future post, I will give you more details about how you can get started with your own project. I will maybe give <a href="https://github.com/pledbrook/lazybones">Lazybones</a>, a project bootstraping tool, more love in the next days ;-)</p>
+</div>
+</div>
+</div></p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/06/grooid2.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2014/06/grooid2.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'groovy_on_android_details';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
+  </body>
+</html>

@@ -6,9 +6,108 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>dim., 8 juin 2014 11:42:20 +0200</pubDate>
-    <lastBuildDate>dim., 8 juin 2014 11:42:20 +0200</lastBuildDate>
+    <pubDate>mar., 10 juin 2014 22:40:05 +0200</pubDate>
+    <lastBuildDate>mar., 10 juin 2014 22:40:05 +0200</lastBuildDate>
 
+    <item>
+      <title>Groovy on Android, technical details</title>
+      <link>http://melix.github.io/blog/2014/06/grooid2.html</link>
+      <pubDate>mar., 10 juin 2014 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2014/06/grooid2.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In my previous &lt;a href=&quot;http://melix.github.io/blog/2014/06/grooid.html&quot;&gt;post&lt;/a&gt;, I have introduced how we could now use the &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_compiling_groovy&quot;&gt;Compiling Groovy&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it&amp;#8217;s always compiled. This means that in Groovy, you have two options: either a class is compiled to a &lt;code&gt;.class&lt;/code&gt; file and used like any other class file on the JVM, using the &lt;code&gt;groovyc&lt;/code&gt; compiler instead of &lt;code&gt;javac&lt;/code&gt;, or a class can be compiled &lt;strong&gt;at runtime&lt;/strong&gt;, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is &lt;strong&gt;not&lt;/strong&gt; an interpreted language: everything is turned into bytecode.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_a_classic_android_application&quot;&gt;A classic Android application&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Since the Dalvik VM doesn&amp;#8217;t use the same bytecode as the JVM, Android requires a bit of work in order to compile and execute Java programs. A special tool, called &lt;em&gt;dex&lt;/em&gt;, is responsible for converting the JVM bytecode into Dalvik bytecode, and compile it into a &lt;code&gt;classes.dex&lt;/code&gt; file. This is illustrated in the following schema:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;compilation_process_normal.png&quot; alt=&quot;Classic Android compilation process&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In our case, we&amp;#8217;re using the Gradle build tool, which is now the default for Android projects, so Gradle is responsible for this chain. Java sources are compiled into &lt;code&gt;.class&lt;/code&gt; files, then those classes are processed by the &lt;code&gt;dex&lt;/code&gt; tool, which converts bytecode for all classes and packages everything into a &lt;code&gt;classes.dex&lt;/code&gt; file. Some additional steps can be done (such as calling ProGuard to reduce the size of the package), but in the end, an APK is produced, which is the deliverable application. When deployed on the device, there&amp;#8217;s nothing else to do than loading the classes and executing the application.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s see how the process differs in case of a Groovy application.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_an_application_written_in_groovy&quot;&gt;An application written in Groovy&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this case, we have &lt;code&gt;.groovy&lt;/code&gt; files, corresponding to Groovy sources, but we may also have &lt;code&gt;.java&lt;/code&gt; files. In the end, the process looks very similar:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;compilation_process_groovy.png&quot; alt=&quot;Groovy Android compilation process&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This schema exactly illustrates how the &lt;a href=&quot;https://github.com/melix/gr8confagenda&quot;&gt;GR8Conf Agenda&lt;/a&gt; application is compiled. All is done at &lt;strong&gt;compile time&lt;/strong&gt;, and nothing more at runtime. Groovy sources are compiled into JVM bytecode, which is in turn converted into Dalvik bytecode using &lt;code&gt;dex&lt;/code&gt;. There&amp;#8217;s absolutely no difference with Java, apart from the compiler, which is able to process both Groovy and Java sources!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One noticeable difference that some people have already reported to me is that since we embed the Groovy runtime, the number of method descriptors used in the &lt;code&gt;classes.dex&lt;/code&gt; file is significantly higher than with an application written in pure Java. From my early tests, a Groovy application would consume around 8k methods, without optimizations. The &lt;code&gt;classes.dex&lt;/code&gt; file has a limit of 65536 methods, so this is something you have to keep in mind. Anyway, I am not an Android specialist, but there seem to be workarounds available, like the &lt;code&gt;multi-dex&lt;/code&gt; option.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the end, Groovy is not different from any other library you would embed in your application, it&amp;#8217;s &quot;just&quot; an additional jar. I also mentionned the fact that I recommended to use &lt;code&gt;@CompileStatic&lt;/code&gt; on your classes. There&amp;#8217;s a good reason for that. If you don&amp;#8217;t, the classes that you will compile will use the &lt;strong&gt;dynamic runtime&lt;/strong&gt; of Groovy. This is unlikely what you want on a mobile application, especially because on Android, it would use reflection, implying a major performance drop. On a normal JVM, Groovy would use call site caching techniques, like generation of classes at runtime or invokedynamic to improve performance. This is &lt;strong&gt;not&lt;/strong&gt; possible on Android, so places where you use dynamic features of Groovy should be limited to small parts of the application, called not frequently. A good example would be the use of a builder for the UI. Builders are a very nice feature of Groovy, and for a UI, it would only be called once when the activity is loaded.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Using &lt;code&gt;@CompileStatic&lt;/code&gt;, you will ensure that your classes are &lt;strong&gt;statically compiled&lt;/strong&gt;, meaning that all method calls are resolved at compile time, leading to dramatically improved performance, very close, if not equal, to that of Java (depending on how you write your code, as usual, because idiomatic Groovy might not always be the fastest implementation).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In any case, you must recall that the first application that I wrote does not use a single class generated at runtime. Even if you remove all &lt;code&gt;@CompileStatic&lt;/code&gt; annotations, it would use the dynamic runtime, but &lt;strong&gt;without&lt;/strong&gt; creating classes at runtime.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_runtime_scripting&quot;&gt;Runtime scripting&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the difficulties of adapting the &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;compilation_process_runtime.png&quot; alt=&quot;Groovy Android compilation process at runtime&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can have an application, written in Groovy or not, but in the end, &lt;strong&gt;once the application is running&lt;/strong&gt;, you have Groovy source code that you want to execute. Then it needs to compile the classes, call &lt;code&gt;dex&lt;/code&gt; &lt;strong&gt;directly on the device&lt;/strong&gt;, package the result into a &lt;code&gt;jar&lt;/code&gt; file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This process is demonstrated in &lt;a href=&quot;https://github.com/melix/grooidshell-example&quot;&gt;this application&lt;/a&gt;, which replicates the behavior of the well-known &lt;a href=&quot;http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell&quot;&gt;GroovyShell&lt;/a&gt; but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the &quot;execute&quot; button, the first time, compilation of the little script will take around 3s.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot; style=&quot;text-align: center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;groovy-scripting.png&quot; alt=&quot;Compiling Groovy at runtime&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Subsequent compilations take much less time (around ~500ms), but the fact of having to dex files and write them to the filesystem is a performance killer. In anycase, this shows that it is possible, and even that you could rely on it for an application that would handle scripts. It would be possible, for example, to cache the jar files in order to avoid recompiling them&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this post, I gave further details on how Groovy gets running onto an Android device. In a future post, I will give you more details about how you can get started with your own project. I will maybe give &lt;a href=&quot;https://github.com/pledbrook/lazybones&quot;&gt;Lazybones&lt;/a&gt;, a project bootstraping tool, more love in the next days ;-)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Groovy on Android</title>
       <link>http://melix.github.io/blog/2014/06/grooid.html</link>
@@ -2014,32 +2113,6 @@ easy, so I hope more people will follow that way and contribute to Open Source t
 &lt;p&gt;Of course, this post has been published using the procedure described on this page, so I used &lt;a href=&quot;http://www.jbake.org&quot;&gt;JBake&lt;/a&gt; and &lt;a href=&quot;http://www.gradle.org&quot;&gt;Gradle&lt;/a&gt; to blog
 about how to publish a blog on &lt;a href=&quot;https://github.com/melix/blog&quot;&gt;GitHub&lt;/a&gt; using &lt;a href=&quot;http://www.jbake.org&quot;&gt;JBake&lt;/a&gt; and &lt;a href=&quot;http://www.gradle.org&quot;&gt;Gradle&lt;/a&gt;! Like my friend Andres Almiray
 would say, that&amp;#8217;s a &lt;a href=&quot;https://twitter.com/aalmiray/status/429236158321950720&quot;&gt;toolception&lt;/a&gt;!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>JLangDetect 0.4 released and moved to GitHub</title>
-      <link>http://melix.github.io/blog/2014/01/jlangdetect-github.html</link>
-      <pubDate>mer., 22 janv. 2014 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2014/01/jlangdetect-github.html</guid>
-      	<description>
-	&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_a_new_era&quot;&gt;A new era&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Back in 2011, I initiated a project called &lt;code&gt;JLangDetect&lt;/code&gt;, a language detection library for the JVM. At that time, I was working for
-a company that made NLP tools and I started this as a pet project on my free time. I made it available as open source software and
-people started to use it, so I was pretty happy at that time to see a project I initiated being actually used in production!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;While I don&amp;#8217;t have the need for such a library now that I work on the Groovy language, some people are still using it. At the first
-place, a friend of mine, Freddy Rabiller, took time to upgrade it. A new version has been released (0.4) and the project is now
-available on &lt;a href=&quot;https://github.com/melix/jlangdetect&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A big thank to Freddy, who will probably take the lead of development on this project now!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
