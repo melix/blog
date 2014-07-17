@@ -1,0 +1,62 @@
+= Groovy on Android, technical details
+Cédric Champeau
+2014-06-10
+:jbake-type: post
+:jbake-tags: groovy,android,swift,gr8conf
+:jbake-status: published
+:source-highlighter: prettify
+:id: groovy_on_android_details
+:gr8conf: http://gr8conf.eu[GR8Conf Europe]
+:groovylang: http://groovy.codehaus.org[Groovy language]
+:gradle: http://www.gradle.org[Gradle]
+:icons: font
+
+In my previous http://melix.github.io/blog/2014/06/grooid.html[post], I have introduced how we could now use the {groovylang} to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.
+
+== Compiling Groovy
+
+The {groovylang} is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it's always compiled. This means that in Groovy, you have two options: either a class is compiled to a `.class` file and used like any other class file on the JVM, using the `groovyc` compiler instead of `javac`, or a class can be compiled *at runtime*, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is *not* an interpreted language: everything is turned into bytecode.
+
+=== A classic Android application
+
+Since the Dalvik VM doesn't use the same bytecode as the JVM, Android requires a bit of work in order to compile and execute Java programs. A special tool, called _dex_, is responsible for converting the JVM bytecode into Dalvik bytecode, and compile it into a `classes.dex` file. This is illustrated in the following schema:
+
+image::compilation_process_normal.png[Classic Android compilation process]
+
+In our case, we're using the Gradle build tool, which is now the default for Android projects, so Gradle is responsible for this chain. Java sources are compiled into `.class` files, then those classes are processed by the `dex` tool, which converts bytecode for all classes and packages everything into a `classes.dex` file. Some additional steps can be done (such as calling ProGuard to reduce the size of the package), but in the end, an APK is produced, which is the deliverable application. When deployed on the device, there's nothing else to do than loading the classes and executing the application.
+
+Let's see how the process differs in case of a Groovy application.
+
+=== An application written in Groovy
+
+In this case, we have `.groovy` files, corresponding to Groovy sources, but we may also have `.java` files. In the end, the process looks very similar:
+
+image::compilation_process_groovy.png[Groovy Android compilation process]
+
+This schema exactly illustrates how the https://github.com/melix/gr8confagenda[GR8Conf Agenda] application is compiled. All is done at *compile time*, and nothing more at runtime. Groovy sources are compiled into JVM bytecode, which is in turn converted into Dalvik bytecode using `dex`. There's absolutely no difference with Java, apart from the compiler, which is able to process both Groovy and Java sources!
+
+One noticeable difference that some people have already reported to me is that since we embed the Groovy runtime, the number of method descriptors used in the `classes.dex` file is significantly higher than with an application written in pure Java. From my early tests, a Groovy application would consume around 8k methods, without optimizations. The `classes.dex` file has a limit of 65536 methods, so this is something you have to keep in mind. Anyway, I am not an Android specialist, but there seem to be workarounds available, like the `multi-dex` option.
+
+In the end, Groovy is not different from any other library you would embed in your application, it's "just" an additional jar. I also mentionned the fact that I recommended to use `@CompileStatic` on your classes. There's a good reason for that. If you don't, the classes that you will compile will use the *dynamic runtime* of Groovy. This is unlikely what you want on a mobile application, especially because on Android, it would use reflection, implying a major performance drop. On a normal JVM, Groovy would use call site caching techniques, like generation of classes at runtime or invokedynamic to improve performance. This is *not* possible on Android, so places where you use dynamic features of Groovy should be limited to small parts of the application, called not frequently. A good example would be the use of a builder for the UI. Builders are a very nice feature of Groovy, and for a UI, it would only be called once when the activity is loaded.
+
+Using `@CompileStatic`, you will ensure that your classes are *statically compiled*, meaning that all method calls are resolved at compile time, leading to dramatically improved performance, very close, if not equal, to that of Java (depending on how you write your code, as usual, because idiomatic Groovy might not always be the fastest implementation).
+
+In any case, you must recall that the first application that I wrote does not use a single class generated at runtime. Even if you remove all `@CompileStatic` annotations, it would use the dynamic runtime, but *without* creating classes at runtime.
+
+=== Runtime scripting
+
+One of the difficulties of adapting the {groovylang} is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:
+
+image::compilation_process_runtime.png[Groovy Android compilation process at runtime]
+
+You can have an application, written in Groovy or not, but in the end, *once the application is running*, you have Groovy source code that you want to execute. Then it needs to compile the classes, call `dex` *directly on the device*, package the result into a `jar` file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow. 
+
+This process is demonstrated in https://github.com/melix/grooidshell-example[this application], which replicates the behavior of the well-known http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell[GroovyShell] but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.
+
+image::groovy-scripting.png[Compiling Groovy at runtime,align="center"]
+
+Subsequent compilations take much less time (around ~500ms), but the fact of having to dex files and write them to the filesystem is a performance killer. In anycase, this shows that it is possible, and even that you could rely on it for an application that would handle scripts. It would be possible, for example, to cache the jar files in order to avoid recompiling them...
+
+== Conclusion
+
+In this post, I gave further details on how Groovy gets running onto an Android device. In a future post, I will give you more details about how you can get started with your own project. I will maybe give https://github.com/pledbrook/lazybones[Lazybones], a project bootstraping tool, more love in the next days ;-)
