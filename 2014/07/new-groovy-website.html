@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: The new Groovy website</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    </head>
+  <body>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+ lang: en_US
+</script>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>The new Groovy website</h1>
+	</div>
+
+	<p><em>19 juillet 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/templating.html">templating</a> 
+	</em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/markup-template-engine.html">markup template engine</a> 
+	</p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/07/new-groovy-website.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/07/new-groovy-website.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/07/new-groovy-website.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2014/07/new-groovy-website.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2014/07/new-groovy-website.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last week, we revealed the beta of a <a href="http://beta.groovy-lang.org">brand new website for the Groovy language</a>. This
+new website is <a href="https://github.com/groovy/groovy-website">open sourced</a> and already received a few contributions.
+In order to make it even easier and as it a fully statically generated site that makes use of Groovy
+I wanted to give more technical details on the toolchain and how it is generated.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_static_website">A static website</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the first questions which arised was: <em>why not use Grails/Spring Boot/Ratpack?</em> In fact, the
+new Groovy website is fully statically generated. It offers multiple advantages:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>hosting is much easier, as it only consists of static pages and assets</p>
+</li>
+<li>
+<p>maintenance is simplified, no database to backup for example</p>
+</li>
+<li>
+<p>everything is self contained, pages and data, into a <a href="https://github.com/groovy/groovy-website">single repository</a></p>
+</li>
+<li>
+<p>no need for authentication</p>
+</li>
+<li>
+<p>all content is public</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Last but not least, we didn&#8217;t have any requirement for storing anything in a database, or that would
+require dynamic generation. Pull requests are enough so far. Eventually, we&#8217;re thinking about a
+blog, but even that can be statically generated even if you want to allow users to comment on articles
+(this blog is a perfect example). So in short, this decision was motivated by one mantra:
+<em>the right tool for the right job</em>.</p>
+</div>
+<div class="paragraph">
+<p>The documentation, that you can find on <a href="http://beta.groovy-lang.org/documentation.html">this page</a>, had
+already started migrating from the aging wiki to . It is generated independently of the
+website and integrated into it using iframes (we&#8217;re thinking about source integration though).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_structure_of_the_project">Structure of the project</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_generator_and_site">Generator and site</h3>
+<div class="paragraph">
+<p>The <a href="https://github.com/groovy/groovy-website">project</a> is built using <a href="http://www.gradle.org">Gradle 2</a> and consists of 2 subprojects:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the <a href="https://github.com/groovy/groovy-website/tree/master/generator">generator</a> project contains, as the name says,
+the static generator. It makes use of a <a href="#template-engine">template engine</a> and provides the classes used in the model
+of the templates.</p>
+</li>
+<li>
+<p>thehttps://github.com/groovy/groovy-website/tree/master/site[site] project contains the templates and data. If you&#8217;re
+looking into contributing contents, this is likely the place to look at.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Building and testing the site is easy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/groovy/groovy-website.git          <i class="conum" data-value="1"></i><b>(1)</b>
+cd groovy-website
+./gradlew generate                                              <i class="conum" data-value="2"></i><b>(2)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>clones the repository</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>generates the website from templates</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The output will be visible in <code>&lt;project directory&gt;/site/build/site</code>. There&#8217;s also a <code>checkDeadlinks</code> tasks that we will
+use once we get out of the beta phase to ensure that the generated pages do not contain any dead link.</p>
+</div>
+<div class="paragraph">
+<p>Internally, we use our <a href="http://ci.groovy-lang.org/viewType.html?buildTypeId=Groovy_Website&amp;guest=1">CI server</a> to deploy
+changes to the <code>master</code> branch live. So any commit which is pushed onto the master branch is automatically published
+(in general, takes less than 2 minutes).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_adding_contents">Adding contents</h3>
+<div class="paragraph">
+<p>Even if the site is statically generated, we still have data. In this project, there&#8217;s an important file, named
+<a href="https://github.com/groovy/groovy-website/blob/master/site/src/site/sitemap.groovy">sitemap.groovy</a> which handles a lot
+of the contents of the website. It is our "low cost" database and as you can see, it&#8217;s a DSL describing the contents
+of the website.</p>
+</div>
+<div class="paragraph">
+<p>For example, you can see the <code>menu</code> section which looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>menu {
+    group('Groovy') {
+        item 'Learn',                       'learn.html'
+        item 'Documentation',               'documentation.html'
+        item 'Download',                    'download.html'
+        item 'Community',                   'community.html'
+        item 'Ecosystem',                   'ecosystem.html'
+    }
+
+    group('About') {
+        item 'Contributing',                'contribute.html'
+        item 'Source code',                 'https://github.com/groovy/groovy-core'
+        item 'Books',                       'learn.html#books'
+        item 'Sponsors',                    'sponsors.html'
+        item 'FAQ',                         'faq.html'
+        item 'Search',                      'search.html'
+    }
+
+    // ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is a purely declarative description of the site menus. Actually, the "Groups" are used in the footer of the page,
+while the main <code>Groovy</code> group is used to generate the top navigation bar. Using a simple descriptive DSL is very interesting,
+because it decouples templates from the contents of the menu. We make sure that those templates do not contain any element
+which is hardcoded and reduce the risks of forgetting to update the footer, for example, if a section is added.</p>
+</div>
+<div class="paragraph">
+<p>The same file is used to describe the list of downloads:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>downloads {
+    // ...
+    distribution('Groovy 2.3') {
+        description {
+            yield 'Groovy 2.3 is our latest official '
+            a(href: 'versioning.html', 'version')
+            yield ' of Groovy.'
+        }
+
+        version('2.3.4') {
+            stable true
+            releaseNotes 'https://jira.codehaus.org/secure/ReleaseNote.jspa?projectId=10242&amp;version=20432'
+            windowsInstaller 'http://dist.codehaus.org/groovy/distributions/installers/windows/nsis/groovy-2.3.4-installer.exe'
+        }
+    }
+    // ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or the books which are listed on the file:///home/cchampeau/DEV/PROJECTS/GITHUB/groovy-website/site/build/site/learn.html[learn page]:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>books {
+    book('Groovy in Action, 2nd edition') {
+        authors "Dierk König, Guillaume Laforge, Paul King, Cédric Champeau, Hamlet D'Arcy, Erik Pragt, and Jon Skeet"
+        cover 'img/books/regina.png'
+        url 'http://www.manning.com/koenig2/'
+        description 'The undisputed definitive reference on the Groovy programming language, authored by core members of the development team.'
+    }
+    // ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The same is done for all contents that need regular updates: user groups, events, projects of the ecosystem, &#8230; I think
+this DSL provides a very nice way to add contents to the website without caring about where it has to be done. You can
+really think of it as a small database, but making use of a Groovy DSL.</p>
+</div>
+<div class="paragraph">
+<p>In addition, this file also declares the <a href="https://github.com/groovy/groovy-website/blob/03e3806cf26af6b13d99e6ee7473687e3f36fedd/site/src/site/sitemap.groovy#L62-L74">mapping between pages in the documentation section</a>
+and <a href="http://beta.groovy-lang.org/documentation.html">the documentation page</a>. Last but not least, it lists the individual
+pages that the website contain. Those pages make use of the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_eat_your_own_dog_food">Eat your own dog food</h3>
+<div class="paragraph">
+<p>In Groovy 2.3, we introduced a new {markuptemplatengine}. We decided that the new web site was an excellent showcase of
+this template engine, and a real life use case. This template engine has several remarkable features, like static compilation
+of templates (even if the model is dynamic), layouts and of course a human readable builder like syntax:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>html {
+   head {
+    title 'Groovy markup template engine in action!'
+   }
+   body {
+    ul {
+        features.each { f-&gt; li(f.name) }
+    }
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It has already been integrated into <a href="https://spring.io/blog/2014/05/28/using-the-innovative-groovy-template-engine-in-spring-boot">Spring Boot</a>
+and <a href="http://www.ratpack.io/">Ratpack</a> will use it in the next version (to be released on July 1st). A hint about its performance can be found <a href="https://github.com/ratpack/ratpack/pull/370">here</a>.
+If you are interested in details about how it works, you can find the documentation <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">here</a>
+and you can read my <a href="http://melix.github.io/blog/2014/02/markuptemplateengine.html">blog posts</a> about it.</p>
+</div>
+<div class="paragraph">
+<p>The website subproject is therefore organized accordingly. Inside the <a href="https://github.com/groovy/groovy-website/tree/master/site/src/site">main source tree</a>, you&#8217;ll find the following directories:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>assets: contains static assets, like Javascript, CSS, images, &#8230;</p>
+</li>
+<li>
+<p>html: contains pure HTML files which are easier to embed as is than using a markup syntax</p>
+</li>
+<li>
+<p>includes: contains elements of code which are shared among multiple templates</p>
+</li>
+<li>
+<p>layouts: contains template layouts, as defined in the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html#_layouts">documentation</a></p>
+</li>
+<li>
+<p>pages: contains the main pages of the website</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In general, consider <code>pages</code> as the entry point. A page generally makes use of one layout. As an example, let&#8217;s see how
+the <a href="http://beta.groovy-lang.org/ecosystem.html">Ecosystem</a> page is generated. The source file consists of this:</p>
+</div>
+<div class="listingblock">
+<div class="title">ecosystem.groovy</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>layout 'layouts/main.groovy', true,                                             <i class="conum" data-value="1"></i><b>(1)</b>
+    pageTitle: 'The Groovy programming language - Ecosystem',                   <i class="conum" data-value="2"></i><b>(2)</b>
+    mainContent: contents {                                                     <i class="conum" data-value="3"></i><b>(3)</b>
+      div(id: 'content', class: 'page-1') {
+        section(class: 'row') {
+          div(class: 'row-fluid') {
+            // ... snip side menu ...
+            div(class: 'col-lg-8 col-lg-pull-0') {
+              include template: 'includes/contribute-button.groovy'             <i class="conum" data-value="4"></i><b>(4)</b>
+              h1 {
+                i(class: 'fa fa-leaf') {}
+                yield ' Ecosystem'
+              }
+              p {
+                yield '''
+                    Beside the language and its API, Groovy gave birth ...
+                    on various themes such as web frameworks, desktop  ...
+                    In this section, we'll highlight a few of the most ...
+                    which leverage Groovy at their core.
+              '''
+              }
+              hr(class: 'divider')
+
+              ecosys.eachWithIndex { e, index -&gt;                                <i class="conum" data-value="5"></i><b>(5)</b>
+                def (name, item) = [e.key, e.value]
+                article {
+                  a(name: "${name}") {}
+                  div(class:"content-heading clearfix media") {
+                    div {
+                      if (item.logo) {
+                        img class: "pull-${(index % 2 == 0) ? 'left' : 'right'}",
+                          src: item.logo, alt: name, hspace: '20px'
+                      } else {
+                        h2(name)
+                      }
+                      p(item.description)
+                    }
+                    a(href: item.url, target:'_blank', "Learn more...")
+                  }
+                }
+                hr(class: 'divider')
+              }
+              // ...
+            }
+          }
+        }
+      }
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>make use of the <code>main</code> layout</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the layout requires a <code>pageTitle</code> variable</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>as well as a <code>mainContent</code> section corresponding to the main page contents</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>example of use of an <code>include</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>iterates over the <code>ecosys</code> variable which contains the list of ecosystem projects as found in the sitemap</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>As you can see, this template format has the advantage of taking care of generating markup for you. You won&#8217;t hit your
+head again on the wall to find an unclosed tag. Everything is embedded, readable and concise.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lessons_learnt">Lessons learnt</h3>
+<div class="paragraph">
+<p>Using the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a> for this project was interesting, because it was probably the first "real life" project
+to use it intensively. And as such, we discovered usability issues, but also bugs. Hopefully, none of those bugs or
+usability features were critical, and everything could be worked around, but expect some fixes in Groovy 2.3.5. It is
+also the reason why the project initially used <a href="http://www.gradle.org">Gradle 2</a>: it comes with Groovy 2.3.2 which embeds the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>,
+so it was possible to use it <strong>without</strong> organizing the project into separate modules like we have. In fact, the early
+versions of the site didn&#8217;t use subprojects. It&#8217;s only when we wanted to leverage improvements from Groovy 2.3.4 that
+we had to <a href="https://github.com/groovy/groovy-website/commit/e922701f747dbb78a7e695796c60d2b783f7e7ee">switch to that architecture</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_team_work">A team work</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the end, I can&#8217;t finish this blog post without mentionning the team work it implied. In particular:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://twitter.com/oodamien">Damien Vitrac</a> designed the website and produced HTML sketches. If you think the new site
+looks good, thank this guy!</p>
+</li>
+<li>
+<p><a href="https://twitter.com/glaforge">Guillaume Laforge</a> designed the site architecture, wrote contents, tweaked the CSS, that is to
+say produced almost all contents. He spent countless hours fixing responsiveness issues and digging into front-end dev.</p>
+</li>
+<li>
+<p><a href="https://twitter.com/CedricChampeau">I streamlined</a> the process by setting up the Gradle project, designing the sitemap DSL,
+the integration of the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>, CI integration, &#8230; that is to say pretty much all the "backend" stuff.</p>
+</li>
+<li>
+<p><strong>You</strong>, as a community, provided awesome <a href="https://github.com/groovy/groovy-website/pulls?direction=desc&amp;page=1&amp;sort=created&amp;state=closed">pull requests</a> within hours. Keep them coming, we love it!</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Each of us have different skills. Guillaume is far better than I am in any kind of web design, styling issues, etc for example, so in the
+end, I think the combination works quite good and that the site as it is now is already pretty usable.</p>
+</div>
+<div class="paragraph">
+<p>Let us know what you think, and don&#8217;t forget that you can contribute, it&#8217;s easy!</p>
+</div>
+</div>
+</div></p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/07/new-groovy-website.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/07/new-groovy-website.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2014/07/new-groovy-website.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2014/07/new-groovy-website.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'new_groovy_website_draft';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
+  </body>
+</html>
