@@ -80,6 +80,222 @@
 		<h2>Next conferences</h2>
 		<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-number-3 lanyrd-context-future" rel="me">My conferences on Lanyrd</a></div>
 	</div>
+  			<a href="/blog/2014/07/bisecting-groovy.html"><h1>Tip of the day: reversed git bisect</h1></a>
+  			<p>23 juillet 2014</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	
+		<a href="/blog/tags/git.html">git</a> 
+	
+		<a href="/blog/tags/bisect.html">bisect</a> 
+	</p>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Tip of the day: reversed git bisect" data-url="http://melix.github.io/blog/2014/07/bisecting-groovy.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/07/bisecting-groovy.html"></div>
+		        <script id='fbvpgng2014/07/bisecting-groovy.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/07/bisecting-groovy.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/07/bisecting-groovy.html');</script>
+
+			<script type="IN/Share" data-url="http://melix.github.io/blog/2014/07/bisecting-groovy.html" data-counter="right"></script>
+			<div class="fb-like" data-href="http://melix.github.io/blog/2014/07/bisecting-groovy.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I had an interesting use case for <code>git bisect</code> today and as my blog also consistutes a good archive for things I don&#8217;t
+want to loose, let&#8217;s take advantage of this to share the trick with you!</p>
+</div>
+<div class="paragraph">
+<p>Normally, <code>git bisect</code> is used to find what commit introduced a regression in the codebase. For example, if you know
+that current <code>HEAD</code> is buggy but that at least, RELEASE_1_0 was good, then you can write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git bisect start             <i class="conum" data-value="1"></i><b>(1)</b>
+git bisect bad               <i class="conum" data-value="2"></i><b>(2)</b>
+git bisect good RELEASE_1_0  <i class="conum" data-value="3"></i><b>(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>start bisecting</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>tells that <code>HEAD</code> contains the regression</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>tells that <code>RELEASE_1_0</code> is a tag corresponding to a version known not to have the bug</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Git will checkout a revision that you can test, and you issue a list of <code>git bisect good</code> or <code>git bisect bad</code> commands
+until it determines what commit introduced the regression.</p>
+</div>
+<div class="paragraph">
+<p>This is a <strong>very</strong> practical way to find a regression. In Groovy, I&#8217;ve used this more than once, it&#8217;s very useful.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reversing_the_logic">Reversing the logic</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>But today, I wanted to <em>reverse the logic</em>. Actually, we had a <a href="https://jira.codehaus.org/browse/GROOVY-6463">bug report</a>
+and we found out that the bug was already fixed, but we didn&#8217;t know in which version it was fixed. So actually, I didn&#8217;t
+want to find a regression, but a fix commit.</p>
+</div>
+<div class="paragraph">
+<p>The idea to do this is to reverse the meaning of <code>bad</code> and <code>good</code> in <code>bisect</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>bad</code> becomes "doesn&#8217;t produce a compile error"</p>
+</li>
+<li>
+<p><code>good</code> becomes "produces a compile error"</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And since the range of revisions to test was pretty big (we know that the error was reported on Groovy 2.2.1, but master
+is 2.4.0), then I also took advantage of the <code>git bisect run</code> command, which automatically continues bisecting based on
+a command line return status code.</p>
+</div>
+<div class="paragraph">
+<p>So basically, here&#8217;s what I wrote:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git bisect start                <i class="conum" data-value="1"></i><b>(1)</b>
+git bisect bad master           <i class="conum" data-value="2"></i><b>(2)</b>
+git bisect good GROOVY_2_2_1    <i class="conum" data-value="3"></i><b>(3)</b>
+git bisect run ./bisect.sh      <i class="conum" data-value="4"></i><b>(4)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>start bisecting</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>master is known to have the fix, so we say <strong>bad</strong> is master</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>GROOVY_2_2_1 is known to have the bug, so we say <strong>good</strong> is GROOVY_2_2_1</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>start automatic bisecting thanks to the ./bisect.sh script</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And what does <em>bisect.sh</em> consist of? Here you go:</p>
+</div>
+<div class="listingblock">
+<div class="title">bisect.sh</div>
+<div class="content">
+<pre>#!/bin/bash
+export GROOVY_HOME=/tmp/testversion                                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+./gradlew clean -x javadoc -x groovydoc -x javadocAll -x groovydocAll -PskipIndy=true installGroovy     <i class="conum" data-value="2"></i><b>(2)</b>
+/tmp/testversion/bin/groovy bisect.groovy || exit 0                                                     <i class="conum" data-value="3"></i><b>(3)</b>
+exit 1                                                                                                  <i class="conum" data-value="4"></i><b>(4)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>tells where the local build version of Groovy will be installed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>builds Groovy and installs it locally</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>executes the test script and if the test fails, return a success exit code</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>return a failure exit code</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The trick is to <strong>reverse the exit codes</strong> in the script too: if the script compiles, then it means that the bug was fixed.
+Since we reverse the logic, we then need the script to return a bad exit code! In case the script fails, we will return
+a success (0) error code, because it means that the revision doesn&#8217;t have the fix. Easy, but needs some mental contorsion :-)</p>
+</div>
+<div class="paragraph">
+<p>You will note that this script uses <code>GROOVY_HOME</code> and a local installation path. You can configure it using the <code>$HOME/.gradle/gradle.properties</code> file,
+and adding the following line in it:</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle.properties</div>
+<div class="content">
+<pre>groovy_installPath=/tmp/testversion</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Eventually, here is the groovy script which served as a test case (almost copied directly from the JIRA issue):</p>
+</div>
+<div class="listingblock">
+<div class="title">bisect.groovy</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>abstract  class Base&lt;A&gt; {
+    abstract  void foo(A[] a)
+}
+
+class X {}
+
+class Inheritor extends Base&lt;X&gt;{
+    @Override
+    void foo(X[] a) {}
+//Groovyc: Can't have an abstract method in a non-abstract class.
+//The class 'B' must be declared abstract
+//or the method 'void foo([Ljava.lang.Object;)' must be implemented.
+}
+
+Inheritor</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that each revision took around ~1 min 30s to test, even skipping the javadoc/groovydoc and indy versions of Groovy,
+so you can imagine what benefit you have here in using automatic bisecting.</p>
+</div>
+<div class="paragraph">
+<p>In the end, after around 20 minutes of automatic processing, I received this nice message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>74d991f9f8c39d2730a054431bf28e6516e61735 is the first bad commit
+commit 74d991f9f8c39d2730a054431bf28e6516e61735
+Author: Cedric Champeau &lt;cedric.champeau@gmail.com&gt;
+Date:   Sun Apr 27 18:06:24 2014 +0200
+
+    GROOVY-6722: Compiler doesn't handle generic array covariant
+
+:040000 040000 b61b92399ac86246c157f948b3232bf5ab0cf04f 5d0c56413a621c7693e7985aff0e4c84eb08889f M	src
+bisect run success</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What? "bad commit"? Yes, remember that the logic is reversed, so "bad" means actually "fixed it". So it says that the
+first commit which <strong>fixed</strong> the bug was actually <code>74d991f</code>. And here we go, issue closed ;) One improvement I can see
+is to use a local clone of my repository instead of working directly in the same repository, so that I can continue
+working on my copy while bisecting is in progress.</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2014/07/bisecting-groovy.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/07/new-groovy-website.html"><h1>The new Groovy website</h1></a>
   			<p>18 juillet 2014</p>
 			<p><em>Tags: </em>
@@ -621,267 +837,6 @@ end, I think the combination works quite good and that the site as it is now is 
 </div>
 </div></p>
 			<p><a href="/blog/2014/06/grooid2.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2014/06/grooid.html"><h1>Groovy on Android</h1></a>
-  			<p>05 juin 2014</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/groovy.html">groovy</a> 
-	
-		<a href="/blog/tags/android.html">android</a> 
-	
-		<a href="/blog/tags/swift.html">swift</a> 
-	
-		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
-	</p>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Groovy on Android" data-url="http://melix.github.io/blog/2014/06/grooid.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/06/grooid.html"></div>
-		        <script id='fbvpgng2014/06/grooid.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/06/grooid.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/06/grooid.html');</script>
-
-			<script type="IN/Share" data-url="http://melix.github.io/blog/2014/06/grooid.html" data-counter="right"></script>
-			<div class="fb-like" data-href="http://melix.github.io/blog/2014/06/grooid.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
-
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>Yesterday ended <a href="http://gr8conf.eu">GR8Conf Europe</a>, a <a href="http://groovy.codehaus.org">Groovy language</a> conference in Copenhagen that was once again a successful event.
-I want to thank the crew again for this, and of course the <a href="http://groovy.codehaus.org">Groovy language</a> community which is so friendly and always helpful. This year
-turned out to be very special for me, because just two days after the announcement by Apple of the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a>, I was talking about
-running Groovy on Android! As Guillaume Laforge <a href="http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy">noticed</a>, there
-are a lot of similarities between the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a> and <a href="http://groovy.codehaus.org">Groovy language</a>.</p>
-</div>
-<div class="paragraph">
-<p>The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
-better candidate than <a href="http://groovy.codehaus.org">Groovy language</a> here.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_presentation">The presentation</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Should you be interested in the slides, you can find them below. Since it was presented at <a href="http://gr8conf.eu">GR8Conf Europe</a>, it gives a bit of history of the changes needed to
-have the runtime working on Android too:</p>
-</div>
-<script async class="speakerdeck-embed" data-id="e8e58fc0cdee0131f20616308848c4b8" data-ratio="1.6" src="//speakerdeck.com/assets/embed.js"></script>
-<div class="paragraph">
-<p>For those of you who are new to Groovy, you have to know that this language is derived from Java, meaning that the learning curve is almost 0, but it also
-removes a lot of its verbosity and adds a lot of features to it, such as closures (similar to lambdas in Java 8, but Java 8 is not available for Android
-developers), builders, runtime and compile-time metaprogramming.</p>
-</div>
-<div class="paragraph">
-<p>As an example of how Groovylang can be used to reduce the verbosity of Java on Android, I will take a simple example: asynchronous tasks. Asynchronous tasks
-are required as soon as a task takes too much time to be executed on the UI thread. That is the case, by default, for any network based operations, in order
-to guarantee that the UI remains snappy even if network is slow or unavailable. The problem is that those asynchronous tasks are incredibly verbose. You have
-to write a lot of code, that I would tend to name "inner class hell", just for this. Let&#8217;s imagine that you need to parse a JSON feed, then update the UI
-accordingly. Then you would have to write something like this (no kidding):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint java language-java"><code>public class FeedActivity {
-    TextView mTextView;
-
-    ...
-
-    void updateFeed() {
-    	new FeedTask().execute("http://path/to/feed");
-    }
-
-    class FeedTask extends AsyncTask&lt;String, Void, String&gt; {
-        protected String doInBackground(String... params) {
-            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
-            HttpPost httppost = new HttpPost(params[0]);
-
-            InputStream inputStream = null;
-            String result = null;
-            try {
-                HttpResponse response = httpclient.execute(httppost);
-                HttpEntity entity = response.getEntity();
-
-                inputStream = entity.getContent();
-                // json is UTF-8 by default
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
-                StringBuilder sb = new StringBuilder();
-
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-                result = sb.toString();
-            } catch (Exception e) {
-                // Oops
-            } finally {
-                try {
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                } catch (Exception squish) {
-                }
-            }
-            StringBuilder speakers = null;
-            try {
-                JSONObject jObject = new JSONObject(result);
-                JSONArray jArray = jObject.getJSONArray("speakers");
-                speakers = new StringBuilder();
-                for (int i = 0; i &lt; jArray.length(); i++) {
-                    speakers.append(jArray.getString(i));
-                    speakers.append(" ");
-                }
-            } catch (JSONException e) {
-                // do something?
-            }
-            return speakers.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            mTextView.setText(s);
-        }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>So now, let&#8217;s see the equivalent in Groovy (no kidding either):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public class FeedActivity {
-    TextView mTextView
-
-    ...
-
-    void updateFeed() {
-    	Fluent.async {
-            def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
-            json.speakers.join(' ')
-        } then {
-	    mTextView.setText(it)
-        }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>I think you can start to see the advantage of using Groovy in your own Android projects. Of course, the <code>Fluent</code> class that I&#8217;m using here
-is a support class which I implemented in my <a href="https://github.com/melix/gr8confagenda">first Android project</a> (which is open sourced btw), but it&#8217;s
-really simple and gives an example of how Android users could benefit from Groovification of their APIs.</p>
-</div>
-<div class="sect2">
-<h3 id="_feeling_the_pain">Feeling the pain</h3>
-<div class="paragraph">
-<p>This is actually a key point of my talk: I hadn&#8217;t written any Android application before this talk, and I definitely wanted to be able to write
-an application in Groovy on Android. Why? Because it&#8217;s been some time already that I use Groovy everyday, and there&#8217;s no turning back. I wanted
-to feel the pain of the Java developers on Android, so that I can write better tools for them. And that&#8217;s actually where you, as a user, come
-in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn&#8217;t be complicated a breeze.
-This is exactly the point. My example with <code>Fluent</code> is <strong>one</strong> example of simplification of usages of Android APIs, but you have many more to invent,
-especially because <strong>you</strong> must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&#8230;</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_the_beginning_of_a_new_era">The beginning of a new era</h3>
-<div class="paragraph">
-<p>In upcoming posts, I will try to demonstrate that we&#8217;re just at the beginning. Some people are already asking for a {swift} alternative for Android.
-It&#8217;s there guys, you have it, so spread the word and let&#8217;s make it happen! I am convinced that it is the beginning of a new era for Android and Groovy.
-Google already switched their main build system to Gradle, which is, by the way, using Groovy, so I think it&#8217;s time to move over and show your love!</p>
-</div>
-<div class="paragraph">
-<p>All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://github.com/melix/gr8confagenda">https://github.com/melix/gr8confagenda</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p><em>Update 2: build instructions with the Gradle plugin</em></p>
-</div>
-<div class="paragraph">
-<p>You can now use a Gradle plugin to integrate Groovy with Android. The plugin can be found here: <a href="https://github.com/melix/groovy-android-gradle-plugin">groovy-android-gradle-plugin</a>. As of version 0.2, the plugin supports the Android plugin 0.10+.</p>
-</div>
-<div class="paragraph">
-<p><em>Update: build instructions</em></p>
-</div>
-<div class="paragraph">
-<p>If you want to try it by yourself, here&#8217;s how you can do it. First of all, official support for Android will be in Groovy 2.4. Before the first beta,
-you&#8217;ll have to build it from sources, and here is the quickest way:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>git clone https://github.com/melix/groovy-core.git --branch master
-cd groovy-core
-./gradlew -PskipIndy=true install</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then you can clone the sample application:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>cd ..
-git clone https://github.com/melix/gr8confagenda.git</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This contains a project that you can open using <a href="http://developer.android.com/sdk/installing/studio.html">Android Studio</a>.</p>
-</div>
-<div class="paragraph">
-<p>If you want to use the <a href="http://groovy.codehaus.org">Groovy language</a> in your own Android project, a requirement is that it is using Gradle. If so, you can update your <code>build.gradle</code> file
-as is:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>android {
-   ...
-   packagingOptions {
-        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/groovy-release-info.properties'
-    }
-}
-
-repositories {
-    mavenLocal()
-    jcenter()
-}
-
-dependencies {
-    compile 'org.codehaus.groovy:groovy:2.4.0-SNAPSHOT:grooid'
-    // the following dependency is necessary if you want JSON support
-    compile ('org.codehaus.groovy:groovy-json:2.4.0-SNAPSHOT') {
-        transitive = false
-    }
-}
-
-// add support for Groovy to existing configurations
-android.applicationVariants.all {
-    task "groovy${name}Compile"(type: GroovyCompile) {
-        source = javaCompile.source + fileTree('src/main/java').include('**/*.groovy')
-        destinationDir = javaCompile.destinationDir
-        classpath = javaCompile.classpath
-        groovyClasspath = classpath
-        sourceCompatibility = '1.6'
-        targetCompatibility = '1.6'
-        doFirst {
-            def runtimeJars = plugins.findPlugin(com.android.build.gradle.AppPlugin).runtimeJars
-            classpath = files(runtimeJars) + classpath
-        }
-    }
-    javaCompile.dependsOn("groovy${name}Compile")
-    javaCompile.enabled = false
-}
-</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>And that&#8217;s all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!</p>
-</div>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2014/06/grooid.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
