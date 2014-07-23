@@ -1,0 +1,277 @@
+= The new Groovy website
+Cédric Champeau
+2014-07-18
+:jbake-type: post
+:jbake-tags: groovy,templating,gradle,markup template engine
+:jbake-status: published
+:source-highlighter: prettify
+:id: new_groovy_website
+:groovylang: http://beta.groovy-lang.org
+:gradle: http://www.gradle.org[Gradle 2]
+:github-repo: https://github.com/groovy/groovy-website
+:asciidoctor: http://asciidoctor.org/[Asciidoctor]
+:markuptemplateengine: http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html[markup template engine]
+:ratpack: http://www.ratpack.io/[Ratpack]
+:icons: font
+
+Last week, we revealed the beta of a {groovylang}[brand new website for the Groovy language]. This
+new website is {github-repo}[open sourced] and already received a few contributions.
+In order to make it even easier and as it a fully statically generated site that makes use of Groovy
+I wanted to give more technical details on the toolchain and how it is generated.
+
+== A static website
+
+One of the first questions which arised was: _why not use Grails/Spring Boot/Ratpack?_ In fact, the
+new Groovy website is fully statically generated. It offers multiple advantages:
+
+* hosting is much easier, as it only consists of static pages and assets
+* maintenance is simplified, no database to backup for example
+* everything is self contained, pages and data, into a {github-repo}[single repository]
+* no need for authentication
+* all content is public
+
+Last but not least, we didn't have any requirement for storing anything in a database, or that would
+require dynamic generation. Pull requests are enough so far. Eventually, we're thinking about a
+blog, but even that can be statically generated even if you want to allow users to comment on articles
+(this blog is a perfect example). So in short, this decision was motivated by one mantra:
+_the right tool for the right job_.
+
+The documentation, that you can find on http://beta.groovy-lang.org/documentation.html[this page], had
+already started migrating from the aging wiki to {asciidoctor}. It is generated independently of the
+website and integrated into it using iframes (we're thinking about source integration though).
+
+== Structure of the project
+=== Generator and site
+The {github-repo}[project] is built using {gradle} and consists of 2 subprojects:
+
+* the https://github.com/groovy/groovy-website/tree/master/generator[generator] project contains, as the name says,
+the static generator. It makes use of a <<template-engine,template engine>> and provides the classes used in the model
+of the templates.
+* the https://github.com/groovy/groovy-website/tree/master/site[site] project contains the templates and data. If you're
+looking into contributing contents, this is likely the place to look at.
+
+Building and testing the site is easy:
+
+----
+git clone https://github.com/groovy/groovy-website.git          <1>
+cd groovy-website
+./gradlew generate                                              <2>
+----
+<1> clones the repository
+<2> generates the website from templates
+
+The output will be visible in `<project directory>/site/build/site`. There's also a `checkDeadlinks` tasks that we will
+use once we get out of the beta phase to ensure that the generated pages do not contain any dead link.
+
+Internally, we use our http://ci.groovy-lang.org/viewType.html?buildTypeId=Groovy_Website&guest=1[CI server] to deploy
+changes to the `master` branch live. So any commit which is pushed onto the master branch is automatically published
+(in general, takes less than 2 minutes).
+
+=== Adding contents
+
+Even if the site is statically generated, we still have data. In this project, there's an important file, named
+https://github.com/groovy/groovy-website/blob/master/site/src/site/sitemap.groovy[sitemap.groovy] which handles a lot
+of the contents of the website. It is our "low cost" database and as you can see, it's a DSL describing the contents
+of the website.
+
+For example, you can see the `menu` section which looks like this:
+
+[source,groovy]
+----
+menu {
+    group('Groovy') {
+        item 'Learn',                       'learn.html'
+        item 'Documentation',               'documentation.html'
+        item 'Download',                    'download.html'
+        item 'Community',                   'community.html'
+        item 'Ecosystem',                   'ecosystem.html'
+    }
+
+    group('About') {
+        item 'Contributing',                'contribute.html'
+        item 'Source code',                 'https://github.com/groovy/groovy-core'
+        item 'Books',                       'learn.html#books'
+        item 'Sponsors',                    'sponsors.html'
+        item 'FAQ',                         'faq.html'
+        item 'Search',                      'search.html'
+    }
+
+    // ...
+}
+----
+
+It is a purely declarative description of the site menus. Actually, the "Groups" are used in the footer of the page,
+while the main `Groovy` group is used to generate the top navigation bar. Using a simple descriptive DSL is very interesting,
+because it decouples templates from the contents of the menu. We make sure that those templates do not contain any element
+which is hardcoded and reduce the risks of forgetting to update the footer, for example, if a section is added.
+
+The same file is used to describe the list of downloads:
+
+[source,groovy]
+----
+downloads {
+    // ...
+    distribution('Groovy 2.3') {
+        description {
+            yield 'Groovy 2.3 is our latest official '
+            a(href: 'versioning.html', 'version')
+            yield ' of Groovy.'
+        }
+
+        version('2.3.4') {
+            stable true
+            releaseNotes 'https://jira.codehaus.org/secure/ReleaseNote.jspa?projectId=10242&version=20432'
+            windowsInstaller 'http://dist.codehaus.org/groovy/distributions/installers/windows/nsis/groovy-2.3.4-installer.exe'
+        }
+    }
+    // ...
+}
+----
+
+or the books which are listed on the http://beta.groovy-lang.org/learn.html[learn page]:
+
+[source,groovy]
+----
+books {
+    book('Groovy in Action, 2nd edition') {
+        authors "Dierk König, Guillaume Laforge, Paul King, Cédric Champeau, Hamlet D'Arcy, Erik Pragt, and Jon Skeet"
+        cover 'img/books/regina.png'
+        url 'http://www.manning.com/koenig2/'
+        description 'The undisputed definitive reference on the Groovy programming language, authored by core members of the development team.'
+    }
+    // ...
+}
+----
+
+The same is done for all contents that need regular updates: user groups, events, projects of the ecosystem, ... I think
+this DSL provides a very nice way to add contents to the website without caring about where it has to be done. You can
+really think of it as a small database, but making use of a Groovy DSL.
+
+In addition, this file also declares the https://github.com/groovy/groovy-website/blob/03e3806cf26af6b13d99e6ee7473687e3f36fedd/site/src/site/sitemap.groovy#L62-L74[mapping between pages in the documentation section]
+and http://beta.groovy-lang.org/documentation.html[the documentation page]. Last but not least, it lists the individual
+pages that the website contain. Those pages make use of the {markuptemplateengine}.
+
+=== Eat your own dog food
+
+In Groovy 2.3, we introduced a new {markuptemplateengine}. We decided that the new web site was an excellent showcase of
+this template engine, and a real life use case. This template engine has several remarkable features, like static compilation
+of templates (even if the model is dynamic), layouts and of course a human readable builder like syntax:
+
+[source,groovy]
+----
+html {
+   head {
+    title 'Groovy markup template engine in action!'
+   }
+   body {
+    ul {
+        features.each { f-> li(f.name) }
+    }
+   }
+}
+----
+
+It has already been integrated into https://spring.io/blog/2014/05/28/using-the-innovative-groovy-template-engine-in-spring-boot[Spring Boot]
+and {ratpack} will use it in the next version (to be released on August 1st). A hint about its performance can be found https://github.com/ratpack/ratpack/pull/370[here].
+If you are interested in details about how it works, you can find the documentation http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html[here]
+and you can read my http://melix.github.io/blog/2014/02/markuptemplateengine.html[blog posts] about it.
+
+The website subproject is therefore organized accordingly. Inside the https://github.com/groovy/groovy-website/tree/master/site/src/site[main source tree], you'll find the following directories:
+
+* assets: contains static assets, like Javascript, CSS, images, ...
+* html: contains pure HTML files which are easier to embed as is than using a markup syntax
+* includes: contains elements of code which are shared among multiple templates
+* layouts: contains template layouts, as defined in the http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html#_layouts[documentation]
+* pages: contains the main pages of the website
+
+In general, consider `pages` as the entry point. A page generally makes use of one layout. As an example, let's see how
+the http://beta.groovy-lang.org/ecosystem.html[Ecosystem] page is generated. The source file consists of this:
+
+[source,groovy]
+.ecosystem.groovy
+----
+layout 'layouts/main.groovy', true,                                             <1>
+    pageTitle: 'The Groovy programming language - Ecosystem',                   <2>
+    mainContent: contents {                                                     <3>
+      div(id: 'content', class: 'page-1') {
+        section(class: 'row') {
+          div(class: 'row-fluid') {
+            // ... snip side menu ...
+            div(class: 'col-lg-8 col-lg-pull-0') {
+              include template: 'includes/contribute-button.groovy'             <4>
+              h1 {
+                i(class: 'fa fa-leaf') {}
+                yield ' Ecosystem'
+              }
+              p {
+                yield '''
+                    Beside the language and its API, Groovy gave birth   ...
+                    on various themes such as web frameworks, desktop    ...
+                    In this section, we will highlight a few of the most ...
+                    which leverage Groovy at their core.
+              '''
+              }
+              hr(class: 'divider')
+
+              ecosys.eachWithIndex { e, index ->                                <5>
+                def (name, item) = [e.key, e.value]
+                article {
+                  a(name: "${name}") {}
+                  div(class:"content-heading clearfix media") {
+                    div {
+                      if (item.logo) {
+                        img class: "pull-${(index % 2 == 0) ? 'left' : 'right'}",
+                          src: item.logo, alt: name, hspace: '20px'
+                      } else {
+                        h2(name)
+                      }
+                      p(item.description)
+                    }
+                    a(href: item.url, target:'_blank', "Learn more...")
+                  }
+                }
+                hr(class: 'divider')
+              }
+              // ...
+            }
+          }
+        }
+      }
+    }
+----
+<1> make use of the `main` layout
+<2> the layout requires a `pageTitle` variable
+<3> as well as a `mainContent` section corresponding to the main page contents
+<4> example of use of an `include`
+<5> iterates over the `ecosys` variable which contains the list of ecosystem projects as found in the sitemap
+
+As you can see, this template format has the advantage of taking care of generating markup for you. You won't hit your
+head again on the wall to find an unclosed tag. Everything is embedded, readable and concise.
+
+=== Lessons learnt
+
+Using the {markuptemplateengine} for this project was interesting, because it was probably the first "real life" project
+to use it intensively. And as such, we discovered usability issues, but also bugs. Hopefully, none of those bugs or
+usability features were critical, and everything could be worked around, but expect some fixes in Groovy 2.3.5. It is
+also the reason why the project initially used {gradle}: it comes with Groovy 2.3.2 which embeds the {markuptemplateengine},
+so it was possible to use it *without* organizing the project into separate modules like we have. In fact, the early
+versions of the site didn't use subprojects. It's only when we wanted to leverage improvements from Groovy 2.3.4 that
+we had to https://github.com/groovy/groovy-website/commit/e922701f747dbb78a7e695796c60d2b783f7e7ee[switch to that architecture].
+
+== A team work
+
+In the end, I can't finish this blog post without mentionning the team work it implied. In particular:
+
+* https://twitter.com/oodamien[Damien Vitrac] designed the website and produced HTML sketches. If you think the new site
+looks good, thank this guy!
+* https://twitter.com/glaforge[Guillaume Laforge] designed the site architecture, wrote contents, tweaked the CSS, that is to
+ say produced almost all contents. He spent countless hours fixing responsiveness issues and digging into front-end dev.
+* https://twitter.com/CedricChampeau[I streamlined] the process by setting up the Gradle project, designing the sitemap DSL,
+the integration of the {markuptemplateengine}, CI integration, ... that is to say pretty much all the "backend" stuff.
+* *You*, as a community, provided awesome https://github.com/groovy/groovy-website/pulls?direction=desc&page=1&sort=created&state=closed[pull requests] within hours. Keep them coming, we love it!
+
+Each of us have different skills. Guillaume is far better than I am in any kind of web design, styling issues, etc for example, so in the
+end, I think the combination works quite good and that the site as it is now is already pretty usable.
+
+Let us know what you think, and don't forget that you can contribute, it's easy!
+
