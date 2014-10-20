@@ -80,8 +80,151 @@
 		<h2>Next conferences</h2>
 		<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-number-3 lanyrd-context-future" rel="me">My conferences on Lanyrd</a></div>
 	</div>
+  			<a href="/blog/2014/10/android-moto360.html"><h1>Fixing Bluetooth debugging on Android Wear</h1></a>
+  			<p>20 October 2014</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	
+		<a href="/blog/tags/android.html">android</a> 
+	
+		<a href="/blog/tags/moto-360.html">moto 360</a> 
+	
+		<a href="/blog/tags/wear.html">wear</a> 
+	</p>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Fixing Bluetooth debugging on Android Wear" data-url="http://melix.github.io/blog/2014/10/android-moto360.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/10/android-moto360.html"></div>
+		        <script id='fbvpgng2014/10/android-moto360.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/10/android-moto360.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/10/android-moto360.html');</script>
+
+			<script type="IN/Share" data-url="http://melix.github.io/blog/2014/10/android-moto360.html" data-counter="right"></script>
+			<div class="fb-like" data-href="http://melix.github.io/blog/2014/10/android-moto360.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I have been working on making <a href="http://beta.groovy-lang.org">Groovy</a> work on Android for several months now. In the last weeks, I even
+showed at SpringOne2GX an example of an application written in Groovy that worked on Android Wear. However, that code
+worked in an emulator. Recently, I got a real device, a Moto 360, so I wanted to see that application running on a
+real device. For some very obscure (understand buggy Android SDK) reason, it was far from being that easy&#8230;</p>
+</div>
+<div class="paragraph">
+<p>I litteraly spent <strong>hours</strong> trying to figure out what was wrong, so I thought it would be interesting for those of you
+who face the same problem to have a blog post that explains how to deal with it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_problem">The problem</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you follow the instructions on the <a href="https://developer.android.com/training/wearables/apps/bt-debugging.html">Android documentation</a>
+about how to enable bluetooth debugging, it&#8217;s in the end pretty simple. Basically, it&#8217;s about enabling USB debugging on your physical
+handheld, then enable bluetooth debugging on your wearable, and in the end enable bluetooth debugging in the Android Wear companion app.</p>
+</div>
+<div class="paragraph">
+<p>The guide says:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>In the Android Wear companion app, you should see the status change to:</p>
+</div>
+<div class="paragraph">
+<p>Host: connected
+Target: connected</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>However, whatever I did, the <code>Target: connected</code> line never appeared for me. It was <strong>always</strong> <code>Target: disconnected</code>, so if I continued
+with the instructions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Doing</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>adb devices</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Only showed my wearable as <code>offline</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>List of devices attached
+
+dcfbbafd	device
+localhost:4444	offline</pre>
+</div>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img src="/blog/img/rage-offline.jpg" alt="Why so evil?">
+</div>
+</div>
+<div class="paragraph">
+<p>I have searched for an answer in a lot of pages, including <a href="http://stackoverflow.com/questions/25938998/debugging-on-moto-360">Stackoverflow</a> where
+I tried very unlikely answers like in <a href="http://stackoverflow.com/questions/25938998/debugging-on-moto-360">this page</a>: execute both commands separately instead
+of doing them in the same line. I thought that maybe there was a timing issue and that the fact of separating both commands would give the toolkit a chance,
+but no, wasn&#8217;t that easy.</p>
+</div>
+<div class="paragraph">
+<p>In the end, I was totally convinced that the problem was because I had previously associated my handheld with an emulator. I was convinced of it because even if I had now associated it with a real device (the Moto 360), in the Android Wear companion app, the device was recognized as an "emulator"&#8230; mmm&#8230; So I tried uninstalling the Android Wear app, clear its cache, but no matter what I did, after reinstalling, the settings were kept, and the Moto recognized as an emulator. So sad&#8230;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_solution">The solution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So you were looking at a solution, and here it is. Basically, the problem is that the Android companion app doesn&#8217;t store its settings under its cache. They are stored in the <code>Google Play Services</code> space, so here is the procedure that worked for me, and I sincerely hope it will do for you. On your handheld:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>open the applications settings, search for the <code>Android Wear</code> application, then <strong>force stop it</strong></p>
+</li>
+<li>
+<p>clear its <strong>data and cache</strong></p>
+</li>
+<li>
+<p>now search for <code>Google Play Services</code> (depending on your language settings, it can appear with a different name, on m y device it is "Services Google Play".</p>
+</li>
+<li>
+<p>click on <code>Manage space</code>. You will see that there&#8217;s a section for connected devices. I tried to clear data here, but it didn&#8217;t help, so you have to click on <strong>delete all data</strong>.</p>
+</li>
+<li>
+<p>reboot your phone</p>
+</li>
+<li>
+<p>reboot your Moto 360</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>I am unsure that the two last steps are really necessary, but I did it because I wanted to make sure that force stopping and clearing data did not introduce some weird behavior after that. When you reopen the Android Wear companion app, it should now be as if it was the first time you opened it and ask you to associate it with your watch. Do it, and now, you should be able to follow the normal procedure described in the Android documentation and&#8230;</p>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img src="/blog/img/yes-baby.jpg" alt="yes baby">
+</div>
+</div>
+<div class="paragraph">
+<p>Success, now you can debug your application on a real device (which includes deploying it&#8230;).</p>
+</div>
+<blockquote class="twitter-tweet" lang="fr"><p>Hey, finally got it working! I need to blog about how I arrived the insane emulator issue... <a href="https://twitter.com/hashtag/groovylang?src=hash">#groovylang</a> <a href="http://t.co/XINccF3V7k">pic.twitter.com/XINccF3V7k</a></p>&mdash; Cédric Champeau (@CedricChampeau) <a href="https://twitter.com/CedricChampeau/status/523934124898521090">19 Octobre 2014</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div></p>
+			<p><a href="/blog/2014/10/android-moto360.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/07/bisecting-groovy.html"><h1>Tip of the day: reversed git bisect</h1></a>
-  			<p>23 juillet 2014</p>
+  			<p>23 July 2014</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	
@@ -297,7 +440,7 @@ working on my copy while bisecting is in progress.</p>
 </div></p>
 			<p><a href="/blog/2014/07/bisecting-groovy.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/07/new-groovy-website.html"><h1>The new Groovy website</h1></a>
-  			<p>18 juillet 2014</p>
+  			<p>18 July 2014</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	
@@ -695,7 +838,7 @@ end, I think the combination works quite good and that the site as it is now is 
 </div></p>
 			<p><a href="/blog/2014/07/new-groovy-website.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2014/06/contribute-groovy-ide.html"><h1>Contributing for the Groovy language: setting up IntelliJ IDEA</h1></a>
-  			<p>24 juin 2014</p>
+  			<p>24 June 2014</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	
@@ -726,117 +869,6 @@ end, I think the combination works quite good and that the site as it is now is 
 </div>
 </div></p>
 			<p><a href="/blog/2014/06/contribute-groovy-ide.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2014/06/grooid2.html"><h1>Groovy on Android, technical details</h1></a>
-  			<p>10 juin 2014</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/groovy.html">groovy</a> 
-	
-		<a href="/blog/tags/android.html">android</a> 
-	
-		<a href="/blog/tags/swift.html">swift</a> 
-	
-		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
-	</p>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="Groovy on Android, technical details" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/06/grooid2.html"></div>
-		        <script id='fbvpgng2014/06/grooid2.html'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/06/grooid2.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng2014/06/grooid2.html');</script>
-
-			<script type="IN/Share" data-url="http://melix.github.io/blog/2014/06/grooid2.html" data-counter="right"></script>
-			<div class="fb-like" data-href="http://melix.github.io/blog/2014/06/grooid2.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
-
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>In my previous <a href="http://melix.github.io/blog/2014/06/grooid.html">post</a>, I have introduced how we could now use the <a href="http://groovy.codehaus.org">Groovy language</a> to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_compiling_groovy">Compiling Groovy</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The <a href="http://groovy.codehaus.org">Groovy language</a> is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it&#8217;s always compiled. This means that in Groovy, you have two options: either a class is compiled to a <code>.class</code> file and used like any other class file on the JVM, using the <code>groovyc</code> compiler instead of <code>javac</code>, or a class can be compiled <strong>at runtime</strong>, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is <strong>not</strong> an interpreted language: everything is turned into bytecode.</p>
-</div>
-<div class="sect2">
-<h3 id="_a_classic_android_application">A classic Android application</h3>
-<div class="paragraph">
-<p>Since the Dalvik VM doesn&#8217;t use the same bytecode as the JVM, Android requires a bit of work in order to compile and execute Java programs. A special tool, called <em>dex</em>, is responsible for converting the JVM bytecode into Dalvik bytecode, and compile it into a <code>classes.dex</code> file. This is illustrated in the following schema:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="compilation_process_normal.png" alt="Classic Android compilation process">
-</div>
-</div>
-<div class="paragraph">
-<p>In our case, we&#8217;re using the Gradle build tool, which is now the default for Android projects, so Gradle is responsible for this chain. Java sources are compiled into <code>.class</code> files, then those classes are processed by the <code>dex</code> tool, which converts bytecode for all classes and packages everything into a <code>classes.dex</code> file. Some additional steps can be done (such as calling ProGuard to reduce the size of the package), but in the end, an APK is produced, which is the deliverable application. When deployed on the device, there&#8217;s nothing else to do than loading the classes and executing the application.</p>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s see how the process differs in case of a Groovy application.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_an_application_written_in_groovy">An application written in Groovy</h3>
-<div class="paragraph">
-<p>In this case, we have <code>.groovy</code> files, corresponding to Groovy sources, but we may also have <code>.java</code> files. In the end, the process looks very similar:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="compilation_process_groovy.png" alt="Groovy Android compilation process">
-</div>
-</div>
-<div class="paragraph">
-<p>This schema exactly illustrates how the <a href="https://github.com/melix/gr8confagenda">GR8Conf Agenda</a> application is compiled. All is done at <strong>compile time</strong>, and nothing more at runtime. Groovy sources are compiled into JVM bytecode, which is in turn converted into Dalvik bytecode using <code>dex</code>. There&#8217;s absolutely no difference with Java, apart from the compiler, which is able to process both Groovy and Java sources!</p>
-</div>
-<div class="paragraph">
-<p>One noticeable difference that some people have already reported to me is that since we embed the Groovy runtime, the number of method descriptors used in the <code>classes.dex</code> file is significantly higher than with an application written in pure Java. From my early tests, a Groovy application would consume around 8k methods, without optimizations. The <code>classes.dex</code> file has a limit of 65536 methods, so this is something you have to keep in mind. Anyway, I am not an Android specialist, but there seem to be workarounds available, like the <code>multi-dex</code> option.</p>
-</div>
-<div class="paragraph">
-<p>In the end, Groovy is not different from any other library you would embed in your application, it&#8217;s "just" an additional jar. I also mentionned the fact that I recommended to use <code>@CompileStatic</code> on your classes. There&#8217;s a good reason for that. If you don&#8217;t, the classes that you will compile will use the <strong>dynamic runtime</strong> of Groovy. This is unlikely what you want on a mobile application, especially because on Android, it would use reflection, implying a major performance drop. On a normal JVM, Groovy would use call site caching techniques, like generation of classes at runtime or invokedynamic to improve performance. This is <strong>not</strong> possible on Android, so places where you use dynamic features of Groovy should be limited to small parts of the application, called not frequently. A good example would be the use of a builder for the UI. Builders are a very nice feature of Groovy, and for a UI, it would only be called once when the activity is loaded.</p>
-</div>
-<div class="paragraph">
-<p>Using <code>@CompileStatic</code>, you will ensure that your classes are <strong>statically compiled</strong>, meaning that all method calls are resolved at compile time, leading to dramatically improved performance, very close, if not equal, to that of Java (depending on how you write your code, as usual, because idiomatic Groovy might not always be the fastest implementation).</p>
-</div>
-<div class="paragraph">
-<p>In any case, you must recall that the first application that I wrote does not use a single class generated at runtime. Even if you remove all <code>@CompileStatic</code> annotations, it would use the dynamic runtime, but <strong>without</strong> creating classes at runtime.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_runtime_scripting">Runtime scripting</h3>
-<div class="paragraph">
-<p>One of the difficulties of adapting the <a href="http://groovy.codehaus.org">Groovy language</a> is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="compilation_process_runtime.png" alt="Groovy Android compilation process at runtime">
-</div>
-</div>
-<div class="paragraph">
-<p>You can have an application, written in Groovy or not, but in the end, <strong>once the application is running</strong>, you have Groovy source code that you want to execute. Then it needs to compile the classes, call <code>dex</code> <strong>directly on the device</strong>, package the result into a <code>jar</code> file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow.</p>
-</div>
-<div class="paragraph">
-<p>This process is demonstrated in <a href="https://github.com/melix/grooidshell-example">this application</a>, which replicates the behavior of the well-known <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell">GroovyShell</a> but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.</p>
-</div>
-<div class="imageblock" style="text-align: center">
-<div class="content">
-<img src="groovy-scripting.png" alt="Compiling Groovy at runtime">
-</div>
-</div>
-<div class="paragraph">
-<p>Subsequent compilations take much less time (around ~500ms), but the fact of having to dex files and write them to the filesystem is a performance killer. In anycase, this shows that it is possible, and even that you could rely on it for an application that would handle scripts. It would be possible, for example, to cache the jar files in order to avoid recompiling them&#8230;</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In this post, I gave further details on how Groovy gets running onto an Android device. In a future post, I will give you more details about how you can get started with your own project. I will maybe give <a href="https://github.com/pledbrook/lazybones">Lazybones</a>, a project bootstraping tool, more love in the next days ;-)</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2014/06/grooid2.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	

@@ -6,13 +6,144 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>mer., 23 juil. 2014 16:20:04 +0200</pubDate>
-    <lastBuildDate>mer., 23 juil. 2014 16:20:04 +0200</lastBuildDate>
+    <pubDate>Mon, 20 Oct 2014 09:51:22 +0200</pubDate>
+    <lastBuildDate>Mon, 20 Oct 2014 09:51:22 +0200</lastBuildDate>
 
+    <item>
+      <title>Fixing Bluetooth debugging on Android Wear</title>
+      <link>http://melix.github.io/blog/2014/10/android-moto360.html</link>
+      <pubDate>Mon, 20 Oct 2014 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2014/10/android-moto360.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I have been working on making &lt;a href=&quot;http://beta.groovy-lang.org&quot;&gt;Groovy&lt;/a&gt; work on Android for several months now. In the last weeks, I even
+showed at SpringOne2GX an example of an application written in Groovy that worked on Android Wear. However, that code
+worked in an emulator. Recently, I got a real device, a Moto 360, so I wanted to see that application running on a
+real device. For some very obscure (understand buggy Android SDK) reason, it was far from being that easy&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I litteraly spent &lt;strong&gt;hours&lt;/strong&gt; trying to figure out what was wrong, so I thought it would be interesting for those of you
+who face the same problem to have a blog post that explains how to deal with it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_problem&quot;&gt;The problem&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you follow the instructions on the &lt;a href=&quot;https://developer.android.com/training/wearables/apps/bt-debugging.html&quot;&gt;Android documentation&lt;/a&gt;
+about how to enable bluetooth debugging, it&amp;#8217;s in the end pretty simple. Basically, it&amp;#8217;s about enabling USB debugging on your physical
+handheld, then enable bluetooth debugging on your wearable, and in the end enable bluetooth debugging in the Android Wear companion app.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The guide says:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the Android Wear companion app, you should see the status change to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Host: connected
+Target: connected&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, whatever I did, the &lt;code&gt;Target: connected&lt;/code&gt; line never appeared for me. It was &lt;strong&gt;always&lt;/strong&gt; &lt;code&gt;Target: disconnected&lt;/code&gt;, so if I continued
+with the instructions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Doing&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;adb devices&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Only showed my wearable as &lt;code&gt;offline&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;List of devices attached
+
+dcfbbafd	device
+localhost:4444	offline&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot; style=&quot;text-align: center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/rage-offline.jpg&quot; alt=&quot;Why so evil?&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I have searched for an answer in a lot of pages, including &lt;a href=&quot;http://stackoverflow.com/questions/25938998/debugging-on-moto-360&quot;&gt;Stackoverflow&lt;/a&gt; where
+I tried very unlikely answers like in &lt;a href=&quot;http://stackoverflow.com/questions/25938998/debugging-on-moto-360&quot;&gt;this page&lt;/a&gt;: execute both commands separately instead
+of doing them in the same line. I thought that maybe there was a timing issue and that the fact of separating both commands would give the toolkit a chance,
+but no, wasn&amp;#8217;t that easy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the end, I was totally convinced that the problem was because I had previously associated my handheld with an emulator. I was convinced of it because even if I had now associated it with a real device (the Moto 360), in the Android Wear companion app, the device was recognized as an &quot;emulator&quot;&amp;#8230; mmm&amp;#8230; So I tried uninstalling the Android Wear app, clear its cache, but no matter what I did, after reinstalling, the settings were kept, and the Moto recognized as an emulator. So sad&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_solution&quot;&gt;The solution&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So you were looking at a solution, and here it is. Basically, the problem is that the Android companion app doesn&amp;#8217;t store its settings under its cache. They are stored in the &lt;code&gt;Google Play Services&lt;/code&gt; space, so here is the procedure that worked for me, and I sincerely hope it will do for you. On your handheld:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;open the applications settings, search for the &lt;code&gt;Android Wear&lt;/code&gt; application, then &lt;strong&gt;force stop it&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;clear its &lt;strong&gt;data and cache&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;now search for &lt;code&gt;Google Play Services&lt;/code&gt; (depending on your language settings, it can appear with a different name, on m y device it is &quot;Services Google Play&quot;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;click on &lt;code&gt;Manage space&lt;/code&gt;. You will see that there&amp;#8217;s a section for connected devices. I tried to clear data here, but it didn&amp;#8217;t help, so you have to click on &lt;strong&gt;delete all data&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;reboot your phone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;reboot your Moto 360&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I am unsure that the two last steps are really necessary, but I did it because I wanted to make sure that force stopping and clearing data did not introduce some weird behavior after that. When you reopen the Android Wear companion app, it should now be as if it was the first time you opened it and ask you to associate it with your watch. Do it, and now, you should be able to follow the normal procedure described in the Android documentation and&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot; style=&quot;text-align: center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/yes-baby.jpg&quot; alt=&quot;yes baby&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Success, now you can debug your application on a real device (which includes deploying it&amp;#8230;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;blockquote class=&quot;twitter-tweet&quot; lang=&quot;fr&quot;&gt;&lt;p&gt;Hey, finally got it working! I need to blog about how I arrived the insane emulator issue... &lt;a href=&quot;https://twitter.com/hashtag/groovylang?src=hash&quot;&gt;#groovylang&lt;/a&gt; &lt;a href=&quot;http://t.co/XINccF3V7k&quot;&gt;pic.twitter.com/XINccF3V7k&lt;/a&gt;&lt;/p&gt;&amp;mdash; Cédric Champeau (@CedricChampeau) &lt;a href=&quot;https://twitter.com/CedricChampeau/status/523934124898521090&quot;&gt;19 Octobre 2014&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src=&quot;//platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Tip of the day: reversed git bisect</title>
       <link>http://melix.github.io/blog/2014/07/bisecting-groovy.html</link>
-      <pubDate>mer., 23 juil. 2014 00:00:00 +0200</pubDate>
+      <pubDate>Wed, 23 Jul 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/07/bisecting-groovy.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -218,7 +349,7 @@ working on my copy while bisecting is in progress.&lt;/p&gt;
     <item>
       <title>The new Groovy website</title>
       <link>http://melix.github.io/blog/2014/07/new-groovy-website.html</link>
-      <pubDate>ven., 18 juil. 2014 00:00:00 +0200</pubDate>
+      <pubDate>Fri, 18 Jul 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/07/new-groovy-website.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -604,7 +735,7 @@ end, I think the combination works quite good and that the site as it is now is 
     <item>
       <title>Contributing for the Groovy language: setting up IntelliJ IDEA</title>
       <link>http://melix.github.io/blog/2014/06/contribute-groovy-ide.html</link>
-      <pubDate>mar., 24 juin 2014 00:00:00 +0200</pubDate>
+      <pubDate>Tue, 24 Jun 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/06/contribute-groovy-ide.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -626,7 +757,7 @@ end, I think the combination works quite good and that the site as it is now is 
     <item>
       <title>Groovy on Android, technical details</title>
       <link>http://melix.github.io/blog/2014/06/grooid2.html</link>
-      <pubDate>mar., 10 juin 2014 00:00:00 +0200</pubDate>
+      <pubDate>Tue, 10 Jun 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/06/grooid2.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -717,255 +848,6 @@ end, I think the combination works quite good and that the site as it is now is 
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;In this post, I gave further details on how Groovy gets running onto an Android device. In a future post, I will give you more details about how you can get started with your own project. I will maybe give &lt;a href=&quot;https://github.com/pledbrook/lazybones&quot;&gt;Lazybones&lt;/a&gt;, a project bootstraping tool, more love in the next days ;-)&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Groovy on Android</title>
-      <link>http://melix.github.io/blog/2014/06/grooid.html</link>
-      <pubDate>jeu., 5 juin 2014 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2014/06/grooid.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yesterday ended &lt;a href=&quot;http://gr8conf.eu&quot;&gt;GR8Conf Europe&lt;/a&gt;, a &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; conference in Copenhagen that was once again a successful event.
-I want to thank the crew again for this, and of course the &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; community which is so friendly and always helpful. This year
-turned out to be very special for me, because just two days after the announcement by Apple of the &lt;a href=&quot;https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html&quot;&gt;Swift language&lt;/a&gt;, I was talking about
-running Groovy on Android! As Guillaume Laforge &lt;a href=&quot;http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy&quot;&gt;noticed&lt;/a&gt;, there
-are a lot of similarities between the &lt;a href=&quot;https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html&quot;&gt;Swift language&lt;/a&gt; and &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
-better candidate than &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; here.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_the_presentation&quot;&gt;The presentation&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Should you be interested in the slides, you can find them below. Since it was presented at &lt;a href=&quot;http://gr8conf.eu&quot;&gt;GR8Conf Europe&lt;/a&gt;, it gives a bit of history of the changes needed to
-have the runtime working on Android too:&lt;/p&gt;
-&lt;/div&gt;
-&lt;script async class=&quot;speakerdeck-embed&quot; data-id=&quot;e8e58fc0cdee0131f20616308848c4b8&quot; data-ratio=&quot;1.6&quot; src=&quot;//speakerdeck.com/assets/embed.js&quot;&gt;&lt;/script&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For those of you who are new to Groovy, you have to know that this language is derived from Java, meaning that the learning curve is almost 0, but it also
-removes a lot of its verbosity and adds a lot of features to it, such as closures (similar to lambdas in Java 8, but Java 8 is not available for Android
-developers), builders, runtime and compile-time metaprogramming.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As an example of how Groovylang can be used to reduce the verbosity of Java on Android, I will take a simple example: asynchronous tasks. Asynchronous tasks
-are required as soon as a task takes too much time to be executed on the UI thread. That is the case, by default, for any network based operations, in order
-to guarantee that the UI remains snappy even if network is slow or unavailable. The problem is that those asynchronous tasks are incredibly verbose. You have
-to write a lot of code, that I would tend to name &quot;inner class hell&quot;, just for this. Let&amp;#8217;s imagine that you need to parse a JSON feed, then update the UI
-accordingly. Then you would have to write something like this (no kidding):&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public class FeedActivity {
-    TextView mTextView;
-
-    ...
-
-    void updateFeed() {
-    	new FeedTask().execute(&quot;http://path/to/feed&quot;);
-    }
-
-    class FeedTask extends AsyncTask&amp;lt;String, Void, String&amp;gt; {
-        protected String doInBackground(String... params) {
-            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
-            HttpPost httppost = new HttpPost(params[0]);
-
-            InputStream inputStream = null;
-            String result = null;
-            try {
-                HttpResponse response = httpclient.execute(httppost);
-                HttpEntity entity = response.getEntity();
-
-                inputStream = entity.getContent();
-                // json is UTF-8 by default
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, &quot;UTF-8&quot;), 8);
-                StringBuilder sb = new StringBuilder();
-
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append(&quot;\n&quot;);
-                }
-                result = sb.toString();
-            } catch (Exception e) {
-                // Oops
-            } finally {
-                try {
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                } catch (Exception squish) {
-                }
-            }
-            StringBuilder speakers = null;
-            try {
-                JSONObject jObject = new JSONObject(result);
-                JSONArray jArray = jObject.getJSONArray(&quot;speakers&quot;);
-                speakers = new StringBuilder();
-                for (int i = 0; i &amp;lt; jArray.length(); i++) {
-                    speakers.append(jArray.getString(i));
-                    speakers.append(&quot; &quot;);
-                }
-            } catch (JSONException e) {
-                // do something?
-            }
-            return speakers.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            mTextView.setText(s);
-        }
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So now, let&amp;#8217;s see the equivalent in Groovy (no kidding either):&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;public class FeedActivity {
-    TextView mTextView
-
-    ...
-
-    void updateFeed() {
-    	Fluent.async {
-            def json = new JsonSlurper().parse([:], new URL(&apos;http://path/to/feed&apos;), &apos;utf-8&apos;)
-            json.speakers.join(&apos; &apos;)
-        } then {
-	    mTextView.setText(it)
-        }
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I think you can start to see the advantage of using Groovy in your own Android projects. Of course, the &lt;code&gt;Fluent&lt;/code&gt; class that I&amp;#8217;m using here
-is a support class which I implemented in my &lt;a href=&quot;https://github.com/melix/gr8confagenda&quot;&gt;first Android project&lt;/a&gt; (which is open sourced btw), but it&amp;#8217;s
-really simple and gives an example of how Android users could benefit from Groovification of their APIs.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_feeling_the_pain&quot;&gt;Feeling the pain&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This is actually a key point of my talk: I hadn&amp;#8217;t written any Android application before this talk, and I definitely wanted to be able to write
-an application in Groovy on Android. Why? Because it&amp;#8217;s been some time already that I use Groovy everyday, and there&amp;#8217;s no turning back. I wanted
-to feel the pain of the Java developers on Android, so that I can write better tools for them. And that&amp;#8217;s actually where you, as a user, come
-in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn&amp;#8217;t be complicated a breeze.
-This is exactly the point. My example with &lt;code&gt;Fluent&lt;/code&gt; is &lt;strong&gt;one&lt;/strong&gt; example of simplification of usages of Android APIs, but you have many more to invent,
-especially because &lt;strong&gt;you&lt;/strong&gt; must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_the_beginning_of_a_new_era&quot;&gt;The beginning of a new era&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In upcoming posts, I will try to demonstrate that we&amp;#8217;re just at the beginning. Some people are already asking for a {swift} alternative for Android.
-It&amp;#8217;s there guys, you have it, so spread the word and let&amp;#8217;s make it happen! I am convinced that it is the beginning of a new era for Android and Groovy.
-Google already switched their main build system to Gradle, which is, by the way, using Groovy, so I think it&amp;#8217;s time to move over and show your love!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;https://github.com/melix/gr8confagenda&quot;&gt;https://github.com/melix/gr8confagenda&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;em&gt;Update 2: build instructions with the Gradle plugin&lt;/em&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You can now use a Gradle plugin to integrate Groovy with Android. The plugin can be found here: &lt;a href=&quot;https://github.com/melix/groovy-android-gradle-plugin&quot;&gt;groovy-android-gradle-plugin&lt;/a&gt;. As of version 0.2, the plugin supports the Android plugin 0.10+.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;em&gt;Update: build instructions&lt;/em&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If you want to try it by yourself, here&amp;#8217;s how you can do it. First of all, official support for Android will be in Groovy 2.4. Before the first beta,
-you&amp;#8217;ll have to build it from sources, and here is the quickest way:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;git clone https://github.com/melix/groovy-core.git --branch master
-cd groovy-core
-./gradlew -PskipIndy=true install&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then you can clone the sample application:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;cd ..
-git clone https://github.com/melix/gr8confagenda.git&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This contains a project that you can open using &lt;a href=&quot;http://developer.android.com/sdk/installing/studio.html&quot;&gt;Android Studio&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If you want to use the &lt;a href=&quot;http://groovy.codehaus.org&quot;&gt;Groovy language&lt;/a&gt; in your own Android project, a requirement is that it is using Gradle. If so, you can update your &lt;code&gt;build.gradle&lt;/code&gt; file
-as is:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;android {
-   ...
-   packagingOptions {
-        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
-        exclude &apos;META-INF/LICENSE.txt&apos;
-        exclude &apos;META-INF/groovy-release-info.properties&apos;
-    }
-}
-
-repositories {
-    mavenLocal()
-    jcenter()
-}
-
-dependencies {
-    compile &apos;org.codehaus.groovy:groovy:2.4.0-SNAPSHOT:grooid&apos;
-    // the following dependency is necessary if you want JSON support
-    compile (&apos;org.codehaus.groovy:groovy-json:2.4.0-SNAPSHOT&apos;) {
-        transitive = false
-    }
-}
-
-// add support for Groovy to existing configurations
-android.applicationVariants.all {
-    task &quot;groovy${name}Compile&quot;(type: GroovyCompile) {
-        source = javaCompile.source + fileTree(&apos;src/main/java&apos;).include(&apos;**/*.groovy&apos;)
-        destinationDir = javaCompile.destinationDir
-        classpath = javaCompile.classpath
-        groovyClasspath = classpath
-        sourceCompatibility = &apos;1.6&apos;
-        targetCompatibility = &apos;1.6&apos;
-        doFirst {
-            def runtimeJars = plugins.findPlugin(com.android.build.gradle.AppPlugin).runtimeJars
-            classpath = files(runtimeJars) + classpath
-        }
-    }
-    javaCompile.dependsOn(&quot;groovy${name}Compile&quot;)
-    javaCompile.enabled = false
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And that&amp;#8217;s all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!&lt;/p&gt;
-&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
