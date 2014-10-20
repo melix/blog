@@ -1,0 +1,130 @@
+= Tip of the day: reversed git bisect
+Cédric Champeau
+2014-07-23
+:jbake-type: post
+:jbake-tags: groovy,git,bisect
+:jbake-status: published
+:source-highlighter: prettify
+:id: git_bisect_groovy
+:groovylang: http://beta.groovy-lang.org
+:icons: font
+
+I had an interesting use case for `git bisect` today and as my blog also consistutes a good archive for things I don't
+want to loose, let's take advantage of this to share the trick with you!
+
+Normally, `git bisect` is used to find what commit introduced a regression in the codebase. For example, if you know
+that current `HEAD` is buggy but that at least, RELEASE_1_0 was good, then you can write:
+
+----
+git bisect start             // <1>
+git bisect bad               // <2>
+git bisect good RELEASE_1_0  // <3>
+----
+<1> start bisecting
+<2> tells that `HEAD` contains the regression
+<3> tells that `RELEASE_1_0` is a tag corresponding to a version known not to have the bug
+
+Git will checkout a revision that you can test, and you issue a list of `git bisect good` or `git bisect bad` commands
+until it determines what commit introduced the regression.
+
+This is a *very* practical way to find a regression. In Groovy, I've used this more than once, it's very useful.
+
+== Reversing the logic
+
+But today, I wanted to _reverse the logic_. Actually, we had a https://jira.codehaus.org/browse/GROOVY-6463[bug report]
+and we found out that the bug was already fixed, but we didn't know in which version it was fixed. So actually, I didn't
+want to find a regression, but a fix commit.
+
+The idea to do this is to reverse the meaning of `bad` and `good` in `bisect`:
+
+* `bad` becomes "doesn't produce a compile error"
+* `good` becomes "produces a compile error"
+
+And since the range of revisions to test was pretty big (we know that the error was reported on Groovy 2.2.1, but master
+is 2.4.0), then I also took advantage of the `git bisect run` command, which automatically continues bisecting based on
+a command line return status code.
+
+So basically, here's what I wrote:
+
+----
+git bisect start                // <1>
+git bisect bad master           // <2>
+git bisect good GROOVY_2_2_1    // <3>
+git bisect run ./bisect.sh      // <4>
+----
+<1> start bisecting
+<2> master is known to have the fix, so we say *bad* is master
+<3> GROOVY_2_2_1 is known to have the bug, so we say *good* is GROOVY_2_2_1
+<4> start automatic bisecting thanks to the ./bisect.sh script
+
+And what does _bisect.sh_ consist of? Here you go:
+
+.bisect.sh
+----
+#!/bin/bash
+export GROOVY_HOME=/tmp/testversion                                                                     // <1>
+./gradlew clean -x javadoc -x groovydoc -x javadocAll -x groovydocAll -PskipIndy=true installGroovy     // <2>
+/tmp/testversion/bin/groovy bisect.groovy || exit 0                                                     // <3>
+exit 1                                                                                                  // <4>
+----
+<1> tells where the local build version of Groovy will be installed
+<2> builds Groovy and installs it locally
+<3> executes the test script and if the test fails, return a success exit code
+<4> return a failure exit code
+
+The trick is to *reverse the exit codes* in the script too: if the script compiles, then it means that the bug was fixed.
+Since we reverse the logic, we then need the script to return a bad exit code! In case the script fails, we will return
+a success (0) error code, because it means that the revision doesn't have the fix. Easy, but needs some mental contorsion :-)
+
+You will note that this script uses `GROOVY_HOME` and a local installation path. You can configure it using the `$HOME/.gradle/gradle.properties` file,
+and adding the following line in it:
+
+.gradle.properties
+----
+groovy_installPath=/tmp/testversion
+----
+
+Eventually, here is the groovy script which served as a test case (almost copied directly from the JIRA issue):
+
+[source,groovy]
+.bisect.groovy
+----
+abstract  class Base<A> {
+    abstract  void foo(A[] a)
+}
+
+class X {}
+
+class Inheritor extends Base<X>{
+    @Override
+    void foo(X[] a) {}
+//Groovyc: Can't have an abstract method in a non-abstract class.
+//The class 'B' must be declared abstract
+//or the method 'void foo([Ljava.lang.Object;)' must be implemented.
+}
+
+Inheritor
+----
+
+Note that each revision took around ~1 min 30s to test, even skipping the javadoc/groovydoc and indy versions of Groovy,
+so you can imagine what benefit you have here in using automatic bisecting.
+
+In the end, after around 20 minutes of automatic processing, I received this nice message:
+
+----
+74d991f9f8c39d2730a054431bf28e6516e61735 is the first bad commit
+commit 74d991f9f8c39d2730a054431bf28e6516e61735
+Author: Cedric Champeau <cedric.champeau@gmail.com>
+Date:   Sun Apr 27 18:06:24 2014 +0200
+
+    GROOVY-6722: Compiler doesn't handle generic array covariant
+
+:040000 040000 b61b92399ac86246c157f948b3232bf5ab0cf04f 5d0c56413a621c7693e7985aff0e4c84eb08889f M	src
+bisect run success
+----
+
+What? "bad commit"? Yes, remember that the logic is reversed, so "bad" means actually "fixed it". So it says that the
+first commit which *fixed* the bug was actually `74d991f`. And here we go, issue closed ;) One improvement I can see
+is to use a local clone of my repository instead of working directly in the same repository, so that I can continue
+working on my copy while bisecting is in progress.
+
