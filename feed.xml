@@ -6,8 +6,8 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 16 Dec 2014 12:25:34 +0100</pubDate>
-    <lastBuildDate>Tue, 16 Dec 2014 12:25:34 +0100</lastBuildDate>
+    <pubDate>Tue, 16 Dec 2014 13:09:01 +0100</pubDate>
+    <lastBuildDate>Tue, 16 Dec 2014 13:09:01 +0100</lastBuildDate>
 
     <item>
       <title>10 things your static language can&amp;#8217;t do</title>
@@ -26,7 +26,7 @@ point of thinking that we should only reason about types. This is why I also lov
 much in Groovy.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Groovy is primarily a dynamic language. It&amp;#8217;s the most widely used alternative language on the JVM, with use cases ranging
+&lt;p&gt;Groovy is primarily a dynamic language. It is probably the most widely used alternative language on the JVM, with use cases ranging
 from DSLs (scripting Jenkins builds for example) to full blown applications on mobile devices (Android), going through
 full stack web applications with Grails. Despite being primarily a dynamic language, I spent a lot of time writing a
 &lt;strong&gt;static compiler for Groovy&lt;/strong&gt;, making it a pretty unique language in the JVM world, but not limited to the JVM world:&lt;/p&gt;
@@ -183,7 +183,7 @@ class Cat {
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Those two classes define the same &lt;code&gt;getName&lt;/code&gt; method, but it is not defined explicitly in a contract (for example through an interface). Imagine that you have a list of objects containing either ducks, cats, or anything else definining a &lt;code&gt;getName&lt;/code&gt; method. Then a dynamic language will let you call
+&lt;p&gt;Those two classes define the same &lt;code&gt;getName&lt;/code&gt; method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&amp;#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a &lt;code&gt;getName&lt;/code&gt; method. Then a dynamic language will let you call
 that method:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
@@ -324,7 +324,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;VulnerableService.metaClass.vulnerableMethod = {
-   println &apos;Well tried, but you have been logged to Santa&apos;s naughty guys list!&apos;
+   println &quot;Well tried, but you have been logged to Santa&apos;s naughty guys list!&quot;
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;

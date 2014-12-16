@@ -118,7 +118,7 @@ point of thinking that we should only reason about types. This is why I also lov
 much in Groovy.</p>
 </div>
 <div class="paragraph">
-<p>Groovy is primarily a dynamic language. It&#8217;s the most widely used alternative language on the JVM, with use cases ranging
+<p>Groovy is primarily a dynamic language. It is probably the most widely used alternative language on the JVM, with use cases ranging
 from DSLs (scripting Jenkins builds for example) to full blown applications on mobile devices (Android), going through
 full stack web applications with Grails. Despite being primarily a dynamic language, I spent a lot of time writing a
 <strong>static compiler for Groovy</strong>, making it a pretty unique language in the JVM world, but not limited to the JVM world:</p>
@@ -275,7 +275,7 @@ class Cat {
 </div>
 </div>
 <div class="paragraph">
-<p>Those two classes define the same <code>getName</code> method, but it is not defined explicitly in a contract (for example through an interface). Imagine that you have a list of objects containing either ducks, cats, or anything else definining a <code>getName</code> method. Then a dynamic language will let you call
+<p>Those two classes define the same <code>getName</code> method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a <code>getName</code> method. Then a dynamic language will let you call
 that method:</p>
 </div>
 <div class="listingblock">
@@ -416,7 +416,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 <div class="listingblock">
 <div class="content">
 <pre class="prettyprint groovy language-groovy"><code>VulnerableService.metaClass.vulnerableMethod = {
-   println 'Well tried, but you have been logged to Santa's naughty guys list!'
+   println "Well tried, but you have been logged to Santa's naughty guys list!"
 }</code></pre>
 </div>
 </div>
