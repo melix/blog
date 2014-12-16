@@ -1,0 +1,360 @@
+= 10 things your static language can't do
+Cédric Champeau
+2014-12-15
+:jbake-type: post
+:jbake-tags: groovy,languages,static,dynamic,java,javascript,scala,C++
+:jbake-status: published
+:source-highlighter: prettify
+:id: ten_things_static_langs_cannot_do
+:groovylang: http://beta.groovy-lang.org
+:icons: font
+
+== But maybe mine can...
+
+For those of you who do not know me, and you are likely much more in that category than in the other, I've been working on
+the Groovy language full-time for more than 3 years now. I started as a user several years ago, in the context of DSLs,
+and eventually became a contributor before getting employed to work on the language. I love static typing, but not at the
+point of thinking that we should only reason about types. This is why I also love dynamic typing, and why I invested so
+much in Groovy.
+
+Groovy is primarily a dynamic language. It's the most widely used alternative language on the JVM, with use cases ranging
+from DSLs (scripting Jenkins builds for example) to full blown applications on mobile devices (Android), going through
+full stack web applications with Grails. Despite being primarily a dynamic language, I spent a lot of time writing a 
+*static compiler for Groovy*, making it a pretty unique language in the JVM world, but not limited to the JVM world:
+
+Groovy is a language which supports *dynamic typing and compile-time type checking*. It makes it surprisingly powerful
+and versatile language, capable of adapting to a great variety of contexts.
+
+When I tell people that I wrote the static compiler for Groovy, I often get a reaction which is "so you admit that dynamic
+languages are less powerful than static ones", and they see me as the one that made the language *right*. Oh no, I did not.
+In fact, I love the dynamic aspects of the language. It is always annoying that I, as a designer of a static compiler, have
+to defend dynamic languages, but it's an interesting topic, especially those days where I read lots of articles doing
+dynamic-bashing.
+
+So in this post, I'm going to illustrate 10 things that a static language (most likely) cannot do. It doesn't mean that there are only
+10 things that a static language cannot do compared to a dynamic one, but it is here to illustrate the fact that this idea
+that static languages are superior or more scalable just because they are _type safe_ is IMHO stupid. Compare languages between
+them, but do not compare categories of languages. While static languages will be excellent in making type safety guarantees (errors
+at compile time), dynamic languages are often far superior in cutting down verbosity. That's just an example which illustrates
+that comparing on the sole aspect of type safety is not enough.
+
+In this post I will also illustrate how Groovy is special, because it is capable of handling things in a *mixed* mode, making it 
+totally unique and incredibly powerful, bringing the best of the two worlds together. Last disclaimer, this post is mostly centered on
+the JVM world, because this is the one I know the best.
+
+Ready?
+
+== 10. Object-oriented programming done right
+
+This is a very academic point of view. Users of static languages tend to think that their language is object-oriented. Because C++
+has a compiler, because Java has a compiler, means that statically typed languages have to be compiled. Object oriented programming
+does *not* require languages to be compiled. OOP is about *message passing*. Object-oriented programming does *not* imply type safety.
+It means that an object is something that receives messages. In the Java world, the message is a method with arguments, and the contract
+is enforced at compile time, but it is an implementation detail which reduces OO programming to a small subset of its capabilities.
+
+The great Alan Kay himself http://lists.squeakfoundation.org/pipermail/squeak-dev/1998-October/017019.html[explains it].
+
+Groovy, as a dynamic language, supports commons OOP concepts (and also functional concepts) like class, interface, abstract classes or traits
+but also has a meta-object protocol. For those of you who did Smalltalk programming, it's the same idea: the behavior of objects is not determined at compile time, it's a runtime behavior determined by a meta-object protocol. In Groovy, it translates to the fact that to each class corresponds
+a meta-class which determines the behavior that an object will have when it receives a message (a method call).
+
+This capability of doing things at runtime instead of compile time is the core of many features of dynamic languages and most of the
+points illustrated in this blog post derive from it.
+
+== 9. Multimethods
+
+Java supports overloaded methods. The question whether it is a good or a bad idea is beyond the scope of this post (and believe me
+it is a very interesting question both in terms of semantics and performance). The idea is that an object can have two methods
+of the same name accepting different parameters. Let's illustrate this with Java code:
+
+[source,java]
+----
+public static int foo(String o) { return 1; }
+public static int foo(Date o) { return 2; }
+public static int foo(Object o) { return 3; }
+----
+
+Then you call it like this:
+
+[source,java]
+----
+public static void main(String[] args) {
+    Object[] array = new Object[] { "a string", new Date(), 666 };
+    for (Object o : array) {
+        System.out.println(foo(o));
+    }
+}
+----
+
+What do you think it prints? Well, most beginners will probably answer something that looks natural when you know the contents of the array:
+
+----
+1
+2
+3
+----
+
+But the correct answer is:
+
+----
+3
+3
+3
+----
+
+Because the static type of `o` when the call to `foo` is made is `Object`. To say it more clearly, the declared type of `o` is `Object` so we are calling `foo(Object)`. The reason for this is that the code is *statically compiled* so the compiler has to know at compile time which method is going to be called. A dynamic language like Groovy chooses the method at runtime (unless, of course, you use `@CompileStatic` to enforce static semantics), so the method which is going to be called corresponds to the *best fitting arguments*. So Groovy, unlike Java, will print the less surprising result:
+
+----
+1
+2
+3
+----
+
+It is theorically possible for a static language to do the same. But it comes at the price of performance. It would mean that the arguments have to be checked at runtime, and since static languages do not, as far as I know, implement an inlining cache, performance would be lower than those of a well designed dynamic language...
+
+But to add something to a dynamic language, what if you remove the `Object` version of `foo`, and remove `666` from the array? As an exercise to the reader, would this Java code compile?
+
+[source,java]
+----
+public static int foo(String o) { return 1; }
+public static int foo(Date o) { return 2; }
+
+public static void main(String[] args) {
+    Object[] array = new Object[] { "a string", new Date() };
+    for (Object o : array) {
+        System.out.println(foo(o));
+    }
+}
+----
+
+If not, what do you have to do to make it pass? Yes, dynamic languages are superior here...
+
+== 8. Duck typing
+
+Duck typing has always been a selling point of dynamic languages. Basically imagine two classes:
+
+[source,groovy]
+----
+class Duck {
+   String getName() { 'Duck' }
+}
+class Cat {
+   String getName() { 'Cat' }
+}
+----
+
+Those two classes define the same `getName` method, but it is not defined explicitly in a contract (for example through an interface). Imagine that you have a list of objects containing either ducks, cats, or anything else definining a `getName` method. Then a dynamic language will let you call
+that method:
+
+[source,groovy]
+----
+def list = [cat, dog, human, hal]
+list.each { obj ->
+   println obj.getName()
+}
+----
+
+A static language like Java would force you to have a cast here. But since you don't have an interface defining `getName` and implemented by all objects, you cannot cast to that type so you have to consider all types and delegate appropriately like in the following code:
+
+[source,java]
+----
+if (obj instanceof Cat) {
+   return ((Cat)obj).getName();
+}
+if (obj instanceof Duck) {
+   return ((Duck)obj).getName();
+}
+if (obj instanceof Human) {
+   return ((Human)obj).getName();
+}
+if (obj instanceof Computer) {
+   return ((Computer)obj).getName();
+}
+----
+
+There are multiple issues with that code:
+
+* it is very repetitive, the only thing which changes is the type used in the test and the cast
+* it has to be extensive, that is to say that if your list happens to contain an object having a `getName` method but not in your list of cases to consider, the code is broken. This means that you have to think about changing that method if you add a new type in your list.
+* in the JVM world, as the number of cases to consider grows, the size of the method will increase to the point where the JIT (just-in-time compiler) decides it's not worth inlining, potentially dramatically reducing performance.
+
+Of course, one may say "but why the hell didn't you use an interface". This is of course a good way to solve this in Java, but it is not always possible. Not for example if you don't have access to the source code (think of the various classes being split in third party libraries). I often faced this problem in the past, and believe me it's no fun (I look at you, _Apache Lucene_).
+
+There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate `getName` method. Of course it is overkill: for each object of your list you have a proxy instantiated... Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn't have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do...
+
+An elegant alternative used by other static languages is _structural typing_. This is for example what the `Go` language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the _invokedynamic_ bytecode instruction but guess what? You are relying on a _dynamic_ feature of the VM... Can you hear it?
+
+== 7. Respond to non-existing methods
+
+A dynamic language answers to messages (method calls) at runtime. This means that a well designed dynamic language should be able to let you answer *any* kind of method call, including... non existing methods! This feature is at the core of powerful facilitating frameworks like Grails. In Grails, you can define a domain class like this:
+
+[source,groovy]
+----
+class Person {
+   String firstName
+   String lastName
+   int age
+}
+----
+
+The `Person` class does not define any method, nor does it have any explicit relation to a datastore, an ORM or SQL server. However, you can write code like this:
+
+[source,groovy]
+----
+def adults = Person.findByAge { it>= 18 }
+----
+
+I will not dig into the details about how this is done, but the idea is to intercept the fact that the `findByAge` method does not exist, then parse the name of the method and build a query based on the method name and the rest of the arguments (here, a closure, an open block of code). Queries can be as complex as you wish, like `findByLastNameAndAge` or whatever you can think of. Of course Grails does some smart things here, like *generating a new method at runtime*, so that the next time this method is hit, it is not an unknown method anymore, and can be invoked faster! Only a dynamic language would let you do that. Say bye to infamous DAOs that you have to change everytime you have
+a new query, it is not necessary. One could say that they prefer safety at compile time rather than the ability to do this, but Grails also offers that possibility of checking that the syntax is correct at compile time, while still leveraging the dynamic runtime to make this work... It's all about boilerplate removed, code verbosity and productivity...
+
+The ability to react to arbitrary messages is actually at the core of many DSLs (domain specific languages) written in Groovy. They are at the core of builders for example, which will let you write code like:
+
+[source,groovy]
+----
+catalog {
+   book {
+   	isbn 123
+	name 'Awesome dynamic languages'
+        price 11.5
+        tags {
+	   dynamic,
+	   groovy,
+	   awesome        
+	}
+   }
+}
+----
+
+Instead of the less readable Java 8 version (for the reader's mental sanity, I will not write the Java 7 version):
+
+[source,java]
+----
+builder.catalog( (el) -> {
+  el.book ( (p) -> {
+     p.setISBN("123");
+     p.setName("Awesome dynamic languages");
+     p.setPrice(11.5);
+     p.setTags("dynamic","groovy","awesome");
+  })
+});
+----
+
+== 6. Mocking and monkey-patching
+
+Mocking is at the core of many unit testing strategies. Most of static languages make use of an external library to do this. Why this can be true of dynamic languages too, this is often not strictly necessary. For example Groovy offers built-in stubbing/mocking capabilities, very easily thanks to its dynamic nature. Monkey patching rely on the very same behavior but is easier to explain so I will illustrate this concept here. Imagine that you use a closed-source library (I won't judge you, I promise) or an open-source library for which you don't want to/don't have time to contribute to, but you have found a serious security issue in a method:
+
+[source,java]
+----
+public class VulnerableService {
+   public void vulnerableMethod() {
+      FileUtils.recurseDeleteWithRootPrivileges("/");
+   }
+}
+----
+
+You know how to fix it, but you have to wait for the maintainer to upgrade the library. Unfortunately, you can't wait because attackers are already leveraging the vulnerability on your production server (yeah, they like to). One option that a dynamic language can let you do is redefine the method at runtime. For example, in Groovy, you could write:
+
+[source,groovy]
+----
+VulnerableService.metaClass.vulnerableMethod = {
+   println 'Well tried, but you have been logged to Santa's naughty guys list!'
+}
+----
+
+Then a caller that would call the vulnerableMethod would call the monkey-patched version instead of the original one. Of course in a language like Groovy, this would only be true if the callee is dynamically compiled: if you use `@CompileStatic` to behave like a static compiler, you're out of luck, because the method which will be invoked is selected at compile time, so you *will* be vulnerable even if you try to monkey patch... Groovy provides other extension mechanisms to work around this, but it's not the topic here ;-)
+
+== 5. Dynamic objects
+
+Most dynamic languages let you create... dynamic objects. It is basically an object for which you attach methods and properties _at runtime_. Not that I am a big fan of it but there are some valid use cases (serialization, languages like https://github.com/golo-lang/golo-lang/[Golo] not supporting classes, prototype based construction, ...). It can also be convenient if you want to rapidly prototype a class.
+
+As an example, let's see how you could create an arbitrary object to represent a person, without actually leveraging on a class, using the Groovy language:
+
+[source,groovy]
+----
+def p = new Expando()
+p.name = 'Cédric'
+p.sayHello = { println "Hello $name" }
+
+p.sayHello()
+----
+
+The code is totally dynamic here. It lets you create an arbitrary object, attach new methods to it, data, ..., without relying on strong typing. Of course it is interesting when you see that the `sayHello` method is capable of referencing "pseudo-fields" which are themselves dynamic!
+
+== 4. Scripting
+
+Static languages can do scripting. But it is definitely not what I would call scripting. Having to write types is not natural in a script. I even worked in the past in a context where people who wrote scripts where not programmers. They didn't even know what a type is, and they don't care. The most popular scripting technologies like Bash do not have types, and it's not a problem, so imagine the following. You arrive late at your office, your boss is very angry about that and shouts to you: "you have 5 minutes, not more, to give me the total number of followers of users who have submitted an accepted pull request on the Groovy repo recently". It's a weird query, most probably your boss is going into social networking madness but you have no choice otherwise you're fired.
+
+In that case, most developers would think of:
+
+- using a Bash script combining `curl`, `grep`, regular expressions and hoping that `man` works
+- using a tool they know like Java, but since they have so little time, they will probably rely on a regular expression to parse the JSON feed until they realize they have to do a second HTTP query for each user
+- quiting their job
+
+In Groovy, you would do:
+
+[source,groovy]
+----
+import groovy.json.JsonSlurper
+
+def json = new JsonSlurper().parse('https://api.github.com/repos/groovy/groovy-core/issues?state=closed'.toURL())
+json.user.collectEntries { u -> 
+   // second query to fetch the nb of followers
+   def followers = new JsonSlurper().parse(u.followers_url.toURL())
+   [u.login,followers.size()]
+}.values().sum()
+----
+
+What you can see here is that we use a facility, `JSonSlurper` which actually parses the JSON result. It is much more reliable that what you would have done with a quick hack like a regex, but not only:
+
+- all data is accessible in a path-like fashion (`json.user.address.city.postalCode`)
+- you don't need a single type here
+
+Even if you use a smart JSON parser with your static language, you would still have to write a collection of classes to unmarshall the JSON structure into beans/classes. For such a simple use case, you really don't care. You just want things done, easily, quickly. You don't need type safety. You don't need it to be super clean and tolerant to future changes of the JSON format. Get. Things. Done. (and boss happy).
+
+== 3. Runtime coercions
+
+Another thing that dynamic languages are particularily good at is runtime coercions. In general static languages users know about one type of conversion, which is casting. Some are lucky enough to know about coercion (like the use of _implicit_ in _Scala_), the others rely on the adapter pattern. In a dynamic language, runtime coercions are often easy to implement. A coercion differs from a cast in the sense that you want to convert an object of `class A` to an object of `class B`, but a `B` cannot be assigned to an `A`.
+
+Groovy provides "natural" conversions for some widely used types: lists to objects, and maps to object, like in the example here:
+
+[source,groovy]
+----
+Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
+Point p = [x:1, y:2] // coercion of a map literal into an object of class Point thanks to setter injection
+----
+
+But if it happened to be that you cannot use maps or lists but really want to convert one type to another, you can just declare a converter:
+
+[source,groovy]
+----
+class A {
+   Object asType(Class<?> clazz) { new B(...) }
+}
+----
+
+I can see you raising an eyebrow here, because I wrote the conversion code directly in class `A`, but remember it's a dynamic language with a meta-object protocol, so nothing prevents you from writing this conversion code *outside* of the class `A` itself, through its metaclass, which would let you add conversion algorithms for classes which are beyond your control. It's a win!
+
+== 2. Dynamic binding
+
+Dynamic binding is linked to DSL evaluation and scripting. Imagine the following script:
+
+[source,groovy]
+----
+a+b
+----
+
+In this script, variables `a` and `b` are `unbound`. They are not known from a compiler, so if you tried to statically compile this with a compiler like _Java_ (or _C++_, or _Scala_) it would definitely blow up. Not if you compile this with _Groovy_. Because it's dynamic, it's able to know that those variables *will* be eventually bound, when the script is executed. Groovy provides means to _inject_ those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting[ElasticSearch] uses http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting[Groovy as the default scripting language]: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve `a` and `b` at compile time and that you fear to write code which might fail at runtime...
+
+== 1. Mixed mode compilation
+
+The last thing that a dynamic language like Groovy is capable of doing is leveraging *mixed mode* compilation. Behind this curious term is a unique concept in programming languages: Groovy is able of mixing static code with dynamic code, but more, you can instruct the compiler how to do so. So if you design a DSL like in http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting[ElasticSearch] where you know that some variables will be bound, that the number, names and *types* of those variables are fixed and known in advance, then you can instruct the compiler and switch to a statically compilable mode! This means that if the user uses an unknown variable, compilation will fail.
+
+This technique is already used in Groovy itself, in the powerful http://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html[Markup Template Engine]. It is a template engine which is capable of generating markup-like contents with a very nice builder-like syntax, but all templates are statically compiled even if the code seems to be full of unresolved method calls or variables!
+
+For those who are interested in this, I invite them to take an eye at my http://melix.github.io/blog/2014/02/markuptemplateengine.html[blog posts] describing how you can do this.
+
+= Conclusion
+
+In conclusion, I have highlighted some points where dynamic languages can do what static languages cannot. Users of the most widely used dynamic language, Javascript, probably have lots of ideas too. The point for me is *not to tell which one is better than the other* because *I don't care*. In general, I am not much into the war behind those, because I really enjoy both. I do static typing most of time, but I really enjoy the dynamic nature of the language too because often I don't want to be slowed down just to make a compiler happy. I, as a developer, should be happy. Making a compiler happy is secondary and often not necessary. Last but not least, you might have thought, reading this post, that *your* static language can do this or that. I won't blame you here, because mine can too. The idea here is more to show that it is totally unnatural for a static language or it often comes with horrible drawbacks like verbosity, performance issues or simply difficult to implement. 
+
+So what about using a http://beta.groovy-lang.org[language that brings the best of the two worlds together]?
