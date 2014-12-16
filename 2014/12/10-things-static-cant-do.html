@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: 10 things your static language can&#8217;t do</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    </head>
+  <body>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+ lang: en_US
+</script>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>10 things your static language can&#8217;t do</h1>
+	</div>
+
+	<p><em>15 December 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/languages.html">languages</a> 
+	</em>
+		<a href="/blog/tags/static.html">static</a> 
+	</em>
+		<a href="/blog/tags/dynamic.html">dynamic</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</em>
+		<a href="/blog/tags/javascript.html">javascript</a> 
+	</em>
+		<a href="/blog/tags/scala.html">scala</a> 
+	</em>
+		<a href="/blog/tags/C++.html">C++</a> 
+	</p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2014/12/10-things-static-cant-do.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div class="sect1">
+<h2 id="_but_maybe_mine_can">But maybe mine can&#8230;</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For those of you who do not know me, and you are likely much more in that category than in the other, I&#8217;ve been working on
+the Groovy language full-time for more than 3 years now. I started as a user several years ago, in the context of DSLs,
+and eventually became a contributor before getting employed to work on the language. I love static typing, but not at the
+point of thinking that we should only reason about types. This is why I also love dynamic typing, and why I invested so
+much in Groovy.</p>
+</div>
+<div class="paragraph">
+<p>Groovy is primarily a dynamic language. It&#8217;s the most widely used alternative language on the JVM, with use cases ranging
+from DSLs (scripting Jenkins builds for example) to full blown applications on mobile devices (Android), going through
+full stack web applications with Grails. Despite being primarily a dynamic language, I spent a lot of time writing a
+<strong>static compiler for Groovy</strong>, making it a pretty unique language in the JVM world, but not limited to the JVM world:</p>
+</div>
+<div class="paragraph">
+<p>Groovy is a language which supports <strong>dynamic typing and compile-time type checking</strong>. It makes it surprisingly powerful
+and versatile language, capable of adapting to a great variety of contexts.</p>
+</div>
+<div class="paragraph">
+<p>When I tell people that I wrote the static compiler for Groovy, I often get a reaction which is "so you admit that dynamic
+languages are less powerful than static ones", and they see me as the one that made the language <strong>right</strong>. Oh no, I did not.
+In fact, I love the dynamic aspects of the language. It is always annoying that I, as a designer of a static compiler, have
+to defend dynamic languages, but it&#8217;s an interesting topic, especially those days where I read lots of articles doing
+dynamic-bashing.</p>
+</div>
+<div class="paragraph">
+<p>So in this post, I&#8217;m going to illustrate 10 things that a static language (most likely) cannot do. It doesn&#8217;t mean that there are only
+10 things that a static language cannot do compared to a dynamic one, but it is here to illustrate the fact that this idea
+that static languages are superior or more scalable just because they are <em>type safe</em> is IMHO stupid. Compare languages between
+them, but do not compare categories of languages. While static languages will be excellent in making type safety guarantees (errors
+at compile time), dynamic languages are often far superior in cutting down verbosity. That&#8217;s just an example which illustrates
+that comparing on the sole aspect of type safety is not enough.</p>
+</div>
+<div class="paragraph">
+<p>In this post I will also illustrate how Groovy is special, because it is capable of handling things in a <strong>mixed</strong> mode, making it
+totally unique and incredibly powerful, bringing the best of the two worlds together. Last disclaimer, this post is mostly centered on
+the JVM world, because this is the one I know the best.</p>
+</div>
+<div class="paragraph">
+<p>Ready?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_10_object_oriented_programming_done_right">10. Object-oriented programming done right</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is a very academic point of view. Users of static languages tend to think that their language is object-oriented. Because C++
+has a compiler, because Java has a compiler, means that statically typed languages have to be compiled. Object oriented programming
+does <strong>not</strong> require languages to be compiled. OOP is about <strong>message passing</strong>. Object-oriented programming does <strong>not</strong> imply type safety.
+It means that an object is something that receives messages. In the Java world, the message is a method with arguments, and the contract
+is enforced at compile time, but it is an implementation detail which reduces OO programming to a small subset of its capabilities.</p>
+</div>
+<div class="paragraph">
+<p>The great Alan Kay himself <a href="http://lists.squeakfoundation.org/pipermail/squeak-dev/1998-October/017019.html">explains it</a>.</p>
+</div>
+<div class="paragraph">
+<p>Groovy, as a dynamic language, supports commons OOP concepts (and also functional concepts) like class, interface, abstract classes or traits
+but also has a meta-object protocol. For those of you who did Smalltalk programming, it&#8217;s the same idea: the behavior of objects is not determined at compile time, it&#8217;s a runtime behavior determined by a meta-object protocol. In Groovy, it translates to the fact that to each class corresponds
+a meta-class which determines the behavior that an object will have when it receives a message (a method call).</p>
+</div>
+<div class="paragraph">
+<p>This capability of doing things at runtime instead of compile time is the core of many features of dynamic languages and most of the
+points illustrated in this blog post derive from it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_9_multimethods">9. Multimethods</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Java supports overloaded methods. The question whether it is a good or a bad idea is beyond the scope of this post (and believe me
+it is a very interesting question both in terms of semantics and performance). The idea is that an object can have two methods
+of the same name accepting different parameters. Let&#8217;s illustrate this with Java code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>public static int foo(String o) { return 1; }
+public static int foo(Date o) { return 2; }
+public static int foo(Object o) { return 3; }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you call it like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>public static void main(String[] args) {
+    Object[] array = new Object[] { "a string", new Date(), 666 };
+    for (Object o : array) {
+        System.out.println(foo(o));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What do you think it prints? Well, most beginners will probably answer something that looks natural when you know the contents of the array:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>1
+2
+3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But the correct answer is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>3
+3
+3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because the static type of <code>o</code> when the call to <code>foo</code> is made is <code>Object</code>. To say it more clearly, the declared type of <code>o</code> is <code>Object</code> so we are calling <code>foo(Object)</code>. The reason for this is that the code is <strong>statically compiled</strong> so the compiler has to know at compile time which method is going to be called. A dynamic language like Groovy chooses the method at runtime (unless, of course, you use <code>@CompileStatic</code> to enforce static semantics), so the method which is going to be called corresponds to the <strong>best fitting arguments</strong>. So Groovy, unlike Java, will print the less surprising result:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>1
+2
+3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is theorically possible for a static language to do the same. But it comes at the price of performance. It would mean that the arguments have to be checked at runtime, and since static languages do not, as far as I know, implement an inlining cache, performance would be lower than those of a well designed dynamic language&#8230;</p>
+</div>
+<div class="paragraph">
+<p>But to add something to a dynamic language, what if you remove the <code>Object</code> version of <code>foo</code>, and remove <code>666</code> from the array? As an exercise to the reader, would this Java code compile?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>public static int foo(String o) { return 1; }
+public static int foo(Date o) { return 2; }
+
+public static void main(String[] args) {
+    Object[] array = new Object[] { "a string", new Date() };
+    for (Object o : array) {
+        System.out.println(foo(o));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If not, what do you have to do to make it pass? Yes, dynamic languages are superior here&#8230;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_8_duck_typing">8. Duck typing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Duck typing has always been a selling point of dynamic languages. Basically imagine two classes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>class Duck {
+   String getName() { 'Duck' }
+}
+class Cat {
+   String getName() { 'Cat' }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Those two classes define the same <code>getName</code> method, but it is not defined explicitly in a contract (for example through an interface). Imagine that you have a list of objects containing either ducks, cats, or anything else definining a <code>getName</code> method. Then a dynamic language will let you call
+that method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def list = [cat, dog, human, hal]
+list.each { obj -&gt;
+   println obj.getName()
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A static language like Java would force you to have a cast here. But since you don&#8217;t have an interface defining <code>getName</code> and implemented by all objects, you cannot cast to that type so you have to consider all types and delegate appropriately like in the following code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>if (obj instanceof Cat) {
+   return ((Cat)obj).getName();
+}
+if (obj instanceof Duck) {
+   return ((Duck)obj).getName();
+}
+if (obj instanceof Human) {
+   return ((Human)obj).getName();
+}
+if (obj instanceof Computer) {
+   return ((Computer)obj).getName();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are multiple issues with that code:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>it is very repetitive, the only thing which changes is the type used in the test and the cast</p>
+</li>
+<li>
+<p>it has to be extensive, that is to say that if your list happens to contain an object having a <code>getName</code> method but not in your list of cases to consider, the code is broken. This means that you have to think about changing that method if you add a new type in your list.</p>
+</li>
+<li>
+<p>in the JVM world, as the number of cases to consider grows, the size of the method will increase to the point where the JIT (just-in-time compiler) decides it&#8217;s not worth inlining, potentially dramatically reducing performance.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Of course, one may say "but why the hell didn&#8217;t you use an interface". This is of course a good way to solve this in Java, but it is not always possible. Not for example if you don&#8217;t have access to the source code (think of the various classes being split in third party libraries). I often faced this problem in the past, and believe me it&#8217;s no fun (I look at you, <em>Apache Lucene</em>).</p>
+</div>
+<div class="paragraph">
+<p>There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate <code>getName</code> method. Of course it is overkill: for each object of your list you have a proxy instantiated&#8230; Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn&#8217;t have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do&#8230;</p>
+</div>
+<div class="paragraph">
+<p>An elegant alternative used by other static languages is <em>structural typing</em>. This is for example what the <code>Go</code> language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the <em>invokedynamic</em> bytecode instruction but guess what? You are relying on a <em>dynamic</em> feature of the VM&#8230; Can you hear it?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_7_respond_to_non_existing_methods">7. Respond to non-existing methods</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A dynamic language answers to messages (method calls) at runtime. This means that a well designed dynamic language should be able to let you answer <strong>any</strong> kind of method call, including&#8230; non existing methods! This feature is at the core of powerful facilitating frameworks like Grails. In Grails, you can define a domain class like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>class Person {
+   String firstName
+   String lastName
+   int age
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>Person</code> class does not define any method, nor does it have any explicit relation to a datastore, an ORM or SQL server. However, you can write code like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def adults = Person.findByAge { it&gt;= 18 }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I will not dig into the details about how this is done, but the idea is to intercept the fact that the <code>findByAge</code> method does not exist, then parse the name of the method and build a query based on the method name and the rest of the arguments (here, a closure, an open block of code). Queries can be as complex as you wish, like <code>findByLastNameAndAge</code> or whatever you can think of. Of course Grails does some smart things here, like <strong>generating a new method at runtime</strong>, so that the next time this method is hit, it is not an unknown method anymore, and can be invoked faster! Only a dynamic language would let you do that. Say bye to infamous DAOs that you have to change everytime you have
+a new query, it is not necessary. One could say that they prefer safety at compile time rather than the ability to do this, but Grails also offers that possibility of checking that the syntax is correct at compile time, while still leveraging the dynamic runtime to make this work&#8230; It&#8217;s all about boilerplate removed, code verbosity and productivity&#8230;</p>
+</div>
+<div class="paragraph">
+<p>The ability to react to arbitrary messages is actually at the core of many DSLs (domain specific languages) written in Groovy. They are at the core of builders for example, which will let you write code like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>catalog {
+   book {
+   	isbn 123
+	name 'Awesome dynamic languages'
+        price 11.5
+        tags {
+	   dynamic,
+	   groovy,
+	   awesome
+	}
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of the less readable Java 8 version (for the reader&#8217;s mental sanity, I will not write the Java 7 version):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>builder.catalog( (el) -&gt; {
+  el.book ( (p) -&gt; {
+     p.setISBN("123");
+     p.setName("Awesome dynamic languages");
+     p.setPrice(11.5);
+     p.setTags("dynamic","groovy","awesome");
+  })
+});</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_6_mocking_and_monkey_patching">6. Mocking and monkey-patching</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Mocking is at the core of many unit testing strategies. Most of static languages make use of an external library to do this. Why this can be true of dynamic languages too, this is often not strictly necessary. For example Groovy offers built-in stubbing/mocking capabilities, very easily thanks to its dynamic nature. Monkey patching rely on the very same behavior but is easier to explain so I will illustrate this concept here. Imagine that you use a closed-source library (I won&#8217;t judge you, I promise) or an open-source library for which you don&#8217;t want to/don&#8217;t have time to contribute to, but you have found a serious security issue in a method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>public class VulnerableService {
+   public void vulnerableMethod() {
+      FileUtils.recurseDeleteWithRootPrivileges("/");
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You know how to fix it, but you have to wait for the maintainer to upgrade the library. Unfortunately, you can&#8217;t wait because attackers are already leveraging the vulnerability on your production server (yeah, they like to). One option that a dynamic language can let you do is redefine the method at runtime. For example, in Groovy, you could write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>VulnerableService.metaClass.vulnerableMethod = {
+   println 'Well tried, but you have been logged to Santa's naughty guys list!'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then a caller that would call the vulnerableMethod would call the monkey-patched version instead of the original one. Of course in a language like Groovy, this would only be true if the callee is dynamically compiled: if you use <code>@CompileStatic</code> to behave like a static compiler, you&#8217;re out of luck, because the method which will be invoked is selected at compile time, so you <strong>will</strong> be vulnerable even if you try to monkey patch&#8230; Groovy provides other extension mechanisms to work around this, but it&#8217;s not the topic here ;-)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_5_dynamic_objects">5. Dynamic objects</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most dynamic languages let you create&#8230; dynamic objects. It is basically an object for which you attach methods and properties <em>at runtime</em>. Not that I am a big fan of it but there are some valid use cases (serialization, languages like <a href="https://github.com/golo-lang/golo-lang/">Golo</a> not supporting classes, prototype based construction, &#8230;). It can also be convenient if you want to rapidly prototype a class.</p>
+</div>
+<div class="paragraph">
+<p>As an example, let&#8217;s see how you could create an arbitrary object to represent a person, without actually leveraging on a class, using the Groovy language:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def p = new Expando()
+p.name = 'Cédric'
+p.sayHello = { println "Hello $name" }
+
+p.sayHello()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The code is totally dynamic here. It lets you create an arbitrary object, attach new methods to it, data, &#8230;, without relying on strong typing. Of course it is interesting when you see that the <code>sayHello</code> method is capable of referencing "pseudo-fields" which are themselves dynamic!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_scripting">4. Scripting</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Static languages can do scripting. But it is definitely not what I would call scripting. Having to write types is not natural in a script. I even worked in the past in a context where people who wrote scripts where not programmers. They didn&#8217;t even know what a type is, and they don&#8217;t care. The most popular scripting technologies like Bash do not have types, and it&#8217;s not a problem, so imagine the following. You arrive late at your office, your boss is very angry about that and shouts to you: "you have 5 minutes, not more, to give me the total number of followers of users who have submitted an accepted pull request on the Groovy repo recently". It&#8217;s a weird query, most probably your boss is going into social networking madness but you have no choice otherwise you&#8217;re fired.</p>
+</div>
+<div class="paragraph">
+<p>In that case, most developers would think of:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>using a Bash script combining <code>curl</code>, <code>grep</code>, regular expressions and hoping that <code>man</code> works</p>
+</li>
+<li>
+<p>using a tool they know like Java, but since they have so little time, they will probably rely on a regular expression to parse the JSON feed until they realize they have to do a second HTTP query for each user</p>
+</li>
+<li>
+<p>quiting their job</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In Groovy, you would do:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>import groovy.json.JsonSlurper
+
+def json = new JsonSlurper().parse('https://api.github.com/repos/groovy/groovy-core/issues?state=closed'.toURL())
+json.user.collectEntries { u -&gt;
+   // second query to fetch the nb of followers
+   def followers = new JsonSlurper().parse(u.followers_url.toURL())
+   [u.login,followers.size()]
+}.values().sum()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What you can see here is that we use a facility, <code>JSonSlurper</code> which actually parses the JSON result. It is much more reliable that what you would have done with a quick hack like a regex, but not only:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>all data is accessible in a path-like fashion (<code>json.user.address.city.postalCode</code>)</p>
+</li>
+<li>
+<p>you don&#8217;t need a single type here</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Even if you use a smart JSON parser with your static language, you would still have to write a collection of classes to unmarshall the JSON structure into beans/classes. For such a simple use case, you really don&#8217;t care. You just want things done, easily, quickly. You don&#8217;t need type safety. You don&#8217;t need it to be super clean and tolerant to future changes of the JSON format. Get. Things. Done. (and boss happy).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_3_runtime_coercions">3. Runtime coercions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Another thing that dynamic languages are particularily good at is runtime coercions. In general static languages users know about one type of conversion, which is casting. Some are lucky enough to know about coercion (like the use of <em>implicit</em> in <em>Scala</em>), the others rely on the adapter pattern. In a dynamic language, runtime coercions are often easy to implement. A coercion differs from a cast in the sense that you want to convert an object of <code>class A</code> to an object of <code>class B</code>, but a <code>B</code> cannot be assigned to an <code>A</code>.</p>
+</div>
+<div class="paragraph">
+<p>Groovy provides "natural" conversions for some widely used types: lists to objects, and maps to object, like in the example here:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
+Point p = [x:1, y:2] // coercion of a map literal into an object of class Point thanks to setter injection</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But if it happened to be that you cannot use maps or lists but really want to convert one type to another, you can just declare a converter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>class A {
+   Object asType(Class&lt;?&gt; clazz) { new B(...) }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I can see you raising an eyebrow here, because I wrote the conversion code directly in class <code>A</code>, but remember it&#8217;s a dynamic language with a meta-object protocol, so nothing prevents you from writing this conversion code <strong>outside</strong> of the class <code>A</code> itself, through its metaclass, which would let you add conversion algorithms for classes which are beyond your control. It&#8217;s a win!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_dynamic_binding">2. Dynamic binding</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Dynamic binding is linked to DSL evaluation and scripting. Imagine the following script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>a+b</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this script, variables <code>a</code> and <code>b</code> are <code>unbound</code>. They are not known from a compiler, so if you tried to statically compile this with a compiler like <em>Java</em> (or <em>C++</em>, or <em>Scala</em>) it would definitely blow up. Not if you compile this with <em>Groovy</em>. Because it&#8217;s dynamic, it&#8217;s able to know that those variables <strong>will</strong> be eventually bound, when the script is executed. Groovy provides means to <em>inject</em> those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> uses <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">Groovy as the default scripting language</a>: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve <code>a</code> and <code>b</code> at compile time and that you fear to write code which might fail at runtime&#8230;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_1_mixed_mode_compilation">1. Mixed mode compilation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The last thing that a dynamic language like Groovy is capable of doing is leveraging <strong>mixed mode</strong> compilation. Behind this curious term is a unique concept in programming languages: Groovy is able of mixing static code with dynamic code, but more, you can instruct the compiler how to do so. So if you design a DSL like in <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> where you know that some variables will be bound, that the number, names and <strong>types</strong> of those variables are fixed and known in advance, then you can instruct the compiler and switch to a statically compilable mode! This means that if the user uses an unknown variable, compilation will fail.</p>
+</div>
+<div class="paragraph">
+<p>This technique is already used in Groovy itself, in the powerful <a href="http://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html">Markup Template Engine</a>. It is a template engine which is capable of generating markup-like contents with a very nice builder-like syntax, but all templates are statically compiled even if the code seems to be full of unresolved method calls or variables!</p>
+</div>
+<div class="paragraph">
+<p>For those who are interested in this, I invite them to take an eye at my <a href="http://melix.github.io/blog/2014/02/markuptemplateengine.html">blog posts</a> describing how you can do this.</p>
+</div>
+</div>
+</div>
+<h1 id="_conclusion" class="sect0">Conclusion</h1>
+<div class="paragraph">
+<p>In conclusion, I have highlighted some points where dynamic languages can do what static languages cannot. Users of the most widely used dynamic language, Javascript, probably have lots of ideas too. The point for me is <strong>not to tell which one is better than the other</strong> because <strong>I don&#8217;t care</strong>. In general, I am not much into the war behind those, because I really enjoy both. I do static typing most of time, but I really enjoy the dynamic nature of the language too because often I don&#8217;t want to be slowed down just to make a compiler happy. I, as a developer, should be happy. Making a compiler happy is secondary and often not necessary. Last but not least, you might have thought, reading this post, that <strong>your</strong> static language can do this or that. I won&#8217;t blame you here, because mine can too. The idea here is more to show that it is totally unnatural for a static language or it often comes with horrible drawbacks like verbosity, performance issues or simply difficult to implement.</p>
+</div>
+<div class="paragraph">
+<p>So what about using a <a href="http://beta.groovy-lang.org">language that brings the best of the two worlds together</a>?</p>
+</div></p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2014/12/10-things-static-cant-do.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'ten_things_static_langs_cannot_do';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
+  </body>
+</html>
