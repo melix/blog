@@ -42,6 +42,15 @@ In this post I will also illustrate how Groovy is special, because it is capable
 totally unique and incredibly powerful, bringing the best of the two worlds together. Last disclaimer, this post is mostly centered on
 the JVM world, because this is the one I know the best.
 
+CAUTION: As expected I got lots of comments on various social media. Some are positive, some not, that's ok, but again, I
+would like to remember that this is *not* static languages bashing, nor dynamic languages promotion. Maybe some of you
+will think "hey, but my static language can do it!" and yes, it is possible, because as the subtitle of this post says,
+mine can too. But when it does, often, there's a drawback (like loosing type safety, decreased performance,... ) or you fall on
+dynamic behavior without even noticing it. When it is the case, I tried to be honest and tell about the possibilities. But I also
+voluntarily hide some static features of Groovy that make it a very interesting solution (flow typing for example). Last but not
+least, I am not saying that *all* dynamic features implement *all* those items. I am saying that by nature a dynamic language make
+it possible. An possible doesn't mean required. So please read carefully before screaming!
+
 Ready?
 
 == 10. Object-oriented programming done right
@@ -60,6 +69,9 @@ a meta-class which determines the behavior that an object will have when it rece
 
 This capability of doing things at runtime instead of compile time is the core of many features of dynamic languages and most of the
 points illustrated in this blog post derive from it.
+
+NOTE: I had some comments that the fact that dynamic languages can do OO right wasn't really interesting. In fact, I insisted on keeping this
+because this is actually what makes most of the following items possible. So think of 10. as the basement for most of the following items.
 
 == 9. Multimethods
 
@@ -143,8 +155,7 @@ class Cat {
 }
 ----
 
-Those two classes define the same `getName` method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn't write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a `getName` method. Then a dynamic language will let you call
-that method:
+Those two classes define the same `getName` method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn't write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a `getName` method. Then a dynamic language will let you call that method:
 
 [source,groovy]
 ----
@@ -172,7 +183,20 @@ if (obj instanceof Computer) {
 }
 ----
 
-There are multiple issues with that code:
+The real solution in Java is to define either a common super class or an interface for all those, but again, sometimes you just cannot because you don't have access to the code! Imagine that the `Cat` and `Dog` classes where designed like this for example:
+
+[source,java]
+----
+public abstract class Something {} // should define getName, but does not for some obscure reason
+public class Cat extends Something {
+   public String getName() { return "Cat"; }
+}
+public class Dog extends Something {
+   public String getName() { return "Dog"; }
+}
+----
+
+Often the developer didn't even realize that all objects share a common interface. That's bad for you, and if you find this code you have no choice but the cascading _instanceof_ solution. There are multiple issues with that code:
 
 * it is very repetitive, the only thing which changes is the type used in the test and the cast
 * it has to be extensive, that is to say that if your list happens to contain an object having a `getName` method but not in your list of cases to consider, the code is broken. This means that you have to think about changing that method if you add a new type in your list.
@@ -182,7 +206,17 @@ Of course, one may say "but why the hell didn't you use an interface". This is o
 
 There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate `getName` method. Of course it is overkill: for each object of your list you have a proxy instantiated... Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn't have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do...
 
-An elegant alternative used by other static languages is _structural typing_. This is for example what the `Go` language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the _invokedynamic_ bytecode instruction but guess what? You are relying on a _dynamic_ feature of the VM... Can you hear it?
+An elegant alternative used by other static languages is *structural typing*. This is for example what the `Go` language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the _invokedynamic_ bytecode instruction but guess what? You are relying on a _dynamic_ feature of the VM... Can you hear it?
+
+NOTE: Some argued that this is very bad design. I must repeat that if you think so, you missed the point. The idea is to *workaround poorly designed
+APIs* (or APIs which were "optimized"). When I talked about _Lucene_ it was for a very good reason. I faced the problem. _Lucene_ is a highly
+optimized piece of code. It makes design decisions which are often based on performance: flattening as much as possible class hierarchies (the HotSpot
+JIT doesn't like deep class hierarchies), make classes final, prefer abstract classes over interfaces, ... So it is easy to find classes that you want
+to extend, but you can't because they are final, or classes that implicitly implement a contract but do not define interfaces. This is a pain to work
+with, and the ability of a dynamic language to be able to call such methods without having to explicitly declare a contract is a real gain. Some
+static languages offer similar features through structural typing, but then you have to think about what it means (virtual table lookup?) and how
+it is implemented depending on the platform (on the JVM, relying on reflection is possible but you loose all type safety and have very bad performance). So everytime I used duck typing, it wasn't on APIs that *I* had designed. It was on 3rd party APIs, that for some reason didn't provide
+me with a way to call some methods.
 
 == 7. Respond to non-existing methods
 
