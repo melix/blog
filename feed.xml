@@ -6,8 +6,8 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 16 Dec 2014 13:09:01 +0100</pubDate>
-    <lastBuildDate>Tue, 16 Dec 2014 13:09:01 +0100</lastBuildDate>
+    <pubDate>Thu, 18 Dec 2014 20:14:40 +0100</pubDate>
+    <lastBuildDate>Thu, 18 Dec 2014 20:14:40 +0100</lastBuildDate>
 
     <item>
       <title>10 things your static language can&amp;#8217;t do</title>
@@ -55,6 +55,25 @@ that comparing on the sole aspect of type safety is not enough.&lt;/p&gt;
 totally unique and incredibly powerful, bringing the best of the two worlds together. Last disclaimer, this post is mostly centered on
 the JVM world, because this is the one I know the best.&lt;/p&gt;
 &lt;/div&gt;
+&lt;div class=&quot;admonitionblock caution&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;icon-caution&quot; title=&quot;Caution&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+As expected I got lots of comments on various social media. Some are positive, some not, that&amp;#8217;s ok, but again, I
+would like to remember that this is &lt;strong&gt;not&lt;/strong&gt; static languages bashing, nor dynamic languages promotion. Maybe some of you
+will think &quot;hey, but my static language can do it!&quot; and yes, it is possible, because as the subtitle of this post says,
+mine can too. But when it does, often, there&amp;#8217;s a drawback (like loosing type safety, decreased performance,&amp;#8230; ) or you fall on
+dynamic behavior without even noticing it. When it is the case, I tried to be honest and tell about the possibilities. But I also
+voluntarily hide some static features of Groovy that make it a very interesting solution (flow typing for example). Last but not
+least, I am not saying that &lt;strong&gt;all&lt;/strong&gt; dynamic features implement &lt;strong&gt;all&lt;/strong&gt; those items. I am saying that by nature a dynamic language make
+it possible. An possible doesn&amp;#8217;t mean required. So please read carefully before screaming!
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Ready?&lt;/p&gt;
 &lt;/div&gt;
@@ -81,6 +100,19 @@ a meta-class which determines the behavior that an object will have when it rece
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;This capability of doing things at runtime instead of compile time is the core of many features of dynamic languages and most of the
 points illustrated in this blog post derive from it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+I had some comments that the fact that dynamic languages can do OO right wasn&amp;#8217;t really interesting. In fact, I insisted on keeping this
+because this is actually what makes most of the following items possible. So think of 10. as the basement for most of the following items.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -183,8 +215,7 @@ class Cat {
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Those two classes define the same &lt;code&gt;getName&lt;/code&gt; method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&amp;#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a &lt;code&gt;getName&lt;/code&gt; method. Then a dynamic language will let you call
-that method:&lt;/p&gt;
+&lt;p&gt;Those two classes define the same &lt;code&gt;getName&lt;/code&gt; method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&amp;#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a &lt;code&gt;getName&lt;/code&gt; method. Then a dynamic language will let you call that method:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -214,7 +245,21 @@ if (obj instanceof Computer) {
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There are multiple issues with that code:&lt;/p&gt;
+&lt;p&gt;The real solution in Java is to define either a common super class or an interface for all those, but again, sometimes you just cannot because you don&amp;#8217;t have access to the code! Imagine that the &lt;code&gt;Cat&lt;/code&gt; and &lt;code&gt;Dog&lt;/code&gt; classes where designed like this for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public abstract class Something {} // should define getName, but does not for some obscure reason
+public class Cat extends Something {
+   public String getName() { return &quot;Cat&quot;; }
+}
+public class Dog extends Something {
+   public String getName() { return &quot;Dog&quot;; }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Often the developer didn&amp;#8217;t even realize that all objects share a common interface. That&amp;#8217;s bad for you, and if you find this code you have no choice but the cascading &lt;em&gt;instanceof&lt;/em&gt; solution. There are multiple issues with that code:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
@@ -236,7 +281,27 @@ if (obj instanceof Computer) {
 &lt;p&gt;There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate &lt;code&gt;getName&lt;/code&gt; method. Of course it is overkill: for each object of your list you have a proxy instantiated&amp;#8230; Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn&amp;#8217;t have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do&amp;#8230;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;An elegant alternative used by other static languages is &lt;em&gt;structural typing&lt;/em&gt;. This is for example what the &lt;code&gt;Go&lt;/code&gt; language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the &lt;em&gt;invokedynamic&lt;/em&gt; bytecode instruction but guess what? You are relying on a &lt;em&gt;dynamic&lt;/em&gt; feature of the VM&amp;#8230; Can you hear it?&lt;/p&gt;
+&lt;p&gt;An elegant alternative used by other static languages is &lt;strong&gt;structural typing&lt;/strong&gt;. This is for example what the &lt;code&gt;Go&lt;/code&gt; language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the &lt;em&gt;invokedynamic&lt;/em&gt; bytecode instruction but guess what? You are relying on a &lt;em&gt;dynamic&lt;/em&gt; feature of the VM&amp;#8230; Can you hear it?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Some argued that this is very bad design. I must repeat that if you think so, you missed the point. The idea is to &lt;strong&gt;workaround poorly designed
+APIs&lt;/strong&gt; (or APIs which were &quot;optimized&quot;). When I talked about &lt;em&gt;Lucene&lt;/em&gt; it was for a very good reason. I faced the problem. &lt;em&gt;Lucene&lt;/em&gt; is a highly
+optimized piece of code. It makes design decisions which are often based on performance: flattening as much as possible class hierarchies (the HotSpot
+JIT doesn&amp;#8217;t like deep class hierarchies), make classes final, prefer abstract classes over interfaces, &amp;#8230; So it is easy to find classes that you want
+to extend, but you can&amp;#8217;t because they are final, or classes that implicitly implement a contract but do not define interfaces. This is a pain to work
+with, and the ability of a dynamic language to be able to call such methods without having to explicitly declare a contract is a real gain. Some
+static languages offer similar features through structural typing, but then you have to think about what it means (virtual table lookup?) and how
+it is implemented depending on the platform (on the JVM, relying on reflection is possible but you loose all type safety and have very bad performance). So everytime I used duck typing, it wasn&amp;#8217;t on APIs that &lt;strong&gt;I&lt;/strong&gt; had designed. It was on 3rd party APIs, that for some reason didn&amp;#8217;t provide
+me with a way to call some methods.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

@@ -143,6 +143,25 @@ that comparing on the sole aspect of type safety is not enough.</p>
 totally unique and incredibly powerful, bringing the best of the two worlds together. Last disclaimer, this post is mostly centered on
 the JVM world, because this is the one I know the best.</p>
 </div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+As expected I got lots of comments on various social media. Some are positive, some not, that&#8217;s ok, but again, I
+would like to remember that this is <strong>not</strong> static languages bashing, nor dynamic languages promotion. Maybe some of you
+will think "hey, but my static language can do it!" and yes, it is possible, because as the subtitle of this post says,
+mine can too. But when it does, often, there&#8217;s a drawback (like loosing type safety, decreased performance,&#8230; ) or you fall on
+dynamic behavior without even noticing it. When it is the case, I tried to be honest and tell about the possibilities. But I also
+voluntarily hide some static features of Groovy that make it a very interesting solution (flow typing for example). Last but not
+least, I am not saying that <strong>all</strong> dynamic features implement <strong>all</strong> those items. I am saying that by nature a dynamic language make
+it possible. An possible doesn&#8217;t mean required. So please read carefully before screaming!
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>Ready?</p>
 </div>
@@ -169,6 +188,19 @@ a meta-class which determines the behavior that an object will have when it rece
 <div class="paragraph">
 <p>This capability of doing things at runtime instead of compile time is the core of many features of dynamic languages and most of the
 points illustrated in this blog post derive from it.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-note" title="Note"></i>
+</td>
+<td class="content">
+I had some comments that the fact that dynamic languages can do OO right wasn&#8217;t really interesting. In fact, I insisted on keeping this
+because this is actually what makes most of the following items possible. So think of 10. as the basement for most of the following items.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -271,8 +303,7 @@ class Cat {
 </div>
 </div>
 <div class="paragraph">
-<p>Those two classes define the same <code>getName</code> method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a <code>getName</code> method. Then a dynamic language will let you call
-that method:</p>
+<p>Those two classes define the same <code>getName</code> method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a <code>getName</code> method. Then a dynamic language will let you call that method:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -302,7 +333,21 @@ if (obj instanceof Computer) {
 </div>
 </div>
 <div class="paragraph">
-<p>There are multiple issues with that code:</p>
+<p>The real solution in Java is to define either a common super class or an interface for all those, but again, sometimes you just cannot because you don&#8217;t have access to the code! Imagine that the <code>Cat</code> and <code>Dog</code> classes where designed like this for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>public abstract class Something {} // should define getName, but does not for some obscure reason
+public class Cat extends Something {
+   public String getName() { return "Cat"; }
+}
+public class Dog extends Something {
+   public String getName() { return "Dog"; }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Often the developer didn&#8217;t even realize that all objects share a common interface. That&#8217;s bad for you, and if you find this code you have no choice but the cascading <em>instanceof</em> solution. There are multiple issues with that code:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -324,7 +369,27 @@ if (obj instanceof Computer) {
 <p>There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate <code>getName</code> method. Of course it is overkill: for each object of your list you have a proxy instantiated&#8230; Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn&#8217;t have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do&#8230;</p>
 </div>
 <div class="paragraph">
-<p>An elegant alternative used by other static languages is <em>structural typing</em>. This is for example what the <code>Go</code> language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the <em>invokedynamic</em> bytecode instruction but guess what? You are relying on a <em>dynamic</em> feature of the VM&#8230; Can you hear it?</p>
+<p>An elegant alternative used by other static languages is <strong>structural typing</strong>. This is for example what the <code>Go</code> language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the <em>invokedynamic</em> bytecode instruction but guess what? You are relying on a <em>dynamic</em> feature of the VM&#8230; Can you hear it?</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-note" title="Note"></i>
+</td>
+<td class="content">
+Some argued that this is very bad design. I must repeat that if you think so, you missed the point. The idea is to <strong>workaround poorly designed
+APIs</strong> (or APIs which were "optimized"). When I talked about <em>Lucene</em> it was for a very good reason. I faced the problem. <em>Lucene</em> is a highly
+optimized piece of code. It makes design decisions which are often based on performance: flattening as much as possible class hierarchies (the HotSpot
+JIT doesn&#8217;t like deep class hierarchies), make classes final, prefer abstract classes over interfaces, &#8230; So it is easy to find classes that you want
+to extend, but you can&#8217;t because they are final, or classes that implicitly implement a contract but do not define interfaces. This is a pain to work
+with, and the ability of a dynamic language to be able to call such methods without having to explicitly declare a contract is a real gain. Some
+static languages offer similar features through structural typing, but then you have to think about what it means (virtual table lookup?) and how
+it is implemented depending on the platform (on the JVM, relying on reflection is possible but you loose all type safety and have very bad performance). So everytime I used duck typing, it wasn&#8217;t on APIs that <strong>I</strong> had designed. It was on 3rd party APIs, that for some reason didn&#8217;t provide
+me with a way to call some methods.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
