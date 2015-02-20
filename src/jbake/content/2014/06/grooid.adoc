@@ -119,7 +119,7 @@ public class FeedActivity {
             def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
             json.speakers.join(' ')
         } then {
-	    mTextView.setText(it)
+	    mTextView.text = it
         }
     } 
 }
@@ -147,6 +147,12 @@ Google already switched their main build system to Gradle, which is, by the way,
 All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:
 
 * https://github.com/melix/gr8confagenda
+
+=== Update 3: it's even simpler now
+
+TIP: Groovy 2.4.0 has been released now and building an Android application in Groovy is even simpler. All you have to do is to apply a Gradle plugin. Instructions can be found https://github.com/groovy/groovy-android-gradle-plugin[here]. You absolutely don't have to build Groovy from sources or add tasks to your Gradle build as described originally in this post! Just https://github.com/groovy/groovy-android-gradle-plugin[use the plugin]!
+
+WARNING: Information below is outdated. Please use the https://github.com/groovy/groovy-android-gradle-plugin[Gradle plugin !].
 
 _Update 2: build instructions with the Gradle plugin_
 
