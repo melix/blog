@@ -210,7 +210,7 @@ accordingly. Then you would have to write something like this (no kidding):</p>
             def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
             json.speakers.join(' ')
         } then {
-	    mTextView.setText(it)
+	    mTextView.text = it
         }
     }
 }</code></pre>
@@ -248,6 +248,33 @@ Google already switched their main build system to Gradle, which is, by the way,
 <p><a href="https://github.com/melix/gr8confagenda">https://github.com/melix/gr8confagenda</a></p>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_3_it_s_even_simpler_now">Update 3: it&#8217;s even simpler now</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Groovy 2.4.0 has been released now and building an Android application in Groovy is even simpler. All you have to do is to apply a Gradle plugin. Instructions can be found <a href="https://github.com/groovy/groovy-android-gradle-plugin">here</a>. You absolutely don&#8217;t have to build Groovy from sources or add tasks to your Gradle build as described originally in this post! Just <a href="https://github.com/groovy/groovy-android-gradle-plugin">use the plugin</a>!
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Information below is outdated. Please use the <a href="https://github.com/groovy/groovy-android-gradle-plugin">Gradle plugin !</a>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><em>Update 2: build instructions with the Gradle plugin</em></p>
