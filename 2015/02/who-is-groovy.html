@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Who is Groovy?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    </head>
+  <body>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+ lang: en_US
+</script>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Who is Groovy?</h1>
+	</div>
+
+	<p><em>04 March 2015</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/apache.html">apache</a> 
+	</em>
+		<a href="/blog/tags/OSS.html">OSS</a> 
+	</p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2015/02/who-is-groovy.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2015/02/who-is-groovy.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2015/02/who-is-groovy.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2015/02/who-is-groovy.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2015/02/who-is-groovy.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>With all the changes that the Groovy project is seeing since the beginning of the year, I thought it was a good time to
+make a summary about its history. In particular, with the <a href="http://blog.pivotal.io/pivotal/news-2/groovy-2-4-and-grails-3-0-to-be-last-major-releases-under-pivotal-sponsorship">end of sponsorship from Pivotal</a>, as well as
+<a href="http://restlet.com/blog/2015/03/02/head-of-groovy-project-joins-restlet-to-lead-api-development-tools/">Guillaume Laforge annoucing he is joining Restlet</a>, a lot of people state that Groovy is done. It will be the occasion to talk about
+the history of the project, both in terms of community and sponsorship.</p>
+</div>
+<div class="paragraph">
+<p>First of all, Groovy is, and will remain, alive. Groovy is a community project and we are pleased to announce that <strong><a href="http://glaforge.appspot.com/article/groovy-projects-intends-to-join-the-apache-software-foundation">Groovy
+has started the process to join the Apache Software Foundation</a></strong>. The community deserved it, and even if it will mean some adaptations on
+our side, we think that the <a href="http://apache.org">ASF</a> will be a great fit for the project.</p>
+</div>
+<div class="paragraph">
+<p>To build the statistics you will read in this post, I have used a <a href="https://github.com/melix/blog/blob/master/src/jbake/content/2015/02/commit-stats.groovy">Groovy script</a> (of course!) that
+takes as reference the number of commits. This is far from being a perfect number, because some commits are just
+for fixing typos, while others are full new features and it also totally misses the fact that patches, before Git, didn&#8217;t carry the author
+information or the problem that we maintain multiple branches
+of Groovy, requiring a lot of work, but it gives an idea&#8230; And because people think that end of sponsorship
+may be equivalent to death, I separated commits in two categories: sponsored and community. Sponsored commits are commits
+which are likely to have been made by someone directly paid to contribute on Groovy. We will see how this proportion evolved
+over time.</p>
+</div>
+<div class="paragraph">
+<p>If you think Groovy is dead, please read the following carefully. Let&#8217;s start our journey back in time!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2003_a_dynamic_language_for_the_jvm">2003: A dynamic language for the JVM</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 476 commits <strong>Community</strong>: 476 commits (100%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">James Strachan : 374 commits (78%)</span></strong></p>
+</li>
+<li>
+<p>Boc McWhirter : 76 commits (15%)</p>
+</li>
+<li>
+<p>Sam Pullara : 23 commits (4%)</p>
+</li>
+<li>
+<p>Kasper Nielsen : 2 commits (0%)</p>
+</li>
+<li>
+<p>Aslak Hellesoy : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2003 is the inception year of Groovy. <strong>James Strachan</strong>, in August 2003, wanted to create a dynamic language for the JVM, inspired by Ruby,
+but closer to Java. Groovy was born, and the idea never changed over time: Groovy is the perfect companion for Java, a language which can
+be very close to Java in terms of syntax but also removes a lot of its boilerplate. Bob McWhirter is a famous name in the JVM world, he is
+now Director of Polyglot at Red Hat, so you can see that when he started contributing to the language back then, there was already a story
+for him! Sam Pullara is another very smart guy in the JVM world and he worked for top companies like BEA, Yahoo! or Twitter to name a few.
+He is a technical reviewer for the JavaOne conference.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2004_guillaume_laforge_joins_the_project">2004: Guillaume Laforge joins the project</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 871 commits <strong>Community</strong>: 871 commits (100%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">James Strachan : 495 commits (56%)</span></strong></p>
+</li>
+<li>
+<p>Guillaume Laforge : 101 commits (11%)</p>
+</li>
+<li>
+<p>John Wilson : 70 commits (8%)</p>
+</li>
+<li>
+<p>Sam Pullara : 66 commits (7%)</p>
+</li>
+<li>
+<p>Jeremy Rayner : 33 commits (3%)</p>
+</li>
+<li>
+<p>Chris Poirier : 28 commits (3%)</p>
+</li>
+<li>
+<p>Bing Ran : 21 commits (2%)</p>
+</li>
+<li>
+<p>Steve Goetze : 12 commits (1%)</p>
+</li>
+<li>
+<p>John Stump : 10 commits (1%)</p>
+</li>
+<li>
+<p>Russel Winder : 8 commits (0%)</p>
+</li>
+<li>
+<p>Zohar Melamed : 8 commits (0%)</p>
+</li>
+<li>
+<p>Jochen Theodorou : 7 commits (0%)</p>
+</li>
+<li>
+<p>Damage Control : 4 commits (0%)</p>
+</li>
+<li>
+<p>Boc McWhirter : 3 commits (0%)</p>
+</li>
+<li>
+<p>Christiaan ten Klooster : 3 commits (0%)</p>
+</li>
+<li>
+<p>Yuri Schimke : 2 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Groovy is hosted at <a href="http://www.codehaus.org/">Codehaus</a> (which just has annouced its retirement) and 2004 sees the appearance of famous names of the community. In particular,
+you can already see <strong>Guillaume Laforge</strong> and <strong>Jochen Theodorou</strong>. Both of them still directly work on the project as today. John Wilson started contributing
+the famous XML support of Groovy, and you can also note names like Russel Winder of Gant and <a href="http://gpars.codehaus.org/">GPars</a> fame. Jeremy Rayer&#8217;s work is famous in the Groovy
+community since he wrote the first versions of the Groovy grammar using Antlr.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2005_jochen_theodorou_joins_the_project">2005: Jochen Theodorou joins the project</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 934 commits <strong>Community</strong>: 934 commits (100%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Jochen Theodorou : 244 commits (26%)</span></strong></p>
+</li>
+<li>
+<p>James Strachan : 162 commits (17%)</p>
+</li>
+<li>
+<p>Pilho Kim : 104 commits (11%)</p>
+</li>
+<li>
+<p>John Wilson : 79 commits (8%)</p>
+</li>
+<li>
+<p>Guillaume Laforge : 75 commits (8%)</p>
+</li>
+<li>
+<p>Dierk Koenig : 70 commits (7%)</p>
+</li>
+<li>
+<p>Jeremy Rayner : 62 commits (6%)</p>
+</li>
+<li>
+<p>Christian Stein : 48 commits (5%)</p>
+</li>
+<li>
+<p>Alan Green : 20 commits (2%)</p>
+</li>
+<li>
+<p>Russel Winder : 20 commits (2%)</p>
+</li>
+<li>
+<p>Martin C. Martin : 14 commits (1%)</p>
+</li>
+<li>
+<p>Sam Pullara : 10 commits (1%)</p>
+</li>
+<li>
+<p>John Rose : 8 commits (0%)</p>
+</li>
+<li>
+<p>Hein Meling : 7 commits (0%)</p>
+</li>
+<li>
+<p>Scott Stirling : 6 commits (0%)</p>
+</li>
+<li>
+<p>Franck Rasolo : 5 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>I would tend to think that 2005 is the year when Jochen Theodorou took the technical lead of Groovy. In 2005, he becomes the most prolific contributor,
+even beyond the creator of the language himself. Dierk Koenig makes an appearance here: he is known for his work on <a href="http://gpars.codehaus.org/">GPars</a>, but also for the reference book for Groovy: <a href="http://www.manning.com/koenig2/">Groovy in Action</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2006_rise_of_paul_king">2006: Rise of Paul King</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 480 commits <strong>Community</strong>: 480 commits (100%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Jochen Theodorou : 221 commits (46%)</span></strong></p>
+</li>
+<li>
+<p>John Wilson : 56 commits (11%)</p>
+</li>
+<li>
+<p>Paul King : 54 commits (11%)</p>
+</li>
+<li>
+<p>Guillaume Laforge : 47 commits (9%)</p>
+</li>
+<li>
+<p>Dierk Koenig : 37 commits (7%)</p>
+</li>
+<li>
+<p>Jeremy Rayner : 23 commits (4%)</p>
+</li>
+<li>
+<p>Russel Winder : 14 commits (2%)</p>
+</li>
+<li>
+<p>Guillaume Alleon : 12 commits (2%)</p>
+</li>
+<li>
+<p>Joachim Baumann : 6 commits (1%)</p>
+</li>
+<li>
+<p>Martin C. Martin : 4 commits (0%)</p>
+</li>
+<li>
+<p>Graeme Rocher : 2 commits (0%)</p>
+</li>
+<li>
+<p>Marc Guillemot : 2 commits (0%)</p>
+</li>
+<li>
+<p>Christian Stein : 1 commits (0%)</p>
+</li>
+<li>
+<p>Steve Goetze : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2006 is a very calm year for Groovy in terms of code production. James, the creator of the language, already disappeared from the contributors, and will not contribute anymore. <strong>Guillaume Laforge</strong>, in agreement with the other contributors, <strong>takes the project lead</strong> (he is still the lead today).</p>
+</div>
+<div class="paragraph">
+<p>With half as many commits as in 2007, in retrospect, I would say that this was a critical year: either the project would die, or it would have become what it is today. And my personal feeling is that the person who saved Groovy just appeared in the contributors list: Paul King. <strong>Paul is undoubtfully the most active contributor to Groovy</strong>. He wrote a lot of the Groovy Development Kit, that is to say the APIs without which a language would be nothing. Having a nice language is one thing, having proper APIs and libraries that unleash its full potential is another. Paul King did it. Look at his ranking here: 3rd place. You will never see him ranked lower than that. And guess what? Paul is <strong>not</strong> paid to do this. He <a href="http://www.asert.com.au/">runs his own business</a> and if you want to work with a Groovy expert, he&#8217;s probably the best.</p>
+</div>
+<div class="paragraph">
+<p>Joachim Baumann is a name some people would recognize: he is still working with Groovy and one of the most regular contributors, with the Windows installer. Joachim takes time, for each Groovy release, to produce a Windows installer, which today we are still not capable of handling automatically.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2007_groovy_1_0">2007: Groovy 1.0</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Paul King : 447 commits (30%)</span></strong></p>
+</li>
+<li>
+<p>Jason Dillon : 265 commits (18%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 242 commits (16%)</p>
+</li>
+<li>
+<p>Danno Ferrin : 101 commits (6%)</p>
+</li>
+<li>
+<p>Alex Tkachman (Sponsored) : 87 commits (5%)</p>
+</li>
+<li>
+<p>Graeme Rocher (Sponsored) : 61 commits (4%)</p>
+</li>
+<li>
+<p>Russel Winder : 46 commits (3%)</p>
+</li>
+<li>
+<p>Marc Guillemot : 36 commits (2%)</p>
+</li>
+<li>
+<p>Andres Almiray : 34 commits (2%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 33 commits (2%)</p>
+</li>
+<li>
+<p>Jeremy Rayner : 26 commits (1%)</p>
+</li>
+<li>
+<p>Alexandru Popescu : 24 commits (1%)</p>
+</li>
+<li>
+<p>John Wilson : 22 commits (1%)</p>
+</li>
+<li>
+<p>Joachim Baumann : 21 commits (1%)</p>
+</li>
+<li>
+<p>Jeff Brown : 8 commits (0%)</p>
+</li>
+<li>
+<p>Dierk Koenig : 6 commits (0%)</p>
+</li>
+<li>
+<p>Martin C. Martin : 6 commits (0%)</p>
+</li>
+<li>
+<p>Guillaume Alleon : 4 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2007 is an important year in the history of Groovy. On January, 2d, Groovy 1.0 is out. <strong>Paul King ranks #1 for the first time, and will
+remain on top for a long time</strong>. This year also sees the creation of G2One, the first company build specifically for Groovy and Grails, by Guillaume
+Laforge, Graeme Rocher and Alex Tkachman. Both Graeme and Alex make their first appearance in the contributors graph, and both of them made
+significant contributions to the Groovy ecosystem: Graeme is famous for co-creating the Grails framework, and is still the lead of the project,
+while Alex is the one who contributed major performance improvements to the Groovy runtime (call site caching) and first experimented with
+a static compiler for Groovy (Groovy++).</p>
+</div>
+<div class="paragraph">
+<p>Danno Ferrin contributed what is still one of my personal favorite features of Groovy, AST transformations, and probably one of the reasons
+I got paid to work on Groovy so thank you Danno!</p>
+</div>
+<div class="paragraph">
+<p>Starting from 2007, you will see that the <em>sponsored</em> ratio of commits is changing. People who were employed by G2One fall into that category. As you
+can see, 2007 is more than important for Groovy, it is its second birth. And to conclude that, Groovy won the first prize at JAX 2007 innovation award.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2008_the_g2one_era">2008: The G2One era</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 1069 commits <strong>Sponsored</strong>: 287 commits (26%) <strong>Community</strong>: 782 commits (73%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Paul King : 445 commits (41%)</span></strong></p>
+</li>
+<li>
+<p>Danno Ferrin : 176 commits (16%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 126 commits (11%)</p>
+</li>
+<li>
+<p>Alex Tkachman (Sponsored) : 125 commits (11%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 33 commits (3%)</p>
+</li>
+<li>
+<p>Jim White : 32 commits (2%)</p>
+</li>
+<li>
+<p>Russel Winder : 31 commits (2%)</p>
+</li>
+<li>
+<p>Martin Kempf : 22 commits (2%)</p>
+</li>
+<li>
+<p>Roshan Dawrani : 19 commits (1%)</p>
+</li>
+<li>
+<p>Jeremy Rayner : 14 commits (1%)</p>
+</li>
+<li>
+<p>Martin C. Martin : 12 commits (1%)</p>
+</li>
+<li>
+<p>Jason Dillon : 9 commits (0%)</p>
+</li>
+<li>
+<p>Andres Almiray : 8 commits (0%)</p>
+</li>
+<li>
+<p>Thom Nichols : 5 commits (0%)</p>
+</li>
+<li>
+<p>Graeme Rocher (Sponsored) : 3 commits (0%)</p>
+</li>
+<li>
+<p>Jeff Brown : 3 commits (0%)</p>
+</li>
+<li>
+<p>John Wilson : 3 commits (0%)</p>
+</li>
+<li>
+<p>James Williams : 1 commits (0%)</p>
+</li>
+<li>
+<p>Marc Guillemot : 1 commits (0%)</p>
+</li>
+<li>
+<p>Vladimir Vivien : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In 2008, <strong>Paul King still ranks #1</strong> and you can see that the people who were sponsored by G2One were actually not the main contributors. Actually, most
+of them did consulting to pay salaries, which doesn&#8217;t leave much time to contribute to the language. Hopefully, a great project such as Groovy can rely
+on its community! Guillaume, Graeme and Alex were looking for an opportunity to spend more time on actual development, and it happened in November 2008
+when G2One got acquired by SpringSource.</p>
+</div>
+<div class="paragraph">
+<p>Some of the contributors you see in this list are still actively using Groovy or contributing: Jim White for example is famous for his contributions on the scripting sides of the language. Roshan Dawrani is one of the few guys capable of opening cryptic code and fixing bugs. Jeff Brown is a name you should know, since he is now a key member of the Grails team.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2009_milestones_and_the_inappropriate_quote">2009: milestones and the inappropriate quote</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 835 commits <strong>Sponsored</strong>: 183 commits (21%) <strong>Community</strong>: 652 commits (78%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Paul King : 342 commits (40%)</span></strong></p>
+</li>
+<li>
+<p>Roshan Dawrani : 128 commits (15%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 101 commits (12%)</p>
+</li>
+<li>
+<p>Alex Tkachman (Sponsored) : 41 commits (4%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 40 commits (4%)</p>
+</li>
+<li>
+<p>Jason Dillon : 31 commits (3%)</p>
+</li>
+<li>
+<p>Jim White : 31 commits (3%)</p>
+</li>
+<li>
+<p>Danno Ferrin : 24 commits (2%)</p>
+</li>
+<li>
+<p>Peter Niederwieser : 23 commits (2%)</p>
+</li>
+<li>
+<p>Hamlet D&#8217;Arcy : 18 commits (2%)</p>
+</li>
+<li>
+<p>Russel Winder : 14 commits (1%)</p>
+</li>
+<li>
+<p>Martin C. Martin : 13 commits (1%)</p>
+</li>
+<li>
+<p>Thom Nichols : 13 commits (1%)</p>
+</li>
+<li>
+<p>Andres Almiray : 12 commits (1%)</p>
+</li>
+<li>
+<p>Vladimir Vivien : 3 commits (0%)</p>
+</li>
+<li>
+<p>Graeme Rocher (Sponsored) : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2009 is another important year concluding with the release of Groovy 1.7, the first version of Groovy supporting inner classes
+or the famous power asserts from Peter Niederwieser. If you know Groovy, you must know Peter, the father of the famous Spock testing
+framework which <a href="http://groovy.329449.n5.nabble.com/Ann-Spock-1-0-has-been-released-td5722915.html">just reached 1.0</a>!</p>
+</div>
+<div class="paragraph">
+<p><strong>Hamlet D&#8217;Arcy contributed a lot in terms of code quality</strong>, but also became the first specialist of AST transformations. Andrés Almiray,
+listed here for the first time, is famous for the <a href="http://griffon.codehaus.org/">Griffon</a> framework, a Grails-like framework for desktop applications which is still
+actively developed. 2009 is also the year I started to use Groovy, as a user. I never stopped and actually I started contributing back
+then. At that time, Groovy was still using Subversion (we&#8217;re now using Git like all the cool kids), so it was the good old patch way,
+loosing authorship.</p>
+</div>
+<div class="paragraph">
+<p>This year is also the year when James Strachan wrote a very famous quote about Groovy. This quote is probably the most innapropriately
+used quote about Groovy of all time, because it was done by its creator, but remember that James left the project in 2005!</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+I can honestly say if someone had shown me the Programming in Scala book by Martin Odersky, Lex Spoon &amp; Bill Venners back in 2003 I&#8217;d probably have never created Groovy.
+</blockquote>
+<div class="attribution">
+<cite>on his blog</cite><br>
+&#8212; James Strachan
+</div>
+</div>
+<div class="paragraph">
+<p>First of all James says nothing about the language itself here. He had already left the project and says that <strong>if</strong> he had known about Scala before, he <strong>wouldn&#8217;t</strong> have created Groovy. I am today very happy that he didn&#8217;t know about it, or we would have missed an incredibly powerful language. Groovy today
+is <strong>nothing close</strong> to what it was when James left the project, thanks to the lead of Guillaume Laforge and incredibly talented people like Paul King, Jochen Theodorou and all the contributors listed on this page. Groovy and Scala both have their communities, but also different use cases. I wouldn&#8217;t sell one for the other&#8230;</p>
+</div>
+<div class="paragraph">
+<p>In the end of 2009, another important milestone occurred for project, with VMware acquiring SpringSource.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2010_dsls_all_the_way">2010: DSLs all the way</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 894 commits <strong>Sponsored</strong>: 189 commits (21%) <strong>Community</strong>: 705 commits (78%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Paul King : 443 commits (49%)</span></strong></p>
+</li>
+<li>
+<p>Roshan Dawrani : 134 commits (14%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 96 commits (10%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 93 commits (10%)</p>
+</li>
+<li>
+<p>Hamlet D&#8217;Arcy : 71 commits (7%)</p>
+</li>
+<li>
+<p>Alex Tkachman : 28 commits (3%)</p>
+</li>
+<li>
+<p>Peter Niederwieser : 19 commits (2%)</p>
+</li>
+<li>
+<p>Andres Almiray : 7 commits (0%)</p>
+</li>
+<li>
+<p>Jason Dillon : 1 commits (0%)</p>
+</li>
+<li>
+<p>Russel Winder : 1 commits (0%)</p>
+</li>
+<li>
+<p>Thom Nichols : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2010 is a pretty stable year for Groovy. Groovy reaches 1.8 in 2010 with important features for its incredible DSL design capabilities. With command chain expressions, native JSON support and performance improvements, Groovy put the bar very high in terms of integration in the Java ecosystem. Today, <strong>no other JVM language is as simple as Groovy to integrate with Java</strong>. With cross-compilation and by the use of the very same class model, Groovy is at that date the best language for scripting on the JVM. It is so good that a lot of people start to see it as a better Java and want to use it as a first class language. However, being dynamic, Groovy is still a problem for a category of users&#8230;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2011_time_to_move_to_github">2011: Time to move to GitHub</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 841 commits <strong>Sponsored</strong>: 514 commits (61%) <strong>Community</strong>: 327 commits (38%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Cédric Champeau (Sponsored) : 252 commits (29%)</span></strong></p>
+</li>
+<li>
+<p>Paul King : 212 commits (25%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 163 commits (19%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 98 commits (11%)</p>
+</li>
+<li>
+<p>Jochen : 44 commits (5%)</p>
+</li>
+<li>
+<p>Hamlet D&#8217;Arcy : 33 commits (3%)</p>
+</li>
+<li>
+<p>Roshan Dawrani : 26 commits (3%)</p>
+</li>
+<li>
+<p>Andres Almiray : 1 commits (0%)</p>
+</li>
+<li>
+<p>Andrew Eisenberg : 3 commits (0%)</p>
+</li>
+<li>
+<p>Alex Tkachman : 2 commits (0%)</p>
+</li>
+<li>
+<p>Bobby Warner : 1 commits (0%)</p>
+</li>
+<li>
+<p>Colin Harrington : 1 commits (0%)</p>
+</li>
+<li>
+<p>Dierk Koenig : 1 commits (0%)</p>
+</li>
+<li>
+<p>Dirk Weber : 1 commits (0%)</p>
+</li>
+<li>
+<p>John Wagenleitner : 1 commits (0%)</p>
+</li>
+<li>
+<p>Lari Hotari (Sponsored) : 1 commits (0%)</p>
+</li>
+<li>
+<p>Peter Niederwieser : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In 2011, I became a committer to the Groovy project. As I said, I had contributed several fixes or features for Groovy 1.8, but for the first time, I became a committer and I started to be able to push changes to the codebase without having to ask permission. So this is basically the first time you see my name on the contributors list, but you can see that I am ranking #1 and I have never lost that ranking since then. It surprised me too, but there is a very good reason for that. In october 2011, in addition to being a committer, I also became paid to work on Groovy. Full-time. <strong>I entered the club of lucky people being paid to work on open-source software</strong>. It was sincerely a dream, and I will never be enough thankful to Guillaume Laforge for giving me this opportunity. He changed my life and I <em>think</em> I became a better developer thanks to him. VMware was my employer back then, and while I had never worked on a language before, Guillaume trusted my skills and proposed to me to work on something that would dramatically change the language : a static type checker.</p>
+</div>
+<div class="paragraph">
+<p>I also worked on the infrastructure of the language, starting from the migration to GitHub. It was an important move to make: as you can see, there was a very limited set of committers to Groovy. With <a href="https://github.com/groovy/groovy-core/">GitHub</a>, we had the tool we needed to increase the size of our community and from the numbers that will follow, I think it&#8217;s a success.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2012_groovy_2_and_static_compilation">2012: Groovy 2 and static compilation</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Cédric Champeau (Sponsored) : 515 commits (46%)</span></strong></p>
+</li>
+<li>
+<p>Paul King : 249 commits (22%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 169 commits (15%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 74 commits (6%)</p>
+</li>
+<li>
+<p>PascalSchumacher : 12 commits (1%)</p>
+</li>
+<li>
+<p>Peter Niederwieser : 11 commits (0%)</p>
+</li>
+<li>
+<p>René Scheibe : 11 commits (0%)</p>
+</li>
+<li>
+<p>Andre Steingress : 9 commits (0%)</p>
+</li>
+<li>
+<p>John Wagenleitner : 7 commits (0%)</p>
+</li>
+<li>
+<p>Peter Ledbrook : 6 commits (0%)</p>
+</li>
+<li>
+<p>Andres Almiray : 6 commits (0%)</p>
+</li>
+<li>
+<p>Adrian Nistor : 5 commits (0%)</p>
+</li>
+<li>
+<p>Tim Yates : 5 commits (0%)</p>
+</li>
+<li>
+<p>Baruch Sadogursky : 4 commits (0%)</p>
+</li>
+<li>
+<p>Andrew Eisenberg : 3 commits (0%)</p>
+</li>
+<li>
+<p>Rich Freedman : 3 commits (0%)</p>
+</li>
+<li>
+<p>Stephane Maldini : 3 commits (0%)</p>
+</li>
+<li>
+<p>Andrew Taylor : 2 commits (0%)</p>
+</li>
+<li>
+<p>Jeff Brown : 2 commits (0%)</p>
+</li>
+<li>
+<p>Luke Daley : 2 commits (0%)</p>
+</li>
+<li>
+<p>Tiago Fernandez : 2 commits (0%)</p>
+</li>
+<li>
+<p>Andrey Bloschetsov : 1 commits (0%)</p>
+</li>
+<li>
+<p>Johnny Wey : 1 commits (0%)</p>
+</li>
+<li>
+<p>Kenneth Kousen : 1 commits (0%)</p>
+</li>
+<li>
+<p>Mathieu Bruyen : 1 commits (0%)</p>
+</li>
+<li>
+<p>Paul Bakker : 1 commits (0%)</p>
+</li>
+<li>
+<p>Paulo Poiati : 1 commits (0%)</p>
+</li>
+<li>
+<p>Sean Flanigan : 1 commits (0%)</p>
+</li>
+<li>
+<p>Suk-Hyun Cho : 1 commits (0%)</p>
+</li>
+<li>
+<p>Vladimir Orany : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2012 is one of the most important years for the language. It was the year Groovy 2.0 was released. As you can see, I am still ranking #1 and Paul King, an unpaid contributor, is #2. This tells you the importance of community! Groovy 2 is a major change in the language, because it introduced both optional type checking and static compilation. For the first time, Groovy was able to provide at compile time the same level of feedback that Java would have. Some people wanted to kill me for having introduced that into the language. The truth is that it wasn&#8217;t my decision, but in retrospect, I am very happy with what the language is now. Without this, some people would have abandonned Groovy in favor of other JVM languages like Scala, while now in Groovy you can have the same level of performance as Java, with type safety, powerful type inference, extension methods, functional style programming and without the boilerplate. And it&#8217;s optional. I don&#8217;t know any other language that allows this, especially when you take type checking extensions into account, a feature that allows Groovy to go far beyond what Java and other languages offer in terms of type safety or static compilation.</p>
+</div>
+<div class="paragraph">
+<p>2012 also sees the appearance of Pascal Schumacher, a silent but very active Groovy committer. Pascal does since 2012 an amazing job in helping us filtering JIRA issues, writing bugfixes, reviewing pull requests and lately writing documentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2013_documentation_effort_and_explosion_of_contributions">2013: Documentation effort and explosion of contributions</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Cédric Champeau (Sponsored) : 244 commits (22%)</span></strong></p>
+</li>
+<li>
+<p>Paul King : 188 commits (17%)</p>
+</li>
+<li>
+<p>PascalSchumacher : 180 commits (16%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 96 commits (8%)</p>
+</li>
+<li>
+<p>Thibault Kruse : 84 commits (7%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 54 commits (4%)</p>
+</li>
+<li>
+<p>Andrey Bloschetsov : 43 commits (3%)</p>
+</li>
+<li>
+<p>Andre Steingress : 36 commits (3%)</p>
+</li>
+<li>
+<p>Pascal Schumacher : 27 commits (2%)</p>
+</li>
+<li>
+<p>Tim Yates : 24 commits (2%)</p>
+</li>
+<li>
+<p>René Scheibe : 12 commits (1%)</p>
+</li>
+<li>
+<p>kruset : 12 commits (1%)</p>
+</li>
+<li>
+<p>Martin Hauner : 8 commits (0%)</p>
+</li>
+<li>
+<p>Andres Almiray : 8 commits (0%)</p>
+</li>
+<li>
+<p>Larry Jacobson : 4 commits (0%)</p>
+</li>
+<li>
+<p>John Wagenleitner : 6 commits (0%)</p>
+</li>
+<li>
+<p>Paolo Di Tommaso : 6 commits (0%)</p>
+</li>
+<li>
+<p>Jeff Scott Brown (Sponsored) : 5 commits (0%)</p>
+</li>
+<li>
+<p>Masato Nagai : 5 commits (0%)</p>
+</li>
+<li>
+<p>Jochen Eddelbüttel : 3 commits (0%)</p>
+</li>
+<li>
+<p>hbaykuslar : 3 commits (0%)</p>
+</li>
+<li>
+<p>shalecraig : 3 commits (0%)</p>
+</li>
+<li>
+<p>Andrew Eisenberg : 2 commits (0%)</p>
+</li>
+<li>
+<p>Jacopo Cappellato : 2 commits (0%)</p>
+</li>
+<li>
+<p>Peter Niederwieser : 2 commits (0%)</p>
+</li>
+<li>
+<p>Rafael Luque : 2 commits (0%)</p>
+</li>
+<li>
+<p>Vladimir Orany : 1 commits (0%)</p>
+</li>
+<li>
+<p>saschaklein : 2 commits (0%)</p>
+</li>
+<li>
+<p>seanjreilly : 2 commits (0%)</p>
+</li>
+<li>
+<p>upcrob : 2 commits (0%)</p>
+</li>
+<li>
+<p>Adrian Nistor : 1 commits (0%)</p>
+</li>
+<li>
+<p>Alan Thompson : 1 commits (0%)</p>
+</li>
+<li>
+<p>Alessio Stalla : 1 commits (0%)</p>
+</li>
+<li>
+<p>DJBen : 1 commits (0%)</p>
+</li>
+<li>
+<p>Eric Dahl : 1 commits (0%)</p>
+</li>
+<li>
+<p>Ingo Hoffmann : 1 commits (0%)</p>
+</li>
+<li>
+<p>JBaruch : 1 commits (0%)</p>
+</li>
+<li>
+<p>Jacob Aae Mikkelsen : 1 commits (0%)</p>
+</li>
+<li>
+<p>Jim White : 1 commits (0%)</p>
+</li>
+<li>
+<p>John Engelman : 1 commits (0%)</p>
+</li>
+<li>
+<p>Jon Schneider : 1 commits (0%)</p>
+</li>
+<li>
+<p>Karel Piwko : 1 commits (0%)</p>
+</li>
+<li>
+<p>Kenneth Endfinger : 1 commits (0%)</p>
+</li>
+<li>
+<p>Kohsuke Kawaguchi : 1 commits (0%)</p>
+</li>
+<li>
+<p>Luke Kirby : 1 commits (0%)</p>
+</li>
+<li>
+<p>Michal Mally : 1 commits (0%)</p>
+</li>
+<li>
+<p>Miro Bezjak : 1 commits (0%)</p>
+</li>
+<li>
+<p>Olivier Croquette : 1 commits (0%)</p>
+</li>
+<li>
+<p>Rob Upcraft : 1 commits (0%)</p>
+</li>
+<li>
+<p>Sergey Egorov : 1 commits (0%)</p>
+</li>
+<li>
+<p>Stefan Armbruster : 1 commits (0%)</p>
+</li>
+<li>
+<p>Yasuharu NAKANO : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>While continuing to improve Groovy, 2013 was very important for the community. You can start to see the GitHub effect here, with <strong>much</strong> more contributors than before. It is impressive to see the difference before 2011 and after. The number of contributors is continously growing. In 2013, 63% of commits came from the community!</p>
+</div>
+<div class="paragraph">
+<p>In February 2013, we also launched a new big project: the documentation and website overhaul. It is incredible to think that this effort is still uncomplete, but if you see that the old wiki has more than a thousand page or contents (often outdated), you can imagine what effort it takes to rewrite the documentation. Hopefully, we&#8217;re close to filling the gap now, and with the demise of Codehaus, we officially launched our <a href="http://groovy-lang.org">new website</a> where you can see the result of this job.</p>
+</div>
+<div class="paragraph">
+<p>I also started working on Android support during 2013, for a first overview in GR8Conf 2014, and continued working on improving the infrastructure, with Bintray, TeamCity and Gradle. And Pivotal was born, out of EMC and VMware. Groovy and Grails, along with the Spring Framework, became part of this new company which is still paying me today to work on Groovy (and I, we, should be very thankful for this).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2014_towards_android_support">2014: Towards Android support</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Cédric Champeau (Sponsored) : 446 commits (37%)</span></strong></p>
+</li>
+<li>
+<p>Paul King : 261 commits (22%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 85 commits (7%)</p>
+</li>
+<li>
+<p>Guillaume Laforge (Sponsored) : 61 commits (5%)</p>
+</li>
+<li>
+<p>Thibault Kruse : 54 commits (4%)</p>
+</li>
+<li>
+<p>Pascal Schumacher : 47 commits (3%)</p>
+</li>
+<li>
+<p>Jim White : 26 commits (2%)</p>
+</li>
+<li>
+<p>Yu Kobayashi : 18 commits (1%)</p>
+</li>
+<li>
+<p>Andre Steingress : 16 commits (1%)</p>
+</li>
+<li>
+<p>Richard Hightower : 3 commits (0%)</p>
+</li>
+<li>
+<p>James Northrop : 11 commits (0%)</p>
+</li>
+<li>
+<p>Kenneth Endfinger : 9 commits (0%)</p>
+</li>
+<li>
+<p>Tomek Janiszewski : 9 commits (0%)</p>
+</li>
+<li>
+<p>Matias Bjarland : 8 commits (0%)</p>
+</li>
+<li>
+<p>Tobia Conforto : 8 commits (0%)</p>
+</li>
+<li>
+<p>Michael Schuenck : 7 commits (0%)</p>
+</li>
+<li>
+<p>Sargis Harutyunyan : 7 commits (0%)</p>
+</li>
+<li>
+<p>Andrey Bloschetsov : 6 commits (0%)</p>
+</li>
+<li>
+<p>Craig Andrews : 5 commits (0%)</p>
+</li>
+<li>
+<p>Kent : 5 commits (0%)</p>
+</li>
+<li>
+<p>Paolo Di Tommaso : 5 commits (0%)</p>
+</li>
+<li>
+<p>Peter Ledbrook : 5 commits (0%)</p>
+</li>
+<li>
+<p>Sergey Egorov : 5 commits (0%)</p>
+</li>
+<li>
+<p>Yasuharu Nakano : 5 commits (0%)</p>
+</li>
+<li>
+<p>Andrew Hamilton : 4 commits (0%)</p>
+</li>
+<li>
+<p>Lari Hotari (Sponsored) : 4 commits (0%)</p>
+</li>
+<li>
+<p>Bloshchetsov Andrey Evgenyevich : 3 commits (0%)</p>
+</li>
+<li>
+<p>Johannes Link : 3 commits (0%)</p>
+</li>
+<li>
+<p>Keegan Witt : 3 commits (0%)</p>
+</li>
+<li>
+<p>Tim Yates : 3 commits (0%)</p>
+</li>
+<li>
+<p>anto_belgin : 3 commits (0%)</p>
+</li>
+<li>
+<p>Baruch Sadogursky : 2 commits (0%)</p>
+</li>
+<li>
+<p>Dan Allen : 2 commits (0%)</p>
+</li>
+<li>
+<p>Jan Sykora : 2 commits (0%)</p>
+</li>
+<li>
+<p>John Wagenleitner : 2 commits (0%)</p>
+</li>
+<li>
+<p>Luke Kirby : 2 commits (0%)</p>
+</li>
+<li>
+<p>Martin Stockhammer : 2 commits (0%)</p>
+</li>
+<li>
+<p>UEHARA Junji : 2 commits (0%)</p>
+</li>
+<li>
+<p>Vihang D : 2 commits (0%)</p>
+</li>
+<li>
+<p>Andres Almiray : 2 commits (0%)</p>
+</li>
+<li>
+<p>Andy Hamilton : 1 commits (0%)</p>
+</li>
+<li>
+<p>Bobby Warner : 1 commits (0%)</p>
+</li>
+<li>
+<p>Carsten Lenz : 1 commits (0%)</p>
+</li>
+<li>
+<p>Chris Earle : 1 commits (0%)</p>
+</li>
+<li>
+<p>David Avenante : 1 commits (0%)</p>
+</li>
+<li>
+<p>David Nahodil : 1 commits (0%)</p>
+</li>
+<li>
+<p>David Tiselius : 1 commits (0%)</p>
+</li>
+<li>
+<p>Dimitar Dimitrov : 1 commits (0%)</p>
+</li>
+<li>
+<p>Grant McConnaughey : 1 commits (0%)</p>
+</li>
+<li>
+<p>Jeff Sheets : 1 commits (0%)</p>
+</li>
+<li>
+<p>Jess Sightler : 1 commits (0%)</p>
+</li>
+<li>
+<p>Logan Gorence : 1 commits (0%)</p>
+</li>
+<li>
+<p>Luke Daley : 1 commits (0%)</p>
+</li>
+<li>
+<p>Manuel Prinz : 1 commits (0%)</p>
+</li>
+<li>
+<p>Marc Guillemot : 1 commits (0%)</p>
+</li>
+<li>
+<p>Marcin Grzejszczak : 1 commits (0%)</p>
+</li>
+<li>
+<p>Nathan Mische : 1 commits (0%)</p>
+</li>
+<li>
+<p>Peter Swire : 1 commits (0%)</p>
+</li>
+<li>
+<p>Sagar Sane : 1 commits (0%)</p>
+</li>
+<li>
+<p>Stephen Mallette : 1 commits (0%)</p>
+</li>
+<li>
+<p>Tobias Schulte : 1 commits (0%)</p>
+</li>
+<li>
+<p>Wil Selwood : 1 commits (0%)</p>
+</li>
+<li>
+<p>davidmichaelkarr : 1 commits (0%)</p>
+</li>
+<li>
+<p>fintelia : 1 commits (0%)</p>
+</li>
+<li>
+<p>kruset : 1 commits (0%)</p>
+</li>
+<li>
+<p>paul-bjorkstrand : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2014 was a difficult year. We had a lot of work to do on the documentation side, new features to deliver (traits) and an important topic we definitely wanted to highlight: Android support. This took longer than expected, but in the end, the new <a href="http://beta.groovy-lang.org/releasenotes/groovy-2.4.html">Groovy 2.4</a>. We&#8217;re lucky to have half of the commits coming from the community here. Especially, lots of people helped us on the documentation. And it wasn&#8217;t easy, because our documentation requires that every snippet of code that appears in the docs belongs to a unit test, to make sure that the documentation is always up-to-date.</p>
+</div>
+<div class="paragraph">
+<p>Meanwhile, at the end of the year, we learnt from Pivotal that they would end sponsoring our jobs. It means that Guillaume Laforge, Jochen Theodorou and myself, for the Groovy team, plus Graeme Rocher, Jeff Brown and Lari Hotari, for the Grails team, were both loosing their jobs and full time to work on the project at the same time. This wasn&#8217;t really a surprise and I am very happy I could work for so long on Groovy, full time, but as I said in a previous post I also wish I will still be able to do that, because you can see from the numbers and features that it matters. If you wonder, we are still discussing with several potential sponsors.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2015_your_story">2015: Your story</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Total</strong>: 178 commits <strong>Sponsored</strong>: 81 commits (45%) <strong>Community</strong>: 97 commits (54%)</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Cédric Champeau (Sponsored) : 69 commits (38%)</span></strong></p>
+</li>
+<li>
+<p>Pascal Schumacher : 59 commits (33%)</p>
+</li>
+<li>
+<p>Jochen Theodorou (Sponsored) : 12 commits (6%)</p>
+</li>
+<li>
+<p>Paul King : 12 commits (6%)</p>
+</li>
+<li>
+<p>JBrownVisualSpection : 7 commits (3%)</p>
+</li>
+<li>
+<p>Yu Kobayashi : 3 commits (1%)</p>
+</li>
+<li>
+<p>Christoph Frick : 2 commits (1%)</p>
+</li>
+<li>
+<p>Kamil Szymanski : 2 commits (1%)</p>
+</li>
+<li>
+<p>Michael Schuenck : 2 commits (1%)</p>
+</li>
+<li>
+<p>Sean Gilligan : 2 commits (1%)</p>
+</li>
+<li>
+<p>Sergey Egorov : 2 commits (1%)</p>
+</li>
+<li>
+<p>Thibault Kruse : 2 commits (1%)</p>
+</li>
+<li>
+<p>Andy Wilkinson : 1 commits (0%)</p>
+</li>
+<li>
+<p>Maksym Stavytskyi : 1 commits (0%)</p>
+</li>
+<li>
+<p>Mario Garcia : 1 commits (0%)</p>
+</li>
+<li>
+<p>Radovan Synek : 1 commits (0%)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>2015 will be another important year. It&#8217;s going to be huge for the community. Guillaume Laforge announced that he was joining Restlet, so for the first time since 2007 he will not be fully employed to work on Groovy, but I don&#8217;t expect this to have a big impact on the language development itself: as you can see from the numbers, about half of the commits already come from the community and Guillaume didn&#8217;t contribute much code lately. He was instead the lead of the project, the one that took decisions, the one speaking about the project and talking to and leading the community. He was the voice. It was a hard job, a very important one for Groovy. Guillaume is still today the lead of the project, and he will continue to contribute to the language, but I know from him that he wanted to be able to do more code, and put Groovy in action into a new project.</p>
+</div>
+<div class="paragraph">
+<p>With the <a href="http://blog.pivotal.io/pivotal/news-2/groovy-2-4-and-grails-3-0-to-be-last-major-releases-under-pivotal-sponsorship">end of sponsorship of Pivotal</a>, the <a href="http://www.codehaus.org/">dismiss of Codehaus</a> and <a href="http://restlet.com/blog/2015/03/02/head-of-groovy-project-joins-restlet-to-lead-api-development-tools/">Guillaume&#8217;s decision</a>, it became even more important to move Groovy to a foundation where it will be able to live with or without us. I have honestly no idea where I will work in a few weeks now. I sincerely hope I will still be able to contribute to the language full time, but let&#8217;s be clear: today, it is very unlikely this is going to happen. It makes it very important for the project to be able to develop the community even more. We had more than 4.5 million downloads last year. This is huge. And with Android support, I see a lot of potential, even if we have tough competition with other languages and people being paid to develop them. The <strong><a href="http://apache.org">Apache Software Foundation</a> is going to help us with securing the future of the language and building a community</strong>. I am proud of what you have done, collectively, and this is not over. Groovy is ready for a rebirth under the Apache umbrella!</p>
+</div>
+<div class="paragraph">
+<p>More than ever, the future of Groovy is you.</p>
+</div>
+<div class="paragraph">
+<p>To conclude this post, here are the top 10 contributors, in terms of number of commits, of Groovy, for the past 12 years. Congratulations Paul and thanks to our 100+ contributors!</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><span class="red">Paul King :Paul King : 2653 commits (23%)</span></strong></p>
+</li>
+<li>
+<p><strong>Jochen Theodorou</strong> : 1562 commits (13%)</p>
+</li>
+<li>
+<p><strong>Cédric Champeau</strong> : 1526 commits (13%)</p>
+</li>
+<li>
+<p><strong>James Strachan</strong> : 1031 commits (9%)</p>
+</li>
+<li>
+<p><strong>Guillaume Laforge</strong> : 709 commits (6%)</p>
+</li>
+<li>
+<p><strong>Roshan Dawrani</strong> : 307 commits (2%)</p>
+</li>
+<li>
+<p><strong>Jason Dillon</strong> : 306 commits (2%)</p>
+</li>
+<li>
+<p><strong>Danno Ferrin</strong> : 301 commits (2%)</p>
+</li>
+<li>
+<p><strong>Alex Tkachman</strong> : 283 commits (2%)</p>
+</li>
+<li>
+<p><strong>John Wilson</strong> : 230 commits (2%)</p>
+</li>
+</ol>
+</div>
+</div>
+</div></p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2015/02/who-is-groovy.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2015/02/who-is-groovy.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2015/02/who-is-groovy.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2015/02/who-is-groovy.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'who_is_groovy_draft';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
+  </body>
+</html>
