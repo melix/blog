@@ -1,0 +1,498 @@
+= Who is Groovy?
+Cédric Champeau
+2015-03-04
+:jbake-type: post
+:jbake-tags: groovy,apache,OSS
+:jbake-status: published
+:source-highlighter: prettify
+:id: who_is_groovy
+:groovylang: http://beta.groovy-lang.org
+:gradle: http://gradle.org
+:griffon: http://griffon.codehaus.org/
+:gpars: http://gpars.codehaus.org/
+:apache: http://apache.org
+:script-url: https://github.com/melix/blog/blob/master/src/jbake/content/2015/02/commit-stats.groovy
+:regina: http://www.manning.com/koenig2/
+:eos: http://blog.pivotal.io/pivotal/news-2/groovy-2-4-and-grails-3-0-to-be-last-major-releases-under-pivotal-sponsorship
+:codehaus: http://www.codehaus.org/
+:guillaume-restlet: http://restlet.com/blog/2015/03/02/head-of-groovy-project-joins-restlet-to-lead-api-development-tools/
+:groovy-gh: https://github.com/groovy/groovy-core/
+:groovy-asf: http://glaforge.appspot.com/article/groovy-projects-intends-to-join-the-apache-software-foundation
+:icons: font
+
+With all the changes that the Groovy project is seeing since the beginning of the year, I thought it was a good time to
+make a summary about its history. In particular, with the {eos}[end of sponsorship from Pivotal], as well as 
+{guillaume-restlet}[Guillaume Laforge annoucing he is joining Restlet], a lot of people state that Groovy is done. It will be the occasion to talk about
+the history of the project, both in terms of community and sponsorship.
+
+First of all, Groovy is, and will remain, alive. Groovy is a community project and we are pleased to announce that *{groovy-asf}[Groovy
+has started the process to join the Apache Software Foundation]*. The community deserved it, and even if it will mean some adaptations on
+our side, we think that the {apache}[ASF] will be a great fit for the project.
+
+To build the statistics you will read in this post, I have used a {script-url}[Groovy script] (of course!) that
+takes as reference the number of commits. This is far from being a perfect number, because some commits are just
+for fixing typos, while others are full new features and it also totally misses the fact that patches, before Git, didn't carry the author
+information or the problem that we maintain multiple branches
+of Groovy, requiring a lot of work, but it gives an idea... And because people think that end of sponsorship
+may be equivalent to death, I separated commits in two categories: sponsored and community. Sponsored commits are commits
+which are likely to have been made by someone directly paid to contribute on Groovy. We will see how this proportion evolved
+over time.
+
+If you think Groovy is dead, please read the following carefully. Let's start our journey back in time!
+
+== 2003: A dynamic language for the JVM
+
+*Total*: 476 commits *Community*: 476 commits (100%)
+
+. *[red]#James Strachan : 374 commits (78%)#*
+. Boc McWhirter : 76 commits (15%)
+. Sam Pullara : 23 commits (4%)
+. Kasper Nielsen : 2 commits (0%)
+. Aslak Hellesoy : 1 commits (0%)
+
+2003 is the inception year of Groovy. *James Strachan*, in August 2003, wanted to create a dynamic language for the JVM, inspired by Ruby, 
+but closer to Java. Groovy was born, and the idea never changed over time: Groovy is the perfect companion for Java, a language which can 
+be very close to Java in terms of syntax but also removes a lot of its boilerplate. Bob McWhirter is a famous name in the JVM world, he is
+now Director of Polyglot at Red Hat, so you can see that when he started contributing to the language back then, there was already a story
+for him! Sam Pullara is another very smart guy in the JVM world and he worked for top companies like BEA, Yahoo! or Twitter to name a few.
+He is a technical reviewer for the JavaOne conference.
+
+== 2004: Guillaume Laforge joins the project
+
+*Total*: 871 commits *Community*: 871 commits (100%)
+
+. *[red]#James Strachan : 495 commits (56%)#*
+. Guillaume Laforge : 101 commits (11%)
+. John Wilson : 70 commits (8%)
+. Sam Pullara : 66 commits (7%)
+. Jeremy Rayner : 33 commits (3%)
+. Chris Poirier : 28 commits (3%)
+. Bing Ran : 21 commits (2%)
+. Steve Goetze : 12 commits (1%)
+. John Stump : 10 commits (1%)
+. Russel Winder : 8 commits (0%)
+. Zohar Melamed : 8 commits (0%)
+. Jochen Theodorou : 7 commits (0%)
+. Damage Control : 4 commits (0%)
+. Boc McWhirter : 3 commits (0%)
+. Christiaan ten Klooster : 3 commits (0%)
+. Yuri Schimke : 2 commits (0%)
+
+Groovy is hosted at {codehaus}[Codehaus] (which just has annouced its retirement) and 2004 sees the appearance of famous names of the community. In particular,
+you can already see *Guillaume Laforge* and *Jochen Theodorou*. Both of them still directly work on the project as today. John Wilson started contributing
+the famous XML support of Groovy, and you can also note names like Russel Winder of Gant and {gpars}[GPars] fame. Jeremy Rayer's work is famous in the Groovy
+community since he wrote the first versions of the Groovy grammar using Antlr.
+
+== 2005: Jochen Theodorou joins the project
+
+*Total*: 934 commits *Community*: 934 commits (100%)
+
+. *[red]#Jochen Theodorou : 244 commits (26%)#*
+. James Strachan : 162 commits (17%)
+. Pilho Kim : 104 commits (11%)
+. John Wilson : 79 commits (8%)
+. Guillaume Laforge : 75 commits (8%)
+. Dierk Koenig : 70 commits (7%)
+. Jeremy Rayner : 62 commits (6%)
+. Christian Stein : 48 commits (5%)
+. Alan Green : 20 commits (2%)
+. Russel Winder : 20 commits (2%)
+. Martin C. Martin : 14 commits (1%)
+. Sam Pullara : 10 commits (1%)
+. John Rose : 8 commits (0%)
+. Hein Meling : 7 commits (0%)
+. Scott Stirling : 6 commits (0%)
+. Franck Rasolo : 5 commits (0%)
+
+I would tend to think that 2005 is the year when Jochen Theodorou took the technical lead of Groovy. In 2005, he becomes the most prolific contributor,
+even beyond the creator of the language himself. Dierk Koenig makes an appearance here: he is known for his work on {gpars}[GPars], but also for the reference book for Groovy: {regina}[Groovy in Action].
+
+== 2006: Rise of Paul King
+
+*Total*: 480 commits *Community*: 480 commits (100%)
+
+. *[red]#Jochen Theodorou : 221 commits (46%)#*
+. John Wilson : 56 commits (11%)
+. Paul King : 54 commits (11%)
+. Guillaume Laforge : 47 commits (9%)
+. Dierk Koenig : 37 commits (7%)
+. Jeremy Rayner : 23 commits (4%)
+. Russel Winder : 14 commits (2%)
+. Guillaume Alleon : 12 commits (2%)
+. Joachim Baumann : 6 commits (1%)
+. Martin C. Martin : 4 commits (0%)
+. Graeme Rocher : 2 commits (0%)
+. Marc Guillemot : 2 commits (0%)
+. Christian Stein : 1 commits (0%)
+. Steve Goetze : 1 commits (0%)
+
+2006 is a very calm year for Groovy in terms of code production. James, the creator of the language, already disappeared from the contributors, and will not contribute anymore. *Guillaume Laforge*, in agreement with the other contributors, *takes the project lead* (he is still the lead today).
+
+With half as many commits as in 2007, in retrospect, I would say that this was a critical year: either the project would die, or it would have become what it is today. And my personal feeling is that the person who saved Groovy just appeared in the contributors list: Paul King. *Paul is undoubtfully the most active contributor to Groovy*. He wrote a lot of the Groovy Development Kit, that is to say the APIs without which a language would be nothing. Having a nice language is one thing, having proper APIs and libraries that unleash its full potential is another. Paul King did it. Look at his ranking here: 3rd place. You will never see him ranked lower than that. And guess what? Paul is *not* paid to do this. He http://www.asert.com.au/[runs his own business] and if you want to work with a Groovy expert, he's probably the best.
+
+Joachim Baumann is a name some people would recognize: he is still working with Groovy and one of the most regular contributors, with the Windows installer. Joachim takes time, for each Groovy release, to produce a Windows installer, which today we are still not capable of handling automatically.
+
+== 2007: Groovy 1.0
+
+. *[red]#Paul King : 447 commits (30%)#*
+. Jason Dillon : 265 commits (18%)
+. Jochen Theodorou (Sponsored) : 242 commits (16%)
+. Danno Ferrin : 101 commits (6%)
+. Alex Tkachman (Sponsored) : 87 commits (5%)
+. Graeme Rocher (Sponsored) : 61 commits (4%)
+. Russel Winder : 46 commits (3%)
+. Marc Guillemot : 36 commits (2%)
+. Andres Almiray : 34 commits (2%)
+. Guillaume Laforge (Sponsored) : 33 commits (2%)
+. Jeremy Rayner : 26 commits (1%)
+. Alexandru Popescu : 24 commits (1%)
+. John Wilson : 22 commits (1%)
+. Joachim Baumann : 21 commits (1%)
+. Jeff Brown : 8 commits (0%)
+. Dierk Koenig : 6 commits (0%)
+. Martin C. Martin : 6 commits (0%)
+. Guillaume Alleon : 4 commits (0%)
+
+2007 is an important year in the history of Groovy. On January, 2d, Groovy 1.0 is out. *Paul King ranks #1 for the first time, and will 
+remain on top for a long time*. This year also sees the creation of G2One, the first company build specifically for Groovy and Grails, by Guillaume
+Laforge, Graeme Rocher and Alex Tkachman. Both Graeme and Alex make their first appearance in the contributors graph, and both of them made
+significant contributions to the Groovy ecosystem: Graeme is famous for co-creating the Grails framework, and is still the lead of the project,
+while Alex is the one who contributed major performance improvements to the Groovy runtime (call site caching) and first experimented with
+a static compiler for Groovy (Groovy++).
+
+Danno Ferrin contributed what is still one of my personal favorite features of Groovy, AST transformations, and probably one of the reasons 
+I got paid to work on Groovy so thank you Danno!
+
+Starting from 2007, you will see that the _sponsored_ ratio of commits is changing. People who were employed by G2One fall into that category. As you
+can see, 2007 is more than important for Groovy, it is its second birth. And to conclude that, Groovy won the first prize at JAX 2007 innovation award.
+
+== 2008: The G2One era
+
+*Total*: 1069 commits *Sponsored*: 287 commits (26%) *Community*: 782 commits (73%)
+
+. *[red]#Paul King : 445 commits (41%)#*
+. Danno Ferrin : 176 commits (16%)
+. Jochen Theodorou (Sponsored) : 126 commits (11%)
+. Alex Tkachman (Sponsored) : 125 commits (11%)
+. Guillaume Laforge (Sponsored) : 33 commits (3%)
+. Jim White : 32 commits (2%)
+. Russel Winder : 31 commits (2%)
+. Martin Kempf : 22 commits (2%)
+. Roshan Dawrani : 19 commits (1%)
+. Jeremy Rayner : 14 commits (1%)
+. Martin C. Martin : 12 commits (1%)
+. Jason Dillon : 9 commits (0%)
+. Andres Almiray : 8 commits (0%)
+. Thom Nichols : 5 commits (0%)
+. Graeme Rocher (Sponsored) : 3 commits (0%)
+. Jeff Brown : 3 commits (0%)
+. John Wilson : 3 commits (0%)
+. James Williams : 1 commits (0%)
+. Marc Guillemot : 1 commits (0%)
+. Vladimir Vivien : 1 commits (0%)
+
+In 2008, *Paul King still ranks #1* and you can see that the people who were sponsored by G2One were actually not the main contributors. Actually, most
+of them did consulting to pay salaries, which doesn't leave much time to contribute to the language. Hopefully, a great project such as Groovy can rely
+on its community! Guillaume, Graeme and Alex were looking for an opportunity to spend more time on actual development, and it happened in November 2008
+when G2One got acquired by SpringSource.
+
+Some of the contributors you see in this list are still actively using Groovy or contributing: Jim White for example is famous for his contributions on the scripting sides of the language. Roshan Dawrani is one of the few guys capable of opening cryptic code and fixing bugs. Jeff Brown is a name you should know, since he is now a key member of the Grails team.
+
+== 2009: milestones and the inappropriate quote
+
+*Total*: 835 commits *Sponsored*: 183 commits (21%) *Community*: 652 commits (78%)
+
+. *[red]#Paul King : 342 commits (40%)#*
+. Roshan Dawrani : 128 commits (15%)
+. Jochen Theodorou (Sponsored) : 101 commits (12%)
+. Alex Tkachman (Sponsored) : 41 commits (4%)
+. Guillaume Laforge (Sponsored) : 40 commits (4%)
+. Jason Dillon : 31 commits (3%)
+. Jim White : 31 commits (3%)
+. Danno Ferrin : 24 commits (2%)
+. Peter Niederwieser : 23 commits (2%)
+. Hamlet D'Arcy : 18 commits (2%)
+. Russel Winder : 14 commits (1%)
+. Martin C. Martin : 13 commits (1%)
+. Thom Nichols : 13 commits (1%)
+. Andres Almiray : 12 commits (1%)
+. Vladimir Vivien : 3 commits (0%)
+. Graeme Rocher (Sponsored) : 1 commits (0%)
+
+2009 is another important year concluding with the release of Groovy 1.7, the first version of Groovy supporting inner classes 
+or the famous power asserts from Peter Niederwieser. If you know Groovy, you must know Peter, the father of the famous Spock testing
+framework which http://groovy.329449.n5.nabble.com/Ann-Spock-1-0-has-been-released-td5722915.html[just reached 1.0]!
+
+*Hamlet D'Arcy contributed a lot in terms of code quality*, but also became the first specialist of AST transformations. Andrés Almiray,
+listed here for the first time, is famous for the {griffon}[Griffon] framework, a Grails-like framework for desktop applications which is still
+actively developed. 2009 is also the year I started to use Groovy, as a user. I never stopped and actually I started contributing back
+then. At that time, Groovy was still using Subversion (we're now using Git like all the cool kids), so it was the good old patch way,
+loosing authorship.
+
+This year is also the year when James Strachan wrote a very famous quote about Groovy. This quote is probably the most innapropriately
+used quote about Groovy of all time, because it was done by its creator, but remember that James left the project in 2005! 
+
+[quote, James Strachan, on his blog]
+I can honestly say if someone had shown me the Programming in Scala book by Martin Odersky, Lex Spoon & Bill Venners back in 2003 I'd probably have never created Groovy.
+
+First of all James says nothing about the language itself here. He had already left the project and says that *if* he had known about Scala before, he *wouldn't* have created Groovy. I am today very happy that he didn't know about it, or we would have missed an incredibly powerful language. Groovy today
+is *nothing close* to what it was when James left the project, thanks to the lead of Guillaume Laforge and incredibly talented people like Paul King, Jochen Theodorou and all the contributors listed on this page. Groovy and Scala both have their communities, but also different use cases. I wouldn't sell one for the other...
+
+In the end of 2009, another important milestone occurred for project, with VMware acquiring SpringSource.
+
+== 2010: DSLs all the way
+
+*Total*: 894 commits *Sponsored*: 189 commits (21%) *Community*: 705 commits (78%)
+
+. *[red]#Paul King : 443 commits (49%)#*
+. Roshan Dawrani : 134 commits (14%)
+. Jochen Theodorou (Sponsored) : 96 commits (10%)
+. Guillaume Laforge (Sponsored) : 93 commits (10%)
+. Hamlet D'Arcy : 71 commits (7%)
+. Alex Tkachman : 28 commits (3%)
+. Peter Niederwieser : 19 commits (2%)
+. Andres Almiray : 7 commits (0%)
+. Jason Dillon : 1 commits (0%)
+. Russel Winder : 1 commits (0%)
+. Thom Nichols : 1 commits (0%)
+
+2010 is a pretty stable year for Groovy. Groovy reaches 1.8 in 2010 with important features for its incredible DSL design capabilities. With command chain expressions, native JSON support and performance improvements, Groovy put the bar very high in terms of integration in the Java ecosystem. Today, *no other JVM language is as simple as Groovy to integrate with Java*. With cross-compilation and by the use of the very same class model, Groovy is at that date the best language for scripting on the JVM. It is so good that a lot of people start to see it as a better Java and want to use it as a first class language. However, being dynamic, Groovy is still a problem for a category of users...
+
+== 2011: Time to move to GitHub
+
+*Total*: 841 commits *Sponsored*: 514 commits (61%) *Community*: 327 commits (38%)
+
+. *[red]#Cédric Champeau (Sponsored) : 252 commits (29%)#*
+. Paul King : 212 commits (25%)
+. Jochen Theodorou (Sponsored) : 163 commits (19%)
+. Guillaume Laforge (Sponsored) : 98 commits (11%)
+. Jochen : 44 commits (5%)
+. Hamlet D'Arcy : 33 commits (3%)
+. Roshan Dawrani : 26 commits (3%)
+. Andres Almiray : 1 commits (0%)
+. Andrew Eisenberg : 3 commits (0%)
+. Alex Tkachman : 2 commits (0%)
+. Bobby Warner : 1 commits (0%)
+. Colin Harrington : 1 commits (0%)
+. Dierk Koenig : 1 commits (0%)
+. Dirk Weber : 1 commits (0%)
+. John Wagenleitner : 1 commits (0%)
+. Lari Hotari (Sponsored) : 1 commits (0%)
+. Peter Niederwieser : 1 commits (0%)
+
+In 2011, I became a committer to the Groovy project. As I said, I had contributed several fixes or features for Groovy 1.8, but for the first time, I became a committer and I started to be able to push changes to the codebase without having to ask permission. So this is basically the first time you see my name on the contributors list, but you can see that I am ranking #1 and I have never lost that ranking since then. It surprised me too, but there is a very good reason for that. In october 2011, in addition to being a committer, I also became paid to work on Groovy. Full-time. *I entered the club of lucky people being paid to work on open-source software*. It was sincerely a dream, and I will never be enough thankful to Guillaume Laforge for giving me this opportunity. He changed my life and I _think_ I became a better developer thanks to him. VMware was my employer back then, and while I had never worked on a language before, Guillaume trusted my skills and proposed to me to work on something that would dramatically change the language : a static type checker.
+
+I also worked on the infrastructure of the language, starting from the migration to GitHub. It was an important move to make: as you can see, there was a very limited set of committers to Groovy. With {groovy-gh}[GitHub], we had the tool we needed to increase the size of our community and from the numbers that will follow, I think it's a success.
+
+== 2012: Groovy 2 and static compilation
+
+. *[red]#Cédric Champeau (Sponsored) : 515 commits (46%)#*
+. Paul King : 249 commits (22%)
+. Jochen Theodorou (Sponsored) : 169 commits (15%)
+. Guillaume Laforge (Sponsored) : 74 commits (6%)
+. PascalSchumacher : 12 commits (1%)
+. Peter Niederwieser : 11 commits (0%)
+. René Scheibe : 11 commits (0%)
+. Andre Steingress : 9 commits (0%)
+. John Wagenleitner : 7 commits (0%)
+. Peter Ledbrook : 6 commits (0%)
+. Andres Almiray : 6 commits (0%)
+. Adrian Nistor : 5 commits (0%)
+. Tim Yates : 5 commits (0%)
+. Baruch Sadogursky : 4 commits (0%)
+. Andrew Eisenberg : 3 commits (0%)
+. Rich Freedman : 3 commits (0%)
+. Stephane Maldini : 3 commits (0%)
+. Andrew Taylor : 2 commits (0%)
+. Jeff Brown : 2 commits (0%)
+. Luke Daley : 2 commits (0%)
+. Tiago Fernandez : 2 commits (0%)
+. Andrey Bloschetsov : 1 commits (0%)
+. Johnny Wey : 1 commits (0%)
+. Kenneth Kousen : 1 commits (0%)
+. Mathieu Bruyen : 1 commits (0%)
+. Paul Bakker : 1 commits (0%)
+. Paulo Poiati : 1 commits (0%)
+. Sean Flanigan : 1 commits (0%)
+. Suk-Hyun Cho : 1 commits (0%)
+. Vladimir Orany : 1 commits (0%)
+
+2012 is one of the most important years for the language. It was the year Groovy 2.0 was released. As you can see, I am still ranking #1 and Paul King, an unpaid contributor, is #2. This tells you the importance of community! Groovy 2 is a major change in the language, because it introduced both optional type checking and static compilation. For the first time, Groovy was able to provide at compile time the same level of feedback that Java would have. Some people wanted to kill me for having introduced that into the language. The truth is that it wasn't my decision, but in retrospect, I am very happy with what the language is now. Without this, some people would have abandonned Groovy in favor of other JVM languages like Scala, while now in Groovy you can have the same level of performance as Java, with type safety, powerful type inference, extension methods, functional style programming and without the boilerplate. And it's optional. I don't know any other language that allows this, especially when you take type checking extensions into account, a feature that allows Groovy to go far beyond what Java and other languages offer in terms of type safety or static compilation.
+
+2012 also sees the appearance of Pascal Schumacher, a silent but very active Groovy committer. Pascal does since 2012 an amazing job in helping us filtering JIRA issues, writing bugfixes, reviewing pull requests and lately writing documentation.
+
+== 2013: Documentation effort and explosion of contributions
+
+. *[red]#Cédric Champeau (Sponsored) : 244 commits (22%)#*
+. Paul King : 188 commits (17%)
+. PascalSchumacher : 180 commits (16%)
+. Jochen Theodorou (Sponsored) : 96 commits (8%)
+. Thibault Kruse : 84 commits (7%)
+. Guillaume Laforge (Sponsored) : 54 commits (4%)
+. Andrey Bloschetsov : 43 commits (3%)
+. Andre Steingress : 36 commits (3%)
+. Pascal Schumacher : 27 commits (2%)
+. Tim Yates : 24 commits (2%)
+. René Scheibe : 12 commits (1%)
+. kruset : 12 commits (1%)
+. Martin Hauner : 8 commits (0%)
+. Andres Almiray : 8 commits (0%)
+. Larry Jacobson : 4 commits (0%)
+. John Wagenleitner : 6 commits (0%)
+. Paolo Di Tommaso : 6 commits (0%)
+. Jeff Scott Brown (Sponsored) : 5 commits (0%)
+. Masato Nagai : 5 commits (0%)
+. Jochen Eddelbüttel : 3 commits (0%)
+. hbaykuslar : 3 commits (0%)
+. shalecraig : 3 commits (0%)
+. Andrew Eisenberg : 2 commits (0%)
+. Jacopo Cappellato : 2 commits (0%)
+. Peter Niederwieser : 2 commits (0%)
+. Rafael Luque : 2 commits (0%)
+. Vladimir Orany : 1 commits (0%)
+. saschaklein : 2 commits (0%)
+. seanjreilly : 2 commits (0%)
+. upcrob : 2 commits (0%)
+. Adrian Nistor : 1 commits (0%)
+. Alan Thompson : 1 commits (0%)
+. Alessio Stalla : 1 commits (0%)
+. DJBen : 1 commits (0%)
+. Eric Dahl : 1 commits (0%)
+. Ingo Hoffmann : 1 commits (0%)
+. JBaruch : 1 commits (0%)
+. Jacob Aae Mikkelsen : 1 commits (0%)
+. Jim White : 1 commits (0%)
+. John Engelman : 1 commits (0%)
+. Jon Schneider : 1 commits (0%)
+. Karel Piwko : 1 commits (0%)
+. Kenneth Endfinger : 1 commits (0%)
+. Kohsuke Kawaguchi : 1 commits (0%)
+. Luke Kirby : 1 commits (0%)
+. Michal Mally : 1 commits (0%)
+. Miro Bezjak : 1 commits (0%)
+. Olivier Croquette : 1 commits (0%)
+. Rob Upcraft : 1 commits (0%)
+. Sergey Egorov : 1 commits (0%)
+. Stefan Armbruster : 1 commits (0%)
+. Yasuharu NAKANO : 1 commits (0%)
+
+While continuing to improve Groovy, 2013 was very important for the community. You can start to see the GitHub effect here, with *much* more contributors than before. It is impressive to see the difference before 2011 and after. The number of contributors is continously growing. In 2013, 63% of commits came from the community! 
+
+In February 2013, we also launched a new big project: the documentation and website overhaul. It is incredible to think that this effort is still uncomplete, but if you see that the old wiki has more than a thousand page or contents (often outdated), you can imagine what effort it takes to rewrite the documentation. Hopefully, we're close to filling the gap now, and with the demise of Codehaus, we officially launched our http://groovy-lang.org[new website] where you can see the result of this job.
+
+I also started working on Android support during 2013, for a first overview in GR8Conf 2014, and continued working on improving the infrastructure, with Bintray, TeamCity and Gradle. And Pivotal was born, out of EMC and VMware. Groovy and Grails, along with the Spring Framework, became part of this new company which is still paying me today to work on Groovy (and I, we, should be very thankful for this).
+
+== 2014: Towards Android support
+
+. *[red]#Cédric Champeau (Sponsored) : 446 commits (37%)#*
+. Paul King : 261 commits (22%)
+. Jochen Theodorou (Sponsored) : 85 commits (7%)
+. Guillaume Laforge (Sponsored) : 61 commits (5%)
+. Thibault Kruse : 54 commits (4%)
+. Pascal Schumacher : 47 commits (3%)
+. Jim White : 26 commits (2%)
+. Yu Kobayashi : 18 commits (1%)
+. Andre Steingress : 16 commits (1%)
+. Richard Hightower : 3 commits (0%)
+. James Northrop : 11 commits (0%)
+. Kenneth Endfinger : 9 commits (0%)
+. Tomek Janiszewski : 9 commits (0%)
+. Matias Bjarland : 8 commits (0%)
+. Tobia Conforto : 8 commits (0%)
+. Michael Schuenck : 7 commits (0%)
+. Sargis Harutyunyan : 7 commits (0%)
+. Andrey Bloschetsov : 6 commits (0%)
+. Craig Andrews : 5 commits (0%)
+. Kent : 5 commits (0%)
+. Paolo Di Tommaso : 5 commits (0%)
+. Peter Ledbrook : 5 commits (0%)
+. Sergey Egorov : 5 commits (0%)
+. Yasuharu Nakano : 5 commits (0%)
+. Andrew Hamilton : 4 commits (0%)
+. Lari Hotari (Sponsored) : 4 commits (0%)
+. Bloshchetsov Andrey Evgenyevich : 3 commits (0%)
+. Johannes Link : 3 commits (0%)
+. Keegan Witt : 3 commits (0%)
+. Tim Yates : 3 commits (0%)
+. anto_belgin : 3 commits (0%)
+. Baruch Sadogursky : 2 commits (0%)
+. Dan Allen : 2 commits (0%)
+. Jan Sykora : 2 commits (0%)
+. John Wagenleitner : 2 commits (0%)
+. Luke Kirby : 2 commits (0%)
+. Martin Stockhammer : 2 commits (0%)
+. UEHARA Junji : 2 commits (0%)
+. Vihang D : 2 commits (0%)
+. Andres Almiray : 2 commits (0%)
+. Andy Hamilton : 1 commits (0%)
+. Bobby Warner : 1 commits (0%)
+. Carsten Lenz : 1 commits (0%)
+. Chris Earle : 1 commits (0%)
+. David Avenante : 1 commits (0%)
+. David Nahodil : 1 commits (0%)
+. David Tiselius : 1 commits (0%)
+. Dimitar Dimitrov : 1 commits (0%)
+. Grant McConnaughey : 1 commits (0%)
+. Jeff Sheets : 1 commits (0%)
+. Jess Sightler : 1 commits (0%)
+. Logan Gorence : 1 commits (0%)
+. Luke Daley : 1 commits (0%)
+. Manuel Prinz : 1 commits (0%)
+. Marc Guillemot : 1 commits (0%)
+. Marcin Grzejszczak : 1 commits (0%)
+. Nathan Mische : 1 commits (0%)
+. Peter Swire : 1 commits (0%)
+. Sagar Sane : 1 commits (0%)
+. Stephen Mallette : 1 commits (0%)
+. Tobias Schulte : 1 commits (0%)
+. Wil Selwood : 1 commits (0%)
+. davidmichaelkarr : 1 commits (0%)
+. fintelia : 1 commits (0%)
+. kruset : 1 commits (0%)
+. paul-bjorkstrand : 1 commits (0%)
+
+2014 was a difficult year. We had a lot of work to do on the documentation side, new features to deliver (traits) and an important topic we definitely wanted to highlight: Android support. This took longer than expected, but in the end, the new http://beta.groovy-lang.org/releasenotes/groovy-2.4.html[Groovy 2.4]. We're lucky to have half of the commits coming from the community here. Especially, lots of people helped us on the documentation. And it wasn't easy, because our documentation requires that every snippet of code that appears in the docs belongs to a unit test, to make sure that the documentation is always up-to-date.
+
+Meanwhile, at the end of the year, we learnt from Pivotal that they would end sponsoring our jobs. It means that Guillaume Laforge, Jochen Theodorou and myself, for the Groovy team, plus Graeme Rocher, Jeff Brown and Lari Hotari, for the Grails team, were both loosing their jobs and full time to work on the project at the same time. This wasn't really a surprise and I am very happy I could work for so long on Groovy, full time, but as I said in a previous post I also wish I will still be able to do that, because you can see from the numbers and features that it matters. If you wonder, we are still discussing with several potential sponsors.
+
+== 2015: Your story
+
+*Total*: 178 commits *Sponsored*: 81 commits (45%) *Community*: 97 commits (54%)
+
+. *[red]#Cédric Champeau (Sponsored) : 69 commits (38%)#*
+. Pascal Schumacher : 59 commits (33%)
+. Jochen Theodorou (Sponsored) : 12 commits (6%)
+. Paul King : 12 commits (6%)
+. JBrownVisualSpection : 7 commits (3%)
+. Yu Kobayashi : 3 commits (1%)
+. Christoph Frick : 2 commits (1%)
+. Kamil Szymanski : 2 commits (1%)
+. Michael Schuenck : 2 commits (1%)
+. Sean Gilligan : 2 commits (1%)
+. Sergey Egorov : 2 commits (1%)
+. Thibault Kruse : 2 commits (1%)
+. Andy Wilkinson : 1 commits (0%)
+. Maksym Stavytskyi : 1 commits (0%)
+. Mario Garcia : 1 commits (0%)
+. Radovan Synek : 1 commits (0%)
+
+2015 will be another important year. It's going to be huge for the community. Guillaume Laforge announced that he was joining Restlet, so for the first time since 2007 he will not be fully employed to work on Groovy, but I don't expect this to have a big impact on the language development itself: as you can see from the numbers, about half of the commits already come from the community and Guillaume didn't contribute much code lately. He was instead the lead of the project, the one that took decisions, the one speaking about the project and talking to and leading the community. He was the voice. It was a hard job, a very important one for Groovy. Guillaume is still today the lead of the project, and he will continue to contribute to the language, but I know from him that he wanted to be able to do more code, and put Groovy in action into a new project.
+
+With the {eos}[end of sponsorship of Pivotal], the {codehaus}[dismiss of Codehaus] and {guillaume-restlet}[Guillaume's decision], it became even more important to move Groovy to a foundation where it will be able to live with or without us. I have honestly no idea where I will work in a few weeks now. I sincerely hope I will still be able to contribute to the language full time, but let's be clear: today, it is very unlikely this is going to happen. It makes it very important for the project to be able to develop the community even more. We had more than 4.5 million downloads last year. This is huge. And with Android support, I see a lot of potential, even if we have tough competition with other languages and people being paid to develop them. The *{apache}[Apache Software Foundation] is going to help us with securing the future of the language and building a community*. I am proud of what you have done, collectively, and this is not over. Groovy is ready for a rebirth under the Apache umbrella!
+
+More than ever, the future of Groovy is you.
+
+To conclude this post, here are the top 10 contributors, in terms of number of commits, of Groovy, for the past 12 years. Congratulations Paul and thanks to our 100+ contributors!
+
+. *[red]#Paul King :Paul King : 2653 commits (23%)#*
+. *Jochen Theodorou* : 1562 commits (13%)
+. *Cédric Champeau* : 1526 commits (13%)
+. *James Strachan* : 1031 commits (9%)
+. *Guillaume Laforge* : 709 commits (6%)
+. *Roshan Dawrani* : 307 commits (2%)
+. *Jason Dillon* : 306 commits (2%)
+. *Danno Ferrin* : 301 commits (2%)
+. *Alex Tkachman* : 283 commits (2%)
+. *John Wilson* : 230 commits (2%)
+
+
