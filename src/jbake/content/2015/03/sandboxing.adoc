@@ -1,0 +1,849 @@
+= Improved sandboxing of Groovy scripts
+Cédric Champeau
+2015-03-27
+:jbake-type: post
+:jbake-tags: groovy,sandoxing,type checking,AST,secure
+:jbake-status: published
+:source-highlighter: prettify
+:id: improved-sandboxing
+:groovylang: http://groovy-lang.org
+:gradle: http://gradle.org
+:griffon: http://griffon.codehaus.org/
+:gpars: http://gpars.codehaus.org/
+:apache: http://apache.org
+:groovy-gh: https://github.com/groovy/groovy-core/
+:icons: font
+
+One of the most current uses cases of Groovy is scripting. Groovy makes it very easy to execute code dynamically, at runtime. Depending
+on the application, scripts can be found in multiple sources: file system, databases, remote services, ... but more importantly, the
+designer of the application which executes scripts is not necessarily the one writing those scripts. Moreover, the scripts might run in a 
+constrained environment (limited memory, file descriptors, time, ...) or your you simply don't want to allow users to access the full 
+capabilities of the language from a script.
+
+[INFO]
+.What you will learn in this post
+--
+* why Groovy is a good fit to write internal DSLs
+* what it implies in terms of security in your applications
+* how you can customize compilation to improve the DSL
+* the meaning of `SecureASTCustomizer`
+* what are type checking extensions
+* how you can rely on type checking extensions to offer proper sandboxing
+--
+
+For example, imagine that you want to offer users the ability to evaluate mathematical expressions. One option would be to implement your
+own internal DSL, create a parser and eventually an interpreter for those expressions. Obviously this involves a bit of work, but if in
+the end you need to improve performance, for example by generating bytecode for the expressions instead of evaluating them, or introduce
+caching of those runtime generated classes, then Groovy is probably a very good option. 
+
+There are lots of options available, described in the http://docs.groovy-lang.org/latest/html/documentation/index.html#_integrating_groovy_in_a_java_application[documentation] 
+but the most simple example is just using the `Eval` class:
+
+[source,java]
+.Example.java
+----
+int sum = (Integer) Eval.me("1+1");
+----
+
+The code `1+1` is parsed, compiled to bytecode, loaded and eventually executed by Groovy at runtime. Of course in this example the code is very simple, and you will want to
+add parameters, but the idea is that the code which is executed here is arbitrary. This is probably not what you want. For a calculator, you want to allow expressions like:
+
+[source,groovy]
+----
+1+1
+x+y
+1+(2*x)**y
+cos(alpha)*r
+v=1+x
+----
+
+but certainly not
+
+[source,groovy]
+----
+println 'Hello'
+(0..100).each { println 'Blah' }
+Pong p = new Pong()
+println(new File('/etc/passwd').text)
+System.exit(-1)
+Eval.me('System.exit(-1)') // a script within a script!
+----
+
+This is where things start to become complicated, and where we start seeing actually multiple needs:
+
+* restricting the grammar of the language to a subset of its capabilities
+* preventing users from executing unexpected code
+* preventing users from executing malicious code
+
+The calculator example is pretty simple, but for more complex DSLs, people might actually start writing problematic code without noticing, especially if the DSL is suffiently elegant to be used
+by _non developers_.
+
+I was in this situation a few years ago, when I designed an engine that used Groovy "scripts" written by linguists. One of the problems was that they could unintentionally create infinite loops,
+for example. Code was executing on the server, and then you had a thread eating 100% of the CPU and had no choice but restart the application server so I had to find a way to mitigate that
+problem without compromising the DSL nor the tooling or the performance of the application.
+
+Actually, lots of people have similar needs. During the past 4 years, I spoke to tons of users who had a similar question: _How can I prevent users from doing bad things in Groovy scripts?_
+
+== Compilation customizers
+
+At that time, I had implemented my own solution, but I knew that other people also had implemented similar ones. In the end, Guillaume Laforge
+suggested to me that I wrote something that would help fixing those issues and make into Groovy core. This happened in Groovy 1.8.0 with 
+http://docs.groovy-lang.org/latest/html/documentation/index.html#compilation-customizers[compilation customizers].
+
+Compilation customizers are a set of classes that are aimed at tweaking the compilation of Groovy scripts. You can write your own customizer but Groovy ships with:
+
+* an import customizer, which aims at adding imports transparently to scripts, so that users do not have to add "import" statements
+* an AST (Abstract Syntax Tree) transformation customizer, which allows to add AST transformations transparently to scripts
+* a secure AST customizer, which aims at restricting the grammar and syntactical constructs of the language
+
+The AST transformation customizer allowed me to solve the infinite loop issue, by applying the http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/ThreadInterrupt.html[@ThreadInterrupt]
+transformation, but the http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/control/customizers/SecureASTCustomizer.html[SecureASTCustomizer] is probably the one which has
+been the most misinterpreted of the whole.
+
+I must apologize for this. Back then, I had no better name in mind. The important part of SecureASTCustomizer is *AST*. It was aimed at restricting access to some features of the AST. The
+"secure" part is actually not a good name at all, and I will illustrate why. You can even find a blog post from Kohsuke Kawagushi, of Jenkins fame, named
+Groovy SecureASTCustomizer is harmful[http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/]. It is very true. The SecureASTCustomizer has never been designed with sandboxing
+in mind. It was designed to restrict the language at compile time, not runtime. So a much better name, in retrospect, would have been _GrammarCustomizer_. But as you're certainly aware, there
+are two hard things in computer science: cache invalidation, naming things and off by one errors.
+
+So imagine that you think of the secure AST customizer as a way of securing your script, and that you want to use this to prevent a user from calling `System.exit` from a script. The
+documentation says that you can prevent calls on some specific receivers by defining either a blacklist or a whitelist. In terms of securing something, I would always recommand to use a
+whitelist, that is to say to list explicitly what is allowed, rather than a blacklist, saying what is disallowed. The reason is that hackers always think of things you don't, so let's illustrate
+this.
+
+Here is how a naive "sandbox" script engine could be configured using the `SecureASTCustomizer`. I am writing the examples of configuration in Java, even though I could write them in Groovy, just
+to make the difference between the integration code and the scripts clear.
+
+[source,java]
+----
+public class Sandbox {
+    public static void main(String[] args)  {
+        CompilerConfiguration conf = new CompilerConfiguration();				// <1>
+        SecureASTCustomizer customizer = new SecureASTCustomizer();				// <2>
+        customizer.setReceiversBlackList(Arrays.asList(System.class.getName()));		// <3>
+        conf.addCompilationCustomizers(customizer);						// <4>
+        GroovyShell shell = new GroovyShell(conf);						// <5>
+        Object v = shell.evaluate("System.exit(-1)");						// <6>
+        System.out.println("Result = " +v);							// <7>
+    }
+}
+----
+<1> create a compiler configuration
+<2> create a secure AST customizer
+<3> declare that the `System` class is blacklisted as the receiver of method calls
+<4> add the customizer to the compiler configuration
+<5> associate the configuration to the script shell, that is, try to create a sandbox
+<6> execute a nasty script
+<7> print the result of the execution of the script
+
+If you run this class, when the script is executed, it will throw an error:
+
+----
+General error during canonicalization: Method calls not allowed on [java.lang.System]
+java.lang.SecurityException: Method calls not allowed on [java.lang.System]
+----
+
+This is the result of the application of the secure AST customizer, which prevents the execution of methods on the `System` class. Success! Now we have secured our script! Oh wait...
+
+== SecureASTCustomizer pwned!
+
+Secure you say? So what if I do:
+
+[source,groovy]
+----
+def c = System
+c.exit(-1)
+----
+
+Execute again and you will see that the program exits *without* error and *without* printing the result. The return code of the process is -1, which indicates that the user script has been executed!
+What happened? Basically, at compile time, the secure AST customizer is not able to recognize that `c.exit` is a call on `System`, because it works at the AST level! It analyzes a method call, and
+in this case the method call is `c.exit(-1)`, then gets the receiver and checks if the receiver is in the whitelist (or blacklist). In this case, the receiver is `c` and this variable is *declared
+with def*, which is equivalent to declaring it as `Object`, so it will think that `c` is `Object`, not `System`!
+
+Actually there are *many* ways to workaround the various configurations that you can make on the secure AST customizer. Just for fun, a few of them:
+
+[source,groovy]
+----
+((Object)System).exit(-1)
+Class.forName('java.lang.System').exit(-1)
+('java.lang.System' as Class).exit(-1)
+
+import static java.lang.System.exit
+exit(-1)
+----
+
+and there are *much* more options. The dynamic nature of Groovy just makes it impossible to resolve those cases at compile time. There are solutions though. One option is to rely on the JVM standard
+security manager. However this is a system wide solution which is often considered as a hammer. But it also doesn't really work for all cases, for example you might not want to prevent creation of
+files, but only reads for example...
+
+This limitation - or should I say frustration for lots of us - led several people to create a solution based on *runtime checks*. Runtime checks do not suffer the same problem, because you
+will have for example the actual receiver type of a message before checking if a method call is allowed or not. In particular, those implementations are of particular interest:
+
+* https://github.com/jimwhite/Gondor/blob/master/src/org/ifcx/gondor/SecuredScript.java[SecureScript] by Jim White
+* http://groovy-sandbox.kohsuke.org/[Groovy Sandbox] by Kohsuke Kawagushi
+* https://github.com/simon-temple/groovy-sandbox[Groovy Sandbox] by Simon Temple
+
+However none of those implementations is totally secure or reliable. For example, the version by Kohsuke relies on hacking the internal implementation of call site caching. The problem is that it is
+not compatible with the invokedynamic version of Groovy, and those internal classes are going to be removed in future versions of Groovy. The version by Simon, on the other hand, relies on AST transformations
+but misses a lot of possible hacks.
+
+As a result, with friends of mine Corinne Krych, Fabrice Matrat and Sébastien Blanc, we decided to create a new runtime sandboxing mechanism that would not have the issues of those projects. We started
+implementing this during a hackathon in Nice, and http://greachconf.com/speakers/fabrice-matrat-cedric-champeau-groovy-head-in-the-cloud/[we gave a talk about this last year] at the Greach conference.
+It relies on AST transformations and heavily rewrites the code in order to perform a check before each method call, property access, increment of variable, binary expression, ...
+The https://github.com/rivieragug/groovy-core/tree/secureruntime[implementation] is still incomplete, and not much work has been done because I realized there was still a problem in case
+of methods or properties called on "implicit this", like in builders for example:
+
+[source,groovy]
+----
+xml {
+   cars {				 // cars is a method call on an implicit this: "this".cars(...)
+     car(make:'Renault', model: 'Clio')
+   }
+}
+----
+
+As of today I still didn't find a way to properly handle this because of the design of the meta-object protocol in Groovy, that here relies on the fact that a receiver throws an exception when the method
+is not found before trying another receiver. In short, it means that you cannot know the type of the receiver before the method is actually called. And if it is called, it's already too late...
+
+Until earlier this year I had still no perfect solution to this problem, in case the script being executed is using the dynamic features of the language. But now has come the time to explain how you can
+significantly improve the situation if you are ready to loose some of the dynamism of the language.
+
+== Type checking
+
+Let's come back to the root problem of the SecureASTCustomizer: it works on the abstract syntax tree and has no knowledge of the concrete types of the receivers of messages. But since Groovy 2, Groovy has
+optional compilation, and in Groovy 2.1, we added http://docs.groovy-lang.org/latest/html/documentation/#_type_checking_extensions[type checking extensions]. 
+
+Type checking extensions are very powerful: they allow the designer of a Groovy DSL to help the compiler infer types, but it also lets you throw compilation errors when normally it should not. Type
+checking extensions are even used internally in Groovy to support the static compiler, for example to implement traits or the 
+http://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html[markup template engine].
+
+What if, instead of relying on the information available after parsing, we could rely on information from the type checker? Take the following code that our hacker tried to write:
+
+[source,groovy]
+----
+((Object)System).exit(-1)
+----
+
+If you activate type checking, this code would not compile:
+
+----
+1 compilation error:
+
+[Static type checking] - Cannot find matching method java.lang.Object#exit(java.lang.Integer). Please check if the declared type is right and if the method exists.
+----
+
+So this code would not compile anymore. But what if the code is:
+
+[source,groovy]
+----
+def c = System
+c.exit(-1)
+----
+
+You can verify that this passes type checking by wrapping the code into a method and running the script with the `groovy` command line tool:
+
+[source,groovy]
+----
+@groovy.transform.TypeChecked // or even @CompileStatic
+void foo() {
+  def c = System
+  c.exit(-1)
+}
+foo()
+----
+
+
+Then the type checker will recognize that the `exit` method is called on the `System` class and is valid. It will not help us there. But what we know, if this code passes type checking, is that the
+compiler recognized the call on the `System` receiver. The idea, then, is to rely on a type checking extension to disallow the call.
+
+== A simple type checking extension
+
+Before we dig into the details about sandboxing, let's try to "secure" our script using a traditional type checking extension. Registering a type checking extension is easy: just set the `extensions`
+parameter of the `@TypeChecked` annotation (or `@CompileStatic` if you want to use static compilation):
+
+[source,groovy]
+----
+@TypeChecked(extensions=['SecureExtension1.groovy'])
+void foo() {
+  def c = System
+  c.exit(-1)
+}
+foo()
+----
+
+The extension will be searched on classpath in source form (there's an option to have precompiled type checking extensions but this is beyond the scope of this blog post):
+
+[source,groovy]
+.SecureExtension1.groovy
+----
+onMethodSelection { expr, methodNode ->					// <1>
+   if (methodNode.declaringClass.name=='java.lang.System') {		// <2>
+      addStaticTypeError("Method call is not allowed!", expr)		// <3>
+   }
+}
+----
+<1> when the type checker selects the target method of a call
+<2> then if the selected method belongs to the `System` class
+<3> make the type checker throw an error
+
+That's really all needed. Now execute the code again, and you will see that there's a compile time error!
+
+----
+/home/cchampeau/tmp/securetest.groovy: 6: [Static type checking] - Method call is not allowed!
+ @ line 6, column 3.
+     c.exit(-1)
+     ^
+
+1 error
+----
+
+So this time, thanks to the type checker, `c` is really recognized as an instance of class `System` and we can really disallow the call. This is a very simple example, but it doesn't really go as
+far as what we can do with the secure AST customizer in terms of configuration. The extension that we wrote has *hardcoded* checks, but it would probably be nicer if we could configure it. So let's
+start working with a bit more complex example.
+
+Imagine that your application computes a score for a document and that you allow the users to customize the score. Then your DSL:
+
+* will expose (at least) a variable named `score`
+* will allow the user to perform mathematical operations (including calling methods like _cos_, _abs_, ...)
+* should disallow all other method calls
+
+An example of user script would be:
+
+[source,groovy]
+----
+abs(cos(1+score))
+----
+
+Such a DSL is easy to setup. It's a variant of the one we defined earlier:
+
+[source,java]
+.Sandbox.java
+----
+CompilerConfiguration conf = new CompilerConfiguration();
+ImportCustomizer customizer = new ImportCustomizer();
+customizer.addStaticStars("java.lang.Math");                        // <1>
+conf.addCompilationCustomizers(customizer);
+Binding binding = new Binding();
+binding.setVariable("score", 2.0d);                                 // <2>
+GroovyShell shell = new GroovyShell(binding,conf);
+Double userScore = (Double) shell.evaluate("abs(cos(1+score))");    // <3>
+System.out.println("userScore = " + userScore);                     
+----
+<1> add an import customizer that will add `import static java.lang.Math.*` to all scripts
+<2> make the `score` variable available to the script
+<3> execute the script
+
+TIP: There are options to cache the scripts, instead of parsing and compiling them each time. Please check the documentation for more details.
+
+So far, our script works, but nothing prevents a hacker from executing malicious code. Since we want to use type checking, I would recommand to use the `@CompileStatic` transformation
+transparently:
+
+* it will activate type checking on the script, and we will be able to perform additional checks thanks to the type checking extension
+* it will improve the performance of the script
+
+Adding `@CompileStatic` transparently is easy. We just have to update the compiler configuration:
+
+[source,java]
+----
+ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(CompileStatic.class);
+conf.addCompilationCustomizers(astcz);
+----
+
+Now if you try to execute the script again, you will face a compile time error:
+
+----
+Script1.groovy: 1: [Static type checking] - The variable [score] is undeclared.
+ @ line 1, column 11.
+   abs(cos(1+score))
+             ^
+
+Script1.groovy: 1: [Static type checking] - Cannot find matching method int#plus(java.lang.Object). Please check if the declared type is right and if the method exists.
+ @ line 1, column 9.
+   abs(cos(1+score))
+           ^
+
+2 errors
+----
+
+What happened? If you read the script from a "compiler" point of view, it doesn't know anything about the "score" variable. *You*, as a developer, know that it's a variable
+of type `double`, but the compiler cannot infer it. This is precisely what type checking extensions are designed for: you can provide additional information to the compiler,
+so that compilation passes. In this case, we will want to indicate that the `score` variable is of type `double`.
+
+So we will slightly change the way we transparently add the `@CompileStatic` annotation:
+
+[source,java]
+----
+ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+        singletonMap("extensions", singletonList("SecureExtension2.groovy")),
+        CompileStatic.class);
+----
+
+This will "emulate" code annotated with `@CompileStatic(extensions=['SecureExtension2.groovy'])`. Of course now we need to write the extension which will recognize the `score` variable:
+
+[source,groovy]
+.SecureExtension2.groovy
+----
+unresolvedVariable { var ->			// <1>
+   if (var.name=='score') {			// <2>
+      return makeDynamic(var, double_TYPE)	// <3>
+   }
+}
+----
+<1> in case the type checker cannot resolve a variable
+<2> if the variable name is `score`
+<3> then instruct the compiler to resolve the variable dynamically, and that the type of the variable is `double`
+
+You can find a complete description of the type checking extension DSL in http://docs.groovy-lang.org/latest/html/documentation/#_type_checking_extensions[this section of the documentation],
+but you have here an example of _mixed mode compilation_ : the compiler is not able to resolve the `score` variable. You, as the designer of the DSL, *know* that the variable is in fact
+found in the binding, and is of the `double`, so the `makeDynamic` call is here to tell the compiler: "ok, don't worry, I know what I am doing, this variable can be resolved dynamically
+and it will be of type `double`". That's it!
+
+== First completed "secure" extension
+
+Now it's time to put this altogether. We wrote a type checking extension which is capable of preventing calls on `System` on one side, and we wrote another which is able to resolve the `score`
+variable on another. So if we combine both, we have a first, complete, securing type checking extension:
+
+[source,groovy]
+.SecureExtension3.groovy
+----
+// disallow calls on System
+onMethodSelection { expr, methodNode ->
+    if (methodNode.declaringClass.name=='java.lang.System') {
+        addStaticTypeError("Method call is not allowed!", expr)
+    }
+}
+
+// resolve the score variable
+unresolvedVariable { var ->
+    if (var.name=='score') {
+        return makeDynamic(var, double_TYPE)
+    }
+}
+----
+
+Don't forget to update the configuration in your Java class to use the new type checking extension:
+
+[source,java]
+----
+ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+        singletonMap("extensions", singletonList("SecureExtension3.groovy")),
+	CompileStatic.class);
+----
+
+Execute the code again and it still works. Now, try to do:
+
+----
+abs(cos(1+score))
+System.exit(-1)
+----
+
+And the script compilation will fail with:
+
+----
+Script1.groovy: 1: [Static type checking] - Method call is not allowed!
+ @ line 1, column 19.
+   abs(cos(1+score));System.exit(-1)
+                     ^
+
+1 error
+----
+
+Congratulations, you just wrote your first type checking extension that prevents the execution of malicious code!
+
+== Improving configuration of the extension
+
+So far so good, we are able to prevent calls on `System`, but it is likely that we are going to discover new vulnerabilities, and that we will want to
+prevent execution of such code. So instead of hardcoding everything in the extension, we will try to make our extension generic and configurable. This is
+probably the trickiest thing to do, because there's no direct way to provide context to a type checking extension. Our idea therefore relies on the (ugly)
+thread locals to pass configuration data to the type checker.
+
+The first thing we're going to do is to make the variable list configurable. Here is the code on the Java side of things:
+
+[source,java]
+.Sandbox.java
+----
+public class Sandbox {
+    public static final String VAR_TYPES = "sandboxing.variable.types";
+
+    public static final ThreadLocal<Map<String, Object>> COMPILE_OPTIONS = new ThreadLocal<>();		// <1>
+
+    public static void main(String[] args) {
+        CompilerConfiguration conf = new CompilerConfiguration();
+        ImportCustomizer customizer = new ImportCustomizer();
+        customizer.addStaticStars("java.lang.Math");                        
+        ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+                singletonMap("extensions", singletonList("SecureExtension4.groovy")),			// <2>
+                CompileStatic.class);
+        conf.addCompilationCustomizers(astcz);
+        conf.addCompilationCustomizers(customizer);
+
+        Binding binding = new Binding();
+        binding.setVariable("score", 2.0d);                                 
+        try {
+            Map<String,Class> variableTypes = new HashMap<String, Class>();				// <3>
+            variableTypes.put("score", Double.TYPE);							// <4>
+            Map<String,Object> options = new HashMap<String, Object>();					// <5>
+            options.put(VAR_TYPES, variableTypes);							// <6>
+            COMPILE_OPTIONS.set(options);								// <7>
+            GroovyShell shell = new GroovyShell(binding, conf);
+            Double userScore = (Double) shell.evaluate("abs(cos(1+score));System.exit(-1)");
+            System.out.println("userScore = " + userScore);
+        } finally {
+            COMPILE_OPTIONS.remove();									// <8>
+        }
+    }
+}
+----
+<1> create a `ThreadLocal` that will hold the contextual configuration of the type checking extension
+<2> update the extension to `SecureExtension4.groovy`
+<3> `variableTypes` is a map variable name -> variable type
+<4> so this is where we're going to add the `score` variable declaration
+<5> `options` is the map that will store our type checking configuration
+<6> we set the "variable types" value of this configuration map to the map of variable types
+<7> and assign it to the thread local
+<8> eventually, to avoid memory leaks, it is important to remove the configuration from the thread local
+
+And now, here is how the type checking extension can use this:
+
+[source,groovy]
+----
+import static Sandbox.*
+
+def typesOfVariables = COMPILE_OPTIONS.get()[VAR_TYPES]				// <1>
+
+unresolvedVariable { var ->
+    if (typesOfVariables[var.name]) {						// <2>
+        return makeDynamic(var, classNodeFor(typesOfVariables[var.name]))	// <3>
+    }
+}
+----
+<1> Retrieve the list of variable types from the thread local
+<2> if an unresolved variable is found in the map of known variables
+<3> then declare to the type checker that the variable is of the type found in the map
+
+Basically, the type checking extension, because it is executed when the type checker verifies the script, can access the
+configuration through the thread local. Then, instead of using hard coded names in `unresolvedVariable`, we can just check
+that the variable that the type checker doesn't know about is actually declared in the configuration. If it is, then we
+can tell it which type it is. Easy!
+
+Now we have to find a way to explicitly declare the list of allowed method calls. It is a bit trickier to find a proper
+configuration for that, but here is what we came up with.
+
+== Configuring a white list of methods
+
+The idea of the whitelist is simple. A method call will be allowed if the method descriptor can be found in the whitelist. This whitelist consists of regular expressions, and
+the method descriptor consists of the fully-qualified class name of the method, it's name and parameters. For example, for `System.exit`, the descriptor would be:
+
+----
+java.lang.System#exit(int)
+----
+
+So let's see how to update the Java integration part to add this configuration:
+
+[source,java]
+----
+public class Sandbox {
+    public static final String WHITELIST_PATTERNS = "sandboxing.whitelist.patterns";
+
+    // ...
+
+    public static void main(String[] args) {
+        // ...
+        try {
+            Map<String,Class> variableTypes = new HashMap<String, Class>();
+            variableTypes.put("score", Double.TYPE);
+            Map<String,Object> options = new HashMap<String, Object>();
+            List<String> patterns = new ArrayList<String>();					// <1>
+            patterns.add("java\\.lang\\.Math#");						// <2>
+            options.put(VAR_TYPES, variableTypes);
+            options.put(WHITELIST_PATTERNS, patterns);						// <3>
+            COMPILE_OPTIONS.set(options);
+            GroovyShell shell = new GroovyShell(binding, conf);
+            Double userScore = (Double) shell.evaluate("abs(cos(1+score));System.exit(-1)");
+            System.out.println("userScore = " + userScore);
+        } finally {
+            COMPILE_OPTIONS.remove();
+        }
+    }
+}
+----
+<1> declare a list of patterns
+<2> add all methods of `java.lang.Math` as allowed
+<3> put the whitelist to the type checking options map
+
+Then on the type checking extension side:
+
+[source,groovy]
+----
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.transform.stc.ExtensionMethodNode
+
+import static Sandbox.*
+
+@CompileStatic
+private static String prettyPrint(ClassNode node) {
+    node.isArray()?"${prettyPrint(node.componentType)}[]":node.toString(false)
+}
+
+@CompileStatic
+private static String toMethodDescriptor(MethodNode node) {								// <1>
+    if (node instanceof ExtensionMethodNode) {
+        return toMethodDescriptor(node.extensionMethodNode)
+    }
+    def sb = new StringBuilder()
+    sb.append(node.declaringClass.toString(false))
+    sb.append("#")
+    sb.append(node.name)
+    sb.append('(')
+    sb.append(node.parameters.collect { Parameter it ->
+        prettyPrint(it.originType)
+    }.join(','))
+    sb.append(')')
+    sb
+}
+def typesOfVariables = COMPILE_OPTIONS.get()[VAR_TYPES]									
+def whiteList = COMPILE_OPTIONS.get()[WHITELIST_PATTERNS]								// <2>
+
+onMethodSelection { expr, MethodNode methodNode ->
+    def descr = toMethodDescriptor(methodNode)										// <3>
+    if (!whiteList.any { descr =~ it }) {										// <4>
+        addStaticTypeError("You tried to call a method which is not allowed, what did you expect?: $descr", expr)	// <5>
+    }
+}
+
+unresolvedVariable { var ->
+    if (typesOfVariables[var.name]) {
+        return makeDynamic(var, classNodeFor(typesOfVariables[var.name]))
+    }
+}
+----
+<1> this method will generate a method descriptor from a `MethodNode`
+<2> retrieve the whitelist of methods from the thread local option map
+<3> convert a selected method into a descriptor string
+<4> if the descriptor doesn't match any of the whitelist entries, throw an error
+
+So if you execute the code again, you will now have a very cool error:
+
+----
+Script1.groovy: 1: [Static type checking] - You tried to call a method which is not allowed, what did you expect?: java.lang.System#exit(int)
+ @ line 1, column 19.
+   abs(cos(1+score));System.exit(-1)
+                     ^
+
+1 error
+----
+
+There we are! We now have a type checking extension which handles both the types of the variables that you export in the binding *and*
+a whitelist of allowed methods. This is still not perfect, but we're very close to the final solution! It's not perfect because we only
+took care of method calls here, but you have to deal with more than that. For example, properties (like `foo.text` which is implicitly
+converted into `foo.getText()`).
+
+== Putting it altogether
+
+Dealing with properties is a bit more complicated because the type checker doesn't have a handler for "property selection" like it does
+for methods. We can work around that, and if you are interested in seeing the resulting code, check it out below. It's
+a type checking extension which is not written exactly as you have seen in this blog post, because it is meant to be precompiled
+for improved performance. But the idea is exactly the same.
+
+[source,groovy]
+----
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.ast.ClassCodeVisitorSupport
+import org.codehaus.groovy.ast.ClassHelper
+import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.expr.PropertyExpression
+import org.codehaus.groovy.control.SourceUnit
+import org.codehaus.groovy.transform.sc.StaticCompilationMetadataKeys
+import org.codehaus.groovy.transform.stc.ExtensionMethodNode
+import org.codehaus.groovy.transform.stc.GroovyTypeCheckingExtensionSupport
+import static Sandbox.*
+
+class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
+
+    @CompileStatic
+    private static String prettyPrint(ClassNode node) {
+        node.isArray()?"${prettyPrint(node.componentType)}[]":node.toString(false)
+    }
+
+    @CompileStatic
+    private static String toMethodDescriptor(MethodNode node) {
+        if (node instanceof ExtensionMethodNode) {
+            return toMethodDescriptor(node.extensionMethodNode)
+        }
+        def sb = new StringBuilder()
+        sb.append(node.declaringClass.toString(false))
+        sb.append("#")
+        sb.append(node.name)
+        sb.append('(')
+        sb.append(node.parameters.collect { Parameter it ->
+            prettyPrint(it.originType)
+        }.join(','))
+        sb.append(')')
+        sb
+    }
+
+    @Override
+    Object run() {
+
+        // Fetch white list of regular expressions of authorized method calls
+        def whiteList = COMPILE_OPTIONS.get()[WHITELIST_PATTERNS]
+        def typesOfVariables = COMPILE_OPTIONS.get()[VAR_TYPES]
+
+        onMethodSelection { expr, MethodNode methodNode ->
+            def descr = toMethodDescriptor(methodNode)
+            if (!whiteList.any { descr =~ it }) {
+                addStaticTypeError("You tried to call a method which is not allowed, what did you expect?: $descr", expr)
+            }
+        }
+
+        unresolvedVariable { var ->
+            if (isDynamic(var) && typesOfVariables[var.name]) {
+                storeType(var, ClassHelper.make(typesOfVariables[var.name]))
+                handled = true
+            }
+        }
+
+        // handling properties (like foo.text) is harder because the type checking extension
+        // does not provide a specific hook for this. Harder, but not impossible!
+
+        afterVisitMethod { methodNode ->
+            def visitor = new PropertyExpressionChecker(context.source, whiteList)
+            visitor.visitMethod(methodNode)
+        }
+    }
+
+    private class PropertyExpressionChecker extends ClassCodeVisitorSupport {
+        private final SourceUnit unit
+        private final List<String> whiteList
+
+        PropertyExpressionChecker(final SourceUnit unit, final List<String> whiteList) {
+            this.unit = unit
+            this.whiteList = whiteList
+        }
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            unit
+        }
+
+        @Override
+        void visitPropertyExpression(final PropertyExpression expression) {
+            super.visitPropertyExpression(expression)
+
+            ClassNode owner = expression.objectExpression.getNodeMetaData(StaticCompilationMetadataKeys.PROPERTY_OWNER)
+            if (owner) {
+                def descr = "${prettyPrint(owner)}#${expression.propertyAsString}"
+                if (!whiteList.any { descr =~ it }) {
+                    addStaticTypeError("Property is not allowed: $descr", expression)
+                }
+            }
+        }
+    }
+}
+----
+
+And a final version of the sandbox that includes assertions to make sure that we catch all cases:
+
+[source,java]
+.Sandbox.java
+----
+public class Sandbox {
+    public static final String WHITELIST_PATTERNS = "sandboxing.whitelist.patterns";
+    public static final String VAR_TYPES = "sandboxing.variable.types";
+
+    public static final ThreadLocal<Map<String, Object>> COMPILE_OPTIONS = new ThreadLocal<Map<String, Object>>();
+
+    public static void main(String[] args) {
+        CompilerConfiguration conf = new CompilerConfiguration();
+        ImportCustomizer customizer = new ImportCustomizer();
+        customizer.addStaticStars("java.lang.Math");
+        ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+                singletonMap("extensions", singletonList("SandboxingExtension.groovy")),
+                CompileStatic.class);
+        conf.addCompilationCustomizers(astcz);
+        conf.addCompilationCustomizers(customizer);
+
+        Binding binding = new Binding();
+        binding.setVariable("score", 2.0d);
+        try {
+            Map<String, Class> variableTypes = new HashMap<String, Class>();
+            variableTypes.put("score", Double.TYPE);
+            Map<String, Object> options = new HashMap<String, Object>();
+            List<String> patterns = new ArrayList<String>();
+            // allow method calls on Math
+            patterns.add("java\\.lang\\.Math#");
+            // allow constructors calls on File
+            patterns.add("File#<init>");
+            // because we let the user call each/times/...
+            patterns.add("org\\.codehaus\\.groovy\\.runtime\\.DefaultGroovyMethods");
+            options.put(VAR_TYPES, variableTypes);
+            options.put(WHITELIST_PATTERNS, patterns);
+            COMPILE_OPTIONS.set(options);
+            GroovyShell shell = new GroovyShell(binding, conf);
+            Object result;
+            try {
+                result = shell.evaluate("Eval.me('1')"); // error
+                assert false;
+            } catch (MultipleCompilationErrorsException e) {
+                System.out.println("Successful sandboxing: "+e.getMessage());
+            }
+            try {
+                result = shell.evaluate("System.exit(-1)"); // error
+                assert false;
+            } catch (MultipleCompilationErrorsException e) {
+                System.out.println("Successful sandboxing: "+e.getMessage());
+            }
+            try {
+                result = shell.evaluate("((Object)Eval).me('1')"); // error
+                assert false;
+            } catch (MultipleCompilationErrorsException e) {
+                System.out.println("Successful sandboxing: "+e.getMessage());
+            }
+
+            try {
+                result = shell.evaluate("new File('/etc/passwd').getText()"); // getText is not allowed
+                assert false;
+            } catch (MultipleCompilationErrorsException e) {
+                System.out.println("Successful sandboxing: "+e.getMessage());
+            }
+
+            try {
+                result = shell.evaluate("new File('/etc/passwd').text");  // getText is not allowed
+                assert false;
+            } catch (MultipleCompilationErrorsException e) {
+                System.out.println("Successful sandboxing: "+e.getMessage());
+            }
+
+            Double userScore = (Double) shell.evaluate("abs(cos(1+score))");
+            System.out.println("userScore = " + userScore);
+        } finally {
+            COMPILE_OPTIONS.remove();
+        }
+    }
+}
+----
+
+== Conclusion
+
+This post has explored the interest of using Groovy as a platform for scripting on the JVM. It introduced various mechanisms for integration, and showed that this
+comes at the price of security. However, we illustrated some concepts like compilation customizers that make it easier to sandbox the environment of execution of
+scripts. The current list of customizers available in the Groovy distribution, and the currently available sandboxing projects in the wild, are not sufficient
+to guarantee security of execution of scripts in the general case (dependending, of course, on your users and where the scripts come from).
+
+We then illustrated how you could, if you are ready to pay the price of loosing some of the dynamic features of the language, properly workaround those limitations
+through type checking extensions. Those type checking extensions are so powerful that you can even introduce your own error messages during the compilation of
+scripts. Eventually, by doing this and caching your scripts, you will also benefit from dramatic performance improvements in script execution.
+
+Eventually, the sandboxing mechanism that we illustrated is *not* a replacement for the `SecureASTCustomizer`. We recommand that you actually use *both*, because they
+work on different levels: the secure AST customizer will work on the grammar level, allowing you to restrict some language constructs (for example preventing the
+creation of closures or classes inside the script), while the type checking extension will work after type inference (allowing you to reason on inferred types
+rather than declared types).
+
+Last but not least, the solution that I described here is incomplete. It is not available in Groovy core. As I will have less time to work on Groovy, I would be very
+glad if someone or some people improve this solution and make a pull request so that we can have something!
+
