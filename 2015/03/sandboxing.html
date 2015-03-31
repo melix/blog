@@ -774,8 +774,8 @@ thread locals to pass configuration data to the type checker.</p>
         Binding binding = new Binding();
         binding.setVariable("score", 2.0d);
         try {
-            Map&lt;String,Class&gt; variableTypes = new HashMap&lt;String, Class&gt;();				<i class="conum" data-value="3"></i><b>(3)</b>
-            variableTypes.put("score", Double.TYPE);							<i class="conum" data-value="4"></i><b>(4)</b>
+            Map&lt;String,ClassNode&gt; variableTypes = new HashMap&lt;String, ClassNode&gt;();			<i class="conum" data-value="3"></i><b>(3)</b>
+            variableTypes.put("score", ClassHelper.double_TYPE);					<i class="conum" data-value="4"></i><b>(4)</b>
             Map&lt;String,Object&gt; options = new HashMap&lt;String, Object&gt;();					<i class="conum" data-value="5"></i><b>(5)</b>
             options.put(VAR_TYPES, variableTypes);							<i class="conum" data-value="6"></i><b>(6)</b>
             COMPILE_OPTIONS.set(options);								<i class="conum" data-value="7"></i><b>(7)</b>
@@ -836,7 +836,7 @@ def typesOfVariables = COMPILE_OPTIONS.get()[VAR_TYPES]				<i class="conum" data
 
 unresolvedVariable { var -&gt;
     if (typesOfVariables[var.name]) {						<i class="conum" data-value="2"></i><b>(2)</b>
-        return makeDynamic(var, classNodeFor(typesOfVariables[var.name]))	<i class="conum" data-value="3"></i><b>(3)</b>
+        return makeDynamic(var, typesOfVariables[var.name])			<i class="conum" data-value="3"></i><b>(3)</b>
     }
 }</code></pre>
 </div>
@@ -894,8 +894,8 @@ the method descriptor consists of the fully-qualified class name of the method, 
     public static void main(String[] args) {
         // ...
         try {
-            Map&lt;String,Class&gt; variableTypes = new HashMap&lt;String, Class&gt;();
-            variableTypes.put("score", Double.TYPE);
+            Map&lt;String,ClassNode&gt; variableTypes = new HashMap&lt;String, ClassNode&gt;();
+            variableTypes.put("score", ClassHelper.double_TYPE);
             Map&lt;String,Object&gt; options = new HashMap&lt;String, Object&gt;();
             List&lt;String&gt; patterns = new ArrayList&lt;String&gt;();					<i class="conum" data-value="1"></i><b>(1)</b>
             patterns.add("java\\.lang\\.Math#");						<i class="conum" data-value="2"></i><b>(2)</b>
@@ -974,7 +974,7 @@ onMethodSelection { expr, MethodNode methodNode -&gt;
 
 unresolvedVariable { var -&gt;
     if (typesOfVariables[var.name]) {
-        return makeDynamic(var, classNodeFor(typesOfVariables[var.name]))
+        return makeDynamic(var, typesOfVariables[var.name])
     }
 }</code></pre>
 </div>
@@ -1030,6 +1030,7 @@ a type checking extension which is not written exactly as you have seen in this 
 for improved performance. But the idea is exactly the same.</p>
 </div>
 <div class="listingblock">
+<div class="title">SandboxingTypeCheckingExtension.groovy</div>
 <div class="content">
 <pre class="prettyprint groovy language-groovy"><code>import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport
@@ -1042,6 +1043,8 @@ import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.sc.StaticCompilationMetadataKeys
 import org.codehaus.groovy.transform.stc.ExtensionMethodNode
 import org.codehaus.groovy.transform.stc.GroovyTypeCheckingExtensionSupport
+import org.codehaus.groovy.transform.stc.StaticTypeCheckingSupport
+
 import static Sandbox.*
 
 class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
@@ -1084,7 +1087,7 @@ class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport
 
         unresolvedVariable { var -&gt;
             if (isDynamic(var) &amp;&amp; typesOfVariables[var.name]) {
-                storeType(var, ClassHelper.make(typesOfVariables[var.name]))
+                storeType(var, typesOfVariables[var.name])
                 handled = true
             }
         }
@@ -1118,6 +1121,9 @@ class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport
 
             ClassNode owner = expression.objectExpression.getNodeMetaData(StaticCompilationMetadataKeys.PROPERTY_OWNER)
             if (owner) {
+                if (expression.spreadSafe &amp;&amp; StaticTypeCheckingSupport.implementsInterfaceOrIsSubclassOf(owner, classNodeFor(Collection))) {
+                    owner = typeCheckingVisitor.inferComponentType(owner, ClassHelper.int_TYPE)
+                }
                 def descr = "${prettyPrint(owner)}#${expression.propertyAsString}"
                 if (!whiteList.any { descr =~ it }) {
                     addStaticTypeError("Property is not allowed: $descr", expression)
@@ -1145,7 +1151,7 @@ class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport
         ImportCustomizer customizer = new ImportCustomizer();
         customizer.addStaticStars("java.lang.Math");
         ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
-                singletonMap("extensions", singletonList("SandboxingExtension.groovy")),
+                singletonMap("extensions", singletonList("SandboxingTypeCheckingExtension.groovy")),
                 CompileStatic.class);
         conf.addCompilationCustomizers(astcz);
         conf.addCompilationCustomizers(customizer);
@@ -1153,8 +1159,8 @@ class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport
         Binding binding = new Binding();
         binding.setVariable("score", 2.0d);
         try {
-            Map&lt;String, Class&gt; variableTypes = new HashMap&lt;String, Class&gt;();
-            variableTypes.put("score", Double.TYPE);
+            Map&lt;String, ClassNode&gt; variableTypes = new HashMap&lt;String, ClassNode&gt;();
+            variableTypes.put("score", ClassHelper.double_TYPE);
             Map&lt;String, Object&gt; options = new HashMap&lt;String, Object&gt;();
             List&lt;String&gt; patterns = new ArrayList&lt;String&gt;();
             // allow method calls on Math
