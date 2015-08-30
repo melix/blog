@@ -6,8 +6,8 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 30 Aug 2015 09:37:59 +0200</pubDate>
-    <lastBuildDate>Sun, 30 Aug 2015 09:37:59 +0200</lastBuildDate>
+    <pubDate>Sun, 30 Aug 2015 09:47:42 +0200</pubDate>
+    <lastBuildDate>Sun, 30 Aug 2015 09:47:42 +0200</lastBuildDate>
 
     <item>
       <title>A week fighting a PermGen leak</title>
@@ -238,6 +238,25 @@ try {
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;And this is were I stopped. Because if I found a way to &quot;unload&quot; &lt;code&gt;ClassInfo&lt;/code&gt; from the isolated classpath and the touched classes from the system classloader, I haven&amp;#8217;t found a way to do the same for the &lt;code&gt;ClassInfo&lt;/code&gt; instances that leak into the Ant runtime&amp;#8230; Of course I tried a &quot;brute force&quot; thing, by removing all &lt;code&gt;ClassInfo&lt;/code&gt; from those classes, but as you understood, it&amp;#8217;s a desperate attempt: it&amp;#8217;s equivalent to shutting down the runtime. And then, it totally breaks subsequent calls in the Gradle build, we&amp;#8217;ve just broken the Groovy runtime from Gradle&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To add some confusion to the problem, I think it&amp;#8217;s now a good time to explain that I actually simplified the isolated ant builder classloader hierarchy. There are actually (at least) 3 classloaders involved:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The classloader from Gradle, which loads the Gradle runtime, the &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; instance and also the &lt;code&gt;AntBuilderDelegate&lt;/code&gt; instance&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;A classloader for the Ant runtime, which is isolated from Gradle, apart from logging classes necessary for Gradle to be able to capture the output. This classloader is per classpath, and is the one which is cached.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;A classloader that is &lt;strong&gt;filtering&lt;/strong&gt; some classes from the Gradle runtime classloader to make them available. This is what the bridging Ant builder uses. This classloader is shared among all isolated ant builder instances.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So when I say that something leaks, it can leak to any of those classloaders, and any of the parent loaders&amp;#8230;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;That&amp;#8217;s were I felt desperate. After a week fighting those memory leaks, and so many &quot;ah ah, got you!&quot; moments, I was in front of a wall. Basically, while in the first case (isolated &lt;code&gt;ClassInfo&lt;/code&gt; leaking into Gradle), I know I can totally clean all the &lt;code&gt;ClassInfo&lt;/code&gt; references because I know I can shutdown the Groovy runtime, in the second case (Gradle &lt;code&gt;ClassInfo&lt;/code&gt; leaking), I basically have no idea that a class comes from the isolated classloader or not. So it&amp;#8217;s hard to say if you should remove the &lt;code&gt;ClassInfo&lt;/code&gt; or not. I am currently experimenting a brute force &quot;try to determine if a class belongs in the class loader hierarchy&quot;, but it is weak (ah ah!) because I need to know about several potential class loader types.&lt;/p&gt;

@@ -322,6 +322,25 @@ try {
 <p>And this is were I stopped. Because if I found a way to "unload" <code>ClassInfo</code> from the isolated classpath and the touched classes from the system classloader, I haven&#8217;t found a way to do the same for the <code>ClassInfo</code> instances that leak into the Ant runtime&#8230; Of course I tried a "brute force" thing, by removing all <code>ClassInfo</code> from those classes, but as you understood, it&#8217;s a desperate attempt: it&#8217;s equivalent to shutting down the runtime. And then, it totally breaks subsequent calls in the Gradle build, we&#8217;ve just broken the Groovy runtime from Gradle&#8230;</p>
 </div>
 <div class="paragraph">
+<p>To add some confusion to the problem, I think it&#8217;s now a good time to explain that I actually simplified the isolated ant builder classloader hierarchy. There are actually (at least) 3 classloaders involved:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The classloader from Gradle, which loads the Gradle runtime, the <code>IsolatedAntBuilder</code> instance and also the <code>AntBuilderDelegate</code> instance</p>
+</li>
+<li>
+<p>A classloader for the Ant runtime, which is isolated from Gradle, apart from logging classes necessary for Gradle to be able to capture the output. This classloader is per classpath, and is the one which is cached.</p>
+</li>
+<li>
+<p>A classloader that is <strong>filtering</strong> some classes from the Gradle runtime classloader to make them available. This is what the bridging Ant builder uses. This classloader is shared among all isolated ant builder instances.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So when I say that something leaks, it can leak to any of those classloaders, and any of the parent loaders&#8230;</p>
+</div>
+<div class="paragraph">
 <p>That&#8217;s were I felt desperate. After a week fighting those memory leaks, and so many "ah ah, got you!" moments, I was in front of a wall. Basically, while in the first case (isolated <code>ClassInfo</code> leaking into Gradle), I know I can totally clean all the <code>ClassInfo</code> references because I know I can shutdown the Groovy runtime, in the second case (Gradle <code>ClassInfo</code> leaking), I basically have no idea that a class comes from the isolated classloader or not. So it&#8217;s hard to say if you should remove the <code>ClassInfo</code> or not. I am currently experimenting a brute force "try to determine if a class belongs in the class loader hierarchy", but it is weak (ah ah!) because I need to know about several potential class loader types.</p>
 </div>
 </div>
