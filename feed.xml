@@ -6,9 +6,192 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 1 Sep 2015 23:12:24 +0200</pubDate>
-    <lastBuildDate>Tue, 1 Sep 2015 23:12:24 +0200</lastBuildDate>
+    <pubDate>Sun, 22 May 2016 22:55:33 +0200</pubDate>
+    <lastBuildDate>Sun, 22 May 2016 22:55:33 +0200</lastBuildDate>
 
+    <item>
+      <title>Gradle and Kotlin, a personal perspective</title>
+      <link>http://melix.github.io/blog/2016/05/gradle-kotlin.html</link>
+      <pubDate>Sun, 22 May 2016 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2016/05/gradle-kotlin.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_gradle_embraces_kotlin_what_about_groovy&quot;&gt;Gradle embraces Kotlin, what about Groovy?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all, it&amp;#8217;s been a long time since I last blogged, and I&amp;#8217;d like to remind that everything written here are opinions of my own and not the views of my employer, which happens to be Gradle Inc as write those lines.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A few days ago, &lt;a href=&quot;http://gradle.org/blog/kotlin-meets-gradle/&quot;&gt;Gradle and Jetbrains announced a partnership to make Kotlin a first class language for Gradle builds&lt;/a&gt;, both for build scripts and plugins. Most likely, you know Gradle has been using Groovy since its inception. Lots of people think that Gradle is written in Groovy, which is actually wrong. Most of Gradle is written in Java. The builds scripts are written in Groovy, lots of plugins are written in Groovy, our test cases are written in Groovy (using the best testing framework out there, Spock), but Gradle itself is written in Java.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;From my perspective, this is situation has been very disturbing and continues to be so. I have very good friends in the Groovy community, and this move has been seen by some of them as a betrayal. As an Apache Groovy committer, and someone who spent almost 4 years full time implementing new features of the language, most importantly its static compiler, seeing Kotlin promoted as the language of choice for Gradle&amp;#8217;s future, it&amp;#8217;s a little &lt;em&gt;strange&lt;/em&gt;. One could legitimely say, &lt;em&gt;WTF?&lt;/em&gt; I&amp;#8217;ve been aware of this work for several months now, and my colleagues Rodrigo B. de Oliveira and Chris Beams have done an amazing job in a very short period of time. From a long time Groovy user and Groovy developer point of view, it&amp;#8217;s hard not to make this move an emotional thing. However, business is not about emotions. In particular, what are we trying to acheive with Gradle? We&amp;#8217;re trying to help developers build their applications. We&amp;#8217;re trying to make this elegant, reproducible, scalable and fast. We&amp;#8217;re language agnostic. We can build Java, Groovy, Scala, Kotlin, C++, Python, &amp;#8230; Gradle has never been the tool to build Groovy applications: it&amp;#8217;s been a tool to build software. It&amp;#8217;s a tool about automation. And I&amp;#8217;ve been complaining enough about communities that build their own tool for their very specific language to understand that this is super important: Gradle is (or aims at) the best tool for building any kind of software. In short, we must think in terms of what is best for our users, and sometimes, this means changing technogies. A product should not be bound to a technology, but a company should even less be bound to it. And given the response that we had after the announcement, supporting Kotlin seem to drive a lot of excitement around Gradle, and that&amp;#8217;s a very good thing. So, let&amp;#8217;s take that out, and think what it means for Groovy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_groovy_support_is_not_abandoned&quot;&gt;Groovy support is not abandoned&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all, I already said it several times, but better continue to spread the message: support for Groovy in Gradle is &lt;strong&gt;not&lt;/strong&gt; deprecated nor removed. You can still write your scripts in Groovy, you can write your plugins in Groovy, and you will still be able to do it. But Gradle will likely encourage users to migrate to Kotlin. To be clear, Kotlin support is incubating, and there&amp;#8217;s a lot to do to make it as usable as the Groovy version. Second, there are tens of thousands of builds written using Groovy, hundreds of plugins written in Groovy, so it&amp;#8217;s not tomorrow that Kotlin is going to replace Groovy. However, we care about the future, so we need to think about what it means in the long term. Should we be excited about supporting Kotlin? Yes we should, because Kotlin is an amazing language. Should we continue to be excited about Groovy? Of course we should, because it&amp;#8217;s also an amazing language. But it&amp;#8217;s old and as such brings a lot of legacy with it. As someone who implemented the static compiler for Groovy, I know it very well. There are things that are hard to change, because a large part of the Groovy community is very fond of its dynamic behavior.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So let&amp;#8217;s focus on the two major aspects that led to embracing Kotlin in Gradle. The fist one, and principal, is IDE support. Let&amp;#8217;s face it: even before I joined Gradle, when I was giving talks about it, people were complaining about IDE support. Compared to a tool like Maven, supporting Gradle build scripts is complicated. Supporting XML is easy (to some extent). Supporting a &lt;em&gt;dynamic DSL&lt;/em&gt; is not. Some say it&amp;#8217;s Groovy&amp;#8217;s fault, and I want to correct this statement right now: it&amp;#8217;s not Groovy&amp;#8217;s fault. While Groovy let&amp;#8217;s you design dynamic DSLs, the design of the DSL can be changed to make it easier for tools to &quot;discover&quot; things. But when Gradle was designed, there wasn&amp;#8217;t any statically compiled Groovy. The idiomatic way to write DSLs in Groovy, at that time, was to heavily rely on &lt;em&gt;runtime metaprogramming&lt;/em&gt;. While loving &lt;em&gt;metaprogramming&lt;/em&gt;, I&amp;#8217;ve always prefered &lt;em&gt;compile time&lt;/em&gt; metaprogramming over &lt;em&gt;runtime&lt;/em&gt; metaprogramming. For multiple reasons:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;because in most cases, what you want to do at runtime can be done in a unique, setup phase. For example, create your metaclasses, enrich existing types, configure &lt;em&gt;property missing&lt;/em&gt;, &lt;em&gt;method missing&lt;/em&gt;, &amp;#8230; If it&amp;#8217;s setup, it&amp;#8217;s better done at compile time, because you can report errors, and because it gives higher performance. This led the way I designed the static compiler, and more features of Groovy after that (traits, type checking extensions, &amp;#8230;) : describe what you want to do at compile time.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;because it makes the life of tools easier. While IntelliJ or Eclipse support &lt;em&gt;DSL descriptors&lt;/em&gt; that help them provide completion, those are hard to implement, and often inaccurate. They can only approximate what is going to happen at runtime. And in the end, you&amp;#8217;re doing the same job twice: you&amp;#8217;re writing a runtime for your DSL, which is dynamic, then you need to write a DSL descriptor for the IDE to understand it. Wouldn&amp;#8217;t it be better if all was done in a unique place? Something that both the compiler and the IDE can understand?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So while we &lt;em&gt;know&lt;/em&gt; we can describe dynamic Groovy DSLs so that they are understood by IDEs, it&amp;#8217;s effectively a lot of work. And if you want to support multiple IDEs, it&amp;#8217;s even more work. But in the case of Gradle, it&amp;#8217;s even worse: each plugin can provide it&amp;#8217;s own &quot;micro DSL&quot;. While there&amp;#8217;s an &quot;idiomatic&quot; way to configure Gradle builds, it&amp;#8217;s no single rule. One can implement it&amp;#8217;s own Groovy DSL within the Gradle build. And no luck the IDE would ever understand it. Another pain point is that Gradle adds complexity to complexity in terms of DSL capabilities. For example, when you have a build script that has:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
+   compile libraries.groovy
+}
+
+greeter {
+   message = &apos;hello&apos;
+}
+
+sign {
+   signature = top
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;often people do not realize that:
+   - &lt;code&gt;dependencies&lt;/code&gt; is found on a &lt;code&gt;Project&lt;/code&gt; instance
+   - &lt;code&gt;libraries&lt;/code&gt; is a user declared variable, that can be found in a plugin, another build script, a project properties file, &amp;#8230; (how does the IDE find about it?)
+   - &lt;code&gt;greeter&lt;/code&gt; is a &lt;em&gt;convention object&lt;/em&gt;, defined by a plugin, to configure the default values of its task
+   - &lt;code&gt;sign&lt;/code&gt; is a &lt;em&gt;task&lt;/em&gt;, which has a &lt;code&gt;signature&lt;/code&gt; property, and &lt;code&gt;top&lt;/code&gt; references an &lt;em&gt;extension property&lt;/em&gt; from the project&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So while this build script is &lt;em&gt;simple to read&lt;/em&gt;, it&amp;#8217;s &lt;em&gt;hard to understand how it effectively works&lt;/em&gt;, because objects can be found at different places, can be provided by different providers (plugins, properties, extensions), but everything is accessed using a single notation. This is bad, because it makes it almost impossible for an IDE to understand what is going on.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The question is, is it Groovy&amp;#8217;s fault? My answer is &lt;em&gt;not totally&lt;/em&gt;. The fault is mostly on the DSL design, and Groovy made it too easy to do so. But again, that was designed at a time when dynamic Groovy was the rule. I gave a talk, recently, about &lt;a href=&quot;https://www.google.fr/url?sa=t&amp;amp;rct=j&amp;amp;q=&amp;amp;esrc=s&amp;amp;source=web&amp;amp;cd=1&amp;amp;cad=rja&amp;amp;uact=8&amp;amp;ved=0ahUKEwiW2Mftt-7MAhWKSRoKHQJtCcIQtwIIHTAA&amp;amp;url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DnqqGtdvPzus&amp;amp;usg=AFQjCNH57qeR_jUUIAmGKZiQOK99v0669w&quot;&gt;building modern DSLs with Groovy&lt;/a&gt;, where I discourage such practices, and encourage the use of &lt;em&gt;static DSLs&lt;/em&gt; instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That leads me to the second main reason of embracing Kotlin in Gradle: performance. When we talk about performance, lots of folks tend to think that Groovy is slow. This is not the case. Groovy is pretty fast. However, depending on the design of the DSL, you can easily fall into traps that can lead to catastrophic performance. Before I go further with it, I&amp;#8217;m reading way to often that Gradle is slow &lt;em&gt;because it&amp;#8217;s written in Groovy&lt;/em&gt; and that &lt;em&gt;Groovy is dynamic so it&amp;#8217;s slow&lt;/em&gt;. F* no, those who tell you that just didn&amp;#8217;t profile a build. As I said, Gradle is mostly written in Java. And I&amp;#8217;ve spent the last 3 months optimizing the performance of Gradle, and I can tell you that of the dramatic performance improvements that one can see in Gradle 2.13 and 2.14, almost none was obtained by rewriting Groovy to Java, or rewriting Groovy code. None! Most of the hotspots were pure Java code. Period. However, as soon as you use plugins, which are today mostly written in dynamic Groovy, or that your build scripts imply a lot of nested closures, things start to become complicated for &quot;Groovy&quot;. Let me explain that clearly. I think at some point, someone made a terrible design decision in Groovy. I don&amp;#8217;t know who it was, but the idea was to rely on exceptions to control the flow of resolution of properties. This means that when a property is &lt;em&gt;missing&lt;/em&gt;, typically in a closure, an exception is thrown. When a method is not found, an exception is thrown. When a property is not found, an exception is thrown. That seemed to be a good idea, because in the end, you want to provide the user with an error, but in practice, this is catastrophic, because Groovy can capture those exceptions. Typically, in a delegation chain (nested closures), a containing closure or class can actually have this property defined, or implement &lt;em&gt;property missing&lt;/em&gt;/&lt;em&gt;method missing&lt;/em&gt;. Now, re-think a second about the &quot;simple&quot; example of Gradle build above: how do you now where to look up for &lt;code&gt;message&lt;/code&gt;, &lt;code&gt;top&lt;/code&gt;, &lt;code&gt;signature&lt;/code&gt;, &amp;#8230;? Now you know: f* exceptions are thrown, stack traces are filled, and eventually captured because some composite dynamic object finally wants to answer the message&amp;#8230; In practice, for some builds I have profiled, it was tens of thousands of exceptions being thrown and stack traces filled for nothing. And that has a terrible impact on performance. So even if we have implemented strategies in Gradle to try to avoid throwing those exceptions (which are responsible for part of the performance improvements in 2.14), this is very hard to do it, and we&amp;#8217;re still throwing way too many of them. A static language doesn&amp;#8217;t have this problem, because every single reference in source is resolved at compile time. So, if you&amp;#8217;re writing a plugin in Groovy, for the sake of performance, please add &lt;code&gt;@CompileStatic&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So there goes Kotlin. Kotlin has excellent static builders support, that make it practical both for IDE support, which will dramatically improve user experience in terms of understanding what do write, what is an error, having documentation, refactorings, &amp;#8230; and is a very pleasant language to work with. Honestly, I don&amp;#8217;t have anything bad to say about the language (apart from the &lt;em&gt;fun&lt;/em&gt; keyword that I don&amp;#8217;t like). To some degree, it&amp;#8217;s not very surprising: Kotlin has heavily inspired by Groovy and another popular JVM language: Scala. And again, being the one behind the static compiler of Groovy, I can&amp;#8217;t blame them for doing what I like about static languages. Their builder support is awesome, and very elegant. And it&amp;#8217;s supported out of the box by IntelliJ of course, but also Eclipse.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_a_static_dsl_for_groovy&quot;&gt;A static DSL for Groovy?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok, so one might think at this point that I&amp;#8217;m mad. I wrote a &quot;competing&quot; language, and I&amp;#8217;m happy to see Kotlin being promoted in Gradle. I wrote the static compiler, that is capable of doing everything Kotlin can do (minus reified generics, plus superior scripting support, type checking extensions, &amp;#8230;), so wtf? Ok, so let&amp;#8217;s be very clear: I have absolutely no doubt that Groovy can do everything that we&amp;#8217;ve done with the Kotlin support in Gradle. It can be statically compiled, provide an elegant DSL that is statically compiled, and it can be understood by the IDE. I had no doubt before the Kotlin work started, I have even less doubts now. And I can say I have no doubts because I tried it: I implemented experimental support for statically compiled Gradle scripts, written in Groovy. Here&amp;#8217;s an example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;apply plugin: &apos;java&apos;
+apply plugin: &apos;eclipse&apos;
+apply plugin: &apos;idea&apos;
+apply plugin: &apos;groovy&apos;
+apply plugin: GreetingPlugin
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile &apos;commons-lang:commons-lang:2.5&apos;
+    compile &quot;commons-httpclient:commons-httpclient:3.0&quot;
+    compile &quot;commons-codec:commons-codec:1.2&quot;
+    compile &quot;org.slf4j:jcl-over-slf4j:1.7.10&quot;
+    compile &quot;org.codehaus.groovy:groovy:2.4.4&quot;
+    testCompile &apos;junit:junit:4.12&apos;
+    runtime &apos;com.googlecode:reflectasm:1.01&apos;
+}
+
+tasks.configure(&apos;test&apos;, Test) {
+    jvmArgs &apos;-XX:MaxPermSize=512m&apos;, &apos;-XX:+HeapDumpOnOutOfMemoryError&apos;
+}
+
+dependencies {
+    compile &apos;org.codehaus:groovy:groovy-all:2.4.4&apos;
+}
+
+extension(GreetingPluginExtension) {
+    message = &apos;Hi&apos;
+    greeter = findProperty(&apos;greeter&apos;)?:&apos;static Gradle!&apos;
+}
+
+tasks.create(&apos;dependencyReport&apos;, DependencyReportTask) {
+    outputs.upToDateWhen { false }
+    outputFile = new File( project.buildDir, &quot;dependencies.txt&quot;)
+}
+
+class GreetingPlugin implements Plugin&amp;lt;Project&amp;gt; {
+    void apply(Project project) {
+        project.extensions.create(&quot;greeting&quot;, GreetingPluginExtension)
+        project.task(&apos;hello&apos;) &amp;lt;&amp;lt; {
+            println &quot;${project.extension(GreetingPluginExtension).message} from ${project.extension(GreetingPluginExtension).greeter}&quot;
+        }
+    }
+}
+
+class GreetingPluginExtension {
+    String message
+    String greeter
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is an example Gradle build that is compiled statically. It has none of the problems I described about the Groovy implementation in Gradle above. It uses all the techniques that static Groovy provides: extension methods, powerful scripting with implicit imports, type checking extensions, &amp;#8230; All this works. And interestingly, the work that is done to enable support for Kotlin also benefits to statically compiled Groovy, and Java! Let&amp;#8217;s not forget about the latter, which is years behind in terms of &quot;modern&quot; languages support. So if this works, why do we need Kotlin? To be honest, I asked it to myself many times. It was very difficult to me, because I knew Groovy could do it. Again, I had no doubt about the language capabilities, no doubt about the performance impact of doing this. However, I missed two critical points:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;IDE support. Even if support of Groovy in IntelliJ is by far the most advanced of all other IDEs, it still lacks behind when static compilation is on. But more importantly, it doesn&amp;#8217;t know that my script is statically compiled, nor does it now about my custom extension methods. I tried to implement a &lt;code&gt;GDSL&lt;/code&gt; descriptor to make it aware of them, and it somehow worked: I do have code completion, but errors are not marked as errors, and the IDE still doesn&amp;#8217;t understand that it should only suggest to me what is relevant in the context. With Kotlin scripts which are &lt;em&gt;natively static&lt;/em&gt;, there&amp;#8217;s no such issue. The IDE understands everything natively, in IntelliJ and Eclipse. So, I have no doubt that Jetbrains can implement support for this, just like I had no doubt I could implement a static Groovy DSL, but who is going to write this? Me? Gradle? I don&amp;#8217;t have the time to do it. And it&amp;#8217;s not Gradle&amp;#8217;s job to write IDE plugins. And what about Eclipse? One big issue that the Groovy community has, &lt;strong&gt;today&lt;/strong&gt;, is that nobody is supporting Eclipse since Pivotal dropped sponsorship of Groovy. After more than one year, nobody took over the development of Groovy Eclipse. Nobody. While Groovy itself saw lots of new contributors, while we saw a lot of bugfixes, new contributors and that the download numbers where never as high as they are today, IDE support is critical. And nobody took over the development of it. I saw some people referring to what Jetbrains is doing as &quot;blackmailing&quot;. Seriously? Jetbrains? Think of what they&amp;#8217;ve done for Groovy. Groovy would never has been as popular as it is without them. They provided us with the best Groovy IDE possible. They are constantly supporting new features of the language, adding support for AST transformations, traits, &amp;#8230; They even added the ability, in IDEA 14, to use Groovy (and not Kotlin, guys!) as the language to evaluate expressions in the debugger. And they would try to kill Groovy? Kill part of their business? Come on guys! So yes, they invested a lot in Kotlin and want to promote it, but how could it be otherwise? And it&amp;#8217;s not like if the language sucked: it&amp;#8217;s awesome!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Does it make sense? Now that we made the decision to support Kotlin, that we proved it would provide the level of user friendliness we want and that it is statically compiled by default, does it make sense to put resources to support static Groovy in addition? I don&amp;#8217;t have an answer to this. I thought yes, but now I&amp;#8217;m not sure. Kotlin does the job. And honestly, they have great engineers working on the language. Even if it lacks behind in terms of scripting and compilation times compared to Groovy, I have no doubt they will fix it. How arrogant would we be if we thought other languages could not do what we&amp;#8217;ve done with Groovy?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_future_of_groovy&quot;&gt;The future of Groovy&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The last point I want to address is what it means for the future of Groovy, and what it means for &lt;strong&gt;my&lt;/strong&gt; future in Groovy. First of all, I always thought that the future of Groovy was in the hands of its community. It&amp;#8217;s not Gradle that has Groovy&amp;#8217;s future in its hands. It&amp;#8217;s &lt;strong&gt;you&lt;/strong&gt;. The move to the Apache Software Foundation was also done for this very same reason: community first. If you want to continue to use Groovy, to improve it, to support it, all you have to do is f* do it! And I will continue! I love this language, I know too well how far it can go in terms of DSL support, AST transformations, now in 2.5 we have macros, that&amp;#8217;s just a crazily powerful language that&amp;#8217;s super fun to use. Should we fear competition? No, we shouldn&amp;#8217;t. Competition is good. It should be inspiring. And if Gradle moving to Kotlin means the death of Groovy, maybe the problem is elsewhere. And even if lots of people get introduced to Groovy through Gradle, it&amp;#8217;s not the only entry point. Grails is another. Jenkins (through Flow) is another. And many, many more. There was a tweet a few days ago which showed the 100 most popular dependencies in GitHub projects. Groovy was one of them. No Kotlin. No Scala. Groovy. It&amp;#8217;s everywhere, and it&amp;#8217;s going to be there for a long time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Part of the fears of the community is, after the Pivotal demise, if Groovy is a dying language. It&amp;#8217;s not. It has never been so widely used. The move to Apache Software Foundation drove a lot of attention and brought us many more contributors. But the community has to realize what the problems with Groovy are, and it has to face them: the introduction of the static compiler was too late. IDE support is important. Java 9 support is going to be super important. If you love your language, contribute. Help it. Help yourselves. The future of Groovy &lt;strong&gt;must&lt;/strong&gt; be in your hands. I can&amp;#8217;t recall how many times I told this, since I joined VMware, a few years ago, to develop Groovy. In every talk I give, I&amp;#8217;m always telling how important it is that &lt;strong&gt;you&lt;/strong&gt; contribute. Jetbrains is not going to write Groovy Eclipse for you.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And I would like to finish with one word: if people move from Groovy to Kotlin, is it really a problem? Isn&amp;#8217;t any technology inspired by another? Aren&amp;#8217;t we, developers, always rebuilding the same things, but improving them, learning lessons from the past? Is Kotlin a better Groovy? I don&amp;#8217;t have the answer yet. Maybe it is. Maybe not. Today Groovy remains greatly superior in terms of scripting, DSL support, but it comes with a price that Gradle doesn&amp;#8217;t want to pay. And let&amp;#8217;s not forget the original community of Groovy: a &lt;strong&gt;dynamic&lt;/strong&gt; language for the JVM. There are still &lt;strong&gt;lots&lt;/strong&gt; of people who like this aspect of the language (and I do too, typically when I write Groovy scripts in place of bash scripts, I don&amp;#8217;t care about types). It&amp;#8217;s compile time metaprogramming features also make it incredibly powerful. Modern Groovy definitely doesn&amp;#8217;t deserve its &quot;bad press&quot;. Would you compare Java 8 with Java 1? No. So don&amp;#8217;t compare Groovy 2.4 with Groovy 1 either. Reputation should change, and you can help there too.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This leads me to what I should do. And there, I&amp;#8217;m a bit lost, to be honest. I work for a company that embraced Groovy, that is now embracing Kotlin. I love my job, I love working with Gradle, I love Groovy, and I quite enjoy Kotlin. I&amp;#8217;m a passionate developer. I just want to continue having fun. But if you think that as such, I&amp;#8217;m not a good representative of the Groovy community anymore, maybe I should step off from the Groovy project. I would hate that, but I&amp;#8217;ve kind of been hurt by the bad comments we (Gradle) received from some members of the Groovy community. I don&amp;#8217;t want to fall into a language war, I don&amp;#8217;t care about this. I care about users. What I love to do is helping people, period.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I would like to finish this post with a thought about what I&amp;#8217;m going to do, as a Gradle developer, for you, Groovy users. In particular, I am convinced that the success of Gradle is largely due to its Groovy DSL, despite its problems. The fact that it&amp;#8217;s simple, easy to read, is super important. I joined the Groovy project because I was using Groovy as a DSL platform in a natural language processing context. Groovy is super powerful for this. And I learnt a lot in terms of DSL design. In particular, I will try to make sure that it doesn&amp;#8217;t become a Kotlin API. What I mean by that is that I think we should elevate from a Groovy DSL to a Gradle language. And this language is meant at &lt;strong&gt;describing&lt;/strong&gt; builds. And our users are not Kotlin developers. Most of them are not Groovy developers either. They are, as I described earlier, from different horizons. And I would hate if a user would have to understand concepts like generics or type inference to write a build script. That would be horribly wrong. A build author should understand how to &lt;em&gt;model an application&lt;/em&gt;, not what is a type, what is an extension method, or generic return type inference. It&amp;#8217;s different for &lt;em&gt;plugin authors&lt;/em&gt;, but for a &lt;em&gt;build author&lt;/em&gt;, it&amp;#8217;s super important. So I will try to make sure that Kotlin scripting support improves, even if it means that it would go even closer to what Groovy supports. I would do this not because I want Groovy to die, I don&amp;#8217;t (and it wouldn&amp;#8217;t help my royalties for Groovy in Action 2 ;)), but it would help users or Gradle. That&amp;#8217;s what I care most about, just like I care about what Groovy users want when I work on the Groovy project.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As for talking about Gradle, Groovy and its future, I&amp;#8217;ll be a GR8Conf next week, I&amp;#8217;d be happy to answer you in person there too!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Keep on Groovying!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>A week fighting a PermGen leak</title>
       <link>http://melix.github.io/blog/2015/08/permgenleak.html</link>
@@ -2752,542 +2935,6 @@ is &lt;strong&gt;nothing close&lt;/strong&gt; to what it was when James left the
 &lt;p&gt;In any case if you think a profile like mine is interesting for your company, you can contact me or ask for my résumé at &lt;a href=&quot;mailto:cedric.champeau@gmail.com&quot;&gt;cedric.champeau@gmail.com&lt;/a&gt;. Meanwhile, rest assured that we are focused and we will soon release Groovy 2.4 to prove that!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>10 things your static language can&amp;#8217;t do</title>
-      <link>http://melix.github.io/blog/2014/12/10-things-static-cant-do.html</link>
-      <pubDate>Mon, 15 Dec 2014 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2014/12/10-things-static-cant-do.html</guid>
-      	<description>
-	&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_but_maybe_mine_can&quot;&gt;But maybe mine can&amp;#8230;&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For those of you who do not know me, and you are likely much more in that category than in the other, I&amp;#8217;ve been working on
-the Groovy language full-time for more than 3 years now. I started as a user several years ago, in the context of DSLs,
-and eventually became a contributor before getting employed to work on the language. I love static typing, but not at the
-point of thinking that we should only reason about types. This is why I also love dynamic typing, and why I invested so
-much in Groovy.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Groovy is primarily a dynamic language. It is probably the most widely used alternative language on the JVM, with use cases ranging
-from DSLs (scripting Jenkins builds for example) to full blown applications on mobile devices (Android), going through
-full stack web applications with Grails. Despite being primarily a dynamic language, I spent a lot of time writing a
-&lt;strong&gt;static compiler for Groovy&lt;/strong&gt;, making it a pretty unique language in the JVM world, but not limited to the JVM world:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Groovy is a language which supports &lt;strong&gt;dynamic typing and compile-time type checking&lt;/strong&gt;. It makes it surprisingly powerful
-and versatile language, capable of adapting to a great variety of contexts.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;When I tell people that I wrote the static compiler for Groovy, I often get a reaction which is &quot;so you admit that dynamic
-languages are less powerful than static ones&quot;, and they see me as the one that made the language &lt;strong&gt;right&lt;/strong&gt;. Oh no, I did not.
-In fact, I love the dynamic aspects of the language. It is always annoying that I, as a designer of a static compiler, have
-to defend dynamic languages, but it&amp;#8217;s an interesting topic, especially those days where I read lots of articles doing
-dynamic-bashing.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So in this post, I&amp;#8217;m going to illustrate 10 things that a static language (most likely) cannot do. It doesn&amp;#8217;t mean that there are only
-10 things that a static language cannot do compared to a dynamic one, but it is here to illustrate the fact that this idea
-that static languages are superior or more scalable just because they are &lt;em&gt;type safe&lt;/em&gt; is IMHO stupid. Compare languages between
-them, but do not compare categories of languages. While static languages will be excellent in making type safety guarantees (errors
-at compile time), dynamic languages are often far superior in cutting down verbosity. That&amp;#8217;s just an example which illustrates
-that comparing on the sole aspect of type safety is not enough.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this post I will also illustrate how Groovy is special, because it is capable of handling things in a &lt;strong&gt;mixed&lt;/strong&gt; mode, making it
-totally unique and incredibly powerful, bringing the best of the two worlds together. Last disclaimer, this post is mostly centered on
-the JVM world, because this is the one I know the best.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;admonitionblock caution&quot;&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class=&quot;icon&quot;&gt;
-&lt;i class=&quot;icon-caution&quot; title=&quot;Caution&quot;&gt;&lt;/i&gt;
-&lt;/td&gt;
-&lt;td class=&quot;content&quot;&gt;
-As expected I got lots of comments on various social media. Some are positive, some not, that&amp;#8217;s ok, but again, I
-would like to remember that this is &lt;strong&gt;not&lt;/strong&gt; static languages bashing, nor dynamic languages promotion. Maybe some of you
-will think &quot;hey, but my static language can do it!&quot; and yes, it is possible, because as the subtitle of this post says,
-mine can too. But when it does, often, there&amp;#8217;s a drawback (like loosing type safety, decreased performance,&amp;#8230; ) or you fall on
-dynamic behavior without even noticing it. When it is the case, I tried to be honest and tell about the possibilities. But I also
-voluntarily hide some static features of Groovy that make it a very interesting solution (flow typing for example). Last but not
-least, I am not saying that &lt;strong&gt;all&lt;/strong&gt; dynamic features implement &lt;strong&gt;all&lt;/strong&gt; those items. I am saying that by nature a dynamic language make
-it possible. An possible doesn&amp;#8217;t mean required. So please read carefully before screaming!
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Ready?&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_10_object_oriented_programming_done_right&quot;&gt;10. Object-oriented programming done right&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This is a very academic point of view. Users of static languages tend to think that their language is object-oriented. Because C++
-has a compiler, because Java has a compiler, means that statically typed languages have to be compiled. Object oriented programming
-does &lt;strong&gt;not&lt;/strong&gt; require languages to be compiled. OOP is about &lt;strong&gt;message passing&lt;/strong&gt;. Object-oriented programming does &lt;strong&gt;not&lt;/strong&gt; imply type safety.
-It means that an object is something that receives messages. In the Java world, the message is a method with arguments, and the contract
-is enforced at compile time, but it is an implementation detail which reduces OO programming to a small subset of its capabilities.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The great Alan Kay himself &lt;a href=&quot;http://lists.squeakfoundation.org/pipermail/squeak-dev/1998-October/017019.html&quot;&gt;explains it&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Groovy, as a dynamic language, supports commons OOP concepts (and also functional concepts) like class, interface, abstract classes or traits
-but also has a meta-object protocol. For those of you who did Smalltalk programming, it&amp;#8217;s the same idea: the behavior of objects is not determined at compile time, it&amp;#8217;s a runtime behavior determined by a meta-object protocol. In Groovy, it translates to the fact that to each class corresponds
-a meta-class which determines the behavior that an object will have when it receives a message (a method call).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This capability of doing things at runtime instead of compile time is the core of many features of dynamic languages and most of the
-points illustrated in this blog post derive from it.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;admonitionblock note&quot;&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class=&quot;icon&quot;&gt;
-&lt;i class=&quot;icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
-&lt;/td&gt;
-&lt;td class=&quot;content&quot;&gt;
-I had some comments that the fact that dynamic languages can do OO right wasn&amp;#8217;t really interesting. In fact, I insisted on keeping this
-because this is actually what makes most of the following items possible. So think of 10. as the basement for most of the following items.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_9_multimethods&quot;&gt;9. Multimethods&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Java supports overloaded methods. The question whether it is a good or a bad idea is beyond the scope of this post (and believe me
-it is a very interesting question both in terms of semantics and performance). The idea is that an object can have two methods
-of the same name accepting different parameters. Let&amp;#8217;s illustrate this with Java code:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static int foo(String o) { return 1; }
-public static int foo(Date o) { return 2; }
-public static int foo(Object o) { return 3; }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then you call it like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static void main(String[] args) {
-    Object[] array = new Object[] { &quot;a string&quot;, new Date(), 666 };
-    for (Object o : array) {
-        System.out.println(foo(o));
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What do you think it prints? Well, most beginners will probably answer something that looks natural when you know the contents of the array:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;1
-2
-3&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But the correct answer is:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;3
-3
-3&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Because the static type of &lt;code&gt;o&lt;/code&gt; when the call to &lt;code&gt;foo&lt;/code&gt; is made is &lt;code&gt;Object&lt;/code&gt;. To say it more clearly, the declared type of &lt;code&gt;o&lt;/code&gt; is &lt;code&gt;Object&lt;/code&gt; so we are calling &lt;code&gt;foo(Object)&lt;/code&gt;. The reason for this is that the code is &lt;strong&gt;statically compiled&lt;/strong&gt; so the compiler has to know at compile time which method is going to be called. A dynamic language like Groovy chooses the method at runtime (unless, of course, you use &lt;code&gt;@CompileStatic&lt;/code&gt; to enforce static semantics), so the method which is going to be called corresponds to the &lt;strong&gt;best fitting arguments&lt;/strong&gt;. So Groovy, unlike Java, will print the less surprising result:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;1
-2
-3&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It is theorically possible for a static language to do the same. But it comes at the price of performance. It would mean that the arguments have to be checked at runtime, and since static languages do not, as far as I know, implement an inlining cache, performance would be lower than those of a well designed dynamic language&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But to add something to a dynamic language, what if you remove the &lt;code&gt;Object&lt;/code&gt; version of &lt;code&gt;foo&lt;/code&gt;, and remove &lt;code&gt;666&lt;/code&gt; from the array? As an exercise to the reader, would this Java code compile?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public static int foo(String o) { return 1; }
-public static int foo(Date o) { return 2; }
-
-public static void main(String[] args) {
-    Object[] array = new Object[] { &quot;a string&quot;, new Date() };
-    for (Object o : array) {
-        System.out.println(foo(o));
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If not, what do you have to do to make it pass? Yes, dynamic languages are superior here&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_8_duck_typing&quot;&gt;8. Duck typing&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Duck typing has always been a selling point of dynamic languages. Basically imagine two classes:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class Duck {
-   String getName() { &apos;Duck&apos; }
-}
-class Cat {
-   String getName() { &apos;Cat&apos; }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Those two classes define the same &lt;code&gt;getName&lt;/code&gt; method, but it is not defined explicitly in a contract (for example through an interface). There are many reasons why this can happen. For example, you didn&amp;#8217;t write those classes, they are in a third party library and for some reason those methods were not intended to be part of the contract. Imagine that you have a list of objects containing either ducks, cats, or anything else definining a &lt;code&gt;getName&lt;/code&gt; method. Then a dynamic language will let you call that method:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def list = [cat, dog, human, hal]
-list.each { obj -&amp;gt;
-   println obj.getName()
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A static language like Java would force you to have a cast here. But since you don&amp;#8217;t have an interface defining &lt;code&gt;getName&lt;/code&gt; and implemented by all objects, you cannot cast to that type so you have to consider all types and delegate appropriately like in the following code:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;if (obj instanceof Cat) {
-   return ((Cat)obj).getName();
-}
-if (obj instanceof Duck) {
-   return ((Duck)obj).getName();
-}
-if (obj instanceof Human) {
-   return ((Human)obj).getName();
-}
-if (obj instanceof Computer) {
-   return ((Computer)obj).getName();
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The real solution in Java is to define either a common super class or an interface for all those, but again, sometimes you just cannot because you don&amp;#8217;t have access to the code! Imagine that the &lt;code&gt;Cat&lt;/code&gt; and &lt;code&gt;Dog&lt;/code&gt; classes where designed like this for example:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public abstract class Something {} // should define getName, but does not for some obscure reason
-public class Cat extends Something {
-   public String getName() { return &quot;Cat&quot;; }
-}
-public class Dog extends Something {
-   public String getName() { return &quot;Dog&quot;; }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Often the developer didn&amp;#8217;t even realize that all objects share a common interface. That&amp;#8217;s bad for you, and if you find this code you have no choice but the cascading &lt;em&gt;instanceof&lt;/em&gt; solution. There are multiple issues with that code:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;it is very repetitive, the only thing which changes is the type used in the test and the cast&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;it has to be extensive, that is to say that if your list happens to contain an object having a &lt;code&gt;getName&lt;/code&gt; method but not in your list of cases to consider, the code is broken. This means that you have to think about changing that method if you add a new type in your list.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;in the JVM world, as the number of cases to consider grows, the size of the method will increase to the point where the JIT (just-in-time compiler) decides it&amp;#8217;s not worth inlining, potentially dramatically reducing performance.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Of course, one may say &quot;but why the hell didn&amp;#8217;t you use an interface&quot;. This is of course a good way to solve this in Java, but it is not always possible. Not for example if you don&amp;#8217;t have access to the source code (think of the various classes being split in third party libraries). I often faced this problem in the past, and believe me it&amp;#8217;s no fun (I look at you, &lt;em&gt;Apache Lucene&lt;/em&gt;).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate &lt;code&gt;getName&lt;/code&gt; method. Of course it is overkill: for each object of your list you have a proxy instantiated&amp;#8230; Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn&amp;#8217;t have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;An elegant alternative used by other static languages is &lt;strong&gt;structural typing&lt;/strong&gt;. This is for example what the &lt;code&gt;Go&lt;/code&gt; language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the &lt;em&gt;invokedynamic&lt;/em&gt; bytecode instruction but guess what? You are relying on a &lt;em&gt;dynamic&lt;/em&gt; feature of the VM&amp;#8230; Can you hear it?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;admonitionblock note&quot;&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class=&quot;icon&quot;&gt;
-&lt;i class=&quot;icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
-&lt;/td&gt;
-&lt;td class=&quot;content&quot;&gt;
-Some argued that this is very bad design. I must repeat that if you think so, you missed the point. The idea is to &lt;strong&gt;workaround poorly designed
-APIs&lt;/strong&gt; (or APIs which were &quot;optimized&quot;). When I talked about &lt;em&gt;Lucene&lt;/em&gt; it was for a very good reason. I faced the problem. &lt;em&gt;Lucene&lt;/em&gt; is a highly
-optimized piece of code. It makes design decisions which are often based on performance: flattening as much as possible class hierarchies (the HotSpot
-JIT doesn&amp;#8217;t like deep class hierarchies), make classes final, prefer abstract classes over interfaces, &amp;#8230; So it is easy to find classes that you want
-to extend, but you can&amp;#8217;t because they are final, or classes that implicitly implement a contract but do not define interfaces. This is a pain to work
-with, and the ability of a dynamic language to be able to call such methods without having to explicitly declare a contract is a real gain. Some
-static languages offer similar features through structural typing, but then you have to think about what it means (virtual table lookup?) and how
-it is implemented depending on the platform (on the JVM, relying on reflection is possible but you loose all type safety and have very bad performance). So everytime I used duck typing, it wasn&amp;#8217;t on APIs that &lt;strong&gt;I&lt;/strong&gt; had designed. It was on 3rd party APIs, that for some reason didn&amp;#8217;t provide
-me with a way to call some methods.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_7_respond_to_non_existing_methods&quot;&gt;7. Respond to non-existing methods&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A dynamic language answers to messages (method calls) at runtime. This means that a well designed dynamic language should be able to let you answer &lt;strong&gt;any&lt;/strong&gt; kind of method call, including&amp;#8230; non existing methods! This feature is at the core of powerful facilitating frameworks like Grails. In Grails, you can define a domain class like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class Person {
-   String firstName
-   String lastName
-   int age
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The &lt;code&gt;Person&lt;/code&gt; class does not define any method, nor does it have any explicit relation to a datastore, an ORM or SQL server. However, you can write code like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def adults = Person.findByAge { it&amp;gt;= 18 }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I will not dig into the details about how this is done, but the idea is to intercept the fact that the &lt;code&gt;findByAge&lt;/code&gt; method does not exist, then parse the name of the method and build a query based on the method name and the rest of the arguments (here, a closure, an open block of code). Queries can be as complex as you wish, like &lt;code&gt;findByLastNameAndAge&lt;/code&gt; or whatever you can think of. Of course Grails does some smart things here, like &lt;strong&gt;generating a new method at runtime&lt;/strong&gt;, so that the next time this method is hit, it is not an unknown method anymore, and can be invoked faster! Only a dynamic language would let you do that. Say bye to infamous DAOs that you have to change everytime you have
-a new query, it is not necessary. One could say that they prefer safety at compile time rather than the ability to do this, but Grails also offers that possibility of checking that the syntax is correct at compile time, while still leveraging the dynamic runtime to make this work&amp;#8230; It&amp;#8217;s all about boilerplate removed, code verbosity and productivity&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The ability to react to arbitrary messages is actually at the core of many DSLs (domain specific languages) written in Groovy. They are at the core of builders for example, which will let you write code like:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;catalog {
-   book {
-   	isbn 123
-	name &apos;Awesome dynamic languages&apos;
-        price 11.5
-        tags {
-	   dynamic,
-	   groovy,
-	   awesome
-	}
-   }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Instead of the less readable Java 8 version (for the reader&amp;#8217;s mental sanity, I will not write the Java 7 version):&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;builder.catalog( (el) -&amp;gt; {
-  el.book ( (p) -&amp;gt; {
-     p.setISBN(&quot;123&quot;);
-     p.setName(&quot;Awesome dynamic languages&quot;);
-     p.setPrice(11.5);
-     p.setTags(&quot;dynamic&quot;,&quot;groovy&quot;,&quot;awesome&quot;);
-  })
-});&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_6_mocking_and_monkey_patching&quot;&gt;6. Mocking and monkey-patching&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Mocking is at the core of many unit testing strategies. Most of static languages make use of an external library to do this. Why this can be true of dynamic languages too, this is often not strictly necessary. For example Groovy offers built-in stubbing/mocking capabilities, very easily thanks to its dynamic nature. Monkey patching rely on the very same behavior but is easier to explain so I will illustrate this concept here. Imagine that you use a closed-source library (I won&amp;#8217;t judge you, I promise) or an open-source library for which you don&amp;#8217;t want to/don&amp;#8217;t have time to contribute to, but you have found a serious security issue in a method:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public class VulnerableService {
-   public void vulnerableMethod() {
-      FileUtils.recurseDeleteWithRootPrivileges(&quot;/&quot;);
-   }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You know how to fix it, but you have to wait for the maintainer to upgrade the library. Unfortunately, you can&amp;#8217;t wait because attackers are already leveraging the vulnerability on your production server (yeah, they like to). One option that a dynamic language can let you do is redefine the method at runtime. For example, in Groovy, you could write:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;VulnerableService.metaClass.vulnerableMethod = {
-   println &quot;Well tried, but you have been logged to Santa&apos;s naughty guys list!&quot;
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then a caller that would call the vulnerableMethod would call the monkey-patched version instead of the original one. Of course in a language like Groovy, this would only be true if the callee is dynamically compiled: if you use &lt;code&gt;@CompileStatic&lt;/code&gt; to behave like a static compiler, you&amp;#8217;re out of luck, because the method which will be invoked is selected at compile time, so you &lt;strong&gt;will&lt;/strong&gt; be vulnerable even if you try to monkey patch&amp;#8230; Groovy provides other extension mechanisms to work around this, but it&amp;#8217;s not the topic here ;-)&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_5_dynamic_objects&quot;&gt;5. Dynamic objects&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Most dynamic languages let you create&amp;#8230; dynamic objects. It is basically an object for which you attach methods and properties &lt;em&gt;at runtime&lt;/em&gt;. Not that I am a big fan of it but there are some valid use cases (serialization, languages like &lt;a href=&quot;https://github.com/golo-lang/golo-lang/&quot;&gt;Golo&lt;/a&gt; not supporting classes, prototype based construction, &amp;#8230;). It can also be convenient if you want to rapidly prototype a class.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As an example, let&amp;#8217;s see how you could create an arbitrary object to represent a person, without actually leveraging on a class, using the Groovy language:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def p = new Expando()
-p.name = &apos;Cédric&apos;
-p.sayHello = { println &quot;Hello $name&quot; }
-
-p.sayHello()&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The code is totally dynamic here. It lets you create an arbitrary object, attach new methods to it, data, &amp;#8230;, without relying on strong typing. Of course it is interesting when you see that the &lt;code&gt;sayHello&lt;/code&gt; method is capable of referencing &quot;pseudo-fields&quot; which are themselves dynamic!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_4_scripting&quot;&gt;4. Scripting&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Static languages can do scripting. But it is definitely not what I would call scripting. Having to write types is not natural in a script. I even worked in the past in a context where people who wrote scripts where not programmers. They didn&amp;#8217;t even know what a type is, and they don&amp;#8217;t care. The most popular scripting technologies like Bash do not have types, and it&amp;#8217;s not a problem, so imagine the following. You arrive late at your office, your boss is very angry about that and shouts to you: &quot;you have 5 minutes, not more, to give me the total number of followers of users who have submitted an accepted pull request on the Groovy repo recently&quot;. It&amp;#8217;s a weird query, most probably your boss is going into social networking madness but you have no choice otherwise you&amp;#8217;re fired.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In that case, most developers would think of:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;using a Bash script combining &lt;code&gt;curl&lt;/code&gt;, &lt;code&gt;grep&lt;/code&gt;, regular expressions and hoping that &lt;code&gt;man&lt;/code&gt; works&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;using a tool they know like Java, but since they have so little time, they will probably rely on a regular expression to parse the JSON feed until they realize they have to do a second HTTP query for each user&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;quiting their job&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In Groovy, you would do:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;import groovy.json.JsonSlurper
-
-def json = new JsonSlurper().parse(&apos;https://api.github.com/repos/groovy/groovy-core/issues?state=closed&apos;.toURL())
-json.user.collectEntries { u -&amp;gt;
-   // second query to fetch the nb of followers
-   def followers = new JsonSlurper().parse(u.followers_url.toURL())
-   [u.login,followers.size()]
-}.values().sum()&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What you can see here is that we use a facility, &lt;code&gt;JSonSlurper&lt;/code&gt; which actually parses the JSON result. It is much more reliable that what you would have done with a quick hack like a regex, but not only:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;all data is accessible in a path-like fashion (&lt;code&gt;json.user.address.city.postalCode&lt;/code&gt;)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;you don&amp;#8217;t need a single type here&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Even if you use a smart JSON parser with your static language, you would still have to write a collection of classes to unmarshall the JSON structure into beans/classes. For such a simple use case, you really don&amp;#8217;t care. You just want things done, easily, quickly. You don&amp;#8217;t need type safety. You don&amp;#8217;t need it to be super clean and tolerant to future changes of the JSON format. Get. Things. Done. (and boss happy).&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_3_runtime_coercions&quot;&gt;3. Runtime coercions&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Another thing that dynamic languages are particularily good at is runtime coercions. In general static languages users know about one type of conversion, which is casting. Some are lucky enough to know about coercion (like the use of &lt;em&gt;implicit&lt;/em&gt; in &lt;em&gt;Scala&lt;/em&gt;), the others rely on the adapter pattern. In a dynamic language, runtime coercions are often easy to implement. A coercion differs from a cast in the sense that you want to convert an object of &lt;code&gt;class A&lt;/code&gt; to an object of &lt;code&gt;class B&lt;/code&gt;, but a &lt;code&gt;B&lt;/code&gt; cannot be assigned to an &lt;code&gt;A&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Groovy provides &quot;natural&quot; conversions for some widely used types: lists to objects, and maps to object, like in the example here:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
-Point p = [x:1, y:2] // coercion of a map literal into an object of class Point thanks to setter injection&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But if it happened to be that you cannot use maps or lists but really want to convert one type to another, you can just declare a converter:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;class A {
-   Object asType(Class&amp;lt;?&amp;gt; clazz) { new B(...) }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I can see you raising an eyebrow here, because I wrote the conversion code directly in class &lt;code&gt;A&lt;/code&gt;, but remember it&amp;#8217;s a dynamic language with a meta-object protocol, so nothing prevents you from writing this conversion code &lt;strong&gt;outside&lt;/strong&gt; of the class &lt;code&gt;A&lt;/code&gt; itself, through its metaclass, which would let you add conversion algorithms for classes which are beyond your control. It&amp;#8217;s a win!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_2_dynamic_binding&quot;&gt;2. Dynamic binding&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Dynamic binding is linked to DSL evaluation and scripting. Imagine the following script:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;a+b&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this script, variables &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt; are &lt;code&gt;unbound&lt;/code&gt;. They are not known from a compiler, so if you tried to statically compile this with a compiler like &lt;em&gt;Java&lt;/em&gt; (or &lt;em&gt;C++&lt;/em&gt;, or &lt;em&gt;Scala&lt;/em&gt;) it would definitely blow up. Not if you compile this with &lt;em&gt;Groovy&lt;/em&gt;. Because it&amp;#8217;s dynamic, it&amp;#8217;s able to know that those variables &lt;strong&gt;will&lt;/strong&gt; be eventually bound, when the script is executed. Groovy provides means to &lt;em&gt;inject&lt;/em&gt; those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like &lt;a href=&quot;http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting&quot;&gt;ElasticSearch&lt;/a&gt; uses &lt;a href=&quot;http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting&quot;&gt;Groovy as the default scripting language&lt;/a&gt;: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt; at compile time and that you fear to write code which might fail at runtime&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_1_mixed_mode_compilation&quot;&gt;1. Mixed mode compilation&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The last thing that a dynamic language like Groovy is capable of doing is leveraging &lt;strong&gt;mixed mode&lt;/strong&gt; compilation. Behind this curious term is a unique concept in programming languages: Groovy is able of mixing static code with dynamic code, but more, you can instruct the compiler how to do so. So if you design a DSL like in &lt;a href=&quot;http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting&quot;&gt;ElasticSearch&lt;/a&gt; where you know that some variables will be bound, that the number, names and &lt;strong&gt;types&lt;/strong&gt; of those variables are fixed and known in advance, then you can instruct the compiler and switch to a statically compilable mode! This means that if the user uses an unknown variable, compilation will fail.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This technique is already used in Groovy itself, in the powerful &lt;a href=&quot;http://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html&quot;&gt;Markup Template Engine&lt;/a&gt;. It is a template engine which is capable of generating markup-like contents with a very nice builder-like syntax, but all templates are statically compiled even if the code seems to be full of unresolved method calls or variables!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For those who are interested in this, I invite them to take an eye at my &lt;a href=&quot;http://melix.github.io/blog/2014/02/markuptemplateengine.html&quot;&gt;blog posts&lt;/a&gt; describing how you can do this.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;h1 id=&quot;_conclusion&quot; class=&quot;sect0&quot;&gt;Conclusion&lt;/h1&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In conclusion, I have highlighted some points where dynamic languages can do what static languages cannot. Users of the most widely used dynamic language, Javascript, probably have lots of ideas too. The point for me is &lt;strong&gt;not to tell which one is better than the other&lt;/strong&gt; because &lt;strong&gt;I don&amp;#8217;t care&lt;/strong&gt;. In general, I am not much into the war behind those, because I really enjoy both. I do static typing most of time, but I really enjoy the dynamic nature of the language too because often I don&amp;#8217;t want to be slowed down just to make a compiler happy. I, as a developer, should be happy. Making a compiler happy is secondary and often not necessary. Last but not least, you might have thought, reading this post, that &lt;strong&gt;your&lt;/strong&gt; static language can do this or that. I won&amp;#8217;t blame you here, because mine can too. The idea here is more to show that it is totally unnatural for a static language or it often comes with horrible drawbacks like verbosity, performance issues or simply difficult to implement.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So what about using a &lt;a href=&quot;http://beta.groovy-lang.org&quot;&gt;language that brings the best of the two worlds together&lt;/a&gt;?&lt;/p&gt;
 &lt;/div&gt;
 	</description>
     </item>

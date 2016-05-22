@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Gradle and Kotlin, a personal perspective</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    </head>
+  <body>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+ lang: en_US
+</script>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Gradle and Kotlin, a personal perspective</h1>
+	</div>
+
+	<p><em>22 May 2016</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/jvm.html">jvm</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/kotlin.html">kotlin</a> 
+	</p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2016/05/gradle-kotlin.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2016/05/gradle-kotlin.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2016/05/gradle-kotlin.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2016/05/gradle-kotlin.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2016/05/gradle-kotlin.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div class="sect1">
+<h2 id="_gradle_embraces_kotlin_what_about_groovy">Gradle embraces Kotlin, what about Groovy?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, it&#8217;s been a long time since I last blogged, and I&#8217;d like to remind that everything written here are opinions of my own and not the views of my employer, which happens to be Gradle Inc as write those lines.</p>
+</div>
+<div class="paragraph">
+<p>A few days ago, <a href="http://gradle.org/blog/kotlin-meets-gradle/">Gradle and Jetbrains announced a partnership to make Kotlin a first class language for Gradle builds</a>, both for build scripts and plugins. Most likely, you know Gradle has been using Groovy since its inception. Lots of people think that Gradle is written in Groovy, which is actually wrong. Most of Gradle is written in Java. The builds scripts are written in Groovy, lots of plugins are written in Groovy, our test cases are written in Groovy (using the best testing framework out there, Spock), but Gradle itself is written in Java.</p>
+</div>
+<div class="paragraph">
+<p>From my perspective, this is situation has been very disturbing and continues to be so. I have very good friends in the Groovy community, and this move has been seen by some of them as a betrayal. As an Apache Groovy committer, and someone who spent almost 4 years full time implementing new features of the language, most importantly its static compiler, seeing Kotlin promoted as the language of choice for Gradle&#8217;s future, it&#8217;s a little <em>strange</em>. One could legitimely say, <em>WTF?</em> I&#8217;ve been aware of this work for several months now, and my colleagues Rodrigo B. de Oliveira and Chris Beams have done an amazing job in a very short period of time. From a long time Groovy user and Groovy developer point of view, it&#8217;s hard not to make this move an emotional thing. However, business is not about emotions. In particular, what are we trying to acheive with Gradle? We&#8217;re trying to help developers build their applications. We&#8217;re trying to make this elegant, reproducible, scalable and fast. We&#8217;re language agnostic. We can build Java, Groovy, Scala, Kotlin, C++, Python, &#8230; Gradle has never been the tool to build Groovy applications: it&#8217;s been a tool to build software. It&#8217;s a tool about automation. And I&#8217;ve been complaining enough about communities that build their own tool for their very specific language to understand that this is super important: Gradle is (or aims at) the best tool for building any kind of software. In short, we must think in terms of what is best for our users, and sometimes, this means changing technogies. A product should not be bound to a technology, but a company should even less be bound to it. And given the response that we had after the announcement, supporting Kotlin seem to drive a lot of excitement around Gradle, and that&#8217;s a very good thing. So, let&#8217;s take that out, and think what it means for Groovy.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_groovy_support_is_not_abandoned">Groovy support is not abandoned</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, I already said it several times, but better continue to spread the message: support for Groovy in Gradle is <strong>not</strong> deprecated nor removed. You can still write your scripts in Groovy, you can write your plugins in Groovy, and you will still be able to do it. But Gradle will likely encourage users to migrate to Kotlin. To be clear, Kotlin support is incubating, and there&#8217;s a lot to do to make it as usable as the Groovy version. Second, there are tens of thousands of builds written using Groovy, hundreds of plugins written in Groovy, so it&#8217;s not tomorrow that Kotlin is going to replace Groovy. However, we care about the future, so we need to think about what it means in the long term. Should we be excited about supporting Kotlin? Yes we should, because Kotlin is an amazing language. Should we continue to be excited about Groovy? Of course we should, because it&#8217;s also an amazing language. But it&#8217;s old and as such brings a lot of legacy with it. As someone who implemented the static compiler for Groovy, I know it very well. There are things that are hard to change, because a large part of the Groovy community is very fond of its dynamic behavior.</p>
+</div>
+<div class="paragraph">
+<p>So let&#8217;s focus on the two major aspects that led to embracing Kotlin in Gradle. The fist one, and principal, is IDE support. Let&#8217;s face it: even before I joined Gradle, when I was giving talks about it, people were complaining about IDE support. Compared to a tool like Maven, supporting Gradle build scripts is complicated. Supporting XML is easy (to some extent). Supporting a <em>dynamic DSL</em> is not. Some say it&#8217;s Groovy&#8217;s fault, and I want to correct this statement right now: it&#8217;s not Groovy&#8217;s fault. While Groovy let&#8217;s you design dynamic DSLs, the design of the DSL can be changed to make it easier for tools to "discover" things. But when Gradle was designed, there wasn&#8217;t any statically compiled Groovy. The idiomatic way to write DSLs in Groovy, at that time, was to heavily rely on <em>runtime metaprogramming</em>. While loving <em>metaprogramming</em>, I&#8217;ve always prefered <em>compile time</em> metaprogramming over <em>runtime</em> metaprogramming. For multiple reasons:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>because in most cases, what you want to do at runtime can be done in a unique, setup phase. For example, create your metaclasses, enrich existing types, configure <em>property missing</em>, <em>method missing</em>, &#8230; If it&#8217;s setup, it&#8217;s better done at compile time, because you can report errors, and because it gives higher performance. This led the way I designed the static compiler, and more features of Groovy after that (traits, type checking extensions, &#8230;) : describe what you want to do at compile time.</p>
+</li>
+<li>
+<p>because it makes the life of tools easier. While IntelliJ or Eclipse support <em>DSL descriptors</em> that help them provide completion, those are hard to implement, and often inaccurate. They can only approximate what is going to happen at runtime. And in the end, you&#8217;re doing the same job twice: you&#8217;re writing a runtime for your DSL, which is dynamic, then you need to write a DSL descriptor for the IDE to understand it. Wouldn&#8217;t it be better if all was done in a unique place? Something that both the compiler and the IDE can understand?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So while we <em>know</em> we can describe dynamic Groovy DSLs so that they are understood by IDEs, it&#8217;s effectively a lot of work. And if you want to support multiple IDEs, it&#8217;s even more work. But in the case of Gradle, it&#8217;s even worse: each plugin can provide it&#8217;s own "micro DSL". While there&#8217;s an "idiomatic" way to configure Gradle builds, it&#8217;s no single rule. One can implement it&#8217;s own Groovy DSL within the Gradle build. And no luck the IDE would ever understand it. Another pain point is that Gradle adds complexity to complexity in terms of DSL capabilities. For example, when you have a build script that has:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>dependencies {
+   compile libraries.groovy
+}
+
+greeter {
+   message = 'hello'
+}
+
+sign {
+   signature = top
+}
+</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>often people do not realize that:
+   - <code>dependencies</code> is found on a <code>Project</code> instance
+   - <code>libraries</code> is a user declared variable, that can be found in a plugin, another build script, a project properties file, &#8230; (how does the IDE find about it?)
+   - <code>greeter</code> is a <em>convention object</em>, defined by a plugin, to configure the default values of its task
+   - <code>sign</code> is a <em>task</em>, which has a <code>signature</code> property, and <code>top</code> references an <em>extension property</em> from the project</p>
+</div>
+<div class="paragraph">
+<p>So while this build script is <em>simple to read</em>, it&#8217;s <em>hard to understand how it effectively works</em>, because objects can be found at different places, can be provided by different providers (plugins, properties, extensions), but everything is accessed using a single notation. This is bad, because it makes it almost impossible for an IDE to understand what is going on.</p>
+</div>
+<div class="paragraph">
+<p>The question is, is it Groovy&#8217;s fault? My answer is <em>not totally</em>. The fault is mostly on the DSL design, and Groovy made it too easy to do so. But again, that was designed at a time when dynamic Groovy was the rule. I gave a talk, recently, about <a href="https://www.google.fr/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;ved=0ahUKEwiW2Mftt-7MAhWKSRoKHQJtCcIQtwIIHTAA&amp;url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DnqqGtdvPzus&amp;usg=AFQjCNH57qeR_jUUIAmGKZiQOK99v0669w">building modern DSLs with Groovy</a>, where I discourage such practices, and encourage the use of <em>static DSLs</em> instead.</p>
+</div>
+<div class="paragraph">
+<p>That leads me to the second main reason of embracing Kotlin in Gradle: performance. When we talk about performance, lots of folks tend to think that Groovy is slow. This is not the case. Groovy is pretty fast. However, depending on the design of the DSL, you can easily fall into traps that can lead to catastrophic performance. Before I go further with it, I&#8217;m reading way to often that Gradle is slow <em>because it&#8217;s written in Groovy</em> and that <em>Groovy is dynamic so it&#8217;s slow</em>. F* no, those who tell you that just didn&#8217;t profile a build. As I said, Gradle is mostly written in Java. And I&#8217;ve spent the last 3 months optimizing the performance of Gradle, and I can tell you that of the dramatic performance improvements that one can see in Gradle 2.13 and 2.14, almost none was obtained by rewriting Groovy to Java, or rewriting Groovy code. None! Most of the hotspots were pure Java code. Period. However, as soon as you use plugins, which are today mostly written in dynamic Groovy, or that your build scripts imply a lot of nested closures, things start to become complicated for "Groovy". Let me explain that clearly. I think at some point, someone made a terrible design decision in Groovy. I don&#8217;t know who it was, but the idea was to rely on exceptions to control the flow of resolution of properties. This means that when a property is <em>missing</em>, typically in a closure, an exception is thrown. When a method is not found, an exception is thrown. When a property is not found, an exception is thrown. That seemed to be a good idea, because in the end, you want to provide the user with an error, but in practice, this is catastrophic, because Groovy can capture those exceptions. Typically, in a delegation chain (nested closures), a containing closure or class can actually have this property defined, or implement <em>property missing</em>/<em>method missing</em>. Now, re-think a second about the "simple" example of Gradle build above: how do you now where to look up for <code>message</code>, <code>top</code>, <code>signature</code>, &#8230;? Now you know: f* exceptions are thrown, stack traces are filled, and eventually captured because some composite dynamic object finally wants to answer the message&#8230; In practice, for some builds I have profiled, it was tens of thousands of exceptions being thrown and stack traces filled for nothing. And that has a terrible impact on performance. So even if we have implemented strategies in Gradle to try to avoid throwing those exceptions (which are responsible for part of the performance improvements in 2.14), this is very hard to do it, and we&#8217;re still throwing way too many of them. A static language doesn&#8217;t have this problem, because every single reference in source is resolved at compile time. So, if you&#8217;re writing a plugin in Groovy, for the sake of performance, please add <code>@CompileStatic</code>.</p>
+</div>
+<div class="paragraph">
+<p>So there goes Kotlin. Kotlin has excellent static builders support, that make it practical both for IDE support, which will dramatically improve user experience in terms of understanding what do write, what is an error, having documentation, refactorings, &#8230; and is a very pleasant language to work with. Honestly, I don&#8217;t have anything bad to say about the language (apart from the <em>fun</em> keyword that I don&#8217;t like). To some degree, it&#8217;s not very surprising: Kotlin has heavily inspired by Groovy and another popular JVM language: Scala. And again, being the one behind the static compiler of Groovy, I can&#8217;t blame them for doing what I like about static languages. Their builder support is awesome, and very elegant. And it&#8217;s supported out of the box by IntelliJ of course, but also Eclipse.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_static_dsl_for_groovy">A static DSL for Groovy?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ok, so one might think at this point that I&#8217;m mad. I wrote a "competing" language, and I&#8217;m happy to see Kotlin being promoted in Gradle. I wrote the static compiler, that is capable of doing everything Kotlin can do (minus reified generics, plus superior scripting support, type checking extensions, &#8230;), so wtf? Ok, so let&#8217;s be very clear: I have absolutely no doubt that Groovy can do everything that we&#8217;ve done with the Kotlin support in Gradle. It can be statically compiled, provide an elegant DSL that is statically compiled, and it can be understood by the IDE. I had no doubt before the Kotlin work started, I have even less doubts now. And I can say I have no doubts because I tried it: I implemented experimental support for statically compiled Gradle scripts, written in Groovy. Here&#8217;s an example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'groovy'
+apply plugin: GreetingPlugin
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'commons-lang:commons-lang:2.5'
+    compile "commons-httpclient:commons-httpclient:3.0"
+    compile "commons-codec:commons-codec:1.2"
+    compile "org.slf4j:jcl-over-slf4j:1.7.10"
+    compile "org.codehaus.groovy:groovy:2.4.4"
+    testCompile 'junit:junit:4.12'
+    runtime 'com.googlecode:reflectasm:1.01'
+}
+
+tasks.configure('test', Test) {
+    jvmArgs '-XX:MaxPermSize=512m', '-XX:+HeapDumpOnOutOfMemoryError'
+}
+
+dependencies {
+    compile 'org.codehaus:groovy:groovy-all:2.4.4'
+}
+
+extension(GreetingPluginExtension) {
+    message = 'Hi'
+    greeter = findProperty('greeter')?:'static Gradle!'
+}
+
+tasks.create('dependencyReport', DependencyReportTask) {
+    outputs.upToDateWhen { false }
+    outputFile = new File( project.buildDir, "dependencies.txt")
+}
+
+class GreetingPlugin implements Plugin&lt;Project&gt; {
+    void apply(Project project) {
+        project.extensions.create("greeting", GreetingPluginExtension)
+        project.task('hello') &lt;&lt; {
+            println "${project.extension(GreetingPluginExtension).message} from ${project.extension(GreetingPluginExtension).greeter}"
+        }
+    }
+}
+
+class GreetingPluginExtension {
+    String message
+    String greeter
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is an example Gradle build that is compiled statically. It has none of the problems I described about the Groovy implementation in Gradle above. It uses all the techniques that static Groovy provides: extension methods, powerful scripting with implicit imports, type checking extensions, &#8230; All this works. And interestingly, the work that is done to enable support for Kotlin also benefits to statically compiled Groovy, and Java! Let&#8217;s not forget about the latter, which is years behind in terms of "modern" languages support. So if this works, why do we need Kotlin? To be honest, I asked it to myself many times. It was very difficult to me, because I knew Groovy could do it. Again, I had no doubt about the language capabilities, no doubt about the performance impact of doing this. However, I missed two critical points:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>IDE support. Even if support of Groovy in IntelliJ is by far the most advanced of all other IDEs, it still lacks behind when static compilation is on. But more importantly, it doesn&#8217;t know that my script is statically compiled, nor does it now about my custom extension methods. I tried to implement a <code>GDSL</code> descriptor to make it aware of them, and it somehow worked: I do have code completion, but errors are not marked as errors, and the IDE still doesn&#8217;t understand that it should only suggest to me what is relevant in the context. With Kotlin scripts which are <em>natively static</em>, there&#8217;s no such issue. The IDE understands everything natively, in IntelliJ and Eclipse. So, I have no doubt that Jetbrains can implement support for this, just like I had no doubt I could implement a static Groovy DSL, but who is going to write this? Me? Gradle? I don&#8217;t have the time to do it. And it&#8217;s not Gradle&#8217;s job to write IDE plugins. And what about Eclipse? One big issue that the Groovy community has, <strong>today</strong>, is that nobody is supporting Eclipse since Pivotal dropped sponsorship of Groovy. After more than one year, nobody took over the development of Groovy Eclipse. Nobody. While Groovy itself saw lots of new contributors, while we saw a lot of bugfixes, new contributors and that the download numbers where never as high as they are today, IDE support is critical. And nobody took over the development of it. I saw some people referring to what Jetbrains is doing as "blackmailing". Seriously? Jetbrains? Think of what they&#8217;ve done for Groovy. Groovy would never has been as popular as it is without them. They provided us with the best Groovy IDE possible. They are constantly supporting new features of the language, adding support for AST transformations, traits, &#8230; They even added the ability, in IDEA 14, to use Groovy (and not Kotlin, guys!) as the language to evaluate expressions in the debugger. And they would try to kill Groovy? Kill part of their business? Come on guys! So yes, they invested a lot in Kotlin and want to promote it, but how could it be otherwise? And it&#8217;s not like if the language sucked: it&#8217;s awesome!</p>
+</li>
+<li>
+<p>Does it make sense? Now that we made the decision to support Kotlin, that we proved it would provide the level of user friendliness we want and that it is statically compiled by default, does it make sense to put resources to support static Groovy in addition? I don&#8217;t have an answer to this. I thought yes, but now I&#8217;m not sure. Kotlin does the job. And honestly, they have great engineers working on the language. Even if it lacks behind in terms of scripting and compilation times compared to Groovy, I have no doubt they will fix it. How arrogant would we be if we thought other languages could not do what we&#8217;ve done with Groovy?</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_future_of_groovy">The future of Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The last point I want to address is what it means for the future of Groovy, and what it means for <strong>my</strong> future in Groovy. First of all, I always thought that the future of Groovy was in the hands of its community. It&#8217;s not Gradle that has Groovy&#8217;s future in its hands. It&#8217;s <strong>you</strong>. The move to the Apache Software Foundation was also done for this very same reason: community first. If you want to continue to use Groovy, to improve it, to support it, all you have to do is f* do it! And I will continue! I love this language, I know too well how far it can go in terms of DSL support, AST transformations, now in 2.5 we have macros, that&#8217;s just a crazily powerful language that&#8217;s super fun to use. Should we fear competition? No, we shouldn&#8217;t. Competition is good. It should be inspiring. And if Gradle moving to Kotlin means the death of Groovy, maybe the problem is elsewhere. And even if lots of people get introduced to Groovy through Gradle, it&#8217;s not the only entry point. Grails is another. Jenkins (through Flow) is another. And many, many more. There was a tweet a few days ago which showed the 100 most popular dependencies in GitHub projects. Groovy was one of them. No Kotlin. No Scala. Groovy. It&#8217;s everywhere, and it&#8217;s going to be there for a long time.</p>
+</div>
+<div class="paragraph">
+<p>Part of the fears of the community is, after the Pivotal demise, if Groovy is a dying language. It&#8217;s not. It has never been so widely used. The move to Apache Software Foundation drove a lot of attention and brought us many more contributors. But the community has to realize what the problems with Groovy are, and it has to face them: the introduction of the static compiler was too late. IDE support is important. Java 9 support is going to be super important. If you love your language, contribute. Help it. Help yourselves. The future of Groovy <strong>must</strong> be in your hands. I can&#8217;t recall how many times I told this, since I joined VMware, a few years ago, to develop Groovy. In every talk I give, I&#8217;m always telling how important it is that <strong>you</strong> contribute. Jetbrains is not going to write Groovy Eclipse for you.</p>
+</div>
+<div class="paragraph">
+<p>And I would like to finish with one word: if people move from Groovy to Kotlin, is it really a problem? Isn&#8217;t any technology inspired by another? Aren&#8217;t we, developers, always rebuilding the same things, but improving them, learning lessons from the past? Is Kotlin a better Groovy? I don&#8217;t have the answer yet. Maybe it is. Maybe not. Today Groovy remains greatly superior in terms of scripting, DSL support, but it comes with a price that Gradle doesn&#8217;t want to pay. And let&#8217;s not forget the original community of Groovy: a <strong>dynamic</strong> language for the JVM. There are still <strong>lots</strong> of people who like this aspect of the language (and I do too, typically when I write Groovy scripts in place of bash scripts, I don&#8217;t care about types). It&#8217;s compile time metaprogramming features also make it incredibly powerful. Modern Groovy definitely doesn&#8217;t deserve its "bad press". Would you compare Java 8 with Java 1? No. So don&#8217;t compare Groovy 2.4 with Groovy 1 either. Reputation should change, and you can help there too.</p>
+</div>
+<div class="paragraph">
+<p>This leads me to what I should do. And there, I&#8217;m a bit lost, to be honest. I work for a company that embraced Groovy, that is now embracing Kotlin. I love my job, I love working with Gradle, I love Groovy, and I quite enjoy Kotlin. I&#8217;m a passionate developer. I just want to continue having fun. But if you think that as such, I&#8217;m not a good representative of the Groovy community anymore, maybe I should step off from the Groovy project. I would hate that, but I&#8217;ve kind of been hurt by the bad comments we (Gradle) received from some members of the Groovy community. I don&#8217;t want to fall into a language war, I don&#8217;t care about this. I care about users. What I love to do is helping people, period.</p>
+</div>
+<div class="paragraph">
+<p>I would like to finish this post with a thought about what I&#8217;m going to do, as a Gradle developer, for you, Groovy users. In particular, I am convinced that the success of Gradle is largely due to its Groovy DSL, despite its problems. The fact that it&#8217;s simple, easy to read, is super important. I joined the Groovy project because I was using Groovy as a DSL platform in a natural language processing context. Groovy is super powerful for this. And I learnt a lot in terms of DSL design. In particular, I will try to make sure that it doesn&#8217;t become a Kotlin API. What I mean by that is that I think we should elevate from a Groovy DSL to a Gradle language. And this language is meant at <strong>describing</strong> builds. And our users are not Kotlin developers. Most of them are not Groovy developers either. They are, as I described earlier, from different horizons. And I would hate if a user would have to understand concepts like generics or type inference to write a build script. That would be horribly wrong. A build author should understand how to <em>model an application</em>, not what is a type, what is an extension method, or generic return type inference. It&#8217;s different for <em>plugin authors</em>, but for a <em>build author</em>, it&#8217;s super important. So I will try to make sure that Kotlin scripting support improves, even if it means that it would go even closer to what Groovy supports. I would do this not because I want Groovy to die, I don&#8217;t (and it wouldn&#8217;t help my royalties for Groovy in Action 2 ;)), but it would help users or Gradle. That&#8217;s what I care most about, just like I care about what Groovy users want when I work on the Groovy project.</p>
+</div>
+<div class="paragraph">
+<p>As for talking about Gradle, Groovy and its future, I&#8217;ll be a GR8Conf next week, I&#8217;d be happy to answer you in person there too!</p>
+</div>
+<div class="paragraph">
+<p>Keep on Groovying!</p>
+</div>
+</div>
+</div></p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2016/05/gradle-kotlin.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2016/05/gradle-kotlin.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2016/05/gradle-kotlin.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2016/05/gradle-kotlin.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-kotlin';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
+  </body>
+</html>
