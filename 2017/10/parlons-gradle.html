@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cédric Champeau's blog: My Git tweaks for daily usage</title>
+    <title>Cédric Champeau's blog: Parlons Gradle : Episode 1</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -76,114 +76,63 @@
       <div class="container">
 	
 	<div class="page-header">
-		<h1>My Git tweaks for daily usage</h1>
+		<h1>Parlons Gradle : Episode 1</h1>
 	</div>
 
-	<p><em>25 July 2012</em></p>
+	<p><em>30 October 2017</em></p>
 	<p><em>Tags: </em>
-		<a href="/blog/tags/git.html">git</a> 
+		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/meetup.html">meetup</a> 
+	</em>
+		<a href="/blog/tags/online.html">online</a> 
 	</p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2017/10/parlons-gradle.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html"></div>
-        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
-	<script type="IN/Share" data-url="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html" data-counter="right"></script>
-	<div class="fb-like" data-href="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
-	<p><div class="sect1">
-<h2 id="_a_few_tricks_for_daily_git_usage">A few tricks for daily Git usage</h2>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2017/10/parlons-gradle.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2017/10/parlons-gradle.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2017/10/parlons-gradle.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2017/10/parlons-gradle.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Since <a href="http://groovy.codehaus.org">Groovy</a> switched to Git for version control, and more recently to GitHub for hosting, I’ve had great pleasure working with this tool. In this post, I’ll just show you some basic tricks that I use on a daily basis.</p>
+<p>Suite à de nombreuses discussions via Twitter, j&#8217;ai souhaité organiser des discussions en ligne pour que nous puissions parler de Gradle. Le premier épisode aura lieu mercredi prochain, notez la date !</p>
 </div>
-<div class="sect2">
-<h3 id="_adding_the_git_branch_to_the_bash_prompt">Adding the git branch to the Bash prompt</h3>
+<div style="text-align:center; color:red; font-size: 2em">
 <div class="paragraph">
-<p>My first tweak is to have my bash prompt show me the current branch I’m working on. This is very handy. I borrowed the setup from <a href="http://pastebin.com/CLYTaS5A">this pastebin</a> but unfortunately, I can’t find the original author. Note that it also adds support for svn. Add the following to your <em>.bashrc</em> file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>#GIT
-simple_git_branch() {
-  git branch 2&gt; /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
-}
-
-parse_git_branch() {
-  git branch 2&gt; /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(git::\1)/'
-}
-parse_svn_branch() {
-  parse_svn_url | sed -e 's#^'"$(parse_svn_repository_root)"'##g' | awk -F / '{print "(svn::"$1 "/" $2 ")"}'
-}
-parse_svn_url() {
-  svn info 2&gt;/dev/null | grep -e '^URL*' | sed -e 's#^URL: *\(.*\)#\1#g '
-}
-parse_svn_repository_root() {
-  svn info 2&gt;/dev/null | grep -e '^Repository Root:*' | sed -e 's#^Repository Root: *\(.*\)#\1\/#g '
-}
-export PS1="\[\033[00m\]\u@\h\[\033[01;34m\] \w \[\033[31m\]\$(parse_git_branch)\$(parse_svn_branch) \[\033[00m\]$\[\033[00m\] "
-</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_some_aliases">Some aliases</h3>
-<div class="paragraph">
-<p>All those aliases must be added to your <em>.gitconfig</em> file into the <em>[alias]</em> section.</p>
-</div>
-<div class="paragraph">
-<p>One thing I’m doing often with Groovy development is to fix some bug into a branch, then backport the fix to other branches. My preferred tool for this is <em>cherry-pick</em>. Cherry picking a commit is really easy, but to make it even easier, I’m using an alias that shows me the hash of the last commit on a branch:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>[alias]
- last = log --oneline -n 1</pre>
+<p><strong>LE MERCREDI 6 DECEMBRE , à 17h GMT+1 (Paris)</strong></p>
 </div>
 </div>
 <div class="paragraph">
-<p>Then calling <em>git last</em> will show me the hash of the commit to be cherry-picked. Another problem is that <em>git cherry-pick</em> is a bit long to type, especially if you do this often, and <em>git cherry</em> doesn’t get autocompleted when you press tab, so I’m using another alias for cherry-picking:</p>
+<p>La rencontre se fera via Google Hangouts. Si vous êtes intéressés, envoyez-moi un mail (cedric -at- gradle -point- com) ou un <a href="https://twitter.com/CedricChampeau">tweet</a> avec votre email pour que je vous envoie une invitation.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre>[alias]
- cp = cherry-pick</pre>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_de_quoi_va_t_on_parler">De quoi va-t-on parler ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>L&#8217;objectif pour moi est de récolter votre ressenti sur Gradle, son utilisation, vos problèmes au quotidien, la documentation, les exemples, mais aussi ce que vous aimez, votre utilisation, &#8230; Bref, votre expérience utilisateur. Certains sont encore convaincus que Maven est supérieur, ce qui, de mon point de vue, reste un mystère, et j&#8217;ai donc besoin d&#8217;entendre votre feedback pour savoir comment corriger (si nous n&#8217;avons pas encore entrepris de démarche dans ce sens).</p>
 </div>
 <div class="paragraph">
-<p>If you are used to <em>svn</em>, you also know that <em>co</em> is an alias for <em>checkout</em> so I’m adding this too:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>[alias]
- co = checkout</pre>
-</div>
+<p>Bref, il s&#8217;agira d&#8217;une discussion ouverte, d&#8217;environ 1h. Bien entendu nous pourrons parler du futur de Gradle si nous avons le temps.</p>
 </div>
 <div class="paragraph">
-<p>Eventually, here is a nice history view of commits:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>[alias]
- hist = log --oneline --graph --decorate --all</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>That’s all, those aliases are currently the only ones I’m using on a daily basis, but of course, I’m relatively new to git, so there are chances that new aliases will show up in the future!</p>
-</div>
+<p>Au plaisir de vous voir !</p>
 </div>
 </div>
 </div></p>
 
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2017/10/parlons-gradle.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html"></div>
-	<script type="IN/Share" data-url="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html" data-counter="right"></script>
-	<div class="fb-like" data-href="http://melix.github.io/blog/2012/07/25/my_git_tweaks_for_daily.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2017/10/parlons-gradle.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2017/10/parlons-gradle.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2017/10/parlons-gradle.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
         var disqus_shortname = 'melixblog';
-	var disqus_identifier = 'my_git_tweaks_for_daily';
+	var disqus_identifier = 'parlons-gradle-1';
         /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
