@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Assistants vocaux et robotisation: mon point de vue</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    </head>
+  <body>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+ lang: en_US
+</script>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Assistants vocaux et robotisation: mon point de vue</h1>
+	</div>
+
+	<p><em>03 juillet 2018</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/google-home.html">google home</a> 
+	</em>
+		<a href="/blog/tags/alexa.html">alexa</a> 
+	</em>
+		<a href="/blog/tags/robotisation.html">robotisation</a> 
+	</p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2018/07/robots-vs-human.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2018/07/robots-vs-human.html"></div>
+        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/2018/07/robots-vs-human.html');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2018/07/robots-vs-human.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2018/07/robots-vs-human.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ce billet essaie de résumer une conversation que j&#8217;ai eu avec mon frère, concernant les craintes autour des assistants vocaux, et, plus généralement, la robotisation. Je partage une grande partie de son point de vue, mais j&#8217;ai aussi de larges différences que je voulais résumer ici. C&#8217;est parti !</p>
+</div>
+</div>
+</div>
+<h1 id="__ok_google_cr_e_un_malaise" class="sect0">"Ok Google, crée un malaise"</h1>
+<div class="paragraph">
+<p>Le week-end dernier, à l&#8217;occasion d&#8217;un barbecue en famille à la maison, ma moitié a, au détour d&#8217;une conversation, lancé cette phrase par pur réflexe:</p>
+</div>
+<div class="paragraph">
+<p>"Ok Google, &lt;question anodine&gt;"</p>
+</div>
+<div class="paragraph">
+<p>Là, mon frère, Guillaume, a fait un malaise. Etendu sur le sol, pris de spasmes incontrôlables, en position foetale, il baffouillait des phrases pour la plupart inintelligibles, mais, par moments, j&#8217;arrivais à comprendre des bribes comme "pas eux", "GDPR", ou autres "Saint Qwant venez-vous en aide". Après quelques minutes, l&#8217;intervention d&#8217;un seau d&#8217;eau et rongé par la honte de se montrer ainsi devant junior, Guillaume repris ses esprits, et commença une discussion trop courte parce qu&#8217;interrompue par la nécessité autrement plus primaire de faire griller quelques saucisses.</p>
+</div>
+<div class="paragraph">
+<p>Au final, la question se résume à celle-ci: pourquoi ? De mon côté, je suis assez ouvert sur l&#8217;utilisation des assistants, et je dois dire que c&#8217;est quelque chose que j&#8217;attendais véritablement depuis des années. De lonnngggues années. Guillaume n&#8217;avait probablement rien noté jusqu&#8217;ici parce que mon assistant prenait la forme d&#8217;une enceinte bluetooth classique, alors qu&#8217;il s&#8217;agit en fait une enceinte Sony intégrant la technologie de Google. J&#8217;avais choisi ce modèle principalement parce qu&#8217;une des utilisations que je fais de cet assistant, probablement la plus fréquente, est de lui demander de me diffuser de la musique (via Deezer), ou la radio. La domotique, c&#8217;est un peu un rêve de gosse pour moi, j&#8217;adore tout piloter, par une appli, ou par la voix. Donc parmi les autres utilisations que j&#8217;en fais, il y a:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>contrôler mes lumières, mon thermostat</p>
+</li>
+<li>
+<p>contrôler ma box domotique (et donc les appareils non directement "connectés")</p>
+</li>
+<li>
+<p>demander des informations (météo, à quelle heure est le match de la France, &#8230;)</p>
+</li>
+<li>
+<p>enclencher un minuteur pour la cuisine, ajouter des rappels</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le problème, qui choque Guillaume, est que pour avoir accès à toutes ces fonctions, je partage énormément de données avec El Diablo (Google). Oui, mais j&#8217;en suis conscient. Et, par ailleurs, mon compte est configuré avec une extrême précaution. Notamment, j&#8217;ai complètement désactivé la personnalisation des annonces. Je garde néanmoins certaines fonctionnalités comme le traçage de ma position géographique (qui, par une occasion, m&#8217;a permis de démontrer à des amis qu&#8217;on était bien allé les voir au mois d&#8217;Octobre :)). J&#8217;ai plus de mal, en revanche, sur l&#8217;historique des recherches. Mais le noeud du problème, c&#8217;est qui détient les données, ce qu&#8217;ils en font et en particulier avec qui ils les partagent. Pour ma part, la seule raison pour laquelle j&#8217;utilise les services de Google est qu&#8217;ils me permettent <em>techniquement</em> de faire ce que je veux. Si, demain, j&#8217;ai la possibilité d&#8217;avoir une box locale qui m&#8217;offre les mêmes capacités, y compris lorsqu&#8217;invoquée via IFTTT, je signe à quatre mains. En attendant que celà existe, et j&#8217;espère sincèrement que celà arrivera au plus vite, je fais des compromis, et il faut être conscient de ce que l&#8217;on a a la maison.</p>
+</div>
+<div class="paragraph">
+<p>Là où je suis moins d&#8217;accord, c&#8217;est la diabolisation à l&#8217;extrême des assistants. Je reviendrais plus tard sur quelques raisons, mais en particulier un argument que j&#8217;entends souvent, c&#8217;est "oui mais là tu as un micro qui écoute tout le temps chez toi et qui envoie tes données à Google". Ah, nous y voilà. Quel est le problème ?</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>ça écoute tout le temps ?</p>
+</li>
+<li>
+<p>ça envoie tes données ?</p>
+</li>
+<li>
+<p>ça les envoie à Google ?</p>
+</li>
+<li>
+<p>qui traite des infos ?</p>
+</li>
+</ol>
+</div>
+<h1 id="_intention_malicieuse_ou_non" class="sect0">Intention malicieuse ou non ?</h1>
+<div class="paragraph">
+<p>J&#8217;avoue que j&#8217;ai du mal à comprendre les réticences ici. Probablement parce que je suis un développeur naif, mais les bugs, les amis, je suis désolé de vous l&#8217;apprendre, il y en aura toujours. Donc, oui, il arrivera que votre Google Home, votre Amazon Alexa ou autre, se mette à enregistrer une conversation qu&#8217;il n&#8217;aurait pas du, et l&#8217;envoie sur les serveurs de Google. En règle générale, on le comprend assez vite, parce que la douce voix robotique vous répondra quelque chose du genre "désolé, je ne sais pas comment vous aider". Que s&#8217;est-il vraiment passé ? La box a cru entendre un mot clé. Souvent, on se demande parfois pourquoi Google n&#8217;offre pas la possibilité de changer ce mot clé ("Ok Google", "hey Google", &#8230;). Je pense qu&#8217;une des raisons est ce que l&#8217;interprétation de ce mot clé est forcément locale. La puissance nécessaire pour reconnaitre parfaitement l&#8217;expression, et son contexte de déclenchement avec le bruit, est restreinte. Donc, parfois, pas de bol, ça croit entendre "Ok Google", ou, pire, ça s&#8217;enclenche lorsque la pub passe à la télé. En règle générale, ça fait plutôt rire mes enfants, rien de dramatique. D&#8217;autant qu&#8217;on sait que ça s&#8217;enclenche grâce au signal sonore "attention, Google écoute". Donc, un bug, c&#8217;est un bug. Ca n&#8217;est pas parce que ça <em>peut</em> envoyer des données sans votre accord que l&#8217;intention derrière est malicieuse. Dois-je vous rappeler les histoires d&#8217;activation à distance des webcams des Mac Book par la NSA ? On n&#8217;est pas dans la même catégorie, là. Enfin, des micros qui écoutent tout le temps, vous en avez en poche depuis des années: vos téléphones mobiles. Ils font exactement la même chose, sont activables à distance, et probablement infectés de tonnes de malwares, parfois installées en usine, à des fins d&#8217;espionnage gouvernemental. Si je dois me méfier de quelque chose, personnelement, c&#8217;est plus de ça que de Google recevant ma discussion sur tata Simone.</p>
+</div>
+<div class="paragraph">
+<p>Par ailleurs, une fois la conversation envoyée sur le "cloud" (ça fait peur, le cloud, on ne sait pas ce qui s&#8217;y passe), elle est analysée. Pensez-vous que ce sont des humains qui analysent votre question et renvoie la réponse en 2s ? Non, la puissance de calcul nécessaire pour interpréter correctement votre question et titanesque. Elle nécessite des techniques avancées (TALN, statistiques, oui, vous savez, la même chose que ce gros mot "big data"), et l&#8217;apprentissage pour l&#8217;amélioration de la qualité des réponses requiert le stockage de quantités monstrueuses d&#8217;information. Je ne suis pas convaincu que Google doive pour autant <em>stocker</em> toutes les conversations, mais je conçois parfaitement qu&#8217;en analysant les requêtes de millions d&#8217;utilisateurs, avec des voix différentes, des accents différents et des contextes culturels différents, on est capable de faire beaucoup mieux qu&#8217;en ne stockant rien et analysant localement. Le temps où il fallait patiemment passer des heures à répéter des tonnes de phrases à son logiciel de reconnaissance vocal n&#8217;est pas si loin&#8230;</p>
+</div>
+<div class="paragraph">
+<p>Donc, oui, Google va recevoir ma voix. Oui, il va l&#8217;analyser et construire un profil, qu&#8217;il pourra partager. Je suis au courant. Et j&#8217;ai, dans la mesure du possible, restreint ces possibilités. Je serai d&#8217;autant plus heureux le jour où je n&#8217;aurai pas besoin de lui confier mes données. Mais l&#8217;intégration, la simpliciter d&#8217;utilisation, et le seul fait que ça marche, aujourd&#8217;hui, est la raison de son adoption. Enfin, on dit que ça marche, mais après des mois d&#8217;utilisation, il ne faut pas très longtemps pour comprendre que malgré les quantités énormes de données dont Google dispose, dans de très nombreux cas, l&#8217;assistant est complètement à la ramasse. Genre, on lui demande si un match passe sur TF1, il est incapable de répondre. On lui demande "quel temps va-t-il faire", il comprend "température". On apprend même à reformuler nos questions pour que l&#8217;assistant les comprenne. Bizarre, et frustrant. Mais, ça montre les limite de la technologie, et casse quelques mythes. En particulier, il faut se méfier des annonces autour de Google Duplex, l&#8217;assistant qui prend des rendez-vous à votre place: oui, ça marche, c&#8217;est bluffant, mais il est conçu pour cette tâche spécifique, et il est finalement assez simple, d&#8217;après les premiers retours, de lui faire perdre le fil.</p>
+</div>
+<h1 id="_la_relation_homme_machine" class="sect0">La relation homme-machine</h1>
+<div class="paragraph">
+<p>Néanmoins, la conversation a dévié vers l&#8217;intelligence artificielle en règle générale, et la relation qu&#8217;on a avec les machines. Sur ce sujet, je suis <em>extrêmement</em> ouvert. Je suis très introverti, et, personnellement, avoir une conversation avec une machine a un côté rassurant. Me demandez pas pourquoi, c&#8217;est un fait. Je narrais aussi cette anecdote à mon frère: un de mes enfants a des difficultés à parler aux adultes. Il marmonne, ne les regarde pas dans les yeux, et met <em>beaucoup</em> de temps à leur accorder sa confiance (mais une fois qu&#8217;elle est acquise, il n&#8217;y a plus de pb). Personnellement, ça ne m&#8217;a jamais inquiété, j'étais pareil enfant, et ça n&#8217;a (je pense) pas fait de moi un être associal (j&#8217;espère). Disposant de Google Home, mon fils s&#8217;est naturellement mis à l&#8217;utiliser lui aussi. Et ses premières expériences étaient frustrantes: n&#8217;articulant pas, la machine n'était pas capable de le comprendre. En quelques semaines seulement, il a progressé plus qu&#8217;en plusieurs années: désormais, il articule et parle fort, y compris aux adultes (à de rares exceptions près pour ceux qui l&#8217;impressionnent comme le médecin). Ce sujet en a apporté un autre: celui du fait de faire dire aux enfants "merci" ou "s&#8217;il te plait" aux machines.</p>
+</div>
+<div class="paragraph">
+<p>Guillaume est, si j&#8217;ai bien compris, contre l&#8217;humanisation des machines. Pour ma part, j&#8217;y suis favorable, et je suis donc pour la "politesse envers les machines". Fondamentalement, je pense qu&#8217;une partie des craintes de Guillaume se fondent sur le fait de confier l&#8217;empathie aux machines et que des algorithmes s&#8217;en servent pour nous manipuler. L&#8217;autre aspect est l&#8217;aliénation de l&#8217;homme à la machine, c&#8217;est à dire apprendre à des enfants à obéir non plus à des hommes mais à des machines. Soit, c&#8217;est une crainte légitime. Je suis plus cynique que celà: je doute qu&#8217;une machine puisse faire pire qu&#8217;un être humain. En fait, j&#8217;ai plus d&#8217;espoir envers les machines que je n&#8217;en ai envers les êtres humains. L&#8217;histoire a montré a de trop nombreuses occasions que l&#8217;empathie n&#8217;est pas l&#8217;apparat de tout le monde, bien au contraire. L&#8217;utilisation des biais cognitifs à des fins de manipulation (vente, politique, abus de confiance), ça n&#8217;a rien de nouveau. Est-ce qu&#8217;il faut craindre que les algorithmes fassent de même ? Oui. Serait-ce pire qu&#8217;avec des humains ? J&#8217;en doute, bien au contraire. L&#8217;imagination perverse des hommes n&#8217;est plus à démontrer. Leur intolérance non plus.</p>
+</div>
+<h1 id="_suis_je_humain" class="sect0">Suis-je humain ?</h1>
+<div class="paragraph">
+<p>J&#8217;ai grandi avec Star Trek.</p>
+</div>
+<div class="paragraph">
+<p>Cette série est probablement celle qui a influencé une grande partie de ma pensée. Déja dans Star Trek TOS, l&#8217;ordinateur et la domotique étaient au coeur de la relation homme-machine. La machine était naturellement intégrée, un personnage "vivant" en quelque sorte. Puis, arriva Star Trek The Next Generation, avec des personnages encore plus humanistes, mais un personnage en particulier, Data, change la donne: un Androide dont la seule quête était de devenir humain. Un membre à part entière de l'équipage. Un <a href="https://en.wikipedia.org/wiki/The_Measure_of_a_Man_%28Star_Trek:_The_Next_Generation%29">épisode en particulier traite spécifiquement du sujet du droit des robots</a>: Data devait-il être considéré comme une machine ou un humain ? Un scientifique a-t-il le droit de le démembrer pour l'étudier sur le seul prétexte qu&#8217;il s&#8217;agit d&#8217;une machine ?</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;adore cette série pour celà: son humanisme, sa capacité à rechercher ce qu&#8217;il y a de meilleur chez l&#8217;homme, et son ouverture en général. Subtilement mais sûrement, les sujets sensibles sur le racisme, le transhumanisme, l&#8217;homosexualité y sont traités.</p>
+</div>
+<div class="paragraph">
+<p>Je fais donc partie de ceux qui préfèrent avoir une "conversation" avec une machine polie, lui répondre "merci", tout en sachant qu&#8217;il ne s&#8217;agit que d&#8217;une machine, plutôt de de causer à un con&#8230; raciste, homophobe, ou plus fréquemment un télécommercial essayant toutes les techniques possibles pour me vendre ses panneaux solaires sachant pertinnement que je veux terminer ma conversation avec lui. Je pense que la politesse, le "savoir vivre", procure une certaine satisfaction, une relaxation, qui est un concept totallement orthogonal avec le sujet (l&#8217;homme ou la machine). Il n&#8217;est pas surprenant pour moi que des autistes s&#8217;ouvrent plus facilement avec la présence d&#8217;un animal (chien, chat, peu importe), ou que certaines expériences montrent des enfants <a href="https://www.topsante.com/medecine/psycho/autisme/des-robots-une-aide-pour-les-enfants-autistes-63967">faisant des progrès en parlant à des robots</a>. L&#8217;interaction, la socialisation est importante. Et si le robot est meilleur que l&#8217;homme sur ce sujet, on doit s&#8217;en réjouir ! L&#8217;homme a toujours cherché à créer des choses à son image (ça ne vous rapelle rien ?) et il se trouve que notre cerveau est conçu pour reconnaitre la douleur de l&#8217;autre (empathie) et y réagir. Je préfère donc 100 fois, que dis-je, 1000 fois un homme poli envers un robot, qu&#8217;un homme traitant une autre personne comme une machine. C&#8217;est peut-être naif, mais j&#8217;ai espoir qu&#8217;en apprenant à des enfants à être polis envers des machines, ils apprendront d&#8217;autant plus à l'être envers les autres, et qu&#8217;on effacera une partie de ce mal, qui est la disparition à l'échelle de la société de l&#8217;empathie. Et mon rêve de gosse, c&#8217;est de voir un Data émerger. Montrer qu&#8217;avec suffisamment de puissance, une machine puisse prendre son autonomie. On en est encore loin, mais, on réduit déja ce qui est "visible" entre homme et machine. Si je ne suis pas capable de faire la différence entre un homme et une machine dans une conversation, qu&#8217;est-ce que celà dit de moi ? Qu&#8217;est-ce que celà dit de la machine ? Et si, nous mêmes, n'étions finalement qu&#8217;une machine un peu sophistiquée, issue de l'évolution. Une machine douée de pensée et de sentiments, mais une machine quand même.</p>
+</div></p>
+
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2018/07/robots-vs-human.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2018/07/robots-vs-human.html"></div>
+	<script type="IN/Share" data-url="http://melix.github.io/blog/2018/07/robots-vs-human.html" data-counter="right"></script>
+	<div class="fb-like" data-href="http://melix.github.io/blog/2018/07/robots-vs-human.html" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'robotisation';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
+  </body>
+</html>
