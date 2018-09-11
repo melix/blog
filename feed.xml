@@ -6,13 +6,166 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>mar., 3 juil. 2018 11:59:27 +0200</pubDate>
-    <lastBuildDate>mar., 3 juil. 2018 11:59:27 +0200</lastBuildDate>
+    <pubDate>Tue, 11 Sep 2018 11:11:50 +0200</pubDate>
+    <lastBuildDate>Tue, 11 Sep 2018 11:11:50 +0200</lastBuildDate>
 
+    <item>
+      <title>Gradle myth busting: lifecycle</title>
+      <link>http://melix.github.io/blog/2018/09/gradle-lifecycle.html</link>
+      <pubDate>Tue, 11 Sep 2018 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2018/09/gradle-lifecycle.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_build_lifecycle&quot;&gt;The build lifecycle&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s a very common misconception I read from Maven users about Gradle: that there&amp;#8217;s no default lifecycle. Not only this is &lt;a href=&quot;https://scans.gradle.com/s/alokg5xymahwa/timeline?task=345te4gku5gw4&quot; target=&quot;_blank&quot;&gt;wrong&lt;/a&gt;, but actually the Gradle lifecycle is significanly richer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, let&amp;#8217;s explain in a few words what the lifecycle is in Maven. Detailed explanations can be found &lt;a href=&quot;https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html&quot; target=&quot;&lt;em&gt;blank&quot;&gt;here&lt;/a&gt;, but in a nutshell, the idea is that _any&lt;/em&gt; build will always consist in a sequence of phases, and that each phase is built on top of the previous one. This has the advantage of being simple to explain: to deploy an application, you first need compile it, run the tests, package it, perform validation (checkstyle, &amp;#8230;) and deploy. Let me ignore &lt;em&gt;install&lt;/em&gt; which is an artifact of how Maven works.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Maven plugins attach themselves to those lifecycle phases, and define goals on different phases. For example, a code generator would attach itself to the &lt;code&gt;generate-sources&lt;/code&gt; phase, and define a &lt;em&gt;goal&lt;/em&gt; that runs at this phase. Fun begins when you have dependencies between the goals, and ordering matters&amp;#8230; Anyway, the general idea is that if you want to get the outcome of, say, packaging, you have to execute all previous phases and consequently all goals that are defined on those phases. The other consequence is that the Maven lifecycle is biased towards the Java model, and more specifically, building Java libraries. It&amp;#8217;s even clearer when you think about the term &lt;code&gt;deploy&lt;/code&gt;, which doesn&amp;#8217;t mean &quot;deploy this application on production&quot;, but &quot;push this jar on the external Maven repository&quot;. Similarly &quot;install&quot; doesn&amp;#8217;t mean &quot;install this application on my laptop&quot;, but &quot;copy this library into my local .m2 repository&quot;. This, I would argue, is rather counter-intuitive&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle, on the other hand, is a generic build tool. It&amp;#8217;s aimed at the Java ecosystem, but also the native one, the Android ecosystem, Python, Go, &amp;#8230; It doesn&amp;#8217;t matter. All of those ecosystems have an underlying model, and the way you build applications or libraries in each of those ecosystems is different. Gradle offers the APIs to &lt;em&gt;model the builds&lt;/em&gt; of each ecosystem. This flexibility is often what troubles Maven users, and makes them think there&amp;#8217;s no lifecycle, but it&amp;#8217;s not true.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_goals_vs_tasks&quot;&gt;Goals vs tasks&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To understand why, we need to explain that Gradle model is not &lt;em&gt;phase&lt;/em&gt; based, but &lt;em&gt;task&lt;/em&gt; based. It&amp;#8217;s a bit like what Ant did, but the similarity stops there. While Ant didn&amp;#8217;t define &lt;em&gt;any&lt;/em&gt; convention, &lt;em&gt;any&lt;/em&gt; lifecycle, and everything was different from one build to the other, this is not true with Gradle. By default, if you apply this &quot;Java library&quot; plugin, you&amp;#8217;ll get &lt;em&gt;all the conventions you find with Maven&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;plugins {
+   id &apos;java-library&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is the minimal build file you need to build, test and package a Java library with Gradle, with the same conventions as Maven &lt;code&gt;src/main/java&lt;/code&gt;, &amp;#8230; By applying this plugin, Gradle internally applies a sequence of plugins, which, in turn, would define new tasks, and more specifically for the topic of this blog post, &lt;em&gt;lifecycle tasks&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Gradle, a task is responsible for executing a unit of work. For example, &quot;compile this source set&quot;. A task has inputs (the source files) and outputs (the class files). But a task also has &lt;em&gt;dependencies&lt;/em&gt;. In particular, dependencies on other tasks. Gradle makes sure that a task graph is a DAG (direct, acyclic graph). This means that if you run &lt;code&gt;compile&lt;/code&gt; on the command-line, what Gradle does is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;compute the task dependencies of &lt;code&gt;compile&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;execute the tasks &lt;em&gt;in order&lt;/em&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Task dependencies can be explicit (say, &lt;code&gt;compile.dependsOn(compileJava)&lt;/code&gt;), or implicit (because you add a source set as an input, &lt;strong&gt;and&lt;/strong&gt; that this source set is generated by another task, then we know we need to run the code generation &lt;em&gt;for this source set&lt;/em&gt; before). This model is nice because it&amp;#8217;s significantly more fine grained than the phase one. When you execute a task, Gradle will always perform the minimal amount of work required to get the output of this task. Let&amp;#8217;s illustrate with an example: say you want to run the unit tests of your library. You would run the &lt;code&gt;test&lt;/code&gt; task with Gradle. Gradle would then determine that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;it needs to compile the sources of the library (&lt;code&gt;compileJava&lt;/code&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;but the sources includes a generated source set, so it needs to execute it (&lt;code&gt;generateSources&lt;/code&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it would also find that the &quot;resources&quot; are an input of the test classpath, so execute the &lt;code&gt;processResources&lt;/code&gt; task&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;etc&amp;#8230;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But, in the end, it would &lt;em&gt;not&lt;/em&gt; generate the jar file. Because Gradle knows that to run the tests, there&amp;#8217;s no need to get the jar: we can build a classpath that consists of the generated classes and the resources directories. It&amp;#8217;s actually very easy to figure out what the task dependencies are by running with &lt;code&gt;--dry-run&lt;/code&gt;, or using a &lt;a href=&quot;https://scans.gradle.com/s/mfihmuxqj2b2u/dependencies?focusedDependency=WzE3LDEsNTgsWzE3LDEsWzIzNiw1OF1dXQ&amp;amp;toggled=W1s4XSxbMTddLFsxNywxXSxbMTcsMSxbMjM2XV1d&quot; target=&quot;_blank&quot;&gt;build scan&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_so_will_you_tell_me_what_the_lifecycle_of_gradle_is_then&quot;&gt;So, will you tell me what the lifecycle of Gradle is then?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is the trick. With Gradle, everything boils down to tasks, which are a bit like functions, with inputs and outputs. But there are special kinds of tasks, that we call &quot;lifecycle tasks&quot;, which are &lt;em&gt;binding other tasks together&lt;/em&gt;. They, effectively, produce no output individually. Their only role is to have dependencies on other tasks, so that we have nice shortcuts to produce our outputs. For example, the &lt;code&gt;check&lt;/code&gt; task is a lifecycle task which has dependencies on the &lt;code&gt;test&lt;/code&gt; task, but also the &lt;code&gt;checkstyle&lt;/code&gt; task, etc&amp;#8230; Plugins are free to add dependencies to the &lt;code&gt;check&lt;/code&gt; task, and &lt;em&gt;enrich&lt;/em&gt; the check lifecycle this way. But even better, by defining dependencies between tasks like that, and clearly defining the inputs and outputs of each task, we make it possible to get &lt;em&gt;correct&lt;/em&gt; incremental builds, as well as &lt;em&gt;caching&lt;/em&gt; (and no, this &lt;a href=&quot;https://docs.gradle.org/current/userguide/build_cache.html&quot; target=&quot;_blank&quot;&gt;has nothing to do with &lt;code&gt;~/.m2&lt;/code&gt;&lt;/a&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The good news is that because lifecycle tasks are just regular tasks, it means they can also depend on each other, and you can build your own lifecycle tasks. It becomes very easy to model your build production pipeline. So here is a simple correspondance matrix for Maven users, for the Java library plugin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all&quot; style=&quot;width:100%; &quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Lifecycle correspondance matrix&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width:33%;&quot;&gt;
+&lt;col style=&quot;width:33%;&quot;&gt;
+&lt;col style=&quot;width:33%;&quot;&gt; 
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Maven&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Gradle&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;clean&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;clean&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Removes the outputs of tasks&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;compile&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;classes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Generates the classes from source files&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;test&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;test&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Executes unit tests&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;package&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;assemble&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Creates a jar&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;verify&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;check&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Runs all tests, integration tests, quality checks, &amp;#8230;&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;install&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;publishToMavenLocal&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Gradle doesn&amp;#8217;t need a local repository, but should you need Maven interoperability, you can add the &lt;code&gt;maven-publish&lt;/code&gt; plugin to add this task&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;deploy&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;publishToMavenRepository&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;This tasks is &lt;em&gt;not&lt;/em&gt; available by default, as it depends on which type of repository you deploy to. In general you just apply the &lt;code&gt;maven-publish&lt;/code&gt; plugin to add this task&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But remember: in Gradle, tasks depend on each other. So it means that if you run a lifecycle task, &lt;em&gt;only the tasks required for that specific target are going to be executed&lt;/em&gt;. Nothing more.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_see_us_at_devoxx_belgium&quot;&gt;See us at Devoxx Belgium!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you want to discover more of the differences between Gradle and Maven, come see my colleague Louis Jacomet and I during Devoxx Belgium, we&amp;#8217;re giving a &lt;a href=&quot;https://dvbe18.confinabox.com/talk/UAH-5130/Switching_to_Gradle:_maturity,_performance,_and_pleasure!&quot; target=&quot;_blank&quot;&gt;deep dive into Gradle&lt;/a&gt; where we&amp;#8217;re going to cover what is explained here, and much more!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Assistants vocaux et robotisation: mon point de vue</title>
       <link>http://melix.github.io/blog/2018/07/robots-vs-human.html</link>
-      <pubDate>mar., 3 juil. 2018 00:00:00 +0200</pubDate>
+      <pubDate>Tue, 3 Jul 2018 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2018/07/robots-vs-human.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -108,7 +261,7 @@
     <item>
       <title>Parlons Gradle : Episode 1</title>
       <link>http://melix.github.io/blog/2017/10/parlons-gradle.html</link>
-      <pubDate>lun., 30 oct. 2017 00:00:00 +0100</pubDate>
+      <pubDate>Mon, 30 Oct 2017 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2017/10/parlons-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -145,7 +298,7 @@
     <item>
       <title>Pourquoi je soutiens Benoît Hamon</title>
       <link>http://melix.github.io/blog/2017/03/soutien-hamon.html</link>
-      <pubDate>mer., 1 mars 2017 00:00:00 +0100</pubDate>
+      <pubDate>Wed, 1 Mar 2017 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2017/03/soutien-hamon.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -329,7 +482,7 @@ A mes lecteurs habituels, ce billet n&amp;#8217;a rien à voir avec mes interven
     <item>
       <title>Gradle and Kotlin, a personal perspective</title>
       <link>http://melix.github.io/blog/2016/05/gradle-kotlin.html</link>
-      <pubDate>dim., 22 mai 2016 00:00:00 +0200</pubDate>
+      <pubDate>Sun, 22 May 2016 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2016/05/gradle-kotlin.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -504,311 +657,6 @@ class GreetingPluginExtension {
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Keep on Groovying!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>A week fighting a PermGen leak</title>
-      <link>http://melix.github.io/blog/2015/08/permgenleak.html</link>
-      <pubDate>sam., 29 août 2015 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2015/08/permgenleak.html</guid>
-      	<description>
-	&lt;h1 id=&quot;_a_challenge_at_gradle&quot; class=&quot;sect0&quot;&gt;A challenge at Gradle&lt;/h1&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_a_new_job&quot;&gt;A new job&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This is my first blog post after 4 months being a full time employee of &lt;a href=&quot;https://www.gradle.org&quot;&gt;Gradle Inc.&lt;/a&gt;! I am pretty excited by this job, even though so far it didn&amp;#8217;t give me much time to contribute to &lt;a href=&quot;http://groovy-lang.org&quot;&gt;Apache Groovy&lt;/a&gt; (but we did manage to release 2.4.4 though). One of the reasons I joined the company was because I love technical challenges. And &lt;a href=&quot;https://www.gradle.org&quot;&gt;Gradle&lt;/a&gt; has a lot of them, with an incredible team of smart people working together to make software automation better. This week, I worked on my first true challenge, and I must confess that I miserably failed :-) This is a long post, and anyone who ever fought against the infamous &quot;PermGen space error&quot; in their application is going to understand why&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_codenarc_as_the_source_of_a_leak&quot;&gt;CodeNarc as the source of a leak?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The first suspicious piece of code that draw our attention was &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt;. CodeNarc is a source code quality analysis tool for Groovy, which is used by a lot of Groovy developers, including in Gradle itself (since Gradle intensively makes use of Groovy). &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; can be seen as the equivalent of FindBugs for Groovy code. And problems seemed to start with an upgrade of the Gradle CodeNarc plugin to use CodeNarc 0.23. We actually saw reports like &lt;a href=&quot;https://discuss.gradle.org/t/codenarc-performance-drop-after-versions-update/9677&quot;&gt;this one&lt;/a&gt; in the forums or &lt;a href=&quot;https://github.com/CodeNarc/CodeNarc/issues/116&quot;&gt;this other one&lt;/a&gt; in GitHub but thought that the PermGen error was just a consequence of &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; including more rules: rules are written in Groovy, so compiled down to classes and classes eat PermGen. So increasing the PermGen space was enough, and it did actually solve the error. Problem solved. Or not. The riddle only started for me with a seemingly insignificant question on our internal mailing lists: &quot;Can some investigate why our build sometimes fails with a PermGen space error?&quot;, and I volunteered.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Interestingly, I had just finished pushing an upgrade of &lt;a href=&quot;https://www.gradle.org&quot;&gt;Gradle&lt;/a&gt; to Groovy 2.4.4 on our master branch, and I had noticed that I had to increase the PermGen space too. At first, I naively thought that it was also required because Groovy 2.4 consumed more memory, but I was wrong. I should have known, because before joining Gradle, I had actually worked on Groovy for Android, and a consequence of this work was that Groovy 2.4 had a reduced memory footprint: we generate less bytecode, which directly relates to a reduced PermGen space usage. So why on earth would Groovy 2.4 require more memory? And what is the relation with the CodeNarc plugin? Actually this plugin works in a Gradle version that uses Groovy 2.3.10, so why would there be a relation between the two?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In such a case, your best friend is a profiler. But as I will explain here, it can also lead you to wrong tracks. Be careful. The second best friend is the JVM options &lt;code&gt;-XX:+TraceClassLoading&lt;/code&gt; and &lt;code&gt;+XX:+TraceClassUnloading&lt;/code&gt;. I also used &lt;code&gt;-XX:SoftRefLRUPolicyMSPerMB=0&lt;/code&gt;, an option that I had no idea it existed before my friend David Gageot told me. Basically, it will force the garbage collector to agressively collect all soft references, which is very useful to understand, in combination with the 2 other options, from which classloader we are leaking memory.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The first wrong track was actually thinking that &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; was the source of the problem. I &lt;a href=&quot;https://groups.google.com/d/topic/gradle-dev/w9F0PsCfI4Y/discussion&quot;&gt;wrote an email on the gradle-dev list&lt;/a&gt;, explaining my findings, and I had indeed found a lot of classes from &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; were not unloaded. Before I go further, let&amp;#8217;s explain how the JVM is supposed to behave with regards to classes in Java 7. We all know that objects are garbage collected, but for a lot of people, classes are not. That&amp;#8217;s why we have the PermGen space (which has disappeared in Java 8 but that&amp;#8217;s another story): this segregated space of the JVM memory is used to store classes. And in Java, a class is loaded by a classloader. There is a strong reference between a class and its classloader. But what the JVM is able to do is actually simple: if there&amp;#8217;s no instance of the class which is strongly reachable &lt;strong&gt;and&lt;/strong&gt; that the classloader is neither strongly reachable, then both the class and the classloader can be unloaded. This means that PermGen can be recovered, and it is pretty useful, especially for a language like Groovy which can generate a lot of classes at runtime.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In Gradle, and particularily in the Gradle CodeNarc plugin, &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; is executed through an Ant task, which spawns its own isolated classloader, containing both the &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; and Groovy classes. So when the plugin execution is finished, if we do not keep track of the classloader, classes should be garbage collected. So a good candidate for the memory leak was actually the &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; that Gradle uses to execute the Ant task. And guess what? There is such a leak, because the &lt;code&gt;DefaultIsolatedAntBuilder&lt;/code&gt; performs classloader caching! That was also discovered by my colleague Sterling, who immediately spot that: while we do cache the classloaders, keeping a strong reference on them, we don&amp;#8217;t have any code to release the classloader in case of memory pressure. Conclusion, we&amp;#8217;ve found the memory leak, hurray! And it has nothing to do with &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; or &lt;a href=&quot;http://groovy-lang.org&quot;&gt;Apache Groovy&lt;/a&gt;, pfiew!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So I immediately tried to disable the cache, which turned to be pretty trivial. Run the build again and&amp;#8230; another PermGen space error. No CodeNarc classes unloaded, no Groovy classes unloaded. Wow. So the problem wasn&amp;#8217;t solved, first &quot;oh my!&quot; moment of the week: there was &lt;strong&gt;another&lt;/strong&gt; leak.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;One test I did, then, is to totally comment out the code that, in the ant builder code, performed the definition of the CodeNarc task. Eventually, there was only that code left in the CodeNarc plugin:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;    @TaskAction
-    void run() {
-        logging.captureStandardOutput(LogLevel.INFO)
-        def classpath = new DefaultClassPath(getCodenarcClasspath())
-        antBuilder.withClasspath(classpath.asFiles).execute {
-            // ... thou shalt not leak!
-        }
-    }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I executed the code again, and there was definitely a leak: after several loops, a PermGen error occurred. &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; was ruled out as the source of the leak. After some hours of trials, study of memory snapshots, I eventually came out with a piece of code that reproduces the problem independently of Gradle:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;int i = 0;
-try {
-    while (true) {
-        i++;
-	URLClassLoader loader = new URLClassLoader(
-            new URL[]{new File(GROOVY_JAR).toURI().toURL()},
-            ClassLoader.getSystemClassLoader().getParent());
-        Class system = loader.loadClass(&quot;groovy.lang.GroovySystem&quot;);
-        system.getDeclaredMethod(&quot;getMetaClassRegistry&quot;).invoke(null);
-        loader.close();
-    }
-} catch (OutOfMemoryError e) {
-    System.err.println(&quot;Failed after &quot; + i + &quot; loadings&quot;);
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As you can see, the code is very simple: it creates a new isolated classloader, which only contains Groovy on classpath. Then it invokes the creation of the Groovy runtime, by asking the metaclass registry, then it closes the classloader. On my JVM, after about 40 runs, the code fails with a PermGen space error: despite the fact that no class, no object is kept out of the classloader, the Groovy runtime is not unloaded, leading to a memory leak. The key point here is that I had noticed some oddities during my hours of debugging: a class, named &lt;code&gt;ClassInfo&lt;/code&gt;, was at the center of those oddities.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;https://groups.google.com/group/gradle-dev/attach/cb238029e9b0/leak.png?part=0.1&amp;authuser=0&quot; alt=&quot;ClassInfo leak&quot;&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In particular, although &lt;a href=&quot;https://www.yourkit.com/features/&quot;&gt;YourKit&lt;/a&gt; (the profiler I was using) was telling me that all classes, all classloaders were weakly or softly reachable (btw, it&amp;#8217;s really a pity that &lt;a href=&quot;https://www.yourkit.com/features/&quot;&gt;YourKit&lt;/a&gt; doesn&amp;#8217;t show them separately, that is, weakly referenced objects from softly referenced ones), the classes were not garbage collected. Also strangely, some classes appeared as GC roots, meaning they could be collected, but they weren&amp;#8217;t! And when I navigated through some of the duplicate classes I was seeing, &lt;code&gt;ClassInfo&lt;/code&gt; was present, as a value of a map entry of class value. Here we are, I had found the real source of the leak. Something had changed in Groovy. And the fact that &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; was leaking since 0.23 was just a side effect of upgrading its dependency to Groovy 2.4! So despite Gradle was using Groovy 2.3.10, CodeNarc, by default, was using a more recent version of Groovy. That doesn&amp;#8217;t explain &lt;strong&gt;why&lt;/strong&gt; it leaks yet, but we now know who is responsible: Groovy.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_classvalue_friend_or_foe&quot;&gt;ClassValue, friend or foe?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Since Groovy 2.4, Groovy uses a new mechanism for storing its runtime metadata in case you run on JDK 7 or later: &lt;code&gt;ClassValue&lt;/code&gt;. &lt;code&gt;ClassValue&lt;/code&gt; allows storing information on the class level. Typically, a language like Groovy would use it to store the metaclass of a class. In practice, Groovy doesn&amp;#8217;t directly store the metaclass here, but a higher level concept called &lt;code&gt;ClassInfo&lt;/code&gt;, which in turns gives access to the metaclass of a class.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Before Groovy 2.4, all that information was stored directly in the &lt;code&gt;ClassInfo&lt;/code&gt; class itself, through a private static field. &lt;code&gt;ClassInfo&lt;/code&gt; is therefore the global entry point for accessing runtime information about a class. While Groovy 2.4 still uses &lt;code&gt;ClassInfo&lt;/code&gt; as an entry point, there are 2 possible storage mechanisms, based on the underlying JDK. If &lt;code&gt;ClassValue&lt;/code&gt; is available; which is the case for any JDK 7+, then it is used, otherwise we fallback on the old mechanism. &lt;code&gt;ClassValue&lt;/code&gt; is supposed to be more efficient and more direct. Of course, in any case (old and new storage mechanism), it is memory sensitive: in case a class is not available anymore, its &lt;code&gt;ClassInfo&lt;/code&gt; is removed. What &lt;code&gt;ClassValue&lt;/code&gt; storage provides is basically the same as ThreadLocal, but at the Class level instead of the Thread level. Users are allowed to store information here, but one should be aware that as thread locals, if you start using it, you may face memory leaks if you don&amp;#8217;t use it properly.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s for the theory, let&amp;#8217;s see how in practice this change led to a giant memory leak in the Gradle build.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The theory is that &lt;code&gt;ClassValue&lt;/code&gt; should behave like ThreadLocal. That is, the entries stored in the internal map of the Class class, should be garbage collected when the referent is not strongly referenced anymore. This behavior is however not what the JVM does. It was confirmed to me by Charles Nutter (JRuby) a few hours later: although we all expected the JVM to collect the unreachable, it does not.&lt;/p&gt;
-&lt;/div&gt;
-&lt;blockquote class=&quot;twitter-tweet&quot; lang=&quot;fr&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;&lt;a href=&quot;https://twitter.com/iNikem&quot;&gt;@inikem&lt;/a&gt; &lt;a href=&quot;https://twitter.com/CedricChampeau&quot;&gt;@cedricchampeau&lt;/a&gt; I talked with &lt;a href=&quot;https://twitter.com/haupz&quot;&gt;@haupz&lt;/a&gt; at JVMLS and he agrees that ClassValue *should* work like ThreadLocal wrt dereferencing.&lt;/p&gt;&amp;mdash; Charles Nutter (@headius) &lt;a href=&quot;https://twitter.com/headius/status/636910965817143297&quot;&gt;27 Août 2015&lt;/a&gt;&lt;/blockquote&gt;
-&lt;script async src=&quot;//platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Uh. Second &quot;oh my!&quot; moment of the week. I had now a candidate (Groovy) and a reason (&lt;code&gt;ClassInfo&lt;/code&gt; leaking). However, it doesn&amp;#8217;t explain by itself why the class loader is not garbage collected: if Groovy stores information on classes, it&amp;#8217;s ok, as long as the classes to which it writes some metadata are from the classloader, or any child classloader, of the Groovy runtime itself. Everything would be self-contained, meaning we would have a graph of objects that do not leak outside of the isolated classloader. However&amp;#8230; Groovy uses Strings, integers, List, &amp;#8230; all coming from the system classloader. And that is the main difference with the old metadata storage mechanism: the old one only &lt;strong&gt;referenced&lt;/strong&gt; classes from the system classloader. With &lt;code&gt;ClassValue&lt;/code&gt;, we are &lt;strong&gt;modifying&lt;/strong&gt; classes from the system classloader too! That is, the String class, for example, contains in its class value map, information from the Groovy runtime! The famous &lt;code&gt;ClassInfo&lt;/code&gt; instance is present there! There we are! We leaked a &lt;code&gt;ClassInfo&lt;/code&gt; instance into the system classloader! So what happens is that when we are done with our &quot;isolated&quot; Groovy runtime, we think it should unload because nothing references any object or class from that classloader. However, the Groovy runtime did update classes from the system classloader, and it started leaking into it! The ghost in the shell! Groovy is spoiling everywhere&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So far so good, I had the explanation, I could write a workaround: let&amp;#8217;s iterate over all those classes that Groovy updated, remove the &lt;code&gt;ClassInfo&lt;/code&gt;, and we&amp;#8217;re done. I wrote that code, and it turned out to be a bit ugly, but&amp;#8230; it worked! Here is, for information, the cleanup code:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;    static void removeClassFromGlobalClassSet(Class&amp;lt;?&amp;gt; classInfoClass) throws Exception {
-        Field globalClassValueField = classInfoClass.getDeclaredField(&quot;globalClassValue&quot;);
-        globalClassValueField.setAccessible(true);
-        Object globalClassValue = globalClassValueField.get(null);
-        Method removeFromGlobalClassValue = globalClassValueField.getType().getDeclaredMethod(&quot;remove&quot;, Class.class);
-        removeFromGlobalClassValue.setAccessible(true);
-
-        Field globalClassSetField = classInfoClass.getDeclaredField(&quot;globalClassSet&quot;);
-        globalClassSetField.setAccessible(true);
-        Object globalClassSet = globalClassSetField.get(null);
-        globalClassSetField = globalClassSet.getClass().getDeclaredField(&quot;items&quot;);
-        globalClassSetField.setAccessible(true);
-        Object globalClassSetItems = globalClassSetField.get(globalClassSet);
-
-        Field clazzField = classInfoClass.getDeclaredField(&quot;klazz&quot;);
-        clazzField.setAccessible(true);
-
-
-        Iterator it = (Iterator) globalClassSetItems.getClass().getDeclaredMethod(&quot;iterator&quot;).invoke(globalClassSetItems);
-
-        while (it.hasNext()) {
-            Object classInfo = it.next();
-            Object clazz = clazzField.get(`ClassInfo`);
-            removeFromGlobalClassValue.invoke(globalClassValue, clazz);
-        }
-
-    }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;After executing that code, no &lt;code&gt;ClassInfo&lt;/code&gt; instance was leaking anymore into the system classloader, and the runtime could be shutdown properly. The garbage collector did its job, and yay! I&amp;#8217;m so happy, I&amp;#8217;ll be able to sleep soon! That was tuesday night. And that night, I thought I had found the solution.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_memory_sensitive_classloader_caching&quot;&gt;Memory sensitive classloader caching&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So wednesday, I spent the day trying to implement the same strategy inside Gradle. More precisely, inside the &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; thing I told you. I implemented the code, launched my test again and hurray! it worked! My test passed! No more PermGen space error! So all I had to do, now, was to reactivate classloader caching, otherwise, we would loose a feature that is important performance wise.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So I reactivated the cache, and boom! That time, the Gradle build did &lt;strong&gt;not&lt;/strong&gt; fail with a PermGen error, but with very strange errors like this one:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;groovy.lang.MissingMethodException: No signature of method: java.lang.Integer.plus() is applicable for argument types: (java.lang.Integer) values: [0]
-&amp;gt;  Possible solutions: plus(java.lang.String), plus(java.lang.Character), abs(), use([Ljava.lang.Object;), split(groovy.lang.Closure), minus(java.lang.Character)&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Mmmmmm&amp;#8230; 3rd &quot;oh my!&quot; moment of the week. I understood what I had just done. By clearing the &lt;code&gt;ClassInfo&lt;/code&gt; stuff from the classloader, I had effectively shutdown the Groovy runtime that was initiated in that cached classloader. So when some code was trying to reuse the runtime from that cached classloader, since I had disabled it, it was failing! And there&amp;#8217;s no option to reinitialize the Groovy runtime. It&amp;#8217;s just not doable, because everything happens in static initializers (private final fields, &amp;#8230;). So unless the JVM had an option to allow to re-execute the static initializers of a class (and who knows what oddities it would lead to), I had no luck.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s about when I told my mates at Gradle &quot;I think we have to choose between caching and leaking memory&quot;. But the night came, and I actually had an idea. I could implement a memory sensitive cache: by writing a smart cache structure with appropriate SoftReferences and reference queues, I would be able to execute the shutdown code only when I know that the GC is trying to reclaim memory. The idea is simple: we have a map, which key is a SoftRefence&amp;lt;String&amp;gt;, and the value is our cached classloader. The &lt;code&gt;String&lt;/code&gt; represents the classpath that we are caching for the classloader.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now imagine that the GC is out of memory. The semantics of &lt;code&gt;SoftReference&lt;/code&gt; are clear: before throwing an OutOfMemoryError, the JVM will do its best and clear all soft references. Doing so, using a custom reference queue, we can be notified that the reference is cleared. Then, we can execute the Groovy runtime shutdown code, which will in turn make the ClassLoader collectible.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Honestly I was pretty happy with my implementation. I executed the code and it worked! Caching was working until the GC tried to reclaim memory, then I saw my shutdow code executed, memory reclaimed and green tests. Woooo!!! I had eventually knocked that memory leak down! Ha ha!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then I remembered that my colleague Sterling had a test which involved a loop in an integration test. To make sure I had &lt;strong&gt;really&lt;/strong&gt; fixed the leak, I asked him to tell me how he did that. The code was very simple, just involving a loop thanks to &lt;code&gt;@Unroll&lt;/code&gt; in a &lt;a href=&quot;https://docs.spockframework.org&quot;&gt;Spock specification&lt;/a&gt;. I did it and&amp;#8230; PermGen error showed up again. WAT?!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That was the fourth &quot;oh my!&quot; moment. And not the last one. I really then spent hours in modifying my caching code, refactored my code to add more complicated memory leak strategies, seeing that there were still thread locals, clearing them explicitly, adding a memory leak strategy for Ant itself, for the Java Beans introspector, &amp;#8230; None of my attempts worked. In the end, it always failed. But there was always one mystery: I saw that the Groovy classes were unloading. But the Ant classes were not&amp;#8230; And the rest, I should have discovered that much sooner. But when you have so many potential source leaks, that are much more evident, it&amp;#8217;s so hard to figure out.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In particular, one thing would have made things much easier to discover. In &lt;a href=&quot;https://www.yourkit.com/features/&quot;&gt;YourKit&lt;/a&gt;, you can see that there are duplicate classes. Classes that have the same name, but come from different class loaders. However, there&amp;#8217;s nothing that will &lt;strong&gt;show&lt;/strong&gt; you those duplicates. You have to find them yourself. And in the end, when in the dump you see an instance of that class, all you can see is that it is an instance of &lt;code&gt;ClassInfo&lt;/code&gt;. Nothing, visually, tells you that the instance of &lt;code&gt;ClassInfo&lt;/code&gt; that you are seeing actually comes from a different classloader from the one you are seeing just next to it. A bit of color, for example, would help&amp;#8230;. And it would have helped me seeing that some &lt;code&gt;ClassInfo&lt;/code&gt; elements that I was seeing in the classes from Ant didn&amp;#8217;t come from the &quot;disposable&quot; Groovy runtime&amp;#8230; No. They were coming from&amp;#8230; the Gradle runtime itself!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_where_it_all_ends&quot;&gt;Where it all ends&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Ok, That was the last &quot;oh my!&quot; moment of the week. The one that killed all my hopes. And to understand the problem, I now have to explain to you how &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; works. It&amp;#8217;s a very small, yet very smart and practical piece of code. Maybe too smart.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle, as a core feature, lets you execute Ant tasks thanks to code inherited from the Groovy codebase itself: AntBuilder. It&amp;#8217;s a very elegant piece of code, that lets you write things like:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;task check &amp;lt;&amp;lt; {
-    ant.taskdef(name: &apos;pmd&apos;,
-                classname: &apos;net.sourceforge.pmd.ant.PMDTask&apos;,
-                classpath: configurations.pmd.asPath)
-    ant.pmd(shortFilenames: &apos;true&apos;,
-            failonruleviolation: &apos;true&apos;,
-            rulesetfiles: file(&apos;pmd-rules.xml&apos;).toURI().toString()) {
-        formatter(type: &apos;text&apos;, toConsole: &apos;true&apos;)
-        fileset(dir: &apos;src&apos;)
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;While this works, there&amp;#8217;s actually a lot involved behind that. Including classloader magic. In particular, in the example above, we create a task definition in Ant, which uses a classpath defined in Gradle. &quot;ant&quot; here is a global object which is shared accross the build, but it is possible to avoid the classes from the Ant tasks to be mixed with the Gradle classpath itself by using antBuilder instead. That&amp;#8217;s what the &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; plugin does:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;antBuilder.withClasspath(classpath.asFiles).execute {
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;means &quot;Gradle, please, create an isolated classloader for me, that will contain the classpath only necessary for CodeNarc, and execute that Ant task with it&quot;. It seems very trivial, but there is a problem. The code that you see here is found in a Gradle script. It means that the &quot;antBuilder&quot; object that you are seeing here comes from Gradle. It is our &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; instance. When we call &quot;withClasspath&quot;, a new instance of &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; will be created, with an isolated classloader corresponding to the supplied classpath. Then calling execute with a closure that lets you configure the ant task using the Groovy AntBuilder syntax.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So the &quot;Closure&quot; class that we are seeing here comes from Gradle. Then, we have a classloader which contains the Ant runtime, and a &quot;bridge&quot; class, written in Groovy, called &quot;AntBuilderDelegate&quot;, which has one responsibility: when the code of the Ant builder is going to be executed, it is likely that the version of Groovy which will be found on classpath will be &lt;strong&gt;different&lt;/strong&gt; from the one that Gradle uses. That is exactly what happens with &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt;: Gradle 2.6 uses Groovy 2.3.10, but the &lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; plugin executes with Groovy 2.4.1, so the Ant task works with a different &quot;Closure&quot; class than the one that Gradle has. We will really have two distinct &quot;Closure&quot; classes here, and &quot;AntBuilderDelegate&quot; is responsible for filling the gap: when the Ant configuration code, which will use AntBuilder from the Ant classpath, is going to be executed, it will be calling AntBuilderDelegate instead of directly the Closure code. And that code will intercept the missing methods in order to &quot;reroute&quot; them to the builder. You don&amp;#8217;t have to understand that in detail, it&amp;#8217;s not really the point here, but it is important to understand that this &quot;AntBuilderDelegate&quot; class is instantiated&amp;#8230; in Gradle, using the Gradle classloader.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now you may see it coming. I told you I had upgraded Gradle to use Groovy 2.4.4. So what does it mean? Gradle now uses Groovy with &lt;code&gt;ClassValue&lt;/code&gt;. And what is the problem with &lt;code&gt;ClassValue&lt;/code&gt;? All classes &quot;touched&quot; by Groovy will have them &quot;polluted&quot; with necessary metadata information. So when we create an instance of &quot;AntBuilderDelegate&quot;, we&amp;#8217;re doing that using the Groovy 2.4 runtime from Gradle, which comes with its own &lt;code&gt;ClassInfo&lt;/code&gt;. And that delegate references and AntBuilder which is instantiated using the Ant classloader, with a different Groovy runtime, having its own &lt;code&gt;ClassInfo&lt;/code&gt;. So what I had found earlier was that the &lt;code&gt;ClassInfo&lt;/code&gt; from the Groovy &quot;Ant&quot; runtime was leaking into Gradle. But I hadn&amp;#8217;t realized that the opposite was also true! By bridging the runtimes, we were leaking Groovy &quot;Gradle&quot; into the isolated classloader, through &lt;code&gt;ClassValue&lt;/code&gt;!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So, what happened, is that the Groovy classes from the isolated classpath were garbage collected, because no &lt;code&gt;ClassInfo&lt;/code&gt; from Gradle leaked into them. However, the Ant classes were touched. And they were NOT collectible then.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And this is were I stopped. Because if I found a way to &quot;unload&quot; &lt;code&gt;ClassInfo&lt;/code&gt; from the isolated classpath and the touched classes from the system classloader, I haven&amp;#8217;t found a way to do the same for the &lt;code&gt;ClassInfo&lt;/code&gt; instances that leak into the Ant runtime&amp;#8230; Of course I tried a &quot;brute force&quot; thing, by removing all &lt;code&gt;ClassInfo&lt;/code&gt; from those classes, but as you understood, it&amp;#8217;s a desperate attempt: it&amp;#8217;s equivalent to shutting down the runtime. And then, it totally breaks subsequent calls in the Gradle build, we&amp;#8217;ve just broken the Groovy runtime from Gradle&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To add some confusion to the problem, I think it&amp;#8217;s now a good time to explain that I actually simplified the isolated ant builder classloader hierarchy. There are actually (at least) 3 classloaders involved:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;The classloader from Gradle, which loads the Gradle runtime, the &lt;code&gt;IsolatedAntBuilder&lt;/code&gt; instance and also the &lt;code&gt;AntBuilderDelegate&lt;/code&gt; instance&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;A classloader for the Ant runtime, which is isolated from Gradle, apart from logging classes necessary for Gradle to be able to capture the output. This classloader is per classpath, and is the one which is cached.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;A classloader that is &lt;strong&gt;filtering&lt;/strong&gt; some classes from the Gradle runtime classloader to make them available. This is what the bridging Ant builder uses. This classloader is shared among all isolated ant builder instances.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So when I say that something leaks, it can leak to any of those classloaders, and any of the parent loaders&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s were I felt desperate. After a week fighting those memory leaks, and so many &quot;ah ah, got you!&quot; moments, I was in front of a wall. Basically, while in the first case (isolated &lt;code&gt;ClassInfo&lt;/code&gt; leaking into Gradle), I know I can totally clean all the &lt;code&gt;ClassInfo&lt;/code&gt; references because I know I can shutdown the Groovy runtime, in the second case (Gradle &lt;code&gt;ClassInfo&lt;/code&gt; leaking), I basically have no idea that a class comes from the isolated classloader or not. So it&amp;#8217;s hard to say if you should remove the &lt;code&gt;ClassInfo&lt;/code&gt; or not. I am currently experimenting a brute force &quot;try to determine if a class belongs in the class loader hierarchy&quot;, but it is weak (ah ah!) because I need to know about several potential class loader types.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_what_s_next&quot;&gt;What&amp;#8217;s next?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So, what can we do next? One has to remember that fixing Groovy is not the ultimate solution because Gradle uses Groovy internally, but the various tasks can very well use a different Groovy version which is beyond our control.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;olist arabic&quot;&gt;
-&lt;ol class=&quot;arabic&quot;&gt;
-&lt;li&gt;
-&lt;p&gt;rollback Groovy in Gradle to use Groovy 2.3.10. It would avoid the Groovy classes from Gradle to leak into the Isolated classloaders, but is also unfortunate given the improvements that this version provides. Also, those who write Groovy applications for Android use Groovy 2.4+&amp;#8230;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://codenarc.sourceforge.net/&quot;&gt;CodeNarc&lt;/a&gt; would still use Groovy 2.4+, we could downgrade it too. However, if people rely on features of Groovy 2.4+, they just have no choice, so we would still have the problem.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Use smarter techniques like instrumentation to track the leakages of &lt;code&gt;ClassInfo&lt;/code&gt;, record them, and revert when we&amp;#8217;re done. It&amp;#8217;s doable, but it&amp;#8217;s a huge amount of work, and relying on instrumentation for Gradle would be very bad for performance.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Update Gradle to use FilteringClassLoader everywhere, including in its main process, to prevent &lt;code&gt;ClassValue&lt;/code&gt; to be found. This would work because without that class, Groovy wouldn&amp;#8217;t use &lt;code&gt;ClassValue&lt;/code&gt; to store the metadata and fall back to the old mechanism.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Wait for a fix in Groovy. Jochen is already working on that, but we know that the old mechanism isn&amp;#8217;t perfect either, and has memory leaks too. That was one of the reasons to migrate to &lt;code&gt;ClassValue&lt;/code&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Wait for a fix of the JVM. That&amp;#8217;s beyond our control.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Increase the PermGen space for builds that use the code quality plugins, which internally use AntBuilder. It&amp;#8217;s what we do today. It works, but it&amp;#8217;s just hiding the problem. And we have to explain to our users to do it too.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Some smart people come with a smart solution, that&amp;#8217;s why I wrote this too. During that week, I got help from lots of people, including Jochen &quot;Groovy&quot; Theodorou, Henri &quot;EasyMock&quot; Tremblay, David Gageot or Nikita Salnikov from Plumbr, thank you guys!&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;By the way, if you wonder, the same problem exist in JDK 8 too, it&amp;#8217;s just not visible immediately because of the metaspace that appeared to replace the PermGen space.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now, it was fun writing this &quot;post-mortem&quot;, I hope it wasn&amp;#8217;t too obscure, it helped me a lot because I had so many &quot;got it&quot; and &quot;oh noes!&quot; moments that I felt it was very interesting to share this story with you. And if you like technical challenges, do not forget that &lt;a href=&quot;https://gradle.org/gradle-jobs/&quot;&gt;Gradle is hiring&lt;/a&gt;!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;After writing this post, I made great progress, and I did manage to get rid of the leak, but I also discovered that the leak happens with the various &lt;code&gt;GroovyCompile&lt;/code&gt;
-tasks&amp;#8230; Anyway you can follow my progress on &lt;a href=&quot;https://github.com/gradle/gradle/tree/cc-oom-codenarc&quot;&gt;this branch&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
