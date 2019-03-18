@@ -10,17 +10,9 @@
 	<p><em>Tags: <#list content.tags as tag></em>
 		<a href="/blog/tags/${tag?trim?replace(' ','-')}.html">${tag}</a> 
 	</#list></p>
-	<a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-show-count="true">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/${content.uri}"></div>
-        <script id='fbvpgng'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=CedricChampeau&button=compact&url='+encodeURIComponent('http://melix.github.io/blog/${content.uri}');f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbvpgng');</script>
-	<script type="IN/Share" data-url="http://melix.github.io/blog/${content.uri}" data-counter="right"></script>
-	<div class="fb-like" data-href="http://melix.github.io/blog/${content.uri}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
 	<p>${content.body}</p>
    
-   <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-show-count="true">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/${content.uri}"></div>
-	<script type="IN/Share" data-url="http://melix.github.io/blog/${content.uri}" data-counter="right"></script>
-	<div class="fb-like" data-href="http://melix.github.io/blog/${content.uri}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+   <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
