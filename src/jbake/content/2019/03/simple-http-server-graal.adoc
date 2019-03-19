@@ -1,0 +1,273 @@
+= A simple native HTTP server with Graal
+Cédric Champeau
+2019-03-19
+:jbake-type: post
+:jbake-tags: gradle,graal,groovy, kotlin
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-simple-http-draft
+:linkattrs:
+
+== Writing a simple HTTP server with Graal
+
+In my daily work, I often need to start a simple HTTP server to serve local files.
+For example, this week I'm going to give a talk at https://www.breizhcamp.org[Breizcamp], and because my presentation uses a https://revealjs.com[Reveal.js slide deck] and that it loads resources dynamically, I need a "real" web server to serve the files.
+So far, I've been quite happy using the Python simple http server.
+Using it is as easy as running:
+
+```
+python -m SimpleHTTPServer 8000
+```
+
+But knowing that the JDK has an embedded HTTP server, and that there's a lot of hype around Graal those days, I wanted to see if we could acheive the same thing, with a fast startup, with Graal.
+The answer is **yes**, but the road wasn't so easy, at least for Groovy.
+
+== Show me the code
+
+The code for this experiment can be found on https://github.com/melix/graal-simple-httpserver[GitHub].
+We're going to use:
+
+* https://gradle.org/[Gradle] to build
+* the https://github.com/palantir/gradle-graal[Gradle Graal plugin] from Palantir
+
+And because I like the http://www.groovy-lang.org/[Groovy], and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
+Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
+Knowing that Kotlin is a statically compiled language from the ground and that it doesn't have the whole dynamic history of Groovy, I did expect it to be simpler.
+
+So, in the end, here's what the Kotlin server looks like:
+
+.HttpServer.kt
+[source,ruby]
+----
+fun main(args: Array<String>) {
+    val port = if (args.size > 0) args[0].toInt() else 8080
+    val baseDir = if (args.size > 1) File(args[1]).canonicalFile else File(".").canonicalFile
+
+    create(InetSocketAddress(port), 0).run {
+        createContext("/") { exchange ->
+            exchange.run {
+                val file = File(baseDir, requestURI.path).canonicalFile
+                if (!file.path.startsWith(baseDir.path)) {
+                    sendResponse(403, "403 (Forbidden)\n")
+                } else if (file.isDirectory) {
+                    val base = if (file == baseDir) "" else requestURI.path
+                    sendResponse(200, "<html><body>" +
+                            file.list().map { "<ul><a href=\"$base/${it}\">${it}</a></ul>" }.joinToString("\n") + "</body></html>")
+
+                } else if (!file.isFile) {
+                    sendResponse(404, "404 (Not Found)\n")
+                } else {
+                    sendResponse(200) {
+                        FileInputStream(file).use {
+                            it.copyTo(this)
+                        }
+                    }
+                }
+            }
+        }
+        executor = null
+        println("Listening at http://localhost:$port/")
+        start()
+    }
+}
+----
+
+It's quite simple indeed, and making this work as a Graal native image is extremely easy too. This is the _whole build file_, this is all you need:
+
+.build.gradle.kts
+[source,groovy]
+----
+plugins {
+   kotlin("jvm") version "1.3.21"
+   id("com.palantir.graal") version "0.3.0-6-g0b828af"
+}
+
+repositories {
+   jcenter()
+}
+
+dependencies {
+   implementation(kotlin("stdlib"))
+}
+
+graal {
+   graalVersion("1.0.0-rc14")
+   mainClass("HttpServerKt")
+   outputName("httpserv-kt")
+   option("--enable-http")
+}
+----
+
+As you can see, we just apply the Kotlin plugin to build our code, then the Graal plugin and configure the basics of the Graal plugin (version, main class, ...).
+
+Building the image can be done by calling:
+
+```
+./gradlew http-kotlin:nativeImage
+```
+
+As https://scans.gradle.com/s/nzkvn2gwkguf6[you can see], building the whole thing takes around 15s on my laptop.
+That is to say, compiling the server **and** generating the native image.
+Then you can try to serve files running:
+
+```
+http-kotlin/build/graal/httpserv-kt 9090 /path/to/files
+```
+
+You'll see that the server starts immediately: there's absolutely no wait time, it's there and ready to answer.
+The whole process took me less than 30 minutes, the native image is only 11MB. Success!
+
+== Making it work with Groovy
+
+Now that I had a proof-of-concept with Kotlin, I went back to Groovy.
+And, I can say, despite the fact I love this language, that it was a nightmare to make it work.
+At some point, I even thought of abandoning, however, using perseverance, I managed to work around all problems I faced.
+
+Before I explain the problems, let's took a look at the final Groovy server:
+
+.HttpServerGroovy.groovy
+[source,groovy]
+----
+@CompileStatic
+abstract class HttpServerGroovy {
+
+    // VERY dirty trick to avoid the creation of a groovy.lang.Reference
+    static File baseDir
+
+    static void main(String[] args) {
+        def port = args.length > 0 ? args[0].toInteger() : 8080
+        baseDir = args.length > 1 ? new File(args[1]).canonicalFile : new File(".").canonicalFile
+
+        def server = HttpServer.create(new InetSocketAddress(port), 0)
+        server.createContext("/", new HttpHandler() {
+            @Override
+            void handle(HttpExchange exchange) throws IOException {
+                def uri = exchange.requestURI
+                def file = new File(baseDir, uri.path).canonicalFile
+                if (!file.path.startsWith(baseDir.path)) {
+                    sendResponse(exchange, 403, "403 (Forbidden)\n")
+                } else if (file.directory) {
+                    String base = file == baseDir ? '': uri.path
+                    String listing = linkify(base, file.list()).join("\n")
+                    sendResponse(exchange, 200, String.format("<html><body>%s</body></html>", listing))
+
+                } else if (!file.file) {
+                    sendResponse(exchange, 404, "404 (Not Found)\n")
+                } else {
+                    sendResponse(exchange, 200, new FileInputStream(file))
+                }
+            }
+        })
+        server.executor = null
+        System.out.println(String.format("Listening at http://localhost:%s/", port))
+        server.start()
+    }
+
+    private static List<String> linkify(String base, String[] files) {
+        def out = new ArrayList<String>(files.length)
+        for (int i = 0; i < files.length; i++) {
+            String file = files[i]
+            out << String.format("<ul><a href=\"%s/%s\">%s</a></ul>", base, file, file)
+        }
+        out
+    }
+    ...
+----
+
+The first thing you will notice is that it's far from being idiomatic Groovy.
+Of course I used `@CompileStatic`, because the static nature of Graal would have made this an even greater challenge to make it work with dynamic Groovy.
+However, I didn't expect that it would be _so hard_ to make it work.
+The resulting file is both a consequence of limitations of Graal, and historical background of Groovy.
+
+=== Where are my closures?
+
+The first code I wrote was using idiomatic Groovy, with closures. However, as soon as I started to build my native image, I noticed this obscure error:
+
+```
+com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.<init>(MethodHandle)
+```
+
+It's funny to see this `MethodHandle` error when you know that the code is _fully statically compiled_, and that it doesn't contain a single method handle.
+However, the Groovy runtime does, and this is where the fun began.
+First of all, Graal tells you what method is problematic. This was `org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints`.
+Things are getting a little clearer: for some reason, the Groovy runtime is initialized, and we load the dynamic `IndyInterface`, that I won't ever need.
+
+The "some reason" needs a bit of explanation. Despite the fact that we use statically compiled Groovy, we're still implementing _Groovy specific interfaces_. For example, the `GroovyObject` interface.
+Similarly, we honor class initialization the same way as a dynamic class, meaning that when a statically compiled Groovy class is instantiated, even if it doesn't contain any dynamic reference, we will initialize its metaclass, and as a consequence try to initialize the Groovy runtime.
+
+However something was _wrong_: looking at my code I could not figure out what would cause initialization, because my entry point was static.
+In fact, the answer was easy: it came through the closures.
+
+Well, that's what I thought, because even after eliminating closures, I still got the damn error.
+In fact, it turns out the situation is far more complex.
+For example, I had this innocent looking code:
+
+[source,groovy]
+----
+def baseDir = args[0]
+server.createContext("/", new HttpHandler() {
+    @Override
+    void handle(HttpExchange exchange) throws IOException {
+        ...
+        someCodeUses(baseDir)
+    })
+----
+
+The fact that we use `baseDir` _within_ an anonymous inner class, and that Groovy uses the same code generation under the hood for both closures and anonymous inner classes, that the `baseDir` variable is allowed to be mutated in the inner class. Of course here I'm not doing it, but because the compiler doesn't eliminate that possibility, what it does is generating a `groovy.lang.Reference` for my local variable, that is used in the inner class.
+And, initializing the `Reference` class would cause an additional path to this `IndyInterface` method call...
+
+In the end, the problem is not that much that there's a `MethodHandle`, it's that there are potentially different code paths that lead to this, and that Graal can't figure out in the end a single method to be called: we're just defeating the system!
+
+For example, even creating an anonymous inner class would still trigger the creation of a metaclass for it: this means that even if we replace the closure with an inner class, in the end, we would still trigger the initialization of the Groovy runtime.
+
+I tried to be smart and remove the `IndyInterface` from the code that Graal is using to generate the native image, knowing that in the end, this code would _never_ be called if I didn't register the Java 7 plugin (that I wouldn't use in any case). However, it turns out that Graal doesn't like this, as it has special handling for Groovy, and that if you _remove_ that class, it fails with:
+
+```
+Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.
+```
+
+So instead I spent hours eliminating those paths, which involved:
+
+- turning that shared variable into a field in order to workaround the reference initialization
+- removing all closures
+- removing usages of `GString` (interpolated strings, which is why you see `String.format` instead)
+- replacing the short-hand syntax for creating lists (`def foo=[]`) with an explicit call
+- removing calls to `+` with strings (first attempt to remove GString...)
+- eliminating some classes from the Groovy runtime
+- replacing some classes of the Groovy runtime with stubs, preventing static initialization
+
+In the end, I have https://github.com/melix/graal-simple-httpserver/blob/master/http-groovy/build.gradle.kts[something which works], but you can see that the build file is far more complex.
+
+In particular, it makes use of a little known Gradle feature called _artifact transforms_. Basically, I'm asking Gradle to transform the Groovy jar _before_ Graal uses it. This transformation involves filtering out classes, so that Graal doesn't try to be too smart about them.
+
+Once this is done, we can finally generate a native image for Groovy too:
+
+```
+./gradlew http-groovy:nativeImage
+```
+
+It takes about https://scans.gradle.com/s/p4ctmi5pzune4[the same amount of time as with Kotlin] to generate a similar 11MB native image.
+Running it is as easy:
+
+```
+http-groovy/build/graal/httpserv-groovy 9090 /path/to/files
+```
+
+And again it's super snappy!
+
+== Conclusion
+
+At this stage, you might consider that it's a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
+However, getting the Groovy version to work was _hours of pain_. Each time I managed to fix a problem, another one arose.
+Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this `IndyInterface` code.
+In the end it would be nice if Graal could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it's just _too frustrating_.
+And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
+Last but not least, _any_ addition to your code is likely to force you to update your Graal configuration to make it work.
+In the end, it's just way easier to write plain old Java code, or go Kotlin.
+
+Note that I'm not saying that it's not possible with Groovy, but https://e.printstacktrace.blog/graalvm-and-groovy-how-to-start/[folks usually face different problems than I did], in particular when it's just about configuring classes accessed by reflection: this is a simple problem.
+I'm not saying either that you should avoid Groovy: I just think it's not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it's unlikely to be "Graal compatible".
+
+Eventually, if you look at the Kotlin version and the companion Gradle build, it's extremely simple, thanks to the great work done by the Palantir team!
+
+

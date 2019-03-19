@@ -6,17 +6,20 @@ buildscript {
   }
 
   dependencies { 
-    classpath 'me.champeau.gradle:jbake-gradle-plugin:0.1'
     classpath 'org.asciidoctor:asciidoctor-java-integration:0.1.4'
     classpath 'org.freemarker:freemarker:2.3.19'
   }
 }
 
-apply plugin: 'jbake'
+plugins {
+   id 'org.jbake.site' version '5.0.0'
+}
+
 
 jbake {
-   input = file('src/jbake')
-   output = file('build/jbake')
+   srcDirName = 'src/jbake'
+   destDirName = 'jbake'
+   version = '2.3.0'
    clearCache = true
    configuration['render.tag'] = 'true'
 }
