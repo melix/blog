@@ -19,7 +19,7 @@ Using it is as easy as running:
 python -m SimpleHTTPServer 8000
 ```
 
-But knowing that the JDK has an embedded HTTP server, and that there's a lot of hype around Graal those days, I wanted to see if we could acheive the same thing, with a fast startup, with Graal.
+But knowing that the JDK has an embedded HTTP server, and that there's a lot of hype around Graal those days, I wanted to see if we could achieve the same thing, with a fast startup, with Graal.
 The answer is **yes**, but the road wasn't so easy, at least for Groovy.
 
 == Show me the code
@@ -32,7 +32,7 @@ We're going to use:
 
 And because I like the http://www.groovy-lang.org/[Groovy], and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
 Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
-Knowing that Kotlin is a statically compiled language from the ground and that it doesn't have the whole dynamic history of Groovy, I did expect it to be simpler.
+Knowing that Kotlin is a statically compiled language from the ground up and that it doesn't have the whole dynamic history of Groovy, I did expect it to be simpler.
 
 So, in the end, here's what the Kotlin server looks like:
 
@@ -259,8 +259,8 @@ And again it's super snappy!
 
 At this stage, you might consider that it's a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
 However, getting the Groovy version to work was _hours of pain_. Each time I managed to fix a problem, another one arose.
-Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this `IndyInterface` code.
-In the end it would be nice if Graal could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it's just _too frustrating_.
+Basically, every method call, every extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this `IndyInterface` code.
+In the end it would be nice if Graal could completely eliminate the need for having this class, but until then I just cannot recommend anyone to use Groovy to build native images: it's just _too frustrating_.
 And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
 Last but not least, _any_ addition to your code is likely to force you to update your Graal configuration to make it work.
 In the end, it's just way easier to write plain old Java code, or go Kotlin.
