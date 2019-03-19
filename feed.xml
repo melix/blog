@@ -6,8 +6,8 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 19 Mar 2019 19:46:24 +0100</pubDate>
-    <lastBuildDate>Tue, 19 Mar 2019 19:46:24 +0100</lastBuildDate>
+    <pubDate>Tue, 19 Mar 2019 19:59:35 +0100</pubDate>
+    <lastBuildDate>Tue, 19 Mar 2019 19:59:35 +0100</lastBuildDate>
 
     <item>
       <title>A simple native HTTP server with GraalVM</title>
@@ -351,6 +351,18 @@ I&amp;#8217;m not saying either that you should avoid Groovy: I just think it&am
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Eventually, if you look at the Kotlin version and the companion Gradle build, it&amp;#8217;s extremely simple, thanks to the great work done by the Palantir team!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+After this blog post was published, I received a &lt;a href=&quot;https://github.com/melix/graal-simple-httpserver/pull/1&quot;&gt;pull request from Szymon Stepniak&lt;/a&gt; improving the Groovy code a lot. The resulting file is, however, twice as big (23MB!). It does &lt;em&gt;not&lt;/em&gt; change my vision on this either, because it took 2 men to reach this point, in a significant amount of time.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
