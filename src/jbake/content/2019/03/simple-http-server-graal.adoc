@@ -52,7 +52,9 @@ fun main(args: Array<String>) {
                 } else if (file.isDirectory) {
                     val base = if (file == baseDir) "" else requestURI.path
                     sendResponse(200, "<html><body>" +
-                            file.list().map { "<ul><a href=\"$base/${it}\">${it}</a></ul>" }.joinToString("\n") + "</body></html>")
+                            file.list()
+                                .map { "<ul><a href=\"$base/${it}\">${it}</a></ul>" }
+                                .joinToString("\n") + "</body></html>")
 
                 } else if (!file.isFile) {
                     sendResponse(404, "404 (Not Found)\n")
