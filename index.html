@@ -25,6 +25,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
@@ -69,6 +70,356 @@
 		<h1>Blog</h1>
 	</div>
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
+  			<a href="/blog/2019/03/simple-http-server-graal.html"><h1>A simple native HTTP server with Graal</h1></a>
+  			<p>19 mars 2019</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/graal.html">graal</a> 
+	
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	
+		<a href="/blog/tags/kotlin.html"> kotlin</a> 
+	</p>
+			
+  			<p><div class="sect1">
+<h2 id="_writing_a_simple_http_server_with_graal">Writing a simple HTTP server with Graal</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In my daily work, I often need to start a simple HTTP server to serve local files.
+For example, this week I&#8217;m going to give a talk at <a href="https://www.breizhcamp.org">Breizcamp</a>, and because my presentation uses a <a href="https://revealjs.com">Reveal.js slide deck</a> and that it loads resources dynamically, I need a "real" web server to serve the files.
+So far, I&#8217;ve been quite happy using the Python simple http server.
+Using it is as easy as running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>python -m SimpleHTTPServer 8000</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around Graal those days, I wanted to see if we could acheive the same thing, with a fast startup, with Graal.
+The answer is <strong>yes</strong>, but the road wasn&#8217;t so easy, at least for Groovy.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_show_me_the_code">Show me the code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The code for this experiment can be found on <a href="https://github.com/melix/graal-simple-httpserver">GitHub</a>.
+We&#8217;re going to use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://gradle.org/">Gradle</a> to build</p>
+</li>
+<li>
+<p>the <a href="https://github.com/palantir/gradle-graal">Gradle Graal plugin</a> from Palantir</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And because I like the <a href="http://www.groovy-lang.org/">Groovy</a>, and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
+Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
+Knowing that Kotlin is a statically compiled language from the ground and that it doesn&#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.</p>
+</div>
+<div class="paragraph">
+<p>So, in the end, here&#8217;s what the Kotlin server looks like:</p>
+</div>
+<div class="listingblock">
+<div class="title">HttpServer.kt</div>
+<div class="content">
+<pre class="prettyprint ruby language-ruby"><code>fun main(args: Array&lt;String&gt;) {
+    val port = if (args.size &gt; 0) args[0].toInt() else 8080
+    val baseDir = if (args.size &gt; 1) File(args[1]).canonicalFile else File(".").canonicalFile
+
+    create(InetSocketAddress(port), 0).run {
+        createContext("/") { exchange -&gt;
+            exchange.run {
+                val file = File(baseDir, requestURI.path).canonicalFile
+                if (!file.path.startsWith(baseDir.path)) {
+                    sendResponse(403, "403 (Forbidden)\n")
+                } else if (file.isDirectory) {
+                    val base = if (file == baseDir) "" else requestURI.path
+                    sendResponse(200, "&lt;html&gt;&lt;body&gt;" +
+                            file.list().map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }.joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
+
+                } else if (!file.isFile) {
+                    sendResponse(404, "404 (Not Found)\n")
+                } else {
+                    sendResponse(200) {
+                        FileInputStream(file).use {
+                            it.copyTo(this)
+                        }
+                    }
+                }
+            }
+        }
+        executor = null
+        println("Listening at http://localhost:$port/")
+        start()
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s quite simple indeed, and making this work as a Graal native image is extremely easy too. This is the <em>whole build file</em>, this is all you need:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle.kts</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+   kotlin("jvm") version "1.3.21"
+   id("com.palantir.graal") version "0.3.0-6-g0b828af"
+}
+
+repositories {
+   jcenter()
+}
+
+dependencies {
+   implementation(kotlin("stdlib"))
+}
+
+graal {
+   graalVersion("1.0.0-rc14")
+   mainClass("HttpServerKt")
+   outputName("httpserv-kt")
+   option("--enable-http")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see, we just apply the Kotlin plugin to build our code, then the Graal plugin and configure the basics of the Graal plugin (version, main class, &#8230;).</p>
+</div>
+<div class="paragraph">
+<p>Building the image can be done by calling:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>./gradlew http-kotlin:nativeImage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As <a href="https://scans.gradle.com/s/nzkvn2gwkguf6">you can see</a>, building the whole thing takes around 15s on my laptop.
+That is to say, compiling the server <strong>and</strong> generating the native image.
+Then you can try to serve files running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see that the server starts immediately: there&#8217;s absolutely no wait time, it&#8217;s there and ready to answer.
+The whole process took me less than 30 minutes, the native image is only 11MB. Success!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_making_it_work_with_groovy">Making it work with Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that I had a proof-of-concept with Kotlin, I went back to Groovy.
+And, I can say, despite the fact I love this language, that it was a nightmare to make it work.
+At some point, I even thought of abandoning, however, using perseverance, I managed to work around all problems I faced.</p>
+</div>
+<div class="paragraph">
+<p>Before I explain the problems, let&#8217;s took a look at the final Groovy server:</p>
+</div>
+<div class="listingblock">
+<div class="title">HttpServerGroovy.groovy</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>@CompileStatic
+abstract class HttpServerGroovy {
+
+    // VERY dirty trick to avoid the creation of a groovy.lang.Reference
+    static File baseDir
+
+    static void main(String[] args) {
+        def port = args.length &gt; 0 ? args[0].toInteger() : 8080
+        baseDir = args.length &gt; 1 ? new File(args[1]).canonicalFile : new File(".").canonicalFile
+
+        def server = HttpServer.create(new InetSocketAddress(port), 0)
+        server.createContext("/", new HttpHandler() {
+            @Override
+            void handle(HttpExchange exchange) throws IOException {
+                def uri = exchange.requestURI
+                def file = new File(baseDir, uri.path).canonicalFile
+                if (!file.path.startsWith(baseDir.path)) {
+                    sendResponse(exchange, 403, "403 (Forbidden)\n")
+                } else if (file.directory) {
+                    String base = file == baseDir ? '': uri.path
+                    String listing = linkify(base, file.list()).join("\n")
+                    sendResponse(exchange, 200, String.format("&lt;html&gt;&lt;body&gt;%s&lt;/body&gt;&lt;/html&gt;", listing))
+
+                } else if (!file.file) {
+                    sendResponse(exchange, 404, "404 (Not Found)\n")
+                } else {
+                    sendResponse(exchange, 200, new FileInputStream(file))
+                }
+            }
+        })
+        server.executor = null
+        System.out.println(String.format("Listening at http://localhost:%s/", port))
+        server.start()
+    }
+
+    private static List&lt;String&gt; linkify(String base, String[] files) {
+        def out = new ArrayList&lt;String&gt;(files.length)
+        for (int i = 0; i &lt; files.length; i++) {
+            String file = files[i]
+            out &lt;&lt; String.format("&lt;ul&gt;&lt;a href=\"%s/%s\"&gt;%s&lt;/a&gt;&lt;/ul&gt;", base, file, file)
+        }
+        out
+    }
+    ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first thing you will notice is that it&#8217;s far from being idiomatic Groovy.
+Of course I used <code>@CompileStatic</code>, because the static nature of Graal would have made this an even greater challenge to make it work with dynamic Groovy.
+However, I didn&#8217;t expect that it would be <em>so hard</em> to make it work.
+The resulting file is both a consequence of limitations of Graal, and historical background of Groovy.</p>
+</div>
+<div class="sect2">
+<h3 id="_where_are_my_closures">Where are my closures?</h3>
+<div class="paragraph">
+<p>The first code I wrote was using idiomatic Groovy, with closures. However, as soon as I started to build my native image, I noticed this obscure error:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s funny to see this <code>MethodHandle</code> error when you know that the code is <em>fully statically compiled</em>, and that it doesn&#8217;t contain a single method handle.
+However, the Groovy runtime does, and this is where the fun began.
+First of all, Graal tells you what method is problematic. This was <code>org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints</code>.
+Things are getting a little clearer: for some reason, the Groovy runtime is initialized, and we load the dynamic <code>IndyInterface</code>, that I won&#8217;t ever need.</p>
+</div>
+<div class="paragraph">
+<p>The "some reason" needs a bit of explanation. Despite the fact that we use statically compiled Groovy, we&#8217;re still implementing <em>Groovy specific interfaces</em>. For example, the <code>GroovyObject</code> interface.
+Similarly, we honor class initialization the same way as a dynamic class, meaning that when a statically compiled Groovy class is instantiated, even if it doesn&#8217;t contain any dynamic reference, we will initialize its metaclass, and as a consequence try to initialize the Groovy runtime.</p>
+</div>
+<div class="paragraph">
+<p>However something was <em>wrong</em>: looking at my code I could not figure out what would cause initialization, because my entry point was static.
+In fact, the answer was easy: it came through the closures.</p>
+</div>
+<div class="paragraph">
+<p>Well, that&#8217;s what I thought, because even after eliminating closures, I still got the damn error.
+In fact, it turns out the situation is far more complex.
+For example, I had this innocent looking code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def baseDir = args[0]
+server.createContext("/", new HttpHandler() {
+    @Override
+    void handle(HttpExchange exchange) throws IOException {
+        ...
+        someCodeUses(baseDir)
+    })</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The fact that we use <code>baseDir</code> <em>within</em> an anonymous inner class, and that Groovy uses the same code generation under the hood for both closures and anonymous inner classes, that the <code>baseDir</code> variable is allowed to be mutated in the inner class. Of course here I&#8217;m not doing it, but because the compiler doesn&#8217;t eliminate that possibility, what it does is generating a <code>groovy.lang.Reference</code> for my local variable, that is used in the inner class.
+And, initializing the <code>Reference</code> class would cause an additional path to this <code>IndyInterface</code> method call&#8230;</p>
+</div>
+<div class="paragraph">
+<p>In the end, the problem is not that much that there&#8217;s a <code>MethodHandle</code>, it&#8217;s that there are potentially different code paths that lead to this, and that Graal can&#8217;t figure out in the end a single method to be called: we&#8217;re just defeating the system!</p>
+</div>
+<div class="paragraph">
+<p>For example, even creating an anonymous inner class would still trigger the creation of a metaclass for it: this means that even if we replace the closure with an inner class, in the end, we would still trigger the initialization of the Groovy runtime.</p>
+</div>
+<div class="paragraph">
+<p>I tried to be smart and remove the <code>IndyInterface</code> from the code that Graal is using to generate the native image, knowing that in the end, this code would <em>never</em> be called if I didn&#8217;t register the Java 7 plugin (that I wouldn&#8217;t use in any case). However, it turns out that Graal doesn&#8217;t like this, as it has special handling for Groovy, and that if you <em>remove</em> that class, it fails with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So instead I spent hours eliminating those paths, which involved:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>turning that shared variable into a field in order to workaround the reference initialization</p>
+</li>
+<li>
+<p>removing all closures</p>
+</li>
+<li>
+<p>removing usages of <code>GString</code> (interpolated strings, which is why you see <code>String.format</code> instead)</p>
+</li>
+<li>
+<p>replacing the short-hand syntax for creating lists (<code>def foo=[]</code>) with an explicit call</p>
+</li>
+<li>
+<p>removing calls to <code>+</code> with strings (first attempt to remove GString&#8230;)</p>
+</li>
+<li>
+<p>eliminating some classes from the Groovy runtime</p>
+</li>
+<li>
+<p>replacing some classes of the Groovy runtime with stubs, preventing static initialization</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the end, I have <a href="https://github.com/melix/graal-simple-httpserver/blob/master/http-groovy/build.gradle.kts">something which works</a>, but you can see that the build file is far more complex.</p>
+</div>
+<div class="paragraph">
+<p>In particular, it makes use of a little known Gradle feature called <em>artifact transforms</em>. Basically, I&#8217;m asking Gradle to transform the Groovy jar <em>before</em> Graal uses it. This transformation involves filtering out classes, so that Graal doesn&#8217;t try to be too smart about them.</p>
+</div>
+<div class="paragraph">
+<p>Once this is done, we can finally generate a native image for Groovy too:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>./gradlew http-groovy:nativeImage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It takes about <a href="https://scans.gradle.com/s/p4ctmi5pzune4">the same amount of time as with Kotlin</a> to generate a similar 11MB native image.
+Running it is as easy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And again it&#8217;s super snappy!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At this stage, you might consider that it&#8217;s a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
+However, getting the Groovy version to work was <em>hours of pain</em>. Each time I managed to fix a problem, another one arose.
+Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this <code>IndyInterface</code> code.
+In the end it would be nice if Graal could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
+And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
+Last but not least, <em>any</em> addition to your code is likely to force you to update your Graal configuration to make it work.
+In the end, it&#8217;s just way easier to write plain old Java code, or go Kotlin.</p>
+</div>
+<div class="paragraph">
+<p>Note that I&#8217;m not saying that it&#8217;s not possible with Groovy, but <a href="https://e.printstacktrace.blog/graalvm-and-groovy-how-to-start/">folks usually face different problems than I did</a>, in particular when it&#8217;s just about configuring classes accessed by reflection: this is a simple problem.
+I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;s not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it&#8217;s unlikely to be "Graal compatible".</p>
+</div>
+<div class="paragraph">
+<p>Eventually, if you look at the Kotlin version and the companion Gradle build, it&#8217;s extremely simple, thanks to the great work done by the Palantir team!</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2019/03/simple-http-server-graal.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2018/09/gradle-lifecycle.html"><h1>Gradle myth busting: lifecycle</h1></a>
   			<p>11 septembre 2018</p>
 			<p><em>Tags: </em>
@@ -364,193 +715,6 @@
 </div>
 </div></p>
 			<p><a href="/blog/2017/10/parlons-gradle.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2017/03/soutien-hamon.html"><h1>Pourquoi je soutiens Benoît Hamon</h1></a>
-  			<p>01 mars 2017</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/politique.html">politique</a> 
-	
-		<a href="/blog/tags/ps.html">ps</a> 
-	
-		<a href="/blog/tags/hamon.html">hamon</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>Cette élection présidentielle est unique. A bien des égards. La première raison, qui m&#8217;est insupportable, est que pour la première fois, une candidate FN, Marine Le Pen, est en position de gagner cette élection: un mirroir de ce qui se passe à l'échelle mondiale, avec un repli sur soi et une montée inquiétante du populisme. La seconde, parce qu'évidemment jamais le rejet des politiques en place n&#8217;aura été aussi important. Pour autant, c&#8217;est aussi une opportunité, pour une fois, de changer radicalement de société. Les choix qui s&#8217;offrent à nous sont particulièrement clairs: une droite extrêmement dure avec Fillon et Le Pen, ou une gauche sans compromis avec Hamon ou Mélenchon. Sans oublier, bien sûr, l&#8217;outsider désormais favori Macron, dont je ne sais toujours pas s&#8217;il a des convictions ou s&#8217;il est simplement le reflet de la nature, qui a horreur du vide (je ne sais pas où voter, allons là où tout le monde semble se rallier).</p>
-</div>
-<div class="paragraph">
-<p>Pour ma part, je vote par conviction. J&#8217;aurais bientôt 38 ans, et je dois dire que jamais, je n&#8217;ai été si proche des idées d&#8217;un candidat. Je le suis depuis plusieurs mois, bien avant la primaire, et mes amis proches savent que je leur en parlais et que je croyais en sa victoire. Dans ce billet, je veux vous donner quelques pistes pour lesquelles je soutiens Benoît Hamon, et pourquoi je vous invite à le rejoindre.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-A mes lecteurs habituels, ce billet n&#8217;a rien à voir avec mes interventions techniques. Libre à vous de l&#8217;ignorer. Par ailleurs, je souligne évidemment que ce qui est écrit ici n&#8217;engage que moi, et personne d&#8217;autre que moi.
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_le_revenu_universel">Le revenu universel</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Commençons par le revenu universel, parce qu&#8217;il est le plus clivant. Même pendant la primaire des gauches, j&#8217;ai entendu des absurdités incroyables à son sujet, ou des questions très orientées des journalites simplement destinées à décridibiliser cette proposition. Pourtant, c&#8217;est une idée neuve, défendue par de nombreux économistes, <a href="http://www.sudouest.fr/2017/01/25/dix-economistes-defendent-le-revenu-universel-de-Benoît-hamon-3137718-705.php">de droite comme de gauche</a>, ainsi que d'éminents chefs d&#8217;entreprise, tels <a href="http://www.numerama.com/politique/232346-elon-musk-juge-le-revenu-de-base-necessaire-face-aux-progres-de-la-robotique.html">Elon Musk, le fondateur Tesla, Space X, devenu richissime avec la revente de PayPal</a>, &#8230; Pas spécialement un exemple de ratage. Rappelons son principe de base: donner, à chaque citoyen, un revenu identique (dont le montant varie selon les propositions), universel, indépendemment de ses resources, à compter de sa majorité. A droite, on <a href="http://www.liberation.fr/debats/2017/02/06/non-le-revenu-universel-ne-decourage-pas-le-travail_1546717">crie alors à l&#8217;assistanat</a>. A gauche, on hurle qu&#8217;il ne faut pas donner aux riches qui ont déja bien assez.</p>
-</div>
-<div class="paragraph">
-<p>Mais le monde change. Le travail change. Quiconque vous dit le contraire est soit aveuglé, soit vous ment. Je travaille dans l&#8217;informatique, et par mon activité professionnelle qui m&#8217;amène à rencontrer de nombreux développeurs du monde entier, je pense être assez bien placé pour voir que ce je développe, ce qui arrive, est une nouvelle révolution industrielle (mais pas seulement, les services sont aussi touchés).</p>
-</div>
-<div class="paragraph">
-<p>En France, vous aurez déja remarqué que les caissières se font moins nombreuses, qu&#8217;il n&#8217;y a plus personne aux péages, que le métro n&#8217;a plus de conducteur, qu&#8217;on nous vend du pain frais dans un distributeur&#8230; Mais nous sommes très en retard.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>En Chine, où sont fabriqués nos précieux smartphones, les monstrueuses usines employant des dizaines de milliers d&#8217;ouvriers ont déja entamé leur migration vers une <a href="http://alltrends.over-blog.net/2017/02/une-entreprise-remplace-90-de-ses-employes-par-des-robots.html">robotisation intégrale</a>.</p>
-</li>
-<li>
-<p>A Singapour et aux Etats-Unis, les <a href="http://www.lemonde.fr/economie/article/2016/08/25/les-premiers-taxis-sans-chauffeur-roulent-a-singapour_4988089_3234.html">taxis sont remplacés par les voitures autonomes</a> (notez l&#8217;ironie, au passage: pour un Fillon ou un Macron dont le modèle est <a href="http://www.streetpress.com/sujet/1488276642-coursier-velo-se-fait-virer">l&#8217;Uberisation de la société, l&#8217;auto-entreprenariat</a>, là où il est clair depuis des mois que le but de cette même entreprise est le 0 salarié&#8230;). Des <a href="http://thegoodlife.thegoodhub.com/2016/05/19/otto-camion-se-conduit-seul/">poids lours conduisent tout seuls sur des centaines de kilomètres</a>. <a href="http://www.lemonde.fr/technologies/article/2013/12/02/des-paquets-livres-par-drones-d-ici-cinq-ans_3523489_651865.html">Amazon livre par drones</a>.</p>
-</li>
-<li>
-<p>Au Japon, ce sont mêmes des <a href="http://www.numerama.com/tech/221747-une-i-a-remplace-34-employes-dune-assurance-au-japon.html">employés d&#8217;une assurance qui sont remplacés par une intelligence artificielle</a>.</p>
-</li>
-<li>
-<p>Watson, l&#8217;IA développée par IBM, a déja <a href="https://www.letemps.ch/sciences/2016/09/22/un-outil-diagnostic-medical-nomme-watson">diagnostiqué une leucémie que les médecins avaient ratée</a>.</p>
-</li>
-<li>
-<p>Un <a href="https://www.theguardian.com/technology/video/2017/feb/28/meet-handle-the-two-wheeled-four-legged-hybrid-robot-video">robot pourra bientôt transporter des charges lourdes à notre place</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Quoi qu&#8217;on en pense, à moyen terme, la <strong>révolution robotique</strong> est en marche, et c&#8217;est une bonne chose. Bien sûr, on ne parle pas d&#8217;un remplacement à court terme. Tout celà est progressif. Des métiers vont disparaître, d&#8217;autres se transformer, d&#8217;autres encore vont apparaître, mais il est indéniable que le volume de travail global disponible à l&#8217;humain fond comme neige : nous sommes toujours plus nombreux sur la planète, le <a href="https://data.oecd.org/chart/4KKb">PIB augmente, pour autant le volume d&#8217;heures travaillées évolue peu</a>. L'étude la plus optimiste de l&#8217;OCDE indique que <a href="http://www.lemonde.fr/economie/article/2016/05/20/pour-l-ocde-9-des-emplois-sont-menaces-par-les-robots_4923165_3234.html">près de 10% des emplois sont menacés à court terme</a>. Une autre étude parle elle de <a href="http://www.francetvinfo.fr/replay-radio/nouveau-monde/les-robots-le-chomage-et-les-emplois-de-2030_1777669.html">50% des emplois remplaçables par des robots à l&#8217;horizon 2030</a>. Lorsqu&#8217;on choisit une politique, il ne faut pas penser à court terme, mais à nos enfants. Même s&#8217;il est idiot d&#8217;affirmer que le travail va disparaitre (qui peut sérieusement le croire ?), il se transforme, et il faut embrasser cette transformation.</p>
-</div>
-<div class="paragraph">
-<p>J&#8217;en suis convaincu, les politiques qui ignorent ces changements vivent dans un monde qui n&#8217;existe plus: ils achètent leur pain au chocolat à 10 centimes, font leurs courses chez Prisunic et rêvent de payer leurs assistants parlementaires européens en Francs. Ignorer les changements du travail, c&#8217;est ignorer l&#8217;avenir, s&#8217;aliéner à ceux qui embrassent ce changement, perdre notre souveraineté. Au lieu de combattre ce futur, il faut au contraire s&#8217;y préparer et repenser notre société autour de ces changements. L&#8217;automatisation, la robotisation, n&#8217;engendre pas de perte de valeur: celle-ci est toujours présente, les prix ne baissent en général pas: la productivité augmente et on réduit la pénibilité. Deux choix de société s&#8217;engagent alors: profiter de cette amélioration pour vivre mieux, ou une fuite en avant productiviste. A ce sujet, je conseille la lecture de <a href="https://crew.co/blog/why-you-shouldnt-work-set-hours/">ce billet</a> à mes lecteurs anglophones: ou comment le temps de travail est fonction des évolutions de la société, pas une constante.</p>
-</div>
-<div class="paragraph">
-<p>Ceci appelle à une révolution fiscale: là où aujourd&#8217;hui on taxe le travail, il faudra demain <a href="http://www.lci.fr/elections/quelle-est-donc-cette-taxe-robots-proposee-par-Benoît-hamon-qui-seduit-jusqu-a-bill-gates-2026781.html">taxer les robots</a>, comme <a href="http://fortune.com/2017/02/18/bill-gates-robot-taxes-automation/">le propose aussi Bill Gates</a>. Si ce terme peut faire sourire, il cache en réalité de nombreuses ramifications: évasion fiscale en particulier. Quelle pire injustice que de voir nos petites entreprises crouler sous des 30% de taxes, lorsque les grandes entreprises étrangères qu&#8217;on utilise tous (smartphones, distribution), qui robotisent, automatisent et n&#8217;embauchent quasiment pas, placent "leur" argent dans des paradis fiscaux et ne paient pas d&#8217;impôts, grâce à des montages financiers complexes avec la complicité de nos cabinets comptables ? Ne marchons nous pas sur la tête ?</p>
-</div>
-<div class="paragraph">
-<p>Alors, oui, on peut continuer à sourire, dire qu&#8217;il faut baisser les charges pour les entreprises et les salariés (ce qui serait une bonne chose), mais si on n&#8217;embrasse pas cette virtualisation de l'économie, on ne fait que réduire l&#8217;assiète des cotisations, et se ruiner un peu plus.</p>
-</div>
-<div class="paragraph">
-<p>Alors que vient faire le revenu universel là dedans ? Il permet:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>de mettre fin à la grande pauvreté, en particulier en remplaçant le RSA, belle idée mais tellement complexe que nombreux sont ceux qui y ont droit et ne le demandent pas. Par ailleurs, si le revenu est effectivement universel, l&#8217;argument de la fraude aux aides ne tient plus: tout le monde y a droit, point.</p>
-</li>
-<li>
-<p>de favoriser le temps partiel. Dans certains Etats, comme les <a href="http://www.lemonde.fr/economie/article/2016/02/03/aux-pays-bas-on-travaille-en-moyenne-30-heures-par-semaine_4858496_3234.html">Pays-Bas, c&#8217;est déja la norme, y compris chez les hommes</a>, réduisant ainsi les inégalités homme-femme. Le PIB de ce pays n&#8217;a pas chuté, les employés n&#8217;en sont que plus heureux.</p>
-</li>
-<li>
-<p>de maintenir l&#8217;emploi. Des histoires d&#8217;agriculteurs qui travaillent comme des fous et ne s&#8217;en sortent plus, on en lit tous les jours. Avec <a href="https://twitter.com/Benoîthamon/status/836905767571697664">350€</a> par mois, franchement, vous resteriez? Je connais personnellement l&#8217;un d&#8217;entre eux qui a fini par abandonner. Avec le revenu universel, on permet à ces travailleurs pauvres de rester en poste.</p>
-</li>
-<li>
-<p>de choisir de travailler plutôt que rester à la maison. Je ne sais pas pour vous, mais le nombre de fois où j&#8217;ai entendu quelqu&#8217;un me dire "avec mes frais de garde et de transport, ça me revient plus cher d&#8217;aller travailler que de rester chez moi". Pas franchement encourageant, non?</p>
-</li>
-<li>
-<p>de valoriser des activités non commerciales mais importantes pour la société : travail associatif, aides à la personne, &#8230;</p>
-</li>
-<li>
-<p>de partager le travail: à coût égal pour une entreprise, il sera possible de prendre 2 salariés au lieu d&#8217;un seul, et ainsi donc réduire les risques de TMS (pour les travaux manuels) ou burn-outs : il existe une limite physique à la productivité.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>En revanche, le RU ne rend pas les riches plus riches. C&#8217;est un <strong>revenu</strong>. En conséquence, il est imposable. Il s&#8217;ajoute donc à votre salaire et suivant vos revenus, vous devrez payer ou non des impôts dessus. Il est donc incorrect de dire que ça coute 400 milliards (ou plus). En pratique, il coûte sensiblement moins, en particulier si son implémentation se fait <em>via</em> un crédit d&#8217;impôt. La justice fiscale est maintenue. Le soumettre à conditions de ressources, c&#8217;est augmenter son coût intrinsèque (gestion, contrôles) ou inciter à la fraude pour quelque chose qui ne change au final rien. Quant à l&#8217;argument de l&#8217;incitation à l&#8217;oisiveté, il me fait doucement sourire. A tous ceux qui me l&#8217;ont avancé, je leur ai posé une question simple: si on vous donnait 600€ par mois, est-ce que vous quitteriez votre boulot ? Est-ce que ça vous suffirait ? Je pense que je n&#8217;ai pas besoin de vous donner les réponses&#8230;</p>
-</div>
-<div class="paragraph">
-<p>Alors, certains taxent cette proposition d&#8217;irréaliste, utopique, irréalisable et j&#8217;en passe. Ils doutent de sa crédibilité. Mais que proposent-ils ? Toujours les mêmes solutions ! Réduire les charges des entreprises (merci Fillon pour son exonération sur les bas salaires, effet d&#8217;aubaine pour n&#8217;augmenter personne, alors que la répartition de la valeur n&#8217;a <a href="http://www.inegalites.fr/spip.php?page=article&amp;id_article=1156">jamais été aussi dévaforable aux pauvres et classes moyennes</a>). Augmenter la TVA (belle justice fiscale !). Qui se souvient, à l&#8217;inverse, de la baisse de la TVA pour la restauration, en l'échange, soit disant, d&#8217;emplois et de baisses de prix ? Qui se souvient encore du badge <a href="http://www.lemonde.fr/emploi/article/2014/09/24/pierre-gattaz-oui-il-est-possible-de-creer-un-million-d-emplois_4493160_1698637.html">1 million d&#8217;emplois de Pierre Gattaz</a> en l'échange du pacte de compétitivité ? Travailler plus, en défiscalisant les heures supplémentaires, encore une mesure populaire, mais qui ne crée pas d&#8217;emplois (la vraie injustice), et n&#8217;est qu&#8217;un pansement sur une jambe de bois: est-ce que cette politique a déja une seule fois marché ?</p>
-</div>
-<div class="paragraph">
-<p>Autre question: qui peut encore croire que repousser l'âge de la retraite est une solution, alors même que les seniors sont <a href="http://www.lemonde.fr/societe/article/2011/07/29/chomage-les-seniors-sont-indesirables-dans-les-entreprises_1553945_3224.html">"trop vieux pour travailler" dès 50 ans</a> ? Je ne suis fondamentalement pas contre repousser l'âge de la retraite (qui finalemement va de pair avec l&#8217;augmentation de l&#8217;espérance de vie), mais faire ça alors même que nos seniors sont au chômage n&#8217;a aucun sens. Il faut d&#8217;abord revaloriser l&#8217;expérience, changer notre vision. Comment peut-on imaginer créer des emplois en faisant travailler plus ceux qui ont la chance d&#8217;en avoir un, <a href="http://www.francetvinfo.fr/replay-radio/on-s-y-emploie-de-philippe-duport/l-inquietante-progression-des-troubles-musculo-squelettiques_1790187.html">quitte à les briser</a> ?</p>
-</div>
-<div class="paragraph">
-<p>60 milliards ont été engloutis dans le CICE, pour quel résultat ? Autre solution classique, se reposer sur une croissance, dont les prévisions sont systématiquement revues à la baisse, et donc les conséquences sur notre planète commencent sérieusement à se faire sentir ? Ou faciliter le licenciement, en croyant dogmatiquement que ça facilite l&#8217;embauche ? Ce dont ont besoin les entreprises, ce n&#8217;est pas de pouvoir licencier. Personne ne veut licencier par plaisir. Ce qu&#8217;il faut, c&#8217;est de la stabilité. Connaitre les règles du jeu à l&#8217;avance, et qu&#8217;elles ne changent pas tous les jours, ainsi qu&#8217;une juste concurrence : que les petites paient les mêmes impôts que les grosses, et que les différences de législation entre partenaires commerciaux ne soient pas un frein aux entreprises locales (donc, un protectionnisme <em>raisonné</em>). Alors, dites-moi, qui est irréaliste et utopique ?</p>
-</div>
-<div class="paragraph">
-<p>Alors, on va nous parler de "valeur travail". Ou la réalisation par le travail. Est-ce là une valeur que je veux transmettre à mes enfants ? Non. Si le travail est important, il ne doit pas être le critère de réalisation, en particulier dans une société ou le travail se raréfie. C&#8217;en est de plus insultant pour tous ceux qui ne trouvent pas d&#8217;emploi, ou pour ceux qui s&#8217;investissent autrement (associations, sportifs, artistes) et contribuent à la grandeur de notre pays. Ce que j&#8217;enseigne à mes enfants, c&#8217;est qu&#8217;il faut se donner à fond et ne pas se fermer de portes. Je leur apprends la tolérance. Je leur apprends à apprécier la chance qu&#8217;ils ont par rapport à d&#8217;autres. Je leur apprends que l&#8217;effort est récompensé, mais que parfois, la vie est injuste. Travailler, oui, mais choisir. Le choix, la liberté sont la clé de la réalisation.</p>
-</div>
-<div class="paragraph">
-<p>Et d&#8217;avenir, parlons-en.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_la_r_volution_cologique">La révolution écologique</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Lorsqu&#8217;on parle de révolution industrielle, on ne peut ignorer la transition écologique à mener, et son potentiel énorme en termes d&#8217;emplois. La France a trop longtemps dirigé tous ses crédits vers le nucléaire, en en ignorant volontairement le coût réel (démantèlement, notamment) et son impact sur l&#8217;environnement (bien sûr, un accident n&#8217;arrive jamais). Mais le plus gros mensonge, c&#8217;est encore notre fameuse indépendence énergétique. Faut-il rappeler d&#8217;où vient le combustible si précieux dont nous avons besoin ? Pour autant, il ne faut pas être naif: sortir du nucléaire prend du temps, mais c&#8217;est aussi une énorme opportunité. En échelonnant dans le temps, comme le propose Benoît Hamon, on permet de maintenir notre capacité de production, tout en ouvrant de nouvelles voies de développement, créant des emplois. La catastrophe serait de faire comme en Allemagne, où toutes les centrales ont été remplacées par des centrales à charbon, dont le bilan carbone est redoutable&#8230; Cette <a href="http://www.electricitymap.org/">carte interactive</a> est plus que parlante&#8230;</p>
-</div>
-<div class="paragraph">
-<p>Mais l'écologie ne se limite pas au nucléaire. L&#8217;opposition ferme de Benoît Hamon aux perturbateurs endocriniens est un autre exemple de ce que j&#8217;aime dans sa vision: il est temps d&#8217;en finir avec la dictature de la croissance, qui détruit notre environnement et provoque de graves maladies. Penser que je puisse être responsable du futur cancer de mes enfants m&#8217;est juste impossible: si je peux faire quelque chose aujourd&#8217;hui, quitte à sacrifier un peu de confort (je suis le premier à changer de smartphone tous les 3/4 ans, mais en ai-je vraiment besoin ?), faisons-le. Il existe des solutions: circuits courts, production raisonnée, retour à une agriculture prenant en compte les spécificités régionales, réduction de notre consommation de viande, &#8230; Nous devons aussi nous responsabiliser en tant que consommateurs: acheter toujours moins cher, c&#8217;est inciter à la baisse des salaires ou à la délocalisation.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_la_r_publique">La République</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Un des derniers points que je souhaite discuter ici est ma vision de la République. Tout d&#8217;abord, je souhaite le retour au septennat. Je pense que le passage au quinquénat a été une catastrophe, contribuant à la peopolisation de la politique: on ne cherche plus à faire un projet, on parle tout de suite de la prochaine élection. Même si je n&#8217;ai pas d&#8217;idée précise de ce que doit être la prochaine République, il me semble clair que celle-ci est à bout de souffle. Conçue pour le Général de Gaulle, l&#8217;homme providentiel. Je pense qu&#8217;il faut revoir le rôle de Président, et qu&#8217;il ne soit plus qu&#8217;un garant de nos institutions. Pour celà, il nous faut une assemblée consistuante. Benoît Hamon n&#8217;en parle pas spécialemement, et c&#8217;est peut-être un des points où je suis plus en accord avec un Mélenchon que lui: il faut bien des points de désaccord. En particulier, je trouve l&#8217;idée du 49-3 citoyen avec seulement 1% du corps électoral potentiellement dangereuse : la Manif pour Tous aurait pu bloquer le mariage homosexuel (oui, je suis de ceux qui pensent que donner des droits égaux à tous les citoyens n&#8217;est pas supprimer vos propres droits), ou, du temps de Mitterand, je doute que la peine de mort aurait pu être abolie. En clair, je suis plutôt pour une proportionnelle intégrale, répondant à une crise de représentativité qu&#8217;entretient élégamment le FN. Mais je suis aussi surtout pour la <a href="https://fr.wikipedia.org/wiki/Tirage_au_sort_en_politique#Stochocratie">stochocratie</a>, où le fait de tirer au sort des représentants qui, eux, éliront ceux qui nous gouvernent.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_la_cit_et_peur_de_l_autre">Laïcité et peur de l&#8217;autre</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Une de mes plus grandes désillusions de l'ère Hollande. C&#8217;est là que le Parti Socialiste m&#8217;a perdu. J&#8217;ai été affligé par la Loi Renseignement. Non seulement elle est liberticide, mais elle est aussi dangereuse pour nos entreprises, réduisant considérablement les sécurités et garanties qu&#8217;elles peuvent mettre en place pour leurs clients. Mais le plus grave, le divorce, ce fut la déchéance de nationalité. Sous prétexte de protéger nos concitoyens, nous créons deux catégories de personnes, ce qui est le contraire même des fondements de notre République. Plus encore, une trahison des valeurs de gauche. Aux élections qui ont suivi, pour la première fois de ma vie, je n&#8217;ai pas voté PS. Fort heureusement, cette mesure n&#8217;est jamais passé, j&#8217;aurais eu honte, franchement.</p>
-</div>
-<div class="paragraph">
-<p>En ce qui concerne le débat sur la laïcité, là encore, je suis à 100% derrière la position de Benoît Hamon: la loi 1901 et rien que la loi 1901. En clair, il s&#8217;agit de respecter la liberté de culte. Et respecter <em>toutes</em> les religions. Point. Il faut être sacrément culotté (ou aigri), pour dire "Benoît Hamon est en résonance avec une frange islamo-gauchiste". Malek Boutih, je vous le dis sincèrement, cest propos sont une honte pour la gauche. Les simples sous-entendus de cette phrase me dégoutent. Pire, vous avez donné des arguments à l&#8217;extrème droite, que nous combattons de tout notre coeur. C&#8217;est indigne et tellement typique de cette gauche archaïque (un paradoxe quand vous vous qualifiez de progressiste) et loin de ses valeurs. Après de telles sorties, ne soyez plus surpris que les gens votent FN et vous bottent les fesses aux élections.</p>
-</div>
-<div class="paragraph">
-<p>Non, je crois aux valeurs humaines. Le FN tente de nous faire croire que 2000 migrants sont responsables du chômage en France, par pitié, non. Pire encore, les migrants violent nos femmes et mangent nos enfants. Et ils n&#8217;avaient qu'à <a href="https://s2.qwant.com/thumbr/0x0/d/4/f17a15e2d5fe46ad9f63b25011b969/b_1_q_0_p_0.jpg?u=http%3A%2F%2Fd.ibtimes.co.uk%2Fen%2Ffull%2F1410255%2Faleppo-syria.jpg&amp;q=0&amp;b=1&amp;p=0&amp;a=1">rester chez eux</a>, ou <a href="http://www.bfmtv.com/international/migrations-l-europe-sous-le-choc-apres-la-photo-d-un-enfant-mort-noye-911785.html">apprendre à nager</a>. Nom d&#8217;un chien, où est passé le coeur de la France ? Doit-on laisser mourrir tous ces gens, les suspecter des pires crimes, ou être à la hauteur de notre histoire, nous, le pays des Droits de l&#8217;Homme ? Se dire que l&#8217;allemagne accueille des millions de migrants dans le même temps où l&#8217;on fait des procès à <a href="http://www.francetvinfo.fr/monde/europe/migrants/aide-aux-migrants-cedric-herrou-le-passeur-condamne_2056739.html">Cédric Hérrou</a>. Dois-je vous rappeler ce que la stigmatisation nous a apporté voici 80 ans ? Ce monde tourne sur la tête&#8230;</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_les_cas_macron_m_lenchon">Les cas Macron / Mélenchon</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Pour terminer, parlons rapidement d&#8217;Emmanuel Macron et Jean-Luc Mélenchon. A la lecture de ce billet, certains peuvent se dire que je pourrais choisir Mélenchon. C&#8217;est vrai, lui et Hamon partagent beaucoup d&#8217;idées, tout comme les Verts et à ce titre je suis dépité qu&#8217;un accord entre les 3 n&#8217;ait pas eu lieu. C'était, à mon humble avis, une opportunité unique pour la gauche compte-tenu de la conjecture actuelle. Je pense, pour ma part, que Benoît Hamon a véritablement compris la transition économique qui nous attend et a une personnalité moins clivante. Les solutions de repli sur soi ne fonctionneront pas. Pas plus que les solutions de Macron, qui reste une énigme. Ses discours sont d&#8217;une platitude déconcertante, ses solutions en matière d'économie sont peu ou prou les mêmes que celles de Fillon (libéralisation à outrance du marché du travail), et pourtant&#8230; il monte, il monte&#8230; Le ralliement de François Bayrou, celui là même qui disait, il y a quelques semaines, que <a href="http://www.lefigaro.fr/elections/presidentielles/2017/02/22/35003-20170222ARTFIG00291-avant-de-le-soutenir-bayrou-attaquait-durement-macron.php">Macron était piloté par les banquiers</a> (ce qui est toujours possible puisqu&#8217;il refuse d&#8217;indiquer qui le finance)&#8230; Je peux me tromper, mais je ne crois pas non plus à la fin du clivage droite-gauche. Nos idées sont différentes. Nos visions de la société sont différentes. Progresser, c&#8217;est choisir une vision, et y aller. Faire cohabiter des idées si différentes au sein d&#8217;un même gouvernement ne peut conduire qu'à prendre de "petites" décisions ne frustrant personne. Soyez rassurés, cependant, je ne mets pas Emmanuel Macron au même niveau que François Fillon ou Marine Le Pen&#8230;</p>
-</div>
-<div class="paragraph">
-<p>En conclusion, je ne suis pas crédule non plus, tout ceci n&#8217;est pas réalisable en un jour et c&#8217;est pour celà je j&#8217;aime l&#8217;approche de Benoît Hamon: <strong>jamais</strong> il ne s&#8217;est présenté comme le candidat providentiel, qui a la réponse à tout. Il faut laisser le temps à une politique de se mettre en place (d&#8217;où le septennat). Hamon est un homme qui a une vision, il a travaillé ses dossiers, mais c&#8217;est aussi un <a href="https://www.Benoîthamon2017.fr/2017/02/22/rejoignez-le-conseil-citoyen/">team player</a>. Toutes ses mesures sont réfléchies, travaillées, et vont dans le sens d&#8217;un projet à long terme: un avenir désirable.</p>
-</div>
-<div class="paragraph">
-<p>La société que l&#8217;on souhaite pour nos enfants. C&#8217;est à eux que je pense en le choisissant. Ce dont ils ont besoin, c&#8217;est d&#8217;espoir. Je ne veux pas qu&#8217;ils grandissent dans ce monde qu&#8217;on nous promet:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.marianne.net/societe/auchan-city-de-tourcoing-apres-la-fausse-couche-d-une-caissiere-les-inquietants-recits-de">https://www.marianne.net/societe/auchan-city-de-tourcoing-apres-la-fausse-couche-d-une-caissiere-les-inquietants-recits-de</a></p>
-</li>
-<li>
-<p><a href="http://www.streetpress.com/sujet/1488276642-coursier-velo-se-fait-virer">http://www.streetpress.com/sujet/1488276642-coursier-velo-se-fait-virer</a></p>
-</li>
-<li>
-<p><a href="http://www.bfmtv.com/societe/vaucluse-suicide-d-un-agriculteur-dont-l-exploitation-etait-en-difficulte-963138.html">http://www.bfmtv.com/societe/vaucluse-suicide-d-un-agriculteur-dont-l-exploitation-etait-en-difficulte-963138.html</a></p>
-</li>
-<li>
-<p><a href="https://francais.rt.com/france/19526-hauts-seine&#8212;tabassee-pour">https://francais.rt.com/france/19526-hauts-seine&#8212;tabassee-pour</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Et vous ?</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2017/03/soutien-hamon.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
