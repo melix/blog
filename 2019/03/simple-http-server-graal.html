@@ -70,7 +70,7 @@
 		<h1>A simple native HTTP server with Graal</h1>
 	</div>
 
-	<p><em>19 mars 2019</em></p>
+	<p><em>19 March 2019</em></p>
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
@@ -141,7 +141,9 @@ Knowing that Kotlin is a statically compiled language from the ground and that i
                 } else if (file.isDirectory) {
                     val base = if (file == baseDir) "" else requestURI.path
                     sendResponse(200, "&lt;html&gt;&lt;body&gt;" +
-                            file.list().map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }.joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
+                            file.list()
+                                .map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }
+                                .joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
 
                 } else if (!file.isFile) {
                     sendResponse(404, "404 (Not Found)\n")

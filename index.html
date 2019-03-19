@@ -71,7 +71,7 @@
 	</div>
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
   			<a href="/blog/2019/03/simple-http-server-graal.html"><h1>A simple native HTTP server with Graal</h1></a>
-  			<p>19 mars 2019</p>
+  			<p>19 March 2019</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
@@ -143,7 +143,9 @@ Knowing that Kotlin is a statically compiled language from the ground and that i
                 } else if (file.isDirectory) {
                     val base = if (file == baseDir) "" else requestURI.path
                     sendResponse(200, "&lt;html&gt;&lt;body&gt;" +
-                            file.list().map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }.joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
+                            file.list()
+                                .map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }
+                                .joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
 
                 } else if (!file.isFile) {
                     sendResponse(404, "404 (Not Found)\n")
@@ -421,7 +423,7 @@ I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;
 </div></p>
 			<p><a href="/blog/2019/03/simple-http-server-graal.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2018/09/gradle-lifecycle.html"><h1>Gradle myth busting: lifecycle</h1></a>
-  			<p>11 septembre 2018</p>
+  			<p>11 September 2018</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
@@ -577,7 +579,7 @@ I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;
 </div></p>
 			<p><a href="/blog/2018/09/gradle-lifecycle.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2018/07/robots-vs-human.html"><h1>Assistants vocaux et robotisation: mon point de vue</h1></a>
-  			<p>03 juillet 2018</p>
+  			<p>03 July 2018</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/google-home.html">google home</a> 
 	
@@ -676,7 +678,7 @@ I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;
 </div></p>
 			<p><a href="/blog/2018/07/robots-vs-human.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2017/10/parlons-gradle.html"><h1>Parlons Gradle : Episode 1</h1></a>
-  			<p>30 octobre 2017</p>
+  			<p>30 October 2017</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	

@@ -6,13 +6,13 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>mar., 19 mars 2019 13:45:59 +0100</pubDate>
-    <lastBuildDate>mar., 19 mars 2019 13:45:59 +0100</lastBuildDate>
+    <pubDate>Tue, 19 Mar 2019 14:25:59 +0100</pubDate>
+    <lastBuildDate>Tue, 19 Mar 2019 14:25:59 +0100</lastBuildDate>
 
     <item>
       <title>A simple native HTTP server with Graal</title>
       <link>http://melix.github.io/blog/2019/03/simple-http-server-graal.html</link>
-      <pubDate>mar., 19 mars 2019 00:00:00 +0100</pubDate>
+      <pubDate>Tue, 19 Mar 2019 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2019/03/simple-http-server-graal.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -76,7 +76,9 @@ Knowing that Kotlin is a statically compiled language from the ground and that i
                 } else if (file.isDirectory) {
                     val base = if (file == baseDir) &quot;&quot; else requestURI.path
                     sendResponse(200, &quot;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;&quot; +
-                            file.list().map { &quot;&amp;lt;ul&amp;gt;&amp;lt;a href=\&quot;$base/${it}\&quot;&amp;gt;${it}&amp;lt;/a&amp;gt;&amp;lt;/ul&amp;gt;&quot; }.joinToString(&quot;\n&quot;) + &quot;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&quot;)
+                            file.list()
+                                .map { &quot;&amp;lt;ul&amp;gt;&amp;lt;a href=\&quot;$base/${it}\&quot;&amp;gt;${it}&amp;lt;/a&amp;gt;&amp;lt;/ul&amp;gt;&quot; }
+                                .joinToString(&quot;\n&quot;) + &quot;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&quot;)
 
                 } else if (!file.isFile) {
                     sendResponse(404, &quot;404 (Not Found)\n&quot;)
@@ -357,7 +359,7 @@ I&amp;#8217;m not saying either that you should avoid Groovy: I just think it&am
     <item>
       <title>Gradle myth busting: lifecycle</title>
       <link>http://melix.github.io/blog/2018/09/gradle-lifecycle.html</link>
-      <pubDate>mar., 11 sept. 2018 00:00:00 +0200</pubDate>
+      <pubDate>Tue, 11 Sep 2018 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2018/09/gradle-lifecycle.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -510,7 +512,7 @@ I&amp;#8217;m not saying either that you should avoid Groovy: I just think it&am
     <item>
       <title>Assistants vocaux et robotisation: mon point de vue</title>
       <link>http://melix.github.io/blog/2018/07/robots-vs-human.html</link>
-      <pubDate>mar., 3 juil. 2018 00:00:00 +0200</pubDate>
+      <pubDate>Tue, 3 Jul 2018 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2018/07/robots-vs-human.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -606,7 +608,7 @@ I&amp;#8217;m not saying either that you should avoid Groovy: I just think it&am
     <item>
       <title>Parlons Gradle : Episode 1</title>
       <link>http://melix.github.io/blog/2017/10/parlons-gradle.html</link>
-      <pubDate>lun., 30 oct. 2017 00:00:00 +0100</pubDate>
+      <pubDate>Mon, 30 Oct 2017 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2017/10/parlons-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -643,7 +645,7 @@ I&amp;#8217;m not saying either that you should avoid Groovy: I just think it&am
     <item>
       <title>Pourquoi je soutiens Benoît Hamon</title>
       <link>http://melix.github.io/blog/2017/03/soutien-hamon.html</link>
-      <pubDate>mer., 1 mars 2017 00:00:00 +0100</pubDate>
+      <pubDate>Wed, 1 Mar 2017 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2017/03/soutien-hamon.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
