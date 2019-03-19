@@ -1,4 +1,4 @@
-= A simple native HTTP server with Graal
+= A simple native HTTP server with GraalVM
 Cédric Champeau
 2019-03-19
 :jbake-type: post
@@ -8,7 +8,7 @@ Cédric Champeau
 :id: gradle-simple-http
 :linkattrs:
 
-== Writing a simple HTTP server with Graal
+== Writing a simple HTTP server with GraalVM
 
 In my daily work, I often need to start a simple HTTP server to serve local files.
 For example, this week I'm going to give a talk at https://www.breizhcamp.org[Breizcamp], and because my presentation uses a https://revealjs.com[Reveal.js slide deck] and that it loads resources dynamically, I need a "real" web server to serve the files.
@@ -19,7 +19,7 @@ Using it is as easy as running:
 python -m SimpleHTTPServer 8000
 ```
 
-But knowing that the JDK has an embedded HTTP server, and that there's a lot of hype around Graal those days, I wanted to see if we could acheive the same thing, with a fast startup, with Graal.
+But knowing that the JDK has an embedded HTTP server, and that there's a lot of hype around GraalVM those days, I wanted to see if we could acheive the same thing, with a fast startup, with GraalVM.
 The answer is **yes**, but the road wasn't so easy, at least for Groovy.
 
 == Show me the code
@@ -74,7 +74,7 @@ fun main(args: Array<String>) {
 }
 ----
 
-It's quite simple indeed, and making this work as a Graal native image is extremely easy too. This is the _whole build file_, this is all you need:
+It's quite simple indeed, and making this work as a GraalVM native image is extremely easy too. This is the _whole build file_, this is all you need:
 
 .build.gradle.kts
 [source,groovy]
@@ -100,7 +100,7 @@ graal {
 }
 ----
 
-As you can see, we just apply the Kotlin plugin to build our code, then the Graal plugin and configure the basics of the Graal plugin (version, main class, ...).
+As you can see, we just apply the Kotlin plugin to build our code, then the GraalVM plugin and configure the basics of the GraalVM plugin (version, main class, ...).
 
 Building the image can be done by calling:
 
@@ -177,9 +177,9 @@ abstract class HttpServerGroovy {
 ----
 
 The first thing you will notice is that it's far from being idiomatic Groovy.
-Of course I used `@CompileStatic`, because the static nature of Graal would have made this an even greater challenge to make it work with dynamic Groovy.
+Of course I used `@CompileStatic`, because the static nature of GraalVM would have made this an even greater challenge to make it work with dynamic Groovy.
 However, I didn't expect that it would be _so hard_ to make it work.
-The resulting file is both a consequence of limitations of Graal, and historical background of Groovy.
+The resulting file is both a consequence of limitations of GraalVM, and historical background of Groovy.
 
 === Where are my closures?
 
@@ -191,7 +191,7 @@ com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with M
 
 It's funny to see this `MethodHandle` error when you know that the code is _fully statically compiled_, and that it doesn't contain a single method handle.
 However, the Groovy runtime does, and this is where the fun began.
-First of all, Graal tells you what method is problematic. This was `org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints`.
+First of all, GraalVM tells you what method is problematic. This was `org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints`.
 Things are getting a little clearer: for some reason, the Groovy runtime is initialized, and we load the dynamic `IndyInterface`, that I won't ever need.
 
 The "some reason" needs a bit of explanation. Despite the fact that we use statically compiled Groovy, we're still implementing _Groovy specific interfaces_. For example, the `GroovyObject` interface.
@@ -218,11 +218,11 @@ server.createContext("/", new HttpHandler() {
 The fact that we use `baseDir` _within_ an anonymous inner class, and that Groovy uses the same code generation under the hood for both closures and anonymous inner classes, that the `baseDir` variable is allowed to be mutated in the inner class. Of course here I'm not doing it, but because the compiler doesn't eliminate that possibility, what it does is generating a `groovy.lang.Reference` for my local variable, that is used in the inner class.
 And, initializing the `Reference` class would cause an additional path to this `IndyInterface` method call...
 
-In the end, the problem is not that much that there's a `MethodHandle`, it's that there are potentially different code paths that lead to this, and that Graal can't figure out in the end a single method to be called: we're just defeating the system!
+In the end, the problem is not that much that there's a `MethodHandle`, it's that there are potentially different code paths that lead to this, and that GraalVM can't figure out in the end a single method to be called: we're just defeating the system!
 
 For example, even creating an anonymous inner class would still trigger the creation of a metaclass for it: this means that even if we replace the closure with an inner class, in the end, we would still trigger the initialization of the Groovy runtime.
 
-I tried to be smart and remove the `IndyInterface` from the code that Graal is using to generate the native image, knowing that in the end, this code would _never_ be called if I didn't register the Java 7 plugin (that I wouldn't use in any case). However, it turns out that Graal doesn't like this, as it has special handling for Groovy, and that if you _remove_ that class, it fails with:
+I tried to be smart and remove the `IndyInterface` from the code that GraalVM is using to generate the native image, knowing that in the end, this code would _never_ be called if I didn't register the Java 7 plugin (that I wouldn't use in any case). However, it turns out that GraalVM doesn't like this, as it has special handling for Groovy, and that if you _remove_ that class, it fails with:
 
 ```
 Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.
@@ -240,7 +240,7 @@ So instead I spent hours eliminating those paths, which involved:
 
 In the end, I have https://github.com/melix/graal-simple-httpserver/blob/master/http-groovy/build.gradle.kts[something which works], but you can see that the build file is far more complex.
 
-In particular, it makes use of a little known Gradle feature called _artifact transforms_. Basically, I'm asking Gradle to transform the Groovy jar _before_ Graal uses it. This transformation involves filtering out classes, so that Graal doesn't try to be too smart about them.
+In particular, it makes use of a little known Gradle feature called _artifact transforms_. Basically, I'm asking Gradle to transform the Groovy jar _before_ GraalVM uses it. This transformation involves filtering out classes, so that GraalVM doesn't try to be too smart about them.
 
 Once this is done, we can finally generate a native image for Groovy too:
 
@@ -262,13 +262,13 @@ And again it's super snappy!
 At this stage, you might consider that it's a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
 However, getting the Groovy version to work was _hours of pain_. Each time I managed to fix a problem, another one arose.
 Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this `IndyInterface` code.
-In the end it would be nice if Graal could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it's just _too frustrating_.
+In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it's just _too frustrating_.
 And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
-Last but not least, _any_ addition to your code is likely to force you to update your Graal configuration to make it work.
+Last but not least, _any_ addition to your code is likely to force you to update your GraalVM configuration to make it work.
 In the end, it's just way easier to write plain old Java code, or go Kotlin.
 
 Note that I'm not saying that it's not possible with Groovy, but https://e.printstacktrace.blog/graalvm-and-groovy-how-to-start/[folks usually face different problems than I did], in particular when it's just about configuring classes accessed by reflection: this is a simple problem.
-I'm not saying either that you should avoid Groovy: I just think it's not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it's unlikely to be "Graal compatible".
+I'm not saying either that you should avoid Groovy: I just think it's not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it's unlikely to be "GraalVM compatible".
 
 Eventually, if you look at the Kotlin version and the companion Gradle build, it's extremely simple, thanks to the great work done by the Palantir team!
 
