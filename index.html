@@ -70,7 +70,7 @@
 		<h1>Blog</h1>
 	</div>
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
-  			<a href="/blog/2019/03/simple-http-server-graal.html"><h1>A simple native HTTP server with Graal</h1></a>
+  			<a href="/blog/2019/03/simple-http-server-graal.html"><h1>A simple native HTTP server with GraalVM</h1></a>
   			<p>19 March 2019</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
@@ -83,7 +83,7 @@
 	</p>
 			
   			<p><div class="sect1">
-<h2 id="_writing_a_simple_http_server_with_graal">Writing a simple HTTP server with Graal</h2>
+<h2 id="_writing_a_simple_http_server_with_graalvm">Writing a simple HTTP server with GraalVM</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>In my daily work, I often need to start a simple HTTP server to serve local files.
@@ -97,7 +97,7 @@ Using it is as easy as running:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around Graal those days, I wanted to see if we could acheive the same thing, with a fast startup, with Graal.
+<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around GraalVM those days, I wanted to see if we could acheive the same thing, with a fast startup, with GraalVM.
 The answer is <strong>yes</strong>, but the road wasn&#8217;t so easy, at least for Groovy.</p>
 </div>
 </div>
@@ -166,7 +166,7 @@ Knowing that Kotlin is a statically compiled language from the ground and that i
 </div>
 </div>
 <div class="paragraph">
-<p>It&#8217;s quite simple indeed, and making this work as a Graal native image is extremely easy too. This is the <em>whole build file</em>, this is all you need:</p>
+<p>It&#8217;s quite simple indeed, and making this work as a GraalVM native image is extremely easy too. This is the <em>whole build file</em>, this is all you need:</p>
 </div>
 <div class="listingblock">
 <div class="title">build.gradle.kts</div>
@@ -193,7 +193,7 @@ graal {
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see, we just apply the Kotlin plugin to build our code, then the Graal plugin and configure the basics of the Graal plugin (version, main class, &#8230;).</p>
+<p>As you can see, we just apply the Kotlin plugin to build our code, then the GraalVM plugin and configure the basics of the GraalVM plugin (version, main class, &#8230;).</p>
 </div>
 <div class="paragraph">
 <p>Building the image can be done by calling:</p>
@@ -281,9 +281,9 @@ abstract class HttpServerGroovy {
 </div>
 <div class="paragraph">
 <p>The first thing you will notice is that it&#8217;s far from being idiomatic Groovy.
-Of course I used <code>@CompileStatic</code>, because the static nature of Graal would have made this an even greater challenge to make it work with dynamic Groovy.
+Of course I used <code>@CompileStatic</code>, because the static nature of GraalVM would have made this an even greater challenge to make it work with dynamic Groovy.
 However, I didn&#8217;t expect that it would be <em>so hard</em> to make it work.
-The resulting file is both a consequence of limitations of Graal, and historical background of Groovy.</p>
+The resulting file is both a consequence of limitations of GraalVM, and historical background of Groovy.</p>
 </div>
 <div class="sect2">
 <h3 id="_where_are_my_closures">Where are my closures?</h3>
@@ -298,7 +298,7 @@ The resulting file is both a consequence of limitations of Graal, and historical
 <div class="paragraph">
 <p>It&#8217;s funny to see this <code>MethodHandle</code> error when you know that the code is <em>fully statically compiled</em>, and that it doesn&#8217;t contain a single method handle.
 However, the Groovy runtime does, and this is where the fun began.
-First of all, Graal tells you what method is problematic. This was <code>org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints</code>.
+First of all, GraalVM tells you what method is problematic. This was <code>org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints</code>.
 Things are getting a little clearer: for some reason, the Groovy runtime is initialized, and we load the dynamic <code>IndyInterface</code>, that I won&#8217;t ever need.</p>
 </div>
 <div class="paragraph">
@@ -330,13 +330,13 @@ server.createContext("/", new HttpHandler() {
 And, initializing the <code>Reference</code> class would cause an additional path to this <code>IndyInterface</code> method call&#8230;</p>
 </div>
 <div class="paragraph">
-<p>In the end, the problem is not that much that there&#8217;s a <code>MethodHandle</code>, it&#8217;s that there are potentially different code paths that lead to this, and that Graal can&#8217;t figure out in the end a single method to be called: we&#8217;re just defeating the system!</p>
+<p>In the end, the problem is not that much that there&#8217;s a <code>MethodHandle</code>, it&#8217;s that there are potentially different code paths that lead to this, and that GraalVM can&#8217;t figure out in the end a single method to be called: we&#8217;re just defeating the system!</p>
 </div>
 <div class="paragraph">
 <p>For example, even creating an anonymous inner class would still trigger the creation of a metaclass for it: this means that even if we replace the closure with an inner class, in the end, we would still trigger the initialization of the Groovy runtime.</p>
 </div>
 <div class="paragraph">
-<p>I tried to be smart and remove the <code>IndyInterface</code> from the code that Graal is using to generate the native image, knowing that in the end, this code would <em>never</em> be called if I didn&#8217;t register the Java 7 plugin (that I wouldn&#8217;t use in any case). However, it turns out that Graal doesn&#8217;t like this, as it has special handling for Groovy, and that if you <em>remove</em> that class, it fails with:</p>
+<p>I tried to be smart and remove the <code>IndyInterface</code> from the code that GraalVM is using to generate the native image, knowing that in the end, this code would <em>never</em> be called if I didn&#8217;t register the Java 7 plugin (that I wouldn&#8217;t use in any case). However, it turns out that GraalVM doesn&#8217;t like this, as it has special handling for Groovy, and that if you <em>remove</em> that class, it fails with:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -375,7 +375,7 @@ And, initializing the <code>Reference</code> class would cause an additional pat
 <p>In the end, I have <a href="https://github.com/melix/graal-simple-httpserver/blob/master/http-groovy/build.gradle.kts">something which works</a>, but you can see that the build file is far more complex.</p>
 </div>
 <div class="paragraph">
-<p>In particular, it makes use of a little known Gradle feature called <em>artifact transforms</em>. Basically, I&#8217;m asking Gradle to transform the Groovy jar <em>before</em> Graal uses it. This transformation involves filtering out classes, so that Graal doesn&#8217;t try to be too smart about them.</p>
+<p>In particular, it makes use of a little known Gradle feature called <em>artifact transforms</em>. Basically, I&#8217;m asking Gradle to transform the Groovy jar <em>before</em> GraalVM uses it. This transformation involves filtering out classes, so that GraalVM doesn&#8217;t try to be too smart about them.</p>
 </div>
 <div class="paragraph">
 <p>Once this is done, we can finally generate a native image for Groovy too:</p>
@@ -407,14 +407,14 @@ Running it is as easy:</p>
 <p>At this stage, you might consider that it&#8217;s a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
 However, getting the Groovy version to work was <em>hours of pain</em>. Each time I managed to fix a problem, another one arose.
 Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this <code>IndyInterface</code> code.
-In the end it would be nice if Graal could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
+In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
 And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
-Last but not least, <em>any</em> addition to your code is likely to force you to update your Graal configuration to make it work.
+Last but not least, <em>any</em> addition to your code is likely to force you to update your GraalVM configuration to make it work.
 In the end, it&#8217;s just way easier to write plain old Java code, or go Kotlin.</p>
 </div>
 <div class="paragraph">
 <p>Note that I&#8217;m not saying that it&#8217;s not possible with Groovy, but <a href="https://e.printstacktrace.blog/graalvm-and-groovy-how-to-start/">folks usually face different problems than I did</a>, in particular when it&#8217;s just about configuring classes accessed by reflection: this is a simple problem.
-I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;s not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it&#8217;s unlikely to be "Graal compatible".</p>
+I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;s not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it&#8217;s unlikely to be "GraalVM compatible".</p>
 </div>
 <div class="paragraph">
 <p>Eventually, if you look at the Kotlin version and the companion Gradle build, it&#8217;s extremely simple, thanks to the great work done by the Palantir team!</p>
