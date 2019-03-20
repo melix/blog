@@ -6,8 +6,8 @@
     <atom:link href="http://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 19 Mar 2019 19:59:35 +0100</pubDate>
-    <lastBuildDate>Tue, 19 Mar 2019 19:59:35 +0100</lastBuildDate>
+    <pubDate>Wed, 20 Mar 2019 09:58:20 +0100</pubDate>
+    <lastBuildDate>Wed, 20 Mar 2019 09:58:20 +0100</lastBuildDate>
 
     <item>
       <title>A simple native HTTP server with GraalVM</title>
@@ -30,7 +30,7 @@ Using it is as easy as running:&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But knowing that the JDK has an embedded HTTP server, and that there&amp;#8217;s a lot of hype around GraalVM those days, I wanted to see if we could acheive the same thing, with a fast startup, with GraalVM.
+&lt;p&gt;But knowing that the JDK has an embedded HTTP server, and that there&amp;#8217;s a lot of hype around Graal those days, I wanted to see if we could achieve the same thing, with a fast startup, with GraalVM.
 The answer is &lt;strong&gt;yes&lt;/strong&gt;, but the road wasn&amp;#8217;t so easy, at least for Groovy.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -55,7 +55,7 @@ We&amp;#8217;re going to use:&lt;/p&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;And because I like the &lt;a href=&quot;http://www.groovy-lang.org/&quot;&gt;Groovy&lt;/a&gt;, and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
 Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
-Knowing that Kotlin is a statically compiled language from the ground and that it doesn&amp;#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.&lt;/p&gt;
+Knowing that Kotlin is a statically compiled language from the ground up and that it doesn&amp;#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;So, in the end, here&amp;#8217;s what the Kotlin server looks like:&lt;/p&gt;
@@ -339,8 +339,8 @@ Running it is as easy:&lt;/p&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;At this stage, you might consider that it&amp;#8217;s a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
 However, getting the Groovy version to work was &lt;em&gt;hours of pain&lt;/em&gt;. Each time I managed to fix a problem, another one arose.
-Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this &lt;code&gt;IndyInterface&lt;/code&gt; code.
-In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it&amp;#8217;s just &lt;em&gt;too frustrating&lt;/em&gt;.
+Basically, every method call, every extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this &lt;code&gt;IndyInterface&lt;/code&gt; code.
+In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until then I just cannot recommend anyone to use Groovy to build native images: it&amp;#8217;s just &lt;em&gt;too frustrating&lt;/em&gt;.
 And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
 Last but not least, &lt;em&gt;any&lt;/em&gt; addition to your code is likely to force you to update your GraalVM configuration to make it work.
 In the end, it&amp;#8217;s just way easier to write plain old Java code, or go Kotlin.&lt;/p&gt;

@@ -95,7 +95,7 @@ Using it is as easy as running:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around GraalVM those days, I wanted to see if we could acheive the same thing, with a fast startup, with GraalVM.
+<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around Graal those days, I wanted to see if we could achieve the same thing, with a fast startup, with GraalVM.
 The answer is <strong>yes</strong>, but the road wasn&#8217;t so easy, at least for Groovy.</p>
 </div>
 </div>
@@ -120,7 +120,7 @@ We&#8217;re going to use:</p>
 <div class="paragraph">
 <p>And because I like the <a href="http://www.groovy-lang.org/">Groovy</a>, and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
 Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
-Knowing that Kotlin is a statically compiled language from the ground and that it doesn&#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.</p>
+Knowing that Kotlin is a statically compiled language from the ground up and that it doesn&#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.</p>
 </div>
 <div class="paragraph">
 <p>So, in the end, here&#8217;s what the Kotlin server looks like:</p>
@@ -404,8 +404,8 @@ Running it is as easy:</p>
 <div class="paragraph">
 <p>At this stage, you might consider that it&#8217;s a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
 However, getting the Groovy version to work was <em>hours of pain</em>. Each time I managed to fix a problem, another one arose.
-Basically, every method call, every since extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this <code>IndyInterface</code> code.
-In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until them I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
+Basically, every method call, every extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this <code>IndyInterface</code> code.
+In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until then I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
 And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
 Last but not least, <em>any</em> addition to your code is likely to force you to update your GraalVM configuration to make it work.
 In the end, it&#8217;s just way easier to write plain old Java code, or go Kotlin.</p>
