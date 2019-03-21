@@ -1,0 +1,53 @@
+= Goodbye, Groovy!
+Cédric Champeau
+2019-03-21
+:jbake-type: post
+:jbake-tags: gradle,groovy,kotlin
+:jbake-status: published
+:source-highlighter: pygments
+:id: goodbye-groovy
+:linkattrs:
+
+== I'm stepping down from the Apache Groovy project
+
+Today is a very sad day. I've decided to resign from the Apache Groovy PMC, as well as a committer.
+
+The trigger was that I https://github.com/apache/groovy/commit/56c219eca0c028c95713a3abd74f14fa40cb0e6c[dared pushing a Gradle Kotlin DSL] and this had to be reverted.
+Lots of people in the Groovy community see Kotlin as a threat. I don't. I use both languages everyday, for different purposes.
+I wrote most of the static compiler for Groovy, and I have no problem saying that I believe Kotlin is better as a static language: the experience is more consistent, and very pleasant.
+But nothing in Kotlin reaches the simplicity that Groovy offers. Running a single line script, the awesome Spock framework for testing, ...
+
+The fact I work for Gradle Inc was also mentioned as a reason why I did pushed this file. 
+To me, this is questioning my integrity, which is something I cannot accept.
+
+In practice, since Gradle announced a couple of years back that they would start using Kotlin as a language for its DSL, I've been in a very complicated position.
+Privately, I always get pinged whenever I say something good about Kotlin. Like, you should not do this, this is not good for us, or, Gradle is not nice with Groovy, what are you doing.
+People always make jokes about Kotlin when they talk to me. I was at Gr8Conf Europe a few days after the announcement and man, that wasn't a pleasant experience.
+
+I am Cédric. I am not Gradle Inc.
+
+I am Cédric. I am not Kotlin.
+
+I am Cédric. I am not Groovy.
+
+Technologies live and die, I'm not interested in being married with a technology, I'm intested in working with something that excites me.
+The reality is that I've been more excited with Kotlin than Groovy lastly, and the attacks, conscious or not, public or private, that I get everytime I mention this language are tiring.
+
+Now, when I'm going to say something good about Groovy, I hope folks will believe me.
+
+== Special thanks
+
+I want to thank Guillaume Laforge for this adventure. Man, you gave me the opportunity to join the project, its awesome community. You gave me a job, I was lucky enough to be paid to work on open-source software, and that's all because of you. For that I owe you everything, thank you!
+
+Second, thanks to Paul King. You are the one that the Groovy community should never loose. People have mentioned that I would be a great loss, but that's not true: the reality is that I contributed almost nothing recently, and you did all the hard work. You are also an amazing person always trying to get the best of us. I will miss it.
+
+Then Jochen Theodorou: thanks to you for all the hard work you've done with the compiler. I would not have been able to write the static compiler without your help and insights on the internals of Groovy.
+
+I'd also would like to personally thank folks that make the community vibrant: Søren Berg Glasius, Graeme Rocher, Jeff Scott Brown, Iván López, Álvaro Sánchez and all the others I miss, don't take it personally, this is not easy for me.
+
+Last but not least, thank you to the Groovy community. You've been awesome, and I wouldn't be where I am without you. I may have been a bit sharp saying that the Groovy community as a whole sees me as a Trojan horse, that's not true, but the truth is that I don't want to fight anymore. Do not assume that because I quit the community is toxic: it's not. There's just a lot of understandable fear for the future, in my opinion. My advice is, embrace the change, don't look back, and take inspiration.
+
+I want to say good luck to the team, in particular to its newer members, like Daniel Sun, who are the future of this language: they have the energy, the skills to make it better.
+
+Last but not least, I'm still a https://opencollective.com/friends-of-groovy[friend of Apache Groovy], you should be too!
+
