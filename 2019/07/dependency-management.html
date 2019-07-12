@@ -110,7 +110,7 @@ A few months ago, I read this from the Yarn documentation which got me scared, a
 </div>
 <div class="paragraph">
 <p>This looks like total non-sense to me.
-Because we needed the infrastructure, itt took some time but we implemented what we think is a <em>better</em> solution.
+Because we needed the infrastructure, it took some time but we implemented what we think is a <em>better</em> solution.
 In a nutshell, optional dependencies are <em>not optional</em>.
 They are things that you need <em>if you use a particular feature of a library</em>.
 So it means that if you depend on something, and that this something has <em>optional features</em>, you can say what features you need and Gradle would give you the correct dependencies for this.
@@ -207,8 +207,8 @@ The DSL also doesn&#8217;t matter: Groovy, Kotlin, whatever. What makes Gradle p
 It&#8217;s a waste of time and energy that we all have to fix, constantly, those conflicts between libraries.</p>
 </div>
 <div class="paragraph">
-<p>And please, don&#8217;t get me started on ethics.
-It&#8217;s beyond me we can tolerate this as engineers, just <em>because Maven does it this way</em>.
+<p>And can we talk about ethics?
+It&#8217;s beyond me we can tolerate, as developers/engineers, repeated approximations, errors, just <em>because Maven does it this way</em>?
 I don&#8217;t really care that we&#8217;re <em>not compatible with Maven</em>, as long as we <em>solve the problem</em> and that we move towards well designed, better solutions.
 Sometimes we have to make tradeoffs, but we can&#8217;t compromise on reproducibility, correctness and performance.
 Of course, we do our best to provide Maven compatibility, and again, sometimes make it even better in some situations (the Java Library plugin).</p>
@@ -256,12 +256,13 @@ This, is the result of years of experience from the team with very large builds,
 </div>
 </div></p>
    
-   <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
+
+   <p style="text-align:center"><a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a></p>
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
         var disqus_shortname = 'melixblog';
-	var disqus_identifier = 'gradle-dm-perspective-draft';
+	var disqus_identifier = 'gradle-dm-perspective';
         /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
