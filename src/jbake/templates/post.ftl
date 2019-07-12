@@ -12,7 +12,8 @@
 	</#list></p>
 	<p>${content.body}</p>
    
-   <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
+
+   <p style="text-align:center"><a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a></p>
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
