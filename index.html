@@ -69,8 +69,277 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2019/11/gradle-scripting.html"><h1>Gradle myth busting: scripting</h1></a>
+  			<p>03 November 2019</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/maven.html"> maven</a> 
+	
+		<a href="/blog/tags/groovy.html"> groovy</a> 
+	
+		<a href="/blog/tags/kotlin.html"> kotlin</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I don&#8217;t particularly enjoy Twitter as a medium for debating (no surprise my bio mentions "this is not a support channel").
+This happened again this week, I got caught in a Maven vs Gradle debate, one more, after I replied to <a href="https://twitter.com/lukaseder/status/1189889509254713344">Lukas Eder</a> that his tweet was a call for FUD.
+And it did happen: no surprise, when you submit something like that, the only answers you&#8217;ll get are either people going in your direction "oh yeah, Gradle sucks and here is my personal experience" or similar, this is just human nature.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_good_old_debate">The good old debate</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the end, most of the answers cycle around the same, good old, debate: Gradle uses scripting (Groovy or Kotlin) vs Maven uses declarative.
+You&#8217;ll aways find people telling you that XML is better because it locks you down, its fully declarative (<a href="https://maven.apache.org/plugins/maven-antrun-plugin/">is it</a>, really?) and everybody is forced to do the same.
+I don&#8217;t counter those arguments, this is a strength of Maven, but it also comes with a number of drawbacks.</p>
+</div>
+<div class="paragraph">
+<p>I promised some of the folks in the conversation some answers (please look down for direct answers to tweets), so here they are. I&#8217;m answering on a blog post because again Twitter is not good for this, it&#8217;s causing a lot of misunderstandings, because you get into multiple, parallel conversations with different people who accidentally get mentioned, and get scuds fired at you without even having time to answer&#8230; Even a blog post is not enough, there&#8217;s so much to say on this topic.</p>
+</div>
+<div class="paragraph">
+<p>First, on the so called "declarative vs imperative" model, I will always disagree on this dichotomy. I disagree that Gradle isn&#8217;t declarative. It&#8217;s as declarative as you want it to be. Take this build file I wrote recently, which is an <em>Asciidoctor Reveal.js presentation template</em> (it allows writing slide decks with Asciidoctor and reveal.js). Here&#8217;s what my build file looks like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint kotlin language-kotlin"><code>plugins {
+    id("org.gradle.presentation.asciidoctor")
+}
+
+presentation {
+    githubUserName.set("melix")
+}
+
+dependencies {
+    asciidoctor("org.asciidoctor:asciidoctorj-diagram:1.5.11")
+}
+
+tasks {
+    asciidoctor {
+        requires("asciidoctor-diagram")
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I wouldn&#8217;t particularly say this is imperative. It looks <em>very declarative</em> to me. Concise too. The fact it uses an <em>imperative language</em> is orthogonal, but it does, however, create the ability to write imperative code in the build.
+Note, however, that a dependency was declared for <em>asciidoctor</em>. This is a major, and probably the most important, difference with Maven: <em>compile</em> or <em>runtime</em> doesn&#8217;t make sense here. We declare a dependency for <em>asciidoctor rendering</em>. There&#8217;s no Java library being built here, it&#8217;s a presentation. Gradle lets you model precisely <em>what you build</em>.</p>
+</div>
+<div class="paragraph">
+<p>So, in the end, I think what matters is not <em>declarative</em> vs <em>scripting</em>. I think what people really want is to reduce the risks of writing bad things. Locking down using XML is <em>one</em> way to achieve this, but it&#8217;s not the only one. For example, Gradle build scripts <a href="https://github.com/nebula-plugins/gradle-lint-plugin">may be linted</a>. In other words, you can apply on a Gradle build the same tooling you are used to work with when dealing with your own code: checkstyle, findbugs, &#8230; You don&#8217;t <em>have to</em>, but you can.</p>
+</div>
+<div class="paragraph">
+<p>The consequence is that yes, there are many different ways you can layout your build with Gradle. This is not different from how you can layout your code in a project: we don&#8217;t tell you in which package you should put your beans, services, &#8230; However, there&#8217;s a big misconception that I&#8217;d like to fight:</p>
+</div>
+<div class="paragraph">
+<p>By default, for a Java project, Gradle follows the same conventions as Maven.</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s as simple as that. Sources will be in <code>src/main/java</code>. Tests will be in <code>src/test/java</code>. Gradle gives you the freedom to diverge from this convention, but this is <em>not</em> encouraged, and to be honest, I&#8217;ve almost never seen any build diverging from those conventions. On rare occasions, those were actually builds migrated from <em>other</em> build systems (in particular Ant) where at the time there wasn&#8217;t any convention. Gradle offers the flexibility to reuse an existing layout without much hassle.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gradle_is_too_flexible">Gradle is too flexible?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All in all, the argument that "Gradle is too flexible" is a fallacy.
+It&#8217;s all about good engineering pracitices, putting the right tools in place, and this is nothing different from any engineering work we do everyway.
+If you can do it for your code, you can do it for your build.
+The interesting thing is <em>why you think you shouldn&#8217;t have the same quality expectation levels for your build as you have for your code</em>.
+Often the answer is just "I don&#8217;t care much about the build, I&#8217;m writing code, this is what I&#8217;m paid for".</p>
+</div>
+<div class="paragraph">
+<p>And this is where the discussion becomes interesting, because I think this is a bias that lots of developers have.
+They don&#8217;t even realize how much time they are losing.</p>
+</div>
+<div class="paragraph">
+<p>Tell me, how likely is it that you change your build scripts, compared to the number of times you&#8217;re effectively going to run <code>mvn clean install</code> or <code>gradle test</code>?
+The reality is that you&#8217;re <em>running the build</em> much more often that you change it.
+Therefore, <em>correctness</em>, incremental builds, incremental compilation, compile avoidance, task output caching, are far more important to developer productivity than the declarativeness aspect.</p>
+</div>
+<div class="paragraph">
+<p>Sure pure declarativeness is a good thing and this is why I encourage Gradle users to write nice, synthetic build files, but this is <em>not</em> the most important aspect for <a href="https://gradle.com/developer-productivity-engineering/">developer productivity</a>.</p>
+</div>
+<div class="paragraph">
+<p>My point is therefore that if you only focus on the <em>surface</em>, that is to say the language used to express the build (XML vs Groovy/Kotlin), then you&#8217;re missing the most important part to me, which is the underlying Gradle model, far more advanced than what you have in other tools. The Gradle API surfaces this model and has a number of advantages:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A <em>task</em> can be seen as a <em>function</em>. It <em>declares</em> inputs and outputs. For the same inputs, the output are always the same: this provides up-to-date checking and cache-ability.</p>
+</li>
+<li>
+<p>A task inputs can be another task outputs. This provides <em>implicit dependencies</em>: Gradle knows that if you want to run "test", you have to compile first, but it also knows that whatever else is an input to the tests need to be executed.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As a consequence, I already wrote about why <a href="https://melix.github.io/blog/2018/09/gradle-lifecycle.html">it&#8217;s wrong to think that Gradle doesn&#8217;t have lifecycle tasks</a>. In fact, Gradle has them, but is also <em>significantly more precise</em>. The "phase" approach of Maven is way to coarse: it&#8217;s doomed to execute too much, prevents smart parallelism, and leads to dirty workarounds (<code>-x ....</code> on the CLI to avoid things you know are not necessary).</p>
+</div>
+<div class="paragraph">
+<p>Similarly, say you want to test your application on different JDKs and have a single build execute tests for all target JVMs, which is different from the JVM which runs the build tool. With a scripting approach like Gradle, this is totally doable. I won&#8217;t say easy because we can definitely do better to make this use case better, but the underlying model makes it quite simple. You don&#8217;t want to <em>rebuild</em> your application for each target VM. All you want is to <em>test</em> on different platforms, and therefore the only step should be a different target VM for test execution. Tools like Maven force you into arbitrary things like defining Maven profiles, and force you into rebuilding everything. This is a giant waste of time for something you don&#8217;t need!</p>
+</div>
+<div class="paragraph">
+<p>In a different topic, this is no surprise that Gradle can build for different ecosystems: Java, Scala, C++, Kotlin, Kotlin Native, Python, &#8230; The underlying infrastructure makes it possible. Even for a single ecosystem, Gradle can declare what the difference between a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_library_plugin.html">Java Library</a>, a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_platform_plugin.html">Java Platform</a> or an <a href="https://docs.gradle.org/6.0-rc-2/userguide/application_plugin.html">application</a> is.</p>
+</div>
+<div class="paragraph">
+<p>I could talk hours about why it&#8217;s important to model properly software, and actually with the release of Gradle 6 we&#8217;ll have a series of blog posts explaining why we think it&#8217;s a game changer in terms of dependency management. If you&#8217;re tired of having to fix the same "multiple slf4j bindings" in each and every project, tired of Guava being upgraded from <code>jre</code> to <code>android</code>, frustrated by incompatibilities of Scala 2.11 and 2.12 dependencies, tired of not knowing which of those Maven optional dependencies is important for you to add, you&#8217;ll understand what I mean.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_direct_answer_to_some_tweets">Direct answer to some tweets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ll try to answer more direct questions in this section. Sorry if I missed yours, I got quite a few comments/answers&#8230;</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>I would sacrifice caches, dependency locks and better plugins to version to have a declarative build process instead of an imperative one. Give me a declarative Gradle and I will love it.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Again, I think this is the wrong tradeoff. Given that you run the build way more often that you change it, declarativeness (that you <em>can</em> have with Gradle) shouldn&#8217;t be the goal. Your goal should be to reduce your build times, make your build reproducible, improve your developer productivity. Declarativeness is <em>not a goal</em>, it&#8217;s at best a <em>mean</em>, but not sufficient by itself. A declarative Gradle, whatever that means, would help you reduce the cognitive overhead, but wouldn&#8217;t help you better model what your application needs.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>make a one liner the ability to publish on different repos the snapshot and release artifacts. The way it was done on Gradle 4.x was broken on 5.x and the only way we found to do it is a horrible hack</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a <a href="https://gradle.com/blog/dependency-management-with-gradle-part-3-publishing-and-release-strategies/">webinar about publishing</a>. Publishing is not complicated with Gradle. It used to be poorly documented, and the old pubilshing plugins didn&#8217;t help. But publishing to a snapshot repository should be trivial already.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Some people will prefer to do their own way, some people will prefer to have a less expressive tool that will produce similar build processes on their projects. Gradle give you the former, Maven the latter. As I say, a matter of taste.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>A less expressive tool reduces the risks of writing <em>bad builds</em>. It doesn&#8217;t help, however, in developing correct, reproducible, fast builds. An, again, I disagree that Gradle leads to "custom builds" everywhere. Most people stick to the defaults and are very happy with them. The more complex builds you find in the wild are those which have indeed very specific needs, or need to be tweaked for performance, producing more artifacts, combinations of artifacts or testing. Things that you can&#8217;t easily do with Maven profiles, for example, because profiles are <em>adhoc</em> solutions which do not combine well.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Gradle tries to create a fake sense of declarativeness, but it is just an illusion.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>It&#8217;s not an illusion. Gradle has a clear separation between its configuration model and execution model. All tasks have declared inputs. The plugins create either new tasks or <em>conventions</em>. This is not an illusion, this is the reality. Now, because you <em>can</em> write <code>if</code> or loops doesn&#8217;t mean it&#8217;s not declarative, it&#8217;s imperative-declarativeness. And yes, you can end up with giant build scripts with "code" inside. If you have, do yourself a favor, <em>refactor</em> your build like you would with your code, because no one should tolerate this. Use <code>buildSrc</code>, this is your friend.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>I think library dependencies is not correctly supported by IDEs and Java modules are better.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>That&#8217;s not correct. We&#8217;ve been using the native Gradle IntelliJ support for years at Gradle, with <em>api</em> and <em>implementation</em> separation, and it works exactly like it should. Implementation dependencies are hidden from consumers, like they should. If you don&#8217;t see this, either you didn&#8217;t declare the dependencies or you have a bug in the IDE, in which case it needs to be reported.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Even worst, Gradle don&#8217;t have an official plugin to deal with module-info. there was an old post that says it is not necessay with Gradle because lib dependencies were better (they don&#8217;t)</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>I don&#8217;t think anyone said you don&#8217;t need <code>module-info</code>. There are different things in play:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>separation of API and implementation: Gradle supports this, and it maps to <code>requires</code> vs <code>requires transitive</code></p>
+</li>
+<li>
+<p>declaration of public API packages: Gradle <em>used to have</em> this with the deprecated "software model". It still has to be backported to the current configuration model. For this, <code>module-info</code> works fine but it forces you into using the "modular world", which a lot of libraries, frameworks and IDEs are not ready for.</p>
+</li>
+<li>
+<p>declaration of services: Gradle doesn&#8217;t support this.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Can you use modules with Gradle? Yes, there&#8217;s a quite good <a href="https://github.com/java9-modularity/gradle-modules-plugin">plugin</a> to do it. We are planning to support modules and modularity in general better in Gradle, but not short term, because we have bigger pain to solve for our users first. It doesn&#8217;t mean we don&#8217;t consider this important.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>I don&#8217;t get why Gradle allow you to explain what your app is better than Maven. In fact I think it is more difficult to explain it on a script that descriptivelly.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>I <em>think</em> the question is what Gradle models better than Maven. A good example here is <code>api</code> vs <code>implementation</code> dependencies. Because Maven uses the <em>same descriptor (pom.xml)</em> for the producer and the consumer, a dependency declared in the <code>&lt;compile&gt;</code> scope ends up on the compile classpath of the consumers. This is <em>leaking internal implementation details</em> to consumers, which is very bad because it makes it very hard to evolve libraries, because changing an internal dependency would break consumers which accidentally started depending on your own transitives. This is <em>just</em> an example of course, there are many other differences (like, why we consider that <code>exclude</code> is a bad workaround in general, more on this topic in Gradle 6, if you want to read <a href="https://docs.gradle.org/current/userguide/introduction_dependency_management.html">our docs</a>).</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>The builds I’ve seen have been very spaghettish and clearly copy-and-pasted together un-understood recipes from SO.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Yes, there are bad builds out there. With Gradle it&#8217;s frequent for quite old builds from early adopters. More recent builds tend to be much cleaner, because we made a significant effort in guides, getting started samples, documentation. You&#8217;ll always find bad things, and it should be encouraged to fix. On this topic, tools like <a href="https://scans.gradle.com">build scans</a> really help. And copy/pasting from SO is indeed a bad thing. If you copy and paste without understanding what it does, well, bad things can happen&#8230; That said I&#8217;ve seen very scary Maven builds too, and believe me or not, some of our customers wouldn&#8217;t be proud to show you their Maven builds. It&#8217;s the "personal experience fallacy". I&#8217;ve experienced very clean Gradle builds, you&#8217;ve experienced very bad Gradle builds. I&#8217;ve also written bad Gradle builds, which I dramatically improved, making them more correct, faster, &#8230; Gradle is like any other technology: learn it and you can understand what it brings.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Gradle performance/caching are very attractive but the scripting possibility is a deal breaker. A « declarative-only » Gradle would be perfect for people like me.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Again I think "declarative" is the wrong term here. Locked down to reduce the risks of doing bad things is what you want. It doesn&#8217;t matter if it&#8217;s Kotlin, Groovy, XML or whatever else. It doesn&#8217;t matter if you can use <code>if</code> or <code>for</code> loops. What matters is <em>what you can express</em>, and <em>what should be limited</em>. It&#8217;s all good engineering that we must share within the industry, find the best patterns, discourage the bad ones. There are quite a few things in the Android world (which uses Gradle) in this direction. We, at Gradle, should do more, but it&#8217;s always a matter of priorities: fixing the most important user pain first. By the way, we provide a Maven build cache with Gradle Enterprise. That is to say, the ability to cache Maven builds using Gradle Enterprise. However, this is limited to "clean builds" (which Maven users are used to do in any case), because of the limitations of the Maven execution model (no knowledge of what each plugin or mojo does, where it writes files, &#8230;).</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>IMHO the biggest feature of Gradle that Maven doesn&#8217;t have is the ability to change the version of the project</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Well, this is just an accidental example of the interest of having access to the API in a build script. It offers a number of options for the release process, but that&#8217;s not the only one.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>My only complain about @gradle is how it is unnecessarily complex to deploy a multi-module project to central. Too much copy &amp; paste, or you need to make an init script, which I still haven&#8217;t managed to do.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Technically the problem is not "how to deploy a multi-module project to Central", but rather, how do I avoid duplicating configuration between scripts. This is what <code>buildSrc</code> is for. As soon as you have repetition, then, it means a plugin makes sense. <code>buildSrc</code> can be seen as "local plugins", and this is where you should write your common code. Then each project applies a plugin to publish. This is a <em>composition</em> model, as opposed to the <em>inheritance</em> model of Maven.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>I like all those (caching, incrementality, &#8230;) , in theory, but for my needs they are more complexity than feature</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>I don&#8217;t think those are complexity. A task declares its inputs. If you do, you benefit from up-to-date checking, and with a bit more configuration, caching. You don&#8217;t <em>have to</em>. If you don&#8217;t declare the inputs/outputs, you&#8217;re back to the "Maven" approach where the build tools knows nothing about what a task does, at the difference that Gradle knows that it knows nothing, so can be a bit smarter. As soon as you start declaring your inputs, you benefit from more. It&#8217;s more work, for sure, but it&#8217;s not that complex and the benefit is huge.</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2019/11/gradle-scripting.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2019/09/introverti-teletravail.html"><h1>Chroniques d&#8217;un introverti en télétravail</h1></a>
-  			<p>29 septembre 2019</p>
+  			<p>29 September 2019</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/télétravail.html">télétravail</a> 
 	
@@ -243,7 +512,7 @@ Je suis aussi le coach de l'équipe de basket de mon fils de 10 ans, ce que j&#8
 </div></p>
 			<p><a href="/blog/2019/09/introverti-teletravail.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2019/07/dependency-management.html"><h1>Dependency Management at Gradle</h1></a>
-  			<p>11 juillet 2019</p>
+  			<p>11 July 2019</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
@@ -432,7 +701,7 @@ Does it mean that Gradle is perfect? Hell, no. We&#8217;re going to make mistake
 </div></p>
 			<p><a href="/blog/2019/07/dependency-management.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2019/03/goodbye-groovy.html"><h1>Goodbye, Groovy!</h1></a>
-  			<p>21 mars 2019</p>
+  			<p>21 March 2019</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
@@ -507,370 +776,6 @@ The reality is that I&#8217;ve been more excited with Kotlin than Groovy lately,
 </div>
 </div></p>
 			<p><a href="/blog/2019/03/goodbye-groovy.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2019/03/simple-http-server-graal.html"><h1>A simple native HTTP server with GraalVM</h1></a>
-  			<p>19 mars 2019</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/graal.html">graal</a> 
-	
-		<a href="/blog/tags/groovy.html">groovy</a> 
-	
-		<a href="/blog/tags/kotlin.html"> kotlin</a> 
-	</p>
-			
-  			<p><div class="sect1">
-<h2 id="_writing_a_simple_http_server_with_graalvm">Writing a simple HTTP server with GraalVM</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In my daily work, I often need to start a simple HTTP server to serve local files.
-For example, this week I&#8217;m going to give a talk at <a href="https://www.breizhcamp.org">Breizcamp</a>, and because my presentation uses a <a href="https://revealjs.com">Reveal.js slide deck</a> and that it loads resources dynamically, I need a "real" web server to serve the files.
-So far, I&#8217;ve been quite happy using the Python simple http server.
-Using it is as easy as running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>python -m SimpleHTTPServer 8000</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around Graal those days, I wanted to see if we could achieve the same thing, with a fast startup, with GraalVM.
-The answer is <strong>yes</strong>, but the road wasn&#8217;t so easy, at least for Groovy.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_show_me_the_code">Show me the code</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The code for this experiment can be found on <a href="https://github.com/melix/graal-simple-httpserver">GitHub</a>.
-We&#8217;re going to use:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://gradle.org/">Gradle</a> to build</p>
-</li>
-<li>
-<p>the <a href="https://github.com/palantir/gradle-graal">Gradle Graal plugin</a> from Palantir</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>And because I like the <a href="http://www.groovy-lang.org/">Groovy</a>, and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
-Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
-Knowing that Kotlin is a statically compiled language from the ground up and that it doesn&#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.</p>
-</div>
-<div class="paragraph">
-<p>So, in the end, here&#8217;s what the Kotlin server looks like:</p>
-</div>
-<div class="listingblock">
-<div class="title">HttpServer.kt</div>
-<div class="content">
-<pre class="prettyprint ruby language-ruby"><code>fun main(args: Array&lt;String&gt;) {
-    val port = if (args.size &gt; 0) args[0].toInt() else 8080
-    val baseDir = if (args.size &gt; 1) File(args[1]).canonicalFile else File(".").canonicalFile
-
-    create(InetSocketAddress(port), 0).run {
-        createContext("/") { exchange -&gt;
-            exchange.run {
-                val file = File(baseDir, requestURI.path).canonicalFile
-                if (!file.path.startsWith(baseDir.path)) {
-                    sendResponse(403, "403 (Forbidden)\n")
-                } else if (file.isDirectory) {
-                    val base = if (file == baseDir) "" else requestURI.path
-                    sendResponse(200, "&lt;html&gt;&lt;body&gt;" +
-                            file.list()
-                                .map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }
-                                .joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
-
-                } else if (!file.isFile) {
-                    sendResponse(404, "404 (Not Found)\n")
-                } else {
-                    sendResponse(200) {
-                        FileInputStream(file).use {
-                            it.copyTo(this)
-                        }
-                    }
-                }
-            }
-        }
-        executor = null
-        println("Listening at http://localhost:$port/")
-        start()
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It&#8217;s quite simple indeed, and making this work as a GraalVM native image is extremely easy too. This is the <em>whole build file</em>, this is all you need:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle.kts</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
-   kotlin("jvm") version "1.3.21"
-   id("com.palantir.graal") version "0.3.0-6-g0b828af"
-}
-
-repositories {
-   jcenter()
-}
-
-dependencies {
-   implementation(kotlin("stdlib"))
-}
-
-graal {
-   graalVersion("1.0.0-rc14")
-   mainClass("HttpServerKt")
-   outputName("httpserv-kt")
-   option("--enable-http")
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>As you can see, we just apply the Kotlin plugin to build our code, then the GraalVM plugin and configure the basics of the GraalVM plugin (version, main class, &#8230;).</p>
-</div>
-<div class="paragraph">
-<p>Building the image can be done by calling:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>./gradlew http-kotlin:nativeImage</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>As <a href="https://scans.gradle.com/s/nzkvn2gwkguf6">you can see</a>, building the whole thing takes around 15s on my laptop.
-That is to say, compiling the server <strong>and</strong> generating the native image.
-Then you can try to serve files running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You&#8217;ll see that the server starts immediately: there&#8217;s absolutely no wait time, it&#8217;s there and ready to answer.
-The whole process took me less than 30 minutes, the native image is only 11MB. Success!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_making_it_work_with_groovy">Making it work with Groovy</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Now that I had a proof-of-concept with Kotlin, I went back to Groovy.
-And, I can say, despite the fact I love this language, that it was a nightmare to make it work.
-At some point, I even thought of abandoning, however, using perseverance, I managed to work around all problems I faced.</p>
-</div>
-<div class="paragraph">
-<p>Before I explain the problems, let&#8217;s took a look at the final Groovy server:</p>
-</div>
-<div class="listingblock">
-<div class="title">HttpServerGroovy.groovy</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@CompileStatic
-abstract class HttpServerGroovy {
-
-    // VERY dirty trick to avoid the creation of a groovy.lang.Reference
-    static File baseDir
-
-    static void main(String[] args) {
-        def port = args.length &gt; 0 ? args[0].toInteger() : 8080
-        baseDir = args.length &gt; 1 ? new File(args[1]).canonicalFile : new File(".").canonicalFile
-
-        def server = HttpServer.create(new InetSocketAddress(port), 0)
-        server.createContext("/", new HttpHandler() {
-            @Override
-            void handle(HttpExchange exchange) throws IOException {
-                def uri = exchange.requestURI
-                def file = new File(baseDir, uri.path).canonicalFile
-                if (!file.path.startsWith(baseDir.path)) {
-                    sendResponse(exchange, 403, "403 (Forbidden)\n")
-                } else if (file.directory) {
-                    String base = file == baseDir ? '': uri.path
-                    String listing = linkify(base, file.list()).join("\n")
-                    sendResponse(exchange, 200, String.format("&lt;html&gt;&lt;body&gt;%s&lt;/body&gt;&lt;/html&gt;", listing))
-
-                } else if (!file.file) {
-                    sendResponse(exchange, 404, "404 (Not Found)\n")
-                } else {
-                    sendResponse(exchange, 200, new FileInputStream(file))
-                }
-            }
-        })
-        server.executor = null
-        System.out.println(String.format("Listening at http://localhost:%s/", port))
-        server.start()
-    }
-
-    private static List&lt;String&gt; linkify(String base, String[] files) {
-        def out = new ArrayList&lt;String&gt;(files.length)
-        for (int i = 0; i &lt; files.length; i++) {
-            String file = files[i]
-            out &lt;&lt; String.format("&lt;ul&gt;&lt;a href=\"%s/%s\"&gt;%s&lt;/a&gt;&lt;/ul&gt;", base, file, file)
-        }
-        out
-    }
-    ...</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The first thing you will notice is that it&#8217;s far from being idiomatic Groovy.
-Of course I used <code>@CompileStatic</code>, because the static nature of GraalVM would have made this an even greater challenge to make it work with dynamic Groovy.
-However, I didn&#8217;t expect that it would be <em>so hard</em> to make it work.
-The resulting file is both a consequence of limitations of GraalVM, and historical background of Groovy.</p>
-</div>
-<div class="sect2">
-<h3 id="_where_are_my_closures">Where are my closures?</h3>
-<div class="paragraph">
-<p>The first code I wrote was using idiomatic Groovy, with closures. However, as soon as I started to build my native image, I noticed this obscure error:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It&#8217;s funny to see this <code>MethodHandle</code> error when you know that the code is <em>fully statically compiled</em>, and that it doesn&#8217;t contain a single method handle.
-However, the Groovy runtime does, and this is where the fun began.
-First of all, GraalVM tells you what method is problematic. This was <code>org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints</code>.
-Things are getting a little clearer: for some reason, the Groovy runtime is initialized, and we load the dynamic <code>IndyInterface</code>, that I won&#8217;t ever need.</p>
-</div>
-<div class="paragraph">
-<p>The "some reason" needs a bit of explanation. Despite the fact that we use statically compiled Groovy, we&#8217;re still implementing <em>Groovy specific interfaces</em>. For example, the <code>GroovyObject</code> interface.
-Similarly, we honor class initialization the same way as a dynamic class, meaning that when a statically compiled Groovy class is instantiated, even if it doesn&#8217;t contain any dynamic reference, we will initialize its metaclass, and as a consequence try to initialize the Groovy runtime.</p>
-</div>
-<div class="paragraph">
-<p>However something was <em>wrong</em>: looking at my code I could not figure out what would cause initialization, because my entry point was static.
-In fact, the answer was easy: it came through the closures.</p>
-</div>
-<div class="paragraph">
-<p>Well, that&#8217;s what I thought, because even after eliminating closures, I still got the damn error.
-In fact, it turns out the situation is far more complex.
-For example, I had this innocent looking code:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def baseDir = args[0]
-server.createContext("/", new HttpHandler() {
-    @Override
-    void handle(HttpExchange exchange) throws IOException {
-        ...
-        someCodeUses(baseDir)
-    })</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The fact that we use <code>baseDir</code> <em>within</em> an anonymous inner class, and that Groovy uses the same code generation under the hood for both closures and anonymous inner classes, that the <code>baseDir</code> variable is allowed to be mutated in the inner class. Of course here I&#8217;m not doing it, but because the compiler doesn&#8217;t eliminate that possibility, what it does is generating a <code>groovy.lang.Reference</code> for my local variable, that is used in the inner class.
-And, initializing the <code>Reference</code> class would cause an additional path to this <code>IndyInterface</code> method call&#8230;</p>
-</div>
-<div class="paragraph">
-<p>In the end, the problem is not that much that there&#8217;s a <code>MethodHandle</code>, it&#8217;s that there are potentially different code paths that lead to this, and that GraalVM can&#8217;t figure out in the end a single method to be called: we&#8217;re just defeating the system!</p>
-</div>
-<div class="paragraph">
-<p>For example, even creating an anonymous inner class would still trigger the creation of a metaclass for it: this means that even if we replace the closure with an inner class, in the end, we would still trigger the initialization of the Groovy runtime.</p>
-</div>
-<div class="paragraph">
-<p>I tried to be smart and remove the <code>IndyInterface</code> from the code that GraalVM is using to generate the native image, knowing that in the end, this code would <em>never</em> be called if I didn&#8217;t register the Java 7 plugin (that I wouldn&#8217;t use in any case). However, it turns out that GraalVM doesn&#8217;t like this, as it has special handling for Groovy, and that if you <em>remove</em> that class, it fails with:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>So instead I spent hours eliminating those paths, which involved:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>turning that shared variable into a field in order to workaround the reference initialization</p>
-</li>
-<li>
-<p>removing all closures</p>
-</li>
-<li>
-<p>removing usages of <code>GString</code> (interpolated strings, which is why you see <code>String.format</code> instead)</p>
-</li>
-<li>
-<p>replacing the short-hand syntax for creating lists (<code>def foo=[]</code>) with an explicit call</p>
-</li>
-<li>
-<p>removing calls to <code>+</code> with strings (first attempt to remove GString&#8230;)</p>
-</li>
-<li>
-<p>eliminating some classes from the Groovy runtime</p>
-</li>
-<li>
-<p>replacing some classes of the Groovy runtime with stubs, preventing static initialization</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>In the end, I have <a href="https://github.com/melix/graal-simple-httpserver/blob/master/http-groovy/build.gradle.kts">something which works</a>, but you can see that the build file is far more complex.</p>
-</div>
-<div class="paragraph">
-<p>In particular, it makes use of a little known Gradle feature called <em>artifact transforms</em>. Basically, I&#8217;m asking Gradle to transform the Groovy jar <em>before</em> GraalVM uses it. This transformation involves filtering out classes, so that GraalVM doesn&#8217;t try to be too smart about them.</p>
-</div>
-<div class="paragraph">
-<p>Once this is done, we can finally generate a native image for Groovy too:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>./gradlew http-groovy:nativeImage</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It takes about <a href="https://scans.gradle.com/s/p4ctmi5pzune4">the same amount of time as with Kotlin</a> to generate a similar 11MB native image.
-Running it is as easy:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>And again it&#8217;s super snappy!</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>At this stage, you might consider that it&#8217;s a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
-However, getting the Groovy version to work was <em>hours of pain</em>. Each time I managed to fix a problem, another one arose.
-Basically, every method call, every extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this <code>IndyInterface</code> code.
-In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until then I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
-And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
-Last but not least, <em>any</em> addition to your code is likely to force you to update your GraalVM configuration to make it work.
-In the end, it&#8217;s just way easier to write plain old Java code, or go Kotlin.</p>
-</div>
-<div class="paragraph">
-<p>Note that I&#8217;m not saying that it&#8217;s not possible with Groovy, but <a href="https://e.printstacktrace.blog/graalvm-and-groovy-how-to-start/">folks usually face different problems than I did</a>, in particular when it&#8217;s just about configuring classes accessed by reflection: this is a simple problem.
-I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;s not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it&#8217;s unlikely to be "GraalVM compatible".</p>
-</div>
-<div class="paragraph">
-<p>Eventually, if you look at the Kotlin version and the companion Gradle build, it&#8217;s extremely simple, thanks to the great work done by the Palantir team!</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-After this blog post was published, I received a <a href="https://github.com/melix/graal-simple-httpserver/pull/1">pull request from Szymon Stepniak</a> improving the Groovy code a lot. The resulting file is, however, twice as big (23MB!). It does <em>not</em> change my vision on this either, because it took 2 men to reach this point, in a significant amount of time.
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2019/03/simple-http-server-graal.html#disqus_thread">Comments</a></p>
 	
 	<hr />
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
