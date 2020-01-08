@@ -57,7 +57,7 @@ That's as simple as that. Sources will be in `src/main/java`. Tests will be in `
 == Gradle is too flexible?
 
 All in all, the argument that "Gradle is too flexible" is a fallacy.
-It's all about good engineering pracitices, putting the right tools in place, and this is nothing different from any engineering work we do everyway.
+It's all about good engineering practices, putting the right tools in place, and this is nothing different from any engineering work we do everyday.
 If you can do it for your code, you can do it for your build.
 The interesting thing is _why you think you shouldn't have the same quality expectation levels for your build as you have for your code_.
 Often the answer is just "I don't care much about the build, I'm writing code, this is what I'm paid for".
@@ -94,7 +94,7 @@ Again, I think this is the wrong tradeoff. Given that you run the build way more
 
 > make a one liner the ability to publish on different repos the snapshot and release artifacts. The way it was done on Gradle 4.x was broken on 5.x and the only way we found to do it is a horrible hack
 
-Here's a https://gradle.com/blog/dependency-management-with-gradle-part-3-publishing-and-release-strategies/[webinar about publishing]. Publishing is not complicated with Gradle. It used to be poorly documented, and the old pubilshing plugins didn't help. But publishing to a snapshot repository should be trivial already.
+Here's a https://gradle.com/blog/dependency-management-with-gradle-part-3-publishing-and-release-strategies/[webinar about publishing]. Publishing is not complicated with Gradle. It used to be poorly documented, and the old publishing plugins didn't help. But publishing to a snapshot repository should be trivial already.
 
 > Some people will prefer to do their own way, some people will prefer to have a less expressive tool that will produce similar build processes on their projects. Gradle give you the former, Maven the latter. As I say, a matter of taste.
 
