@@ -6,19 +6,19 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>jeu., 11 juin 2020 11:36:44 +0200</pubDate>
-    <lastBuildDate>jeu., 11 juin 2020 11:36:44 +0200</lastBuildDate>
+    <pubDate>jeu., 11 juin 2020 11:42:07 +0200</pubDate>
+    <lastBuildDate>jeu., 11 juin 2020 11:42:07 +0200</lastBuildDate>
 
     <item>
-      <title>Trying out Java records with Gradle</title>
-      <link>https://melix.github.io/blog/2020/06/java-records-gradle.html</link>
+      <title>Using Java feature previews with Gradle</title>
+      <link>https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html</link>
       <pubDate>jeu., 11 juin 2020 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2020/06/java-records-gradle.html</guid>
+      <guid isPermaLink="false">2020/06/java-feature-previews-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You&amp;#8217;ve probably heard about Java providing features like &lt;a href=&quot;https://blogs.oracle.com/javamagazine/records-come-to-java&quot;&gt;records&lt;/a&gt;, &lt;a href=&quot;https://docs.oracle.com/en/java/javase/13/text_blocks/index.html&quot;&gt;multi-line text blocks&lt;/a&gt; or &lt;a href=&quot;https://blogs.oracle.com/javamagazine/inside-the-language-sealed-types&quot;&gt;sealed types&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;You&amp;#8217;ve probably heard about Java providing features like &lt;a href=&quot;https://blogs.oracle.com/javamagazine/records-come-to-java&quot;&gt;records&lt;/a&gt;, &lt;a href=&quot;https://docs.oracle.com/en/java/javase/13/text_blocks/index.html&quot;&gt;multi-line text blocks&lt;/a&gt; or &lt;a href=&quot;https://blogs.oracle.com/javamagazine/inside-the-language-sealed-types&quot;&gt;sealed types&lt;/a&gt; and you&amp;#8217;d like to try them.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Those features are called &lt;em&gt;feature previews&lt;/em&gt; and it means a couple of things:&lt;/p&gt;
@@ -26,7 +26,7 @@
 &lt;div class=&quot;olist arabic&quot;&gt;
 &lt;ol class=&quot;arabic&quot;&gt;
 &lt;li&gt;
-&lt;p&gt;the Java team wants you to try them and give feedback. They want honest feedback about how it &lt;em&gt;feels&lt;/em&gt; to use them, whether you like them or not. Both feedbacks are important.&lt;/p&gt;
+&lt;p&gt;the Java team wants you to test them and give feedback. They want honest feedback about how it &lt;em&gt;feels&lt;/em&gt; to use them, whether you like them or not. Both ways, feedback is important.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;because they are feature previews, you &lt;em&gt;shouldn&amp;#8217;t&lt;/em&gt; them use in production, but you can play with them for toy projects.&lt;/p&gt;
@@ -38,7 +38,7 @@
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;The goal of this blog post is not to explain what records or sealed classes are, there&amp;#8217;s already a lot of litterature about it.
-However, how can you configure your build to try them and therefore report issues/bugs to the JDK team?&lt;/p&gt;
+Instead, we&amp;#8217;re going to explain how to configure your Gradle build to use feature previews and therefore report issues/bugs to the JDK team.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -46,10 +46,11 @@ However, how can you configure your build to try them and therefore report issue
 &lt;h2 id=&quot;_configuring_your_gradle_build&quot;&gt;Configuring your Gradle build&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The code in this blog post is available on my &lt;a href=&quot;https://github.com/melix/gradle-java-feature-previews&quot;&gt;GitHub repository&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The code in this blog post is available on a &lt;a href=&quot;https://github.com/melix/gradle-java-feature-previews&quot;&gt;GitHub repository&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;First, make sure you are using latest Gradle versions.
+If you use the repository above, the Gradle wrapper will make sure that you do.
 Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -138,6 +139,9 @@ In the mean time, if for some reason your Gradle build doesn&amp;#8217;t want to
             }
         }&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now you don&amp;#8217;t have any excuse not to try feature previews!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
