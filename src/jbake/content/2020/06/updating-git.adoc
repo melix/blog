@@ -1,0 +1,86 @@
+= Configuring git to use main instead of master
+Cédric Champeau
+2020-06-17
+:jbake-type: post
+:jbake-tags: git, github, blacklivesmatter
+:jbake-status: published
+:source-highlighter: pygments
+:id: git-main
+:linkattrs:
+
+I don't need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name.
+
+Actually, if you are reading this, there are good chances you're already in the mindset of removing potentially offensive language from your project, thank you!
+
+The fact is, we have better, more descriptive technical names than "master" and "slave" and we don't have to use terms which refer to dark ages of our history, so let's get rid of them in tech.
+
+In this blog post, you will learn:
+
+- how to make `git init` create your project with a `main` branch instead of `master`
+- how to rename your `master` branch to `main`
+- how to make the change on GitHub
+
+Be aware that renaming branches may break your existing integrations (typically with CI or Slack notifications) so only do it when you're ready.
+
+## Configuring git init
+
+By default, when you create a new project, `git init` will create a `master` branch.
+There's no option in `git init` to change this, but it's actually quite easy to set it up differently.
+
+First, in your `~/.gitconfig` file, add the following:
+
+.~/.gitconfig
+```
+[init]
+    templateDir = ~/.config/git/template/
+```
+
+Then create, if it doesn't exist, the following directory:
+
+```
+mkdir ~/.config/git/template
+```
+
+next create this file:
+
+.~/.config/git/template/HEAD
+```
+ref: refs/heads/main
+```
+
+(don't forget to add a new line at the end of the first line)
+
+Now let's deal with existing projects.
+
+## Renaming your master branch
+
+For your current projects, you may want to rename the `master` branch to `main`.
+This is also single command in `git`:
+
+```
+git checkout master
+git branch -m main
+```
+
+Then you can push the branch to your remote... but be careful, it will create a _new branch_ on the remote:
+
+```
+git push origin main
+```
+
+## Configuring GitHub to use `main` instead of `master`
+
+Once you've pushed your new branch, you need to tell GitHub that this is your new "main branch".
+To do this, go to `Settings` -> `Branches` and select your new branch as the main one:
+
+image::/blog/img/github-branch.png[]
+
+Last but not least, you need to delete the old branch from GitHub, which can be done by calling this:
+
+```
+git push origin :master
+```
+
+Done!
+
+
