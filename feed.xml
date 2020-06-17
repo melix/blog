@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 17 Jun 2020 09:38:06 +0200</pubDate>
-    <lastBuildDate>Wed, 17 Jun 2020 09:38:06 +0200</lastBuildDate>
+    <pubDate>Wed, 17 Jun 2020 09:47:16 +0200</pubDate>
+    <lastBuildDate>Wed, 17 Jun 2020 09:47:16 +0200</lastBuildDate>
 
     <item>
       <title>Configuring git to use main instead of master</title>
@@ -83,6 +83,9 @@ There&amp;#8217;s no option in &lt;code&gt;git init&lt;/code&gt; to change this,
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;(don&amp;#8217;t forget to add a new line at the end of the first line)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Starting from now, calling &lt;code&gt;git init&lt;/code&gt; will create a &lt;code&gt;main&lt;/code&gt; branch instead of &lt;code&gt;master&lt;/code&gt;!&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Now let&amp;#8217;s deal with existing projects.&lt;/p&gt;
