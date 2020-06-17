@@ -6,13 +6,143 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>jeu., 11 juin 2020 11:45:44 +0200</pubDate>
-    <lastBuildDate>jeu., 11 juin 2020 11:45:44 +0200</lastBuildDate>
+    <pubDate>Wed, 17 Jun 2020 09:38:06 +0200</pubDate>
+    <lastBuildDate>Wed, 17 Jun 2020 09:38:06 +0200</lastBuildDate>
 
+    <item>
+      <title>Configuring git to use main instead of master</title>
+      <link>https://melix.github.io/blog/2020/06/updating-git.html</link>
+      <pubDate>Wed, 17 Jun 2020 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2020/06/updating-git.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I don&amp;#8217;t need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Actually, if you are reading this, there are good chances you&amp;#8217;re already in the mindset of removing potentially offensive language from your project, thank you!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The fact is, we have better, more descriptive technical names than &quot;master&quot; and &quot;slave&quot; and we don&amp;#8217;t have to use terms which refer to dark ages of our history, so let&amp;#8217;s get rid of them in tech.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post, you will learn:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;how to make &lt;code&gt;git init&lt;/code&gt; create your project with a &lt;code&gt;main&lt;/code&gt; branch instead of &lt;code&gt;master&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;how to rename your &lt;code&gt;master&lt;/code&gt; branch to &lt;code&gt;main&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;how to make the change on GitHub&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Be aware that renaming branches may break your existing integrations (typically with CI or Slack notifications) so only do it when you&amp;#8217;re ready.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_configuring_git_init&quot;&gt;Configuring git init&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By default, when you create a new project, &lt;code&gt;git init&lt;/code&gt; will create a &lt;code&gt;master&lt;/code&gt; branch.
+There&amp;#8217;s no option in &lt;code&gt;git init&lt;/code&gt; to change this, but it&amp;#8217;s actually quite easy to set it up differently.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, in your &lt;code&gt;~/.gitconfig&lt;/code&gt; file, add the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;~/.gitconfig&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;[init]
+    templateDir = ~/.config/git/template/&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then create, if it doesn&amp;#8217;t exist, the following directory:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;mkdir ~/.config/git/template&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;next create this file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;~/.config/git/template/HEAD&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;ref: refs/heads/main&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;(don&amp;#8217;t forget to add a new line at the end of the first line)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s deal with existing projects.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_renaming_your_master_branch&quot;&gt;Renaming your master branch&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For your current projects, you may want to rename the &lt;code&gt;master&lt;/code&gt; branch to &lt;code&gt;main&lt;/code&gt;.
+This is also single command in &lt;code&gt;git&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;git checkout master
+git branch -m main&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then you can push the branch to your remote&amp;#8230; but be careful, it will create a &lt;em&gt;new branch&lt;/em&gt; on the remote:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;git push origin main&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_configuring_github_to_use_code_main_code_instead_of_code_master_code&quot;&gt;Configuring GitHub to use &lt;code&gt;main&lt;/code&gt; instead of &lt;code&gt;master&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once you&amp;#8217;ve pushed your new branch, you need to tell GitHub that this is your new &quot;main branch&quot;.
+To do this, go to &lt;code&gt;Settings&lt;/code&gt; &amp;#8594; &lt;code&gt;Branches&lt;/code&gt; and select your new branch as the main one:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/github-branch.png&quot; alt=&quot;github branch&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last but not least, you need to delete the old branch from GitHub, which can be done by calling this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;git push origin :master&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Done!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Using Java feature previews with Gradle</title>
       <link>https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html</link>
-      <pubDate>jeu., 11 juin 2020 00:00:00 +0200</pubDate>
+      <pubDate>Thu, 11 Jun 2020 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2020/06/java-feature-previews-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -150,7 +280,7 @@ In the mean time, if for some reason your Gradle build doesn&amp;#8217;t want to
     <item>
       <title>Mon engagement pour Montaigu-Vendée</title>
       <link>https://melix.github.io/blog/2020/03/mvea2020.html</link>
-      <pubDate>sam., 7 mars 2020 00:00:00 +0100</pubDate>
+      <pubDate>Sat, 7 Mar 2020 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2020/03/mvea2020.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -319,7 +449,7 @@ Je me présente humblement sur la liste de Vincent MATHIEU, une liste composée 
     <item>
       <title>Chronicles of an introvert remote worker</title>
       <link>https://melix.github.io/blog/2020/01/introvert-remote.html</link>
-      <pubDate>ven., 3 janv. 2020 00:00:00 +0100</pubDate>
+      <pubDate>Fri, 3 Jan 2020 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2020/01/introvert-remote.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -547,7 +677,7 @@ I am also the coach of my younger boy&amp;#8217;s (10 yo) basketball team, which
     <item>
       <title>Gradle myth busting: scripting</title>
       <link>https://melix.github.io/blog/2019/11/gradle-scripting.html</link>
-      <pubDate>dim., 3 nov. 2019 00:00:00 +0100</pubDate>
+      <pubDate>Sun, 3 Nov 2019 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2019/11/gradle-scripting.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -803,178 +933,6 @@ Therefore, &lt;em&gt;correctness&lt;/em&gt;, incremental builds, incremental com
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;I don&amp;#8217;t think those are complexity. A task declares its inputs. If you do, you benefit from up-to-date checking, and with a bit more configuration, caching. You don&amp;#8217;t &lt;em&gt;have to&lt;/em&gt;. If you don&amp;#8217;t declare the inputs/outputs, you&amp;#8217;re back to the &quot;Maven&quot; approach where the build tools knows nothing about what a task does, at the difference that Gradle knows that it knows nothing, so can be a bit smarter. As soon as you start declaring your inputs, you benefit from more. It&amp;#8217;s more work, for sure, but it&amp;#8217;s not that complex and the benefit is huge.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Chroniques d&amp;#8217;un introverti en télétravail</title>
-      <link>https://melix.github.io/blog/2019/09/introverti-teletravail.html</link>
-      <pubDate>dim., 29 sept. 2019 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2019/09/introverti-teletravail.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;L&amp;#8217;autre jour j&apos;écoutais le podcast &lt;a href=&quot;https://lescastcodeurs.com/2019/09/16/lcc-216-l-episode-ou-on-a-perdu-le-compte/&quot;&gt;Les Cast Codeurs&lt;/a&gt; qui abordait le sujet du télétravail.
-Quelques remarques m&amp;#8217;ont fait tiquer, je m&amp;#8217;en vais donc ici vous raconter mon expérience, mais surtout vous parler de moi et de l&amp;#8217;introversion.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_le_t_l_travail_et_l_introversion&quot;&gt;Le télétravail et l&amp;#8217;introversion&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Voici maintenant presque 10 ans que je suis presque à 100% en télétravail. Je dis presque, parce qu&amp;#8217;en pratique, j&amp;#8217;ai quelques déplacements professionnels (conférences, meetings) de temps en temps, mais pour mon boulot de tous les jours, c&amp;#8217;est tout à la maison.
-Avant de faire du télétravail, je roulais beaucoup: mon emploi était sur Nantes, à 45km de chez moi. Ca faisait donc 90km par jour, mais surtout entre 2 et 3h de transport par jour (eh oui, j&amp;#8217;avais la chance de devoir traverser le pont de Cheviré, pour ceux qui connaissent&amp;#8230;).
-Bref, le jour où j&amp;#8217;ai changé d&amp;#8217;emploi, pour passer chez VMware pour travailler sur le langage Groovy, le premier choc pour moi ça a été de récupérer ces 2 ou 3 heures par jour.
-C&amp;#8217;est autant de temps qu&amp;#8217;on peut passer à s&amp;#8217;occuper de ses enfants (les déposer à l&apos;école, les emmener au sport, &amp;#8230;) ou à faire des activités à la maison (jardinage, sport, &amp;#8230;).
-Je ne reviendrais pas sur ces aspects, parce qu&amp;#8217;ils sont largement connus, le seul &quot;inconvénient&quot; pour moi étant surtout d&apos;être capable de maîtriser ses horaires, c&amp;#8217;est à dire de ne pas, contrairement à ce qu&amp;#8217;on pense, faire &lt;em&gt;trop&lt;/em&gt; d&amp;#8217;heures !&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Non, ce sur quoi je veux revenir, c&amp;#8217;est cette remarque d&amp;#8217;Antonio Goncalvés, qui, en conseil, dit en substance:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&quot;Balancez votre cafetière, sortez dans les bars, voyez des gens, c&amp;#8217;est important de voir des êtres humains!&quot;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Et ceci &lt;a href=&quot;https://twitter.com/CedricChampeau/status/1173893698997936130&quot;&gt;m&amp;#8217;a fait réagir&lt;/a&gt;, j&amp;#8217;aimerais donc revenir sur le sujet.
-Tout d&amp;#8217;abord, revenons sur le fait que ce conseil ne fonctionne que si vous habitez en ville, ce qui n&amp;#8217;est pas mon cas.
-Je suis en campagne, à 5km du bourg, donc faire une &quot;pause café&quot;, ça prend du temps dans ces conditions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Mais revenons surtout sur le fond du sujet: &quot;C&amp;#8217;est important de voir des êtres humains&quot;, ou ce &lt;em&gt;besoin de ne pas être seul&lt;/em&gt;.
-C&amp;#8217;est un sujet qui me tient à coeur et qui résonne avec une des questions que j&amp;#8217;ai souvent lorsque je parle du télétravail:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&quot;Mais tu n&amp;#8217;en as pas marre d&apos;être tout seul, de ne voir personne ?&quot;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Alors, répondons franchement: &lt;strong&gt;non&lt;/strong&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Autant je comprends les personnes qui en ont besoin, autant, &lt;strong&gt;ne croyez pas que tout le monde fonctionne comme vous&lt;/strong&gt; et a &lt;em&gt;besoin&lt;/em&gt; de voir du monde.
-Certaines personnes, comme moi, vivent très bien sans voir personne.
-Je peux passer des journées entières seul, sans que celà ne me pose le moindre problème, ni ne me cause le quelconque manque de relations humaines.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Je vais partie de cette catégorie de population qu&amp;#8217;on appelle les &lt;em&gt;introvertis&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Un &lt;em&gt;introverti&lt;/em&gt;, contrairement à une croyance populaire, ça n&amp;#8217;est pas un associal, un égoïste ou quelqu&amp;#8217;un sans empathie.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Un &lt;em&gt;introverti&lt;/em&gt;, c&amp;#8217;est quelqu&amp;#8217;un dont l&apos;énergie sera drainée par la foule, par les relations inter-personnelles, c&amp;#8217;est l&amp;#8217;opposé d&amp;#8217;un &lt;em&gt;extraverti&lt;/em&gt; qui a besoin de monde pour regagner de l&apos;énergie.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Un &lt;em&gt;introverti&lt;/em&gt;, c&amp;#8217;est quelqu&amp;#8217;un qui ne supportera pas les conversations de comptoir, parce qu&amp;#8217;elles ne lui apportent rien d&amp;#8217;autre qu&amp;#8217;une perte d&apos;énergie.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Un &lt;em&gt;introverti&lt;/em&gt;, c&amp;#8217;est quelqu&amp;#8217;un qui pourra vous tenir une conversation passionnée sur un sujet qui l&amp;#8217;intéresse, parce qu&amp;#8217;il en retire quelque chose: l&amp;#8217;interaction en vaut la chandelle.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Déja tout petit, j&apos;évitais les groupes, je n&amp;#8217;avais pas beaucoup d&amp;#8217;amis (mais ceux que j&amp;#8217;avais à l&apos;époque, je les ai toujours).
-J&amp;#8217;ai toujours eu une peur bleue de me retrouver dans un groupe où je ne connaissais personne, que ce soit à l&apos;école, au sport, &amp;#8230;
-Mais même si je connaissais quelqu&amp;#8217;un, se retrouver &lt;em&gt;dans un groupe&lt;/em&gt;, à devoir cultiver des relations proches, extra &quot;professionnelles&quot;, était d&amp;#8217;une extrême complexité pour moi (et ça l&amp;#8217;est toujours).
-Tout ce qui m&amp;#8217;importait à l&apos;époque, c&apos;était d&amp;#8217;apprendre, être &quot;fort&quot; à l&apos;école, ce qui m&amp;#8217;a valu d&apos;être traité &quot;d&amp;#8217;intello&quot;, parfois chahuté, ou d&amp;#8217;avoir des remarques pas particulièrement gentilles d&amp;#8217;autres élèves au dos de ma photo de classe, ceci pendant une grande partie de mon enfance&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Par exemple, j&amp;#8217;ai toujours refusé les camps de vacances (ma seule expérience, une semaine à faire du cheval, fût tellement une horreur pour moi que je m&amp;#8217;en souviens encore).
-J&amp;#8217;ai aussi refusé toutes les classes de neige.
-En revanche, j&amp;#8217;avais accepté d&amp;#8217;aller en voyage scolaire en Angleterre, en Irlande, en Espagne, non sans lutter contre moi-même, parce que je savais que je pouvais en tirer quelque chose, mais aussi parce que j&amp;#8217;avais la garantie de me retrouver en petit nombre, avec un copain, dans une chambre&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Dans la même veine, devoir se retrouver au tableau pour réciter une poésie, ou, pire, chanter, tenait de la torture.
-J&amp;#8217;ai adoré la fac&apos; de sciences, parce que je pouvais passer du temps au &quot;café&quot; avec 2/3 potes maximum, à discuter.
-J&amp;#8217;ai détesté mon école d&amp;#8217;ingénieur, où j&amp;#8217;ai du rivaliser d&amp;#8217;astuces pour éviter les soirées d&amp;#8217;intégration, tonus et autres dont étaient friants 95% des étudiants: se faire reconnaître sans se faire exclure (mais j&amp;#8217;ai encore trouvé quelques bons amis que je tiens de cette époque).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Aaah, les soirées d&amp;#8217;intégration: ce qui est marrant pour certains, se bourrer la gu&amp;#8230;, humilier &quot;gentilement&quot; les autres, c&apos;était juste pour moi quelque chose d&amp;#8217;horrible.
-Tiens, d&amp;#8217;ailleurs, peu le savent, mais j&amp;#8217;ai fait toute ma scolarité à Nantes, non pas parce que tout était disponible là bas (c&apos;était le case), mais parce que j&apos;était terrifié à l&amp;#8217;idée de me retrouver seul dans une FAC, une école d&amp;#8217;ingénieur, à l&amp;#8217;autre bout de la France&amp;#8230;
-Certains profs m&amp;#8217;avaient reproché de ne pas tenter une &quot;Grande Ecole&quot;, mais je pense qu&amp;#8217;au final, je m&amp;#8217;en suis plutôt bien sorti !&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_jamais_je_n_embaucherais_quelqu_un_comme_vous&quot;&gt;Jamais je n&amp;#8217;embaucherais quelqu&amp;#8217;un comme vous!&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Ceci pourrait vous paraitre surprenant pour quelqu&amp;#8217;un qui, aujourd&amp;#8217;hui, donne des conférences devant, parfois, des centaines de personnes.
-Mais alors, quelle est la différence ?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;La différence, c&amp;#8217;est que lorsque je vous parle dans un cadre professionnelle, &lt;strong&gt;je maîtrise mon sujet&lt;/strong&gt; (ou je pense le maîtriser, ah ah !).
-Je peux vous parler ouvertement, parce que je sais que les questions qu&amp;#8217;on va me poser seront sur ce sujet.
-Il n&amp;#8217;y a que peu de place à l&amp;#8217;inconnu.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;C&amp;#8217;est aussi pour celà qu&amp;#8217;il m&amp;#8217;est très difficile, encore aujourd&amp;#8217;hui, d&amp;#8217;aborder des gens que je ne connais pas.
-Je ne sais pas faire de &quot;small talk&quot;, comme on dit.
-Mais ça va plus loin: j&amp;#8217;ai fais pas mal de déplacements à l&apos;étranger, aux US par exemple, mais JAMAIS, je ne suis sorti seul pour visiter (au mieux je marcherai une heure ou deux dans les alentours).
-On rentre dans cette zone d&amp;#8217;inconnu qui me met tellement mal à l&amp;#8217;aise : devoir s&amp;#8217;adresser à des gens, qui plus est à l&apos;étranger, pour commander un plat, pour demander son chemin: celà me demande trop d&amp;#8217;efforts, me draine trop.
-En revanche, si je connais une ou deux personnes et qu&amp;#8217;elle me proposent de les accompagner, ça se passera bien: j&amp;#8217;apprécie fortement une sortie en &quot;petit comité&quot;.
-Tout le monde me dit que j&amp;#8217;ai tellement de chance de partir voyager, voir du pays, mais moi, je déteste tellement voyager, en tout cas sans ma famille&amp;#8230;
-Rien qu&amp;#8217;aller à Paris, me rendre compte du nombre de personnes qui vivent là bas, me sentir étouffer, qu&amp;#8217;est-ce que j&amp;#8217;ai horreur de ça !&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;La conséquence, c&amp;#8217;est que je fuis comme la peste les &quot;soirées&quot; comme les speaker dinner, les événements d&amp;#8217;entreprise, &amp;#8230;
-Souvent, on les présente comme des incontournables du &quot;réseautage&quot;, et c&amp;#8217;est vrai qu&amp;#8217;on y apprend souvent des choses intéressantes, mais elles sont extrêmement stressantes pour moi.
-La plupart du temps, j&amp;#8217;essaie de trouver une tête connue et je &quot;m&amp;#8217;accroche&quot;, mais je ne fais jamais long feu.
-Ce qui me terrorise s&amp;#8217;est d&amp;#8217;en arriver à des sujets extra-professionnels, là où je n&amp;#8217;ai AUCUNE &quot;compétence&quot;.
-Certains diront que je suis chiant, que je n&amp;#8217;ai aucun intérêt, et c&amp;#8217;est probablement vrai si vous recherchez quelqu&amp;#8217;un à la vie extraordinaire, la mienne n&amp;#8217;est pas ultra passionnante :)&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Si vous en arrivez là, vous devez vous dire que je ne dois pas être un très bon &quot;team player&quot;, comme on dit.
-Paradoxalement je ne pense pas que ce soit le cas.
-En effet, il ne faut pas confondre mon incapacité à avoir des relations inter-personnelles &quot;simples&quot; avec la capacité d&apos;échange, d&amp;#8217;interaction professionnelle, qui est sur une toute autre dimension.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Comme je vous l&amp;#8217;ai expliqué, je donne régulièrement des talks, et j&amp;#8217;adore plus que tout partager ces connaissances, aider les autres.
-J&amp;#8217;aime aussi travailler avec des gens plus compétents que moi pour avoir l&amp;#8217;autre face de la pièce: apprendre, comprendre de nouvelles choses, progresser.
-Et dans ce contexte, travailler en équipe aide énormément.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Alors, ce n&amp;#8217;est pas parce qu&amp;#8217;on est en télétravail et qu&amp;#8217;on ne voit personne qu&amp;#8217;on travaille &lt;em&gt;seul&lt;/em&gt;.
-Non, on est en équipe. On fait des &quot;daily standup&quot; (via Hangout/Slack), on s&amp;#8217;organise, on fait des petites réunions &quot;face to face&quot; de temps en temps, bref, je pense, mes collègues vous le diront si ça n&amp;#8217;est pas le cas, que ça se passe plutôt bien.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Bref, n&amp;#8217;ayez pas peur de cet aspect: la solitude n&amp;#8217;est pas, pour tout le monde, un problème.
-Elle peut, au contraire, aider à la productivité: pas de réunionite inutile, capacité à se focaliser sur un problème des heures durant, &amp;#8230;
-Elle n&amp;#8217;est pas, non plus, signe de quelqu&amp;#8217;un qui ne peut pas travailler en équipe: ça n&amp;#8217;empêche en RIEN d&amp;#8217;aider ses collègues, ses clients, bien au contraire: puisqu&amp;#8217;on sait que la relation est professionnelle, elle est focalisée et bien plus efficace.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Pour vous donner une idée, chez Gradle, tout le monde est en télétravail.
-Mais pour cet aspect &quot;socialisation&quot;, nous avons une réunion hebdomadaire, facultative, appelée &quot;coffee time&quot; où chacun peut rejoindre la réunion et parler de sujets extra-professionnels.
-Certains en ont besoin, pas moi.
-Au contraire, j&amp;#8217;aurais du mal à arriver à cette réunion et savoir de quoi parler.
-Pire, j&apos;évite au maximum d&amp;#8217;arriver en premier à une réunion de peur de ne pas savoir engager une conversation&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Mais encore une fois: parlez moi d&amp;#8217;un sujet que je maîtrise, demandez moi d&amp;#8217;expliquer un problème, de chercher une solution, d&amp;#8217;aider quelqu&amp;#8217;un: il n&amp;#8217;y aura aucun problème, parce qu&amp;#8217;il n&amp;#8217;y a aucune place à l&amp;#8217;inconnu.
-Il est même fort probable que j&amp;#8217;apprécie énormément une conversation entre nous: si je ne viens pas vous voir, ça n&amp;#8217;est pas que je ne souhaite pas vous parler, c&amp;#8217;est que même si je vous connais, engager une conversation reste quelque chose de très compliqué pour moi. Venez me voir, engagez la conversation et tout se passera bien ! :D&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Alors, ne vous étonnez pas si je vais trois fois le tour du quartier plutôt que de demander mon chemin.
-Ne vous étonnez pas si je ne téléphone jamais, ne texte jamais.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Mais si vous faites partie de mes amis, vous avez énormément de chance: c&amp;#8217;est que je tiens beaucoup à vous et vous tiens en haute estime !&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_n_ayez_pas_honte_d_tre_introvertis_faites_comprendre_ce_que_c_est&quot;&gt;N&amp;#8217;ayez pas honte d&apos;être introvertis, faites comprendre ce que c&amp;#8217;est&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Je terminerais pas une remarque: dans mon &lt;a href=&quot;https://twitter.com/CedricChampeau/status/1173893698997936130&quot;&gt;Tweet original&lt;/a&gt;, je disais que je &quot;me soignais&quot;.
-C&amp;#8217;est vrai et c&amp;#8217;est faux à la fois.
-Quand je dis que c&amp;#8217;est vrai, c&amp;#8217;est parce que conscient de l&amp;#8217;importance et de la &quot;non reconnaissance&quot; de cette difficulté par les autres, j&amp;#8217;essaie de travailler, notamment la prise de parole.
-Je suis, par exemple, secrétaire du club de Karaté, ce qui me force à communiquer avec des gens que je ne connais pas.
-Je suis aussi le coach de l&apos;équipe de basket de mon fils de 10 ans, ce que j&amp;#8217;adore faire: c&amp;#8217;est une activité avec son enfant, qui est à la fois publique, mais aussi tellement gratifiante, voir ces enfants heureux de jouer, gagner, &amp;#8230; et ça me permet de travailler sur les relations avec les parents !&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Et surtout, c&amp;#8217;est aussi un message pour mon fils, qui a 10 ans donc mais me ressemble tellement: il a lui aussi beaucoup de mal à parler aux gens, mais je qu&amp;#8217;il travaille dur pour se faire accepter. Lui aussi est si fier lorsqu&amp;#8217;il a la reconnaissance de ses pairs&amp;#8230; Il m&amp;#8217;a fallu des années avant de mettre un nom à ce que je suis, un &lt;em&gt;introverti&lt;/em&gt;, et aujourd&amp;#8217;hui encore, je lutte pour ne plus en avoir &lt;em&gt;honte&lt;/em&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

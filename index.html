@@ -69,8 +69,141 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2020/06/updating-git.html"><h1>Configuring git to use main instead of master</h1></a>
+  			<p>17 June 2020</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/git.html">git</a> 
+	
+		<a href="/blog/tags/github.html"> github</a> 
+	
+		<a href="/blog/tags/blacklivesmatter.html"> blacklivesmatter</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I don&#8217;t need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name.</p>
+</div>
+<div class="paragraph">
+<p>Actually, if you are reading this, there are good chances you&#8217;re already in the mindset of removing potentially offensive language from your project, thank you!</p>
+</div>
+<div class="paragraph">
+<p>The fact is, we have better, more descriptive technical names than "master" and "slave" and we don&#8217;t have to use terms which refer to dark ages of our history, so let&#8217;s get rid of them in tech.</p>
+</div>
+<div class="paragraph">
+<p>In this blog post, you will learn:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>how to make <code>git init</code> create your project with a <code>main</code> branch instead of <code>master</code></p>
+</li>
+<li>
+<p>how to rename your <code>master</code> branch to <code>main</code></p>
+</li>
+<li>
+<p>how to make the change on GitHub</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Be aware that renaming branches may break your existing integrations (typically with CI or Slack notifications) so only do it when you&#8217;re ready.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_git_init">Configuring git init</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default, when you create a new project, <code>git init</code> will create a <code>master</code> branch.
+There&#8217;s no option in <code>git init</code> to change this, but it&#8217;s actually quite easy to set it up differently.</p>
+</div>
+<div class="paragraph">
+<p>First, in your <code>~/.gitconfig</code> file, add the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.gitconfig</div>
+<div class="content">
+<pre class="prettyprint"><code>[init]
+    templateDir = ~/.config/git/template/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then create, if it doesn&#8217;t exist, the following directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>mkdir ~/.config/git/template</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>next create this file:</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.config/git/template/HEAD</div>
+<div class="content">
+<pre class="prettyprint"><code>ref: refs/heads/main</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(don&#8217;t forget to add a new line at the end of the first line)</p>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s deal with existing projects.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_renaming_your_master_branch">Renaming your master branch</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For your current projects, you may want to rename the <code>master</code> branch to <code>main</code>.
+This is also single command in <code>git</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>git checkout master
+git branch -m main</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you can push the branch to your remote&#8230; but be careful, it will create a <em>new branch</em> on the remote:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>git push origin main</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_github_to_use_code_main_code_instead_of_code_master_code">Configuring GitHub to use <code>main</code> instead of <code>master</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once you&#8217;ve pushed your new branch, you need to tell GitHub that this is your new "main branch".
+To do this, go to <code>Settings</code> &#8594; <code>Branches</code> and select your new branch as the main one:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/github-branch.png" alt="github branch">
+</div>
+</div>
+<div class="paragraph">
+<p>Last but not least, you need to delete the old branch from GitHub, which can be done by calling this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>git push origin :master</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Done!</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2020/06/updating-git.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2020/06/java-feature-previews-gradle.html"><h1>Using Java feature previews with Gradle</h1></a>
-  			<p>11 juin 2020</p>
+  			<p>11 June 2020</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
@@ -211,7 +344,7 @@ In the mean time, if for some reason your Gradle build doesn&#8217;t want to sta
 </div></p>
 			<p><a href="/blog/2020/06/java-feature-previews-gradle.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2020/03/mvea2020.html"><h1>Mon engagement pour Montaigu-Vendée</h1></a>
-  			<p>07 mars 2020</p>
+  			<p>07 March 2020</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/montaigu.html">montaigu</a> 
 	
@@ -383,7 +516,7 @@ Je me présente humblement sur la liste de Vincent MATHIEU, une liste composée 
 </div></p>
 			<p><a href="/blog/2020/03/mvea2020.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2020/01/introvert-remote.html"><h1>Chronicles of an introvert remote worker</h1></a>
-  			<p>03 janvier 2020</p>
+  			<p>03 January 2020</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/remote-work.html">remote work</a> 
 	
@@ -611,275 +744,6 @@ I am also the coach of my younger boy&#8217;s (10 yo) basketball team, which I e
 </div>
 </div></p>
 			<p><a href="/blog/2020/01/introvert-remote.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2019/11/gradle-scripting.html"><h1>Gradle myth busting: scripting</h1></a>
-  			<p>03 novembre 2019</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/maven.html"> maven</a> 
-	
-		<a href="/blog/tags/groovy.html"> groovy</a> 
-	
-		<a href="/blog/tags/kotlin.html"> kotlin</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>I don&#8217;t particularly enjoy Twitter as a medium for debating (no surprise my bio mentions "this is not a support channel").
-This happened again this week, I got caught in a Maven vs Gradle debate, one more, after I replied to <a href="https://twitter.com/lukaseder/status/1189889509254713344">Lukas Eder</a> that his tweet was a call for FUD.
-And it did happen: no surprise, when you submit something like that, the only answers you&#8217;ll get are either people going in your direction "oh yeah, Gradle sucks and here is my personal experience" or similar, this is just human nature.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_good_old_debate">The good old debate</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In the end, most of the answers cycle around the same, good old, debate: Gradle uses scripting (Groovy or Kotlin) vs Maven uses declarative.
-You&#8217;ll aways find people telling you that XML is better because it locks you down, its fully declarative (<a href="https://maven.apache.org/plugins/maven-antrun-plugin/">is it</a>, really?) and everybody is forced to do the same.
-I don&#8217;t counter those arguments, this is a strength of Maven, but it also comes with a number of drawbacks.</p>
-</div>
-<div class="paragraph">
-<p>I promised some of the folks in the conversation some answers (please look down for direct answers to tweets), so here they are. I&#8217;m answering on a blog post because again Twitter is not good for this, it&#8217;s causing a lot of misunderstandings, because you get into multiple, parallel conversations with different people who accidentally get mentioned, and get scuds fired at you without even having time to answer&#8230; Even a blog post is not enough, there&#8217;s so much to say on this topic.</p>
-</div>
-<div class="paragraph">
-<p>First, on the so called "declarative vs imperative" model, I will always disagree on this dichotomy. I disagree that Gradle isn&#8217;t declarative. It&#8217;s as declarative as you want it to be. Take this build file I wrote recently, which is an <em>Asciidoctor Reveal.js presentation template</em> (it allows writing slide decks with Asciidoctor and reveal.js). Here&#8217;s what my build file looks like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>plugins {
-    id("org.gradle.presentation.asciidoctor")
-}
-
-presentation {
-    githubUserName.set("melix")
-}
-
-dependencies {
-    asciidoctor("org.asciidoctor:asciidoctorj-diagram:1.5.11")
-}
-
-tasks {
-    asciidoctor {
-        requires("asciidoctor-diagram")
-    }
-
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>I wouldn&#8217;t particularly say this is imperative. It looks <em>very declarative</em> to me. Concise too. The fact it uses an <em>imperative language</em> is orthogonal, but it does, however, create the ability to write imperative code in the build.
-Note, however, that a dependency was declared for <em>asciidoctor</em>. This is a major, and probably the most important, difference with Maven: <em>compile</em> or <em>runtime</em> doesn&#8217;t make sense here. We declare a dependency for <em>asciidoctor rendering</em>. There&#8217;s no Java library being built here, it&#8217;s a presentation. Gradle lets you model precisely <em>what you build</em>.</p>
-</div>
-<div class="paragraph">
-<p>So, in the end, I think what matters is not <em>declarative</em> vs <em>scripting</em>. I think what people really want is to reduce the risks of writing bad things. Locking down using XML is <em>one</em> way to achieve this, but it&#8217;s not the only one. For example, Gradle build scripts <a href="https://github.com/nebula-plugins/gradle-lint-plugin">may be linted</a>. In other words, you can apply on a Gradle build the same tooling you are used to work with when dealing with your own code: checkstyle, findbugs, &#8230; You don&#8217;t <em>have to</em>, but you can.</p>
-</div>
-<div class="paragraph">
-<p>The consequence is that yes, there are many different ways you can layout your build with Gradle. This is not different from how you can layout your code in a project: we don&#8217;t tell you in which package you should put your beans, services, &#8230; However, there&#8217;s a big misconception that I&#8217;d like to fight:</p>
-</div>
-<div class="paragraph">
-<p>By default, for a Java project, Gradle follows the same conventions as Maven.</p>
-</div>
-<div class="paragraph">
-<p>That&#8217;s as simple as that. Sources will be in <code>src/main/java</code>. Tests will be in <code>src/test/java</code>. Gradle gives you the freedom to diverge from this convention, but this is <em>not</em> encouraged, and to be honest, I&#8217;ve almost never seen any build diverging from those conventions. On rare occasions, those were actually builds migrated from <em>other</em> build systems (in particular Ant) where at the time there wasn&#8217;t any convention. Gradle offers the flexibility to reuse an existing layout without much hassle.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_gradle_is_too_flexible">Gradle is too flexible?</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>All in all, the argument that "Gradle is too flexible" is a fallacy.
-It&#8217;s all about good engineering practices, putting the right tools in place, and this is nothing different from any engineering work we do everyday.
-If you can do it for your code, you can do it for your build.
-The interesting thing is <em>why you think you shouldn&#8217;t have the same quality expectation levels for your build as you have for your code</em>.
-Often the answer is just "I don&#8217;t care much about the build, I&#8217;m writing code, this is what I&#8217;m paid for".</p>
-</div>
-<div class="paragraph">
-<p>And this is where the discussion becomes interesting, because I think this is a bias that lots of developers have.
-They don&#8217;t even realize how much time they are losing.</p>
-</div>
-<div class="paragraph">
-<p>Tell me, how likely is it that you change your build scripts, compared to the number of times you&#8217;re effectively going to run <code>mvn clean install</code> or <code>gradle test</code>?
-The reality is that you&#8217;re <em>running the build</em> much more often that you change it.
-Therefore, <em>correctness</em>, incremental builds, incremental compilation, compile avoidance, task output caching, are far more important to developer productivity than the declarativeness aspect.</p>
-</div>
-<div class="paragraph">
-<p>Sure pure declarativeness is a good thing and this is why I encourage Gradle users to write nice, synthetic build files, but this is <em>not</em> the most important aspect for <a href="https://gradle.com/developer-productivity-engineering/">developer productivity</a>.</p>
-</div>
-<div class="paragraph">
-<p>My point is therefore that if you only focus on the <em>surface</em>, that is to say the language used to express the build (XML vs Groovy/Kotlin), then you&#8217;re missing the most important part to me, which is the underlying Gradle model, far more advanced than what you have in other tools. The Gradle API surfaces this model and has a number of advantages:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>A <em>task</em> can be seen as a <em>function</em>. It <em>declares</em> inputs and outputs. For the same inputs, the output are always the same: this provides up-to-date checking and cache-ability.</p>
-</li>
-<li>
-<p>A task inputs can be another task outputs. This provides <em>implicit dependencies</em>: Gradle knows that if you want to run "test", you have to compile first, but it also knows that whatever else is an input to the tests need to be executed.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>As a consequence, I already wrote about why <a href="https://melix.github.io/blog/2018/09/gradle-lifecycle.html">it&#8217;s wrong to think that Gradle doesn&#8217;t have lifecycle tasks</a>. In fact, Gradle has them, but is also <em>significantly more precise</em>. The "phase" approach of Maven is way to coarse: it&#8217;s doomed to execute too much, prevents smart parallelism, and leads to dirty workarounds (<code>-x ....</code> on the CLI to avoid things you know are not necessary).</p>
-</div>
-<div class="paragraph">
-<p>Similarly, say you want to test your application on different JDKs and have a single build execute tests for all target JVMs, which is different from the JVM which runs the build tool. With a scripting approach like Gradle, this is totally doable. I won&#8217;t say easy because we can definitely do better to make this use case better, but the underlying model makes it quite simple. You don&#8217;t want to <em>rebuild</em> your application for each target VM. All you want is to <em>test</em> on different platforms, and therefore the only step should be a different target VM for test execution. Tools like Maven force you into arbitrary things like defining Maven profiles, and force you into rebuilding everything. This is a giant waste of time for something you don&#8217;t need!</p>
-</div>
-<div class="paragraph">
-<p>In a different topic, this is no surprise that Gradle can build for different ecosystems: Java, Scala, C++, Kotlin, Kotlin Native, Python, &#8230; The underlying infrastructure makes it possible. Even for a single ecosystem, Gradle can declare what the difference between a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_library_plugin.html">Java Library</a>, a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_platform_plugin.html">Java Platform</a> or an <a href="https://docs.gradle.org/6.0-rc-2/userguide/application_plugin.html">application</a> is.</p>
-</div>
-<div class="paragraph">
-<p>I could talk hours about why it&#8217;s important to model properly software, and actually with the release of Gradle 6 we&#8217;ll have a series of blog posts explaining why we think it&#8217;s a game changer in terms of dependency management. If you&#8217;re tired of having to fix the same "multiple slf4j bindings" in each and every project, tired of Guava being upgraded from <code>jre</code> to <code>android</code>, frustrated by incompatibilities of Scala 2.11 and 2.12 dependencies, tired of not knowing which of those Maven optional dependencies is important for you to add, you&#8217;ll understand what I mean.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_direct_answer_to_some_tweets">Direct answer to some tweets</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>I&#8217;ll try to answer more direct questions in this section. Sorry if I missed yours, I got quite a few comments/answers&#8230;</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>I would sacrifice caches, dependency locks and better plugins to version to have a declarative build process instead of an imperative one. Give me a declarative Gradle and I will love it.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>Again, I think this is the wrong tradeoff. Given that you run the build way more often that you change it, declarativeness (that you <em>can</em> have with Gradle) shouldn&#8217;t be the goal. Your goal should be to reduce your build times, make your build reproducible, improve your developer productivity. Declarativeness is <em>not a goal</em>, it&#8217;s at best a <em>mean</em>, but not sufficient by itself. A declarative Gradle, whatever that means, would help you reduce the cognitive overhead, but wouldn&#8217;t help you better model what your application needs.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>make a one liner the ability to publish on different repos the snapshot and release artifacts. The way it was done on Gradle 4.x was broken on 5.x and the only way we found to do it is a horrible hack</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>Here&#8217;s a <a href="https://gradle.com/blog/dependency-management-with-gradle-part-3-publishing-and-release-strategies/">webinar about publishing</a>. Publishing is not complicated with Gradle. It used to be poorly documented, and the old publishing plugins didn&#8217;t help. But publishing to a snapshot repository should be trivial already.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>Some people will prefer to do their own way, some people will prefer to have a less expressive tool that will produce similar build processes on their projects. Gradle give you the former, Maven the latter. As I say, a matter of taste.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>A less expressive tool reduces the risks of writing <em>bad builds</em>. It doesn&#8217;t help, however, in developing correct, reproducible, fast builds. An, again, I disagree that Gradle leads to "custom builds" everywhere. Most people stick to the defaults and are very happy with them. The more complex builds you find in the wild are those which have indeed very specific needs, or need to be tweaked for performance, producing more artifacts, combinations of artifacts or testing. Things that you can&#8217;t easily do with Maven profiles, for example, because profiles are <em>adhoc</em> solutions which do not combine well.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>Gradle tries to create a fake sense of declarativeness, but it is just an illusion.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>It&#8217;s not an illusion. Gradle has a clear separation between its configuration model and execution model. All tasks have declared inputs. The plugins create either new tasks or <em>conventions</em>. This is not an illusion, this is the reality. Now, because you <em>can</em> write <code>if</code> or loops doesn&#8217;t mean it&#8217;s not declarative, it&#8217;s imperative-declarativeness. And yes, you can end up with giant build scripts with "code" inside. If you have, do yourself a favor, <em>refactor</em> your build like you would with your code, because no one should tolerate this. Use <code>buildSrc</code>, this is your friend.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>I think library dependencies is not correctly supported by IDEs and Java modules are better.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>That&#8217;s not correct. We&#8217;ve been using the native Gradle IntelliJ support for years at Gradle, with <em>api</em> and <em>implementation</em> separation, and it works exactly like it should. Implementation dependencies are hidden from consumers, like they should. If you don&#8217;t see this, either you didn&#8217;t declare the dependencies or you have a bug in the IDE, in which case it needs to be reported.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>Even worst, Gradle don&#8217;t have an official plugin to deal with module-info. there was an old post that says it is not necessay with Gradle because lib dependencies were better (they don&#8217;t)</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>I don&#8217;t think anyone said you don&#8217;t need <code>module-info</code>. There are different things in play:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>separation of API and implementation: Gradle supports this, and it maps to <code>requires</code> vs <code>requires transitive</code></p>
-</li>
-<li>
-<p>declaration of public API packages: Gradle <em>used to have</em> this with the deprecated "software model". It still has to be backported to the current configuration model. For this, <code>module-info</code> works fine but it forces you into using the "modular world", which a lot of libraries, frameworks and IDEs are not ready for.</p>
-</li>
-<li>
-<p>declaration of services: Gradle doesn&#8217;t support this.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Can you use modules with Gradle? Yes, there&#8217;s a quite good <a href="https://github.com/java9-modularity/gradle-modules-plugin">plugin</a> to do it. We are planning to support modules and modularity in general better in Gradle, but not short term, because we have bigger pain to solve for our users first. It doesn&#8217;t mean we don&#8217;t consider this important.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>I don&#8217;t get why Gradle allow you to explain what your app is better than Maven. In fact I think it is more difficult to explain it on a script that descriptivelly.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>I <em>think</em> the question is what Gradle models better than Maven. A good example here is <code>api</code> vs <code>implementation</code> dependencies. Because Maven uses the <em>same descriptor (pom.xml)</em> for the producer and the consumer, a dependency declared in the <code>&lt;compile&gt;</code> scope ends up on the compile classpath of the consumers. This is <em>leaking internal implementation details</em> to consumers, which is very bad because it makes it very hard to evolve libraries, because changing an internal dependency would break consumers which accidentally started depending on your own transitives. This is <em>just</em> an example of course, there are many other differences (like, why we consider that <code>exclude</code> is a bad workaround in general, more on this topic in Gradle 6, if you want to read <a href="https://docs.gradle.org/current/userguide/introduction_dependency_management.html">our docs</a>).</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>The builds I’ve seen have been very spaghettish and clearly copy-and-pasted together un-understood recipes from SO.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>Yes, there are bad builds out there. With Gradle it&#8217;s frequent for quite old builds from early adopters. More recent builds tend to be much cleaner, because we made a significant effort in guides, getting started samples, documentation. You&#8217;ll always find bad things, and it should be encouraged to fix. On this topic, tools like <a href="https://scans.gradle.com">build scans</a> really help. And copy/pasting from SO is indeed a bad thing. If you copy and paste without understanding what it does, well, bad things can happen&#8230; That said I&#8217;ve seen very scary Maven builds too, and believe me or not, some of our customers wouldn&#8217;t be proud to show you their Maven builds. It&#8217;s the "personal experience fallacy". I&#8217;ve experienced very clean Gradle builds, you&#8217;ve experienced very bad Gradle builds. I&#8217;ve also written bad Gradle builds, which I dramatically improved, making them more correct, faster, &#8230; Gradle is like any other technology: learn it and you can understand what it brings.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>Gradle performance/caching are very attractive but the scripting possibility is a deal breaker. A « declarative-only » Gradle would be perfect for people like me.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>Again I think "declarative" is the wrong term here. Locked down to reduce the risks of doing bad things is what you want. It doesn&#8217;t matter if it&#8217;s Kotlin, Groovy, XML or whatever else. It doesn&#8217;t matter if you can use <code>if</code> or <code>for</code> loops. What matters is <em>what you can express</em>, and <em>what should be limited</em>. It&#8217;s all good engineering that we must share within the industry, find the best patterns, discourage the bad ones. There are quite a few things in the Android world (which uses Gradle) in this direction. We, at Gradle, should do more, but it&#8217;s always a matter of priorities: fixing the most important user pain first. By the way, we provide a Maven build cache with Gradle Enterprise. That is to say, the ability to cache Maven builds using Gradle Enterprise. However, this is limited to "clean builds" (which Maven users are used to do in any case), because of the limitations of the Maven execution model (no knowledge of what each plugin or mojo does, where it writes files, &#8230;).</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>IMHO the biggest feature of Gradle that Maven doesn&#8217;t have is the ability to change the version of the project</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>Well, this is just an accidental example of the interest of having access to the API in a build script. It offers a number of options for the release process, but that&#8217;s not the only one.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>My only complain about @gradle is how it is unnecessarily complex to deploy a multi-module project to central. Too much copy &amp; paste, or you need to make an init script, which I still haven&#8217;t managed to do.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>Technically the problem is not "how to deploy a multi-module project to Central", but rather, how do I avoid duplicating configuration between scripts. This is what <code>buildSrc</code> is for. As soon as you have repetition, then, it means a plugin makes sense. <code>buildSrc</code> can be seen as "local plugins", and this is where you should write your common code. Then each project applies a plugin to publish. This is a <em>composition</em> model, as opposed to the <em>inheritance</em> model of Maven.</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>I like all those (caching, incrementality, &#8230;) , in theory, but for my needs they are more complexity than feature</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>I don&#8217;t think those are complexity. A task declares its inputs. If you do, you benefit from up-to-date checking, and with a bit more configuration, caching. You don&#8217;t <em>have to</em>. If you don&#8217;t declare the inputs/outputs, you&#8217;re back to the "Maven" approach where the build tools knows nothing about what a task does, at the difference that Gradle knows that it knows nothing, so can be a bit smarter. As soon as you start declaring your inputs, you benefit from more. It&#8217;s more work, for sure, but it&#8217;s not that complex and the benefit is huge.</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2019/11/gradle-scripting.html#disqus_thread">Comments</a></p>
 	
 	<hr />
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
