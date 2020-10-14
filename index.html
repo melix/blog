@@ -318,8 +318,13 @@ Then it raises some interesting technical challenges, like how to sandbox execut
 <div class="paragraph">
 <p>Note that I also understand that from a Dependabot creator point of view, having to implement build-tool specific logic, like calling the Tooling API, to gather information about resolved dependencies might sound scary.
 I still think this is the right thing to do to be correct and, if our goal is really to make the industry safer, that&#8217;s what we should do.
-However, we have alternate solutions. For example a few weeks ago I experimented with a <a href="https://github.com/melix/gradle-command-action/tree/dump-dependencies">fork of my friend and colleague Paul Merlin&#8217;s Gradle Command GitHub Action</a> which automatically generates a JSON file of resolved dependencies during the build.
-I&#8217;m not sure this is the best answer, but it shows that we can attack the problem from different angles.</p>
+However, we have alternate solutions. For example a few weeks ago I experimented with a <a href="https://github.com/melix/gradle-command-action/tree/dump-dependencies">fork of my friend and colleague Paul Merlin&#8217;s Gradle Command GitHub Action</a> which automatically generates a JSON file of resolved dependencies during the build.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://twitter.com/ysb33r/">Schalk Cronjé</a> also mentioned to me the <a href="https://github.com/jeremylong/dependency-check-gradle">OWASP plugin</a>, which I forgot to mention when I originally wrote this blog post, but I think it a great answer and currently better answer because it does exactly what I describe: rely on what you actually resolve, not what you declare, and lets you carefully review the results via a generated report.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;m not sure this is the best answer, but it shows that we can attack the problem from different angles.</p>
 </div>
 <div class="paragraph">
 <p>Eventually, the key takeaway of this blog post should be: don&#8217;t assume that you are safe because you use Dependabot. You&#8217;re not.</p>
