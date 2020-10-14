@@ -105,8 +105,11 @@ This might sound cool, a security fix needs to be fixed, but I find this noisy, 
 </div>
 <div class="paragraph">
 <p><a href="https://dependabot.com/">Dependabot</a> is as good as an automated tool can be.
-I mean that its <em>implementation</em> is too simplistic and that it&#8217;s inherently <strong>wrong</strong>.
-In practice, Dependabot is nothing more than a search and replace engine: it looks into some particular files that it knows about (think <code>pom.xml</code>), looks for some patterns, then tries to identify dependency coordinates and eventually replaces them. I&#8217;m simplifying a bit, because it does some interpretation of the versions it finds, for example to match version ranges, but that&#8217;s roughtly how it works.</p>
+I mean that its <em>implementation</em>, at least in the Java and JVM ecosystem in general, is too simplistic and that it&#8217;s inherently <strong>wrong</strong>.
+I don&#8217;t have the expertise to tell if it&#8217;s different in the other supported ecosystems (Go) but I suspect a lot of the problems I&#8217;m going to describe here exist also in those ecosystems.</p>
+</div>
+<div class="paragraph">
+<p>In practice, Dependabot is nothing more than a search and replace engine: it looks into some particular files that it knows about (think <code>pom.xml</code>), looks for some patterns, then tries to identify dependency coordinates and eventually replaces them. I&#8217;m simplifying a bit, because it does some interpretation of the versions it finds, for example to match version ranges, but that&#8217;s roughtly how it works.</p>
 </div>
 <div class="paragraph">
 <p>For example, it will identify this:</p>
