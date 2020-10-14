@@ -6,9 +6,260 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 17 Jun 2020 10:53:11 +0200</pubDate>
-    <lastBuildDate>Wed, 17 Jun 2020 10:53:11 +0200</lastBuildDate>
+    <pubDate>Wed, 14 Oct 2020 09:51:03 +0200</pubDate>
+    <lastBuildDate>Wed, 14 Oct 2020 09:51:03 +0200</lastBuildDate>
 
+    <item>
+      <title>Dependabot and automated dependency upgrades</title>
+      <link>https://melix.github.io/blog/2020/10/about-dependabot.html</link>
+      <pubDate>Sun, 11 Oct 2020 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2020/10/about-dependabot.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://dependabot.com/&quot;&gt;Dependabot&lt;/a&gt; starts with a great idea: the state of our industry, in terms of dependency management, is sad.
+In particular, maintaining dependencies up-to-date is difficult and while some solutions exist, the vast majority of projects are out of date.
+This isn&amp;#8217;t a big deal for bugfixes and feature updates, but it is clearly a problem for security issues.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, any kind of automation to make the situation better is a good idea.
+I am in deep empathy with people working in this area: this is a difficult problem and there are no perfect solutions: as an example, in order to improve security of builds and reduce the risks of attacks via the toolchain, &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_verification.html&quot;&gt;Gradle introduced dependency verification&lt;/a&gt; as a first-class citizen.
+We deeply care about security and definitely support any attempt to make things better in this area.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The genius idea about &lt;a href=&quot;https://dependabot.com/&quot;&gt;Dependabot&lt;/a&gt; is that it does it at scale &lt;strong&gt;and submits pull requests&lt;/strong&gt; that you just have to review and merge if everything goes ok.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The best example in the Java ecosystem happened yesterday: the JUnit team fixed a &lt;a href=&quot;https://github.com/junit-team/junit4/security/advisories/GHSA-269g-pwp5-87pp&quot;&gt;security vulnerability in JUnit 4.13&lt;/a&gt;.
+At first, you might wonder what kind of security problems you can have with a testing framework, which, by definition, just like a build tool, runs any arbitrary code on your machine.
+The reality is that most people are unaffected by this problem: it would only be the case if your tests write sensitive data (like credentials) in a shared environment, or that you somehow expose whatever is written in the test directory to the outside world.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nevertheless, because it&amp;#8217;s a CVE, Dependabot submitted automated pull-requests to all projects using JUnit 4 and &lt;a href=&quot;https://github.com/search?o=desc&amp;amp;q=Bump+junit+from+to+4.13.1+GHSA-269g-pwp5-87pp&amp;amp;s=&amp;amp;type=Issues&quot;&gt;Dependarmaggedon happened&lt;/a&gt;: tens of thousands of pull requests.
+This might sound cool, a security fix needs to be fixed, but I find this noisy, and in the end dangerous.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s why.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://dependabot.com/&quot;&gt;Dependabot&lt;/a&gt; is as good as an automated tool can be.
+I mean that its &lt;em&gt;implementation&lt;/em&gt; is too simplistic and that it&amp;#8217;s inherently &lt;strong&gt;wrong&lt;/strong&gt;.
+In practice, Dependabot is nothing more than a search and replace engine: it looks into some particular files that it knows about (think &lt;code&gt;pom.xml&lt;/code&gt;), looks for some patterns, then tries to identify dependency coordinates and eventually replaces them. I&amp;#8217;m simplifying a bit, because it does some interpretation of the versions it finds, for example to match version ranges, but that&amp;#8217;s roughtly how it works.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, it will identify this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint xml language-xml&quot;&gt;&lt;code&gt;&amp;lt;dependency&amp;gt;
+   &amp;lt;group&amp;gt;junit&amp;lt;/group&amp;gt;
+   &amp;lt;name&amp;gt;junit&amp;lt;/version&amp;gt;
+   &amp;lt;version&amp;gt;4.13&amp;lt;/version&amp;gt;
+   &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
+&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and it will replace the &lt;code&gt;4.13&lt;/code&gt; with &lt;code&gt;4.13.1&lt;/code&gt;, then submit a PR for you to review. WIN!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yes, and no. Because this is extremely easy to defeat.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, as I said, it only looks for known files. For Maven, it&amp;#8217;s pretty simple, there&amp;#8217;s only one place to look for: &lt;code&gt;pom.xml&lt;/code&gt; files, but for other build tools, like Gradle, Ivy, Ant, Bazel, Pants, &amp;#8230; that&amp;#8217;s not the case: dependencies can be declared in different files, not all named the same. Dependency versions can be separate (in properties files) or inherited from context (parent POMs, platforms, &amp;#8230;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A more complete strategy is to look for patterns too, like &lt;code&gt;*.gradle&lt;/code&gt;, but then, they also miss the &lt;code&gt;*.gradle.kts&lt;/code&gt; files (they do), or the plugins which can contribute dependencies.
+In short: it&amp;#8217;s a whack-a-mole game.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One must think that it&amp;#8217;s not a big deal, because catching &lt;em&gt;some cases&lt;/em&gt; is better than not catching at all, and I agree, but that&amp;#8217;s not the expectation when you read what the tool promises.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the end, any tool which tries to parse build files and tries to interpret its model based on string evaluations is doomed to fail.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Even if it manages to catch some problems, things can go wrong. As an example, here&amp;#8217;s what we got at Gradle for this JUnit upgrade:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/dependabomb.jpg&quot; alt=&quot;dependabomb&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For a &lt;strong&gt;single repository&lt;/strong&gt;, it created &lt;strong&gt;dozens&lt;/strong&gt; of individual pull requests to ask us to upgrade.
+That&amp;#8217;s nice of you, Dependabot, but it&amp;#8217;s totally missing the point: this repository contains generated code, used in performance testing.
+The way the code is layout, the repetition of dependency declarations, etc, everything is intentional.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you put apart the fact that Dependabot could have created a single pull request for all dependencies, instead of creating hundreds, it highlights a general problem with those automated detection tools:&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&quot;_context_matters&quot; class=&quot;sect0&quot;&gt;Context matters!&lt;/h1&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At Gradle, we often receive emails from security teams telling us things like: &quot;The Gradle distribution contains a dependency on this X library which has vulnerability Y&quot;.
+However, in almost all cases we&amp;#8217;ve investigated, this was a no issue for us.
+Because of the nature of Gradle, the fact that by definition it runs arbitrary code on a machine, most vulnerabilities are not a problem in this environment: context matters.
+What&amp;#8217;s more, even if your tool uses a library that has a critical vulnerability (we use Jackson for example, which had a number of thems recently), it doesn&amp;#8217;t mean that your code &lt;strong&gt;exercises the path which is vulnerable&lt;/strong&gt;: context matters!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s not harmful to upgrade, but it creates a lot of noise.&lt;/p&gt;
+&lt;/div&gt;
+&lt;h1 id=&quot;_wrong_impression_of_security&quot; class=&quot;sect0&quot;&gt;Wrong impression of security&lt;/h1&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But the biggest problem with such tools, and again I&amp;#8217;m using Dependabot as an example, is that they &lt;strong&gt;give a wrong impression of security&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I explained, Dependabot will basically read your POM files, or Gradle files, or whatever build tool files you use, and &lt;em&gt;assume that the version it reads is the version which is going to be used&lt;/em&gt;.
+We, as developers, and even more as build tool authors, know that this is wrong: the dependencies you declare are rarely the ones you resolve.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s the reason why tools like NPM (Javascript), Gradle (multi-language) or Cargo (Rust) make use of &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_locking.html&quot;&gt;dependency locking&lt;/a&gt;.
+Dependency locking is a concept which helps with build reproducibility.
+Say, for example, that you write:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
+   implementation &apos;org.mylib:awesome:[1.0, 2[&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This means that Gradle can pick whatever version of &lt;code&gt;awesome&lt;/code&gt; as long as it&amp;#8217;s in the range.
+This is a typical declaration for semantic versioning, when you expect a library to be upgradable up to the next major.
+In Gradle you can even improve this by explaining what version you prefer in the range, if nobody else cares:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
+   implementation(&apos;org.mylib:awesome&apos;) {
+      version {
+          require &apos;[1.0, 2[&apos;
+          prefer &apos;1.3&apos;
+      }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, ranges come at a price: if a new dependency version is released, your build would suddenly start using this new version, which breaks reproducibility in case you checkout old code, for example, for a bugfix.
+Therefore, as soon as you use ranges (and by extension any &lt;em&gt;dynamic dependency version&lt;/em&gt;), you should use it with &lt;em&gt;dependency locking&lt;/em&gt;.
+Dependency locking will make sure that whatever version of a library resolved at time T is used at time T+N even if a new version is out.
+It does so by writing the result of the dependency resolution process in a lock file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Upgrading dependencies becomes an intentional process that you do from time to time by generating a new lock file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What is the relationship with tools like Dependabot?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By using the versions you &lt;em&gt;declare&lt;/em&gt;, they have absolutely no guarantee that the versions you resolve are &lt;em&gt;not vulnerable&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the example above, imagine that I use range &lt;code&gt;[1.0, 2[&lt;/code&gt; and that I&amp;#8217;m resolving 1.3.
+At some point in time, version 2.1 is released and is vulnerable.
+You could imagine that because you used a range and that 2.1 is out of the range, you are safe.
+That&amp;#8217;s what those tools would assume, but they would be wrong: the reality is that despite this declaration, by the play of conflict resolution (Ivy, Gradle, &amp;#8230;) or ordering (Maven), a totally different version can be selected, even 2.1!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again there are &lt;a href=&quot;https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html&quot;&gt;tools to mitigate this problem&lt;/a&gt;, but the reality is that by just reading the declaration, you&amp;#8217;re not safe.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s even worse than that: what about transitive dependencies?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Imagine that you have:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;code&gt;Foo -&amp;gt; Bar -&amp;gt; Baz&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And that you depend on &lt;code&gt;Foo&lt;/code&gt;. What if a vulnerability is discovered on &lt;code&gt;Baz&lt;/code&gt;? Will you be notified? What kind of automated pull request can such a tool make to make sure that you upgrade &lt;code&gt;Baz&lt;/code&gt;?&lt;/p&gt;
+&lt;/div&gt;
+&lt;h1 id=&quot;_can_we_do_better&quot; class=&quot;sect0&quot;&gt;Can we do better?&lt;/h1&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I have some good and bad news for you.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The good news is that we can do better.
+The bad news is that it&amp;#8217;s not easy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, instead of relying on the declaration, those tools should really rely on the result of dependency resolution.
+If, for example, they used the lock files instead of the build files, they would know exactly what a build resolves.
+This, however, is only possible if the build uses dependency locking, and only for dependency graphs which are actually locked.
+It&amp;#8217;s a reasonable assumption to say that what is locked is the most relevant information, though.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, I said there were bad news.
+As soon as you use the resolution result, you almost have to give up on automated remediation (pull requests).
+One thing they &lt;em&gt;could&lt;/em&gt; do is patching the lock file.
+However, this is in general not a good idea, because, as I explained, lock files are generated: they present to you the result of resolution.
+Partially upgrading a lock file, manually, is possible but then you cannot make any guarantee that the app is going to work, because introducing a different dependency version may introduce different transitive dependencies!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;An alternate solution is to gather the information about resolved dependencies during the build: this is what scans.gradle.com/[build scans] do for Gradle and Maven, for example.
+This information can be extracted during the build and Dependabot would know precisely, reliably, what is resolved by a project.
+We even offer a Tooling API to do this kind of work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then there&amp;#8217;s remediation.
+This is the hardest problem.
+Because what most people like about Dependabot is actually the automated remediation: pull requests are nice, we all love that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But say, that to fix the transitive dependency issue above, Dependabot suggested to add a first level dependency with a different version.
+For Maven, this would work, since it&amp;#8217;s order and depth sensitive.
+But it would break your model: the application doesn&amp;#8217;t depend on &lt;code&gt;Baz&lt;/code&gt;: it depends on &lt;code&gt;Foo&lt;/code&gt;, which, by the transitive game, depends on &lt;code&gt;Baz&lt;/code&gt;.
+You don&amp;#8217;t want to introduce a first level dependency on &lt;code&gt;Baz&lt;/code&gt; because it doesn&amp;#8217;t make sense.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For Gradle, you could use dependency constraints instead: constraints are meant for this use case.
+A &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_constraints.html#sec:adding-constraints-transitive-deps&quot;&gt;constraint&lt;/a&gt; adds, as it name implies, a constraint to the equation of the resolution of the graph (a bit like in constraint programming).
+They would participate in the dependency graph resolution if, and only if, the dependency they talk about appears in the graph.
+In that sense, they don&amp;#8217;t break the application model, by introducing arbitrary first-level dependencies.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Our Java ecosystem is polluted by hundreds of accidental first level dependencies and exclusions because of this lack of modeling: it is important to get things right.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last but not least, how you declare dependencies matters.
+In Gradle, using &lt;a href=&quot;https://docs.gradle.org/current/userguide/rich_versions.html#header&quot;&gt;rich version constraints&lt;/a&gt;, you can explicitly reject bad versions, and you can explain why.&lt;/p&gt;
+&lt;/div&gt;
+&lt;h1 id=&quot;_conclusion&quot; class=&quot;sect0&quot;&gt;Conclusion&lt;/h1&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In conclusion, I think that Dependabot&amp;#8217;s intent is legitimate and that today it&amp;#8217;s better than nothing. Let&amp;#8217;s detect projects using vulnerable dependencies and propose automated remediation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We, as build tool authors, also need to consider the wider context, which is dependency resolution in general, which isn&amp;#8217;t as simple as it seems.
+In particular we consider that &lt;em&gt;detection&lt;/em&gt; is an easy problem if you use the right tools, while &lt;em&gt;remediation&lt;/em&gt; is a hard one.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I think the current implementation of Dependabot is mostly wrong (at least in the Java ecosystem) as it relies on the declaration. This raises a number of issues:
+- it is dependent to the patterns it recognizes
+- it assumes that what you see is what you get
+- it cannot recognize transitive dependencies actually resolved by your project, so it misses real vulnerabilities
+- it doesn&amp;#8217;t matter about the context of use of your dependencies&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The context thing is difficult to solve, but it&amp;#8217;s actually painful because of the noise it creates, in case the &quot;vulnerable dependency&quot; is actually not in your case.
+However, I think there are improvements which can me made by actually using the actual resolution results instead.
+Then it raises some interesting technical challenges, like how to sandbox execution of builds (GitHub actions already do this) but more importantly how to create an automated pull request from the result of the analysis.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that I also understand that from a Dependabot creator point of view, having to implement build-tool specific logic, like calling the Tooling API, to gather information about resolved dependencies might sound scary.
+I still think this is the right thing to do to be correct and, if our goal is really to make the industry safer, that&amp;#8217;s what we should do.
+However, we have alternate solutions. For example a few weeks ago I experimented with a &lt;a href=&quot;https://github.com/melix/gradle-command-action/tree/dump-dependencies&quot;&gt;fork of my friend and colleague Paul Merlin&amp;#8217;s Gradle Command GitHub Action&lt;/a&gt; which automatically generates a JSON file of resolved dependencies during the build.
+I&amp;#8217;m not sure this is the best answer, but it shows that we can attack the problem from different angles.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Eventually, the key takeaway of this blog post should be: don&amp;#8217;t assume that you are safe because you use Dependabot. You&amp;#8217;re not.&lt;/p&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Configuring git to use main instead of master</title>
       <link>https://melix.github.io/blog/2020/06/updating-git.html</link>
@@ -672,270 +923,6 @@ I am also the coach of my younger boy&amp;#8217;s (10 yo) basketball team, which
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;It took me years to put a name on what I am: I&amp;#8217;m an &lt;em&gt;introvert&lt;/em&gt; and often I have to fight myself not to be ashamed of this.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Gradle myth busting: scripting</title>
-      <link>https://melix.github.io/blog/2019/11/gradle-scripting.html</link>
-      <pubDate>Sun, 3 Nov 2019 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2019/11/gradle-scripting.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I don&amp;#8217;t particularly enjoy Twitter as a medium for debating (no surprise my bio mentions &quot;this is not a support channel&quot;).
-This happened again this week, I got caught in a Maven vs Gradle debate, one more, after I replied to &lt;a href=&quot;https://twitter.com/lukaseder/status/1189889509254713344&quot;&gt;Lukas Eder&lt;/a&gt; that his tweet was a call for FUD.
-And it did happen: no surprise, when you submit something like that, the only answers you&amp;#8217;ll get are either people going in your direction &quot;oh yeah, Gradle sucks and here is my personal experience&quot; or similar, this is just human nature.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_the_good_old_debate&quot;&gt;The good old debate&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the end, most of the answers cycle around the same, good old, debate: Gradle uses scripting (Groovy or Kotlin) vs Maven uses declarative.
-You&amp;#8217;ll aways find people telling you that XML is better because it locks you down, its fully declarative (&lt;a href=&quot;https://maven.apache.org/plugins/maven-antrun-plugin/&quot;&gt;is it&lt;/a&gt;, really?) and everybody is forced to do the same.
-I don&amp;#8217;t counter those arguments, this is a strength of Maven, but it also comes with a number of drawbacks.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I promised some of the folks in the conversation some answers (please look down for direct answers to tweets), so here they are. I&amp;#8217;m answering on a blog post because again Twitter is not good for this, it&amp;#8217;s causing a lot of misunderstandings, because you get into multiple, parallel conversations with different people who accidentally get mentioned, and get scuds fired at you without even having time to answer&amp;#8230; Even a blog post is not enough, there&amp;#8217;s so much to say on this topic.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, on the so called &quot;declarative vs imperative&quot; model, I will always disagree on this dichotomy. I disagree that Gradle isn&amp;#8217;t declarative. It&amp;#8217;s as declarative as you want it to be. Take this build file I wrote recently, which is an &lt;em&gt;Asciidoctor Reveal.js presentation template&lt;/em&gt; (it allows writing slide decks with Asciidoctor and reveal.js). Here&amp;#8217;s what my build file looks like:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;plugins {
-    id(&quot;org.gradle.presentation.asciidoctor&quot;)
-}
-
-presentation {
-    githubUserName.set(&quot;melix&quot;)
-}
-
-dependencies {
-    asciidoctor(&quot;org.asciidoctor:asciidoctorj-diagram:1.5.11&quot;)
-}
-
-tasks {
-    asciidoctor {
-        requires(&quot;asciidoctor-diagram&quot;)
-    }
-
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I wouldn&amp;#8217;t particularly say this is imperative. It looks &lt;em&gt;very declarative&lt;/em&gt; to me. Concise too. The fact it uses an &lt;em&gt;imperative language&lt;/em&gt; is orthogonal, but it does, however, create the ability to write imperative code in the build.
-Note, however, that a dependency was declared for &lt;em&gt;asciidoctor&lt;/em&gt;. This is a major, and probably the most important, difference with Maven: &lt;em&gt;compile&lt;/em&gt; or &lt;em&gt;runtime&lt;/em&gt; doesn&amp;#8217;t make sense here. We declare a dependency for &lt;em&gt;asciidoctor rendering&lt;/em&gt;. There&amp;#8217;s no Java library being built here, it&amp;#8217;s a presentation. Gradle lets you model precisely &lt;em&gt;what you build&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So, in the end, I think what matters is not &lt;em&gt;declarative&lt;/em&gt; vs &lt;em&gt;scripting&lt;/em&gt;. I think what people really want is to reduce the risks of writing bad things. Locking down using XML is &lt;em&gt;one&lt;/em&gt; way to achieve this, but it&amp;#8217;s not the only one. For example, Gradle build scripts &lt;a href=&quot;https://github.com/nebula-plugins/gradle-lint-plugin&quot;&gt;may be linted&lt;/a&gt;. In other words, you can apply on a Gradle build the same tooling you are used to work with when dealing with your own code: checkstyle, findbugs, &amp;#8230; You don&amp;#8217;t &lt;em&gt;have to&lt;/em&gt;, but you can.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The consequence is that yes, there are many different ways you can layout your build with Gradle. This is not different from how you can layout your code in a project: we don&amp;#8217;t tell you in which package you should put your beans, services, &amp;#8230; However, there&amp;#8217;s a big misconception that I&amp;#8217;d like to fight:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;By default, for a Java project, Gradle follows the same conventions as Maven.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s as simple as that. Sources will be in &lt;code&gt;src/main/java&lt;/code&gt;. Tests will be in &lt;code&gt;src/test/java&lt;/code&gt;. Gradle gives you the freedom to diverge from this convention, but this is &lt;em&gt;not&lt;/em&gt; encouraged, and to be honest, I&amp;#8217;ve almost never seen any build diverging from those conventions. On rare occasions, those were actually builds migrated from &lt;em&gt;other&lt;/em&gt; build systems (in particular Ant) where at the time there wasn&amp;#8217;t any convention. Gradle offers the flexibility to reuse an existing layout without much hassle.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_gradle_is_too_flexible&quot;&gt;Gradle is too flexible?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;All in all, the argument that &quot;Gradle is too flexible&quot; is a fallacy.
-It&amp;#8217;s all about good engineering practices, putting the right tools in place, and this is nothing different from any engineering work we do everyday.
-If you can do it for your code, you can do it for your build.
-The interesting thing is &lt;em&gt;why you think you shouldn&amp;#8217;t have the same quality expectation levels for your build as you have for your code&lt;/em&gt;.
-Often the answer is just &quot;I don&amp;#8217;t care much about the build, I&amp;#8217;m writing code, this is what I&amp;#8217;m paid for&quot;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And this is where the discussion becomes interesting, because I think this is a bias that lots of developers have.
-They don&amp;#8217;t even realize how much time they are losing.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Tell me, how likely is it that you change your build scripts, compared to the number of times you&amp;#8217;re effectively going to run &lt;code&gt;mvn clean install&lt;/code&gt; or &lt;code&gt;gradle test&lt;/code&gt;?
-The reality is that you&amp;#8217;re &lt;em&gt;running the build&lt;/em&gt; much more often that you change it.
-Therefore, &lt;em&gt;correctness&lt;/em&gt;, incremental builds, incremental compilation, compile avoidance, task output caching, are far more important to developer productivity than the declarativeness aspect.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Sure pure declarativeness is a good thing and this is why I encourage Gradle users to write nice, synthetic build files, but this is &lt;em&gt;not&lt;/em&gt; the most important aspect for &lt;a href=&quot;https://gradle.com/developer-productivity-engineering/&quot;&gt;developer productivity&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;My point is therefore that if you only focus on the &lt;em&gt;surface&lt;/em&gt;, that is to say the language used to express the build (XML vs Groovy/Kotlin), then you&amp;#8217;re missing the most important part to me, which is the underlying Gradle model, far more advanced than what you have in other tools. The Gradle API surfaces this model and has a number of advantages:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;A &lt;em&gt;task&lt;/em&gt; can be seen as a &lt;em&gt;function&lt;/em&gt;. It &lt;em&gt;declares&lt;/em&gt; inputs and outputs. For the same inputs, the output are always the same: this provides up-to-date checking and cache-ability.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;A task inputs can be another task outputs. This provides &lt;em&gt;implicit dependencies&lt;/em&gt;: Gradle knows that if you want to run &quot;test&quot;, you have to compile first, but it also knows that whatever else is an input to the tests need to be executed.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As a consequence, I already wrote about why &lt;a href=&quot;https://melix.github.io/blog/2018/09/gradle-lifecycle.html&quot;&gt;it&amp;#8217;s wrong to think that Gradle doesn&amp;#8217;t have lifecycle tasks&lt;/a&gt;. In fact, Gradle has them, but is also &lt;em&gt;significantly more precise&lt;/em&gt;. The &quot;phase&quot; approach of Maven is way to coarse: it&amp;#8217;s doomed to execute too much, prevents smart parallelism, and leads to dirty workarounds (&lt;code&gt;-x ....&lt;/code&gt; on the CLI to avoid things you know are not necessary).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Similarly, say you want to test your application on different JDKs and have a single build execute tests for all target JVMs, which is different from the JVM which runs the build tool. With a scripting approach like Gradle, this is totally doable. I won&amp;#8217;t say easy because we can definitely do better to make this use case better, but the underlying model makes it quite simple. You don&amp;#8217;t want to &lt;em&gt;rebuild&lt;/em&gt; your application for each target VM. All you want is to &lt;em&gt;test&lt;/em&gt; on different platforms, and therefore the only step should be a different target VM for test execution. Tools like Maven force you into arbitrary things like defining Maven profiles, and force you into rebuilding everything. This is a giant waste of time for something you don&amp;#8217;t need!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In a different topic, this is no surprise that Gradle can build for different ecosystems: Java, Scala, C++, Kotlin, Kotlin Native, Python, &amp;#8230; The underlying infrastructure makes it possible. Even for a single ecosystem, Gradle can declare what the difference between a &lt;a href=&quot;https://docs.gradle.org/6.0-rc-2/userguide/java_library_plugin.html&quot;&gt;Java Library&lt;/a&gt;, a &lt;a href=&quot;https://docs.gradle.org/6.0-rc-2/userguide/java_platform_plugin.html&quot;&gt;Java Platform&lt;/a&gt; or an &lt;a href=&quot;https://docs.gradle.org/6.0-rc-2/userguide/application_plugin.html&quot;&gt;application&lt;/a&gt; is.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I could talk hours about why it&amp;#8217;s important to model properly software, and actually with the release of Gradle 6 we&amp;#8217;ll have a series of blog posts explaining why we think it&amp;#8217;s a game changer in terms of dependency management. If you&amp;#8217;re tired of having to fix the same &quot;multiple slf4j bindings&quot; in each and every project, tired of Guava being upgraded from &lt;code&gt;jre&lt;/code&gt; to &lt;code&gt;android&lt;/code&gt;, frustrated by incompatibilities of Scala 2.11 and 2.12 dependencies, tired of not knowing which of those Maven optional dependencies is important for you to add, you&amp;#8217;ll understand what I mean.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_direct_answer_to_some_tweets&quot;&gt;Direct answer to some tweets&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;ll try to answer more direct questions in this section. Sorry if I missed yours, I got quite a few comments/answers&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I would sacrifice caches, dependency locks and better plugins to version to have a declarative build process instead of an imperative one. Give me a declarative Gradle and I will love it.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Again, I think this is the wrong tradeoff. Given that you run the build way more often that you change it, declarativeness (that you &lt;em&gt;can&lt;/em&gt; have with Gradle) shouldn&amp;#8217;t be the goal. Your goal should be to reduce your build times, make your build reproducible, improve your developer productivity. Declarativeness is &lt;em&gt;not a goal&lt;/em&gt;, it&amp;#8217;s at best a &lt;em&gt;mean&lt;/em&gt;, but not sufficient by itself. A declarative Gradle, whatever that means, would help you reduce the cognitive overhead, but wouldn&amp;#8217;t help you better model what your application needs.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;make a one liner the ability to publish on different repos the snapshot and release artifacts. The way it was done on Gradle 4.x was broken on 5.x and the only way we found to do it is a horrible hack&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Here&amp;#8217;s a &lt;a href=&quot;https://gradle.com/blog/dependency-management-with-gradle-part-3-publishing-and-release-strategies/&quot;&gt;webinar about publishing&lt;/a&gt;. Publishing is not complicated with Gradle. It used to be poorly documented, and the old publishing plugins didn&amp;#8217;t help. But publishing to a snapshot repository should be trivial already.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Some people will prefer to do their own way, some people will prefer to have a less expressive tool that will produce similar build processes on their projects. Gradle give you the former, Maven the latter. As I say, a matter of taste.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A less expressive tool reduces the risks of writing &lt;em&gt;bad builds&lt;/em&gt;. It doesn&amp;#8217;t help, however, in developing correct, reproducible, fast builds. An, again, I disagree that Gradle leads to &quot;custom builds&quot; everywhere. Most people stick to the defaults and are very happy with them. The more complex builds you find in the wild are those which have indeed very specific needs, or need to be tweaked for performance, producing more artifacts, combinations of artifacts or testing. Things that you can&amp;#8217;t easily do with Maven profiles, for example, because profiles are &lt;em&gt;adhoc&lt;/em&gt; solutions which do not combine well.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle tries to create a fake sense of declarativeness, but it is just an illusion.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It&amp;#8217;s not an illusion. Gradle has a clear separation between its configuration model and execution model. All tasks have declared inputs. The plugins create either new tasks or &lt;em&gt;conventions&lt;/em&gt;. This is not an illusion, this is the reality. Now, because you &lt;em&gt;can&lt;/em&gt; write &lt;code&gt;if&lt;/code&gt; or loops doesn&amp;#8217;t mean it&amp;#8217;s not declarative, it&amp;#8217;s imperative-declarativeness. And yes, you can end up with giant build scripts with &quot;code&quot; inside. If you have, do yourself a favor, &lt;em&gt;refactor&lt;/em&gt; your build like you would with your code, because no one should tolerate this. Use &lt;code&gt;buildSrc&lt;/code&gt;, this is your friend.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I think library dependencies is not correctly supported by IDEs and Java modules are better.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s not correct. We&amp;#8217;ve been using the native Gradle IntelliJ support for years at Gradle, with &lt;em&gt;api&lt;/em&gt; and &lt;em&gt;implementation&lt;/em&gt; separation, and it works exactly like it should. Implementation dependencies are hidden from consumers, like they should. If you don&amp;#8217;t see this, either you didn&amp;#8217;t declare the dependencies or you have a bug in the IDE, in which case it needs to be reported.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Even worst, Gradle don&amp;#8217;t have an official plugin to deal with module-info. there was an old post that says it is not necessay with Gradle because lib dependencies were better (they don&amp;#8217;t)&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I don&amp;#8217;t think anyone said you don&amp;#8217;t need &lt;code&gt;module-info&lt;/code&gt;. There are different things in play:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;separation of API and implementation: Gradle supports this, and it maps to &lt;code&gt;requires&lt;/code&gt; vs &lt;code&gt;requires transitive&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;declaration of public API packages: Gradle &lt;em&gt;used to have&lt;/em&gt; this with the deprecated &quot;software model&quot;. It still has to be backported to the current configuration model. For this, &lt;code&gt;module-info&lt;/code&gt; works fine but it forces you into using the &quot;modular world&quot;, which a lot of libraries, frameworks and IDEs are not ready for.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;declaration of services: Gradle doesn&amp;#8217;t support this.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Can you use modules with Gradle? Yes, there&amp;#8217;s a quite good &lt;a href=&quot;https://github.com/java9-modularity/gradle-modules-plugin&quot;&gt;plugin&lt;/a&gt; to do it. We are planning to support modules and modularity in general better in Gradle, but not short term, because we have bigger pain to solve for our users first. It doesn&amp;#8217;t mean we don&amp;#8217;t consider this important.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I don&amp;#8217;t get why Gradle allow you to explain what your app is better than Maven. In fact I think it is more difficult to explain it on a script that descriptivelly.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I &lt;em&gt;think&lt;/em&gt; the question is what Gradle models better than Maven. A good example here is &lt;code&gt;api&lt;/code&gt; vs &lt;code&gt;implementation&lt;/code&gt; dependencies. Because Maven uses the &lt;em&gt;same descriptor (pom.xml)&lt;/em&gt; for the producer and the consumer, a dependency declared in the &lt;code&gt;&amp;lt;compile&amp;gt;&lt;/code&gt; scope ends up on the compile classpath of the consumers. This is &lt;em&gt;leaking internal implementation details&lt;/em&gt; to consumers, which is very bad because it makes it very hard to evolve libraries, because changing an internal dependency would break consumers which accidentally started depending on your own transitives. This is &lt;em&gt;just&lt;/em&gt; an example of course, there are many other differences (like, why we consider that &lt;code&gt;exclude&lt;/code&gt; is a bad workaround in general, more on this topic in Gradle 6, if you want to read &lt;a href=&quot;https://docs.gradle.org/current/userguide/introduction_dependency_management.html&quot;&gt;our docs&lt;/a&gt;).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The builds I’ve seen have been very spaghettish and clearly copy-and-pasted together un-understood recipes from SO.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yes, there are bad builds out there. With Gradle it&amp;#8217;s frequent for quite old builds from early adopters. More recent builds tend to be much cleaner, because we made a significant effort in guides, getting started samples, documentation. You&amp;#8217;ll always find bad things, and it should be encouraged to fix. On this topic, tools like &lt;a href=&quot;https://scans.gradle.com&quot;&gt;build scans&lt;/a&gt; really help. And copy/pasting from SO is indeed a bad thing. If you copy and paste without understanding what it does, well, bad things can happen&amp;#8230; That said I&amp;#8217;ve seen very scary Maven builds too, and believe me or not, some of our customers wouldn&amp;#8217;t be proud to show you their Maven builds. It&amp;#8217;s the &quot;personal experience fallacy&quot;. I&amp;#8217;ve experienced very clean Gradle builds, you&amp;#8217;ve experienced very bad Gradle builds. I&amp;#8217;ve also written bad Gradle builds, which I dramatically improved, making them more correct, faster, &amp;#8230; Gradle is like any other technology: learn it and you can understand what it brings.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle performance/caching are very attractive but the scripting possibility is a deal breaker. A « declarative-only » Gradle would be perfect for people like me.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Again I think &quot;declarative&quot; is the wrong term here. Locked down to reduce the risks of doing bad things is what you want. It doesn&amp;#8217;t matter if it&amp;#8217;s Kotlin, Groovy, XML or whatever else. It doesn&amp;#8217;t matter if you can use &lt;code&gt;if&lt;/code&gt; or &lt;code&gt;for&lt;/code&gt; loops. What matters is &lt;em&gt;what you can express&lt;/em&gt;, and &lt;em&gt;what should be limited&lt;/em&gt;. It&amp;#8217;s all good engineering that we must share within the industry, find the best patterns, discourage the bad ones. There are quite a few things in the Android world (which uses Gradle) in this direction. We, at Gradle, should do more, but it&amp;#8217;s always a matter of priorities: fixing the most important user pain first. By the way, we provide a Maven build cache with Gradle Enterprise. That is to say, the ability to cache Maven builds using Gradle Enterprise. However, this is limited to &quot;clean builds&quot; (which Maven users are used to do in any case), because of the limitations of the Maven execution model (no knowledge of what each plugin or mojo does, where it writes files, &amp;#8230;).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;IMHO the biggest feature of Gradle that Maven doesn&amp;#8217;t have is the ability to change the version of the project&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Well, this is just an accidental example of the interest of having access to the API in a build script. It offers a number of options for the release process, but that&amp;#8217;s not the only one.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;My only complain about @gradle is how it is unnecessarily complex to deploy a multi-module project to central. Too much copy &amp;amp; paste, or you need to make an init script, which I still haven&amp;#8217;t managed to do.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Technically the problem is not &quot;how to deploy a multi-module project to Central&quot;, but rather, how do I avoid duplicating configuration between scripts. This is what &lt;code&gt;buildSrc&lt;/code&gt; is for. As soon as you have repetition, then, it means a plugin makes sense. &lt;code&gt;buildSrc&lt;/code&gt; can be seen as &quot;local plugins&quot;, and this is where you should write your common code. Then each project applies a plugin to publish. This is a &lt;em&gt;composition&lt;/em&gt; model, as opposed to the &lt;em&gt;inheritance&lt;/em&gt; model of Maven.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I like all those (caching, incrementality, &amp;#8230;) , in theory, but for my needs they are more complexity than feature&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I don&amp;#8217;t think those are complexity. A task declares its inputs. If you do, you benefit from up-to-date checking, and with a bit more configuration, caching. You don&amp;#8217;t &lt;em&gt;have to&lt;/em&gt;. If you don&amp;#8217;t declare the inputs/outputs, you&amp;#8217;re back to the &quot;Maven&quot; approach where the build tools knows nothing about what a task does, at the difference that Gradle knows that it knows nothing, so can be a bit smarter. As soon as you start declaring your inputs, you benefit from more. It&amp;#8217;s more work, for sure, but it&amp;#8217;s not that complex and the benefit is huge.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
