@@ -8,7 +8,7 @@ Cédric Champeau
 :id: git-main
 :linkattrs:
 
-I don't need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name.
+I don't need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name: technical issues shouldn't be a reason to stop us from improving.
 
 Actually, if you are reading this, there are good chances you're already in the mindset of removing potentially offensive language from your project, thank you!
 
@@ -50,6 +50,8 @@ ref: refs/heads/main
 
 (don't forget to add a new line at the end of the first line)
 
+Starting from now, calling `git init` will create a `main` branch instead of `master`!
+
 Now let's deal with existing projects.
 
 ## Renaming your master branch
@@ -70,8 +72,8 @@ git push origin main
 
 ## Configuring GitHub to use `main` instead of `master`
 
-Once you've pushed your new branch, you need to tell GitHub that this is your new "main branch".
-To do this, go to `Settings` -> `Branches` and select your new branch as the main one:
+Once you've pushed your new branch, you need to tell GitHub that this is your new "default branch".
+To do this, go to `Settings` -> `Branches` and select your new branch as the default one:
 
 image::/blog/img/github-branch.png[]
 
