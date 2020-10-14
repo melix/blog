@@ -267,7 +267,7 @@ However, this is in general not a good idea, because, as I explained, lock files
 Partially upgrading a lock file, manually, is possible but then you cannot make any guarantee that the app is going to work, because introducing a different dependency version may introduce different transitive dependencies!</p>
 </div>
 <div class="paragraph">
-<p>An alternate solution is to gather the information about resolved dependencies during the build: this is what scans.gradle.com/[build scans] do for Gradle and Maven, for example.
+<p>An alternate solution is to gather the information about resolved dependencies during the build: this is what <a href="https://scans.gradle.com/">build scans</a> do for Gradle and Maven, for example.
 This information can be extracted during the build and Dependabot would know precisely, reliably, what is resolved by a project.
 We even offer a Tooling API to do this kind of work.</p>
 </div>

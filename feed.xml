@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 14 Oct 2020 10:38:20 +0200</pubDate>
-    <lastBuildDate>Wed, 14 Oct 2020 10:38:20 +0200</lastBuildDate>
+    <pubDate>Wed, 14 Oct 2020 20:44:33 +0200</pubDate>
+    <lastBuildDate>Wed, 14 Oct 2020 20:44:33 +0200</lastBuildDate>
 
     <item>
       <title>Dependabot and automated dependency upgrades</title>
@@ -205,7 +205,7 @@ However, this is in general not a good idea, because, as I explained, lock files
 Partially upgrading a lock file, manually, is possible but then you cannot make any guarantee that the app is going to work, because introducing a different dependency version may introduce different transitive dependencies!&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;An alternate solution is to gather the information about resolved dependencies during the build: this is what scans.gradle.com/[build scans] do for Gradle and Maven, for example.
+&lt;p&gt;An alternate solution is to gather the information about resolved dependencies during the build: this is what &lt;a href=&quot;https://scans.gradle.com/&quot;&gt;build scans&lt;/a&gt; do for Gradle and Maven, for example.
 This information can be extracted during the build and Dependabot would know precisely, reliably, what is resolved by a project.
 We even offer a Tooling API to do this kind of work.&lt;/p&gt;
 &lt;/div&gt;
