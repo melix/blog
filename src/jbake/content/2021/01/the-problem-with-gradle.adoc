@@ -1,0 +1,301 @@
+= The problem with Gradle: really?
+Cédric Champeau
+2021-01-06
+:jbake-type: post
+:jbake-tags: gradle, misconceptions
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-problem
+:linkattrs:
+
+Disclaimer: I'm a former Groovy committer and a Gradle Inc. employee.
+However, I started using Gradle long before I joined Gradle, and I have quite some experience with Java build tools: I started with Ant, but I also used Maven quite a lot, then fell in love with Gradle, for many reasons.
+
+https://www.bruceeckel.com/2021/01/02/the-problem-with-gradle/[A blog post from Bruce Eckel] made quite some noise on Reddit (no wonder, Bruce is a guru!).
+It's not the first time I read comments about Gradle, this article in itself is balanced and not that negative.
+Most of the criticism is on the title itself, which is misleading and looks like a clickbait.
+One can easily be retweeted without actually reading the details, and most importantly the conclusion.
+Also, it doesn't compare with what you'd have to do with _other_ build tools, which is important to draw good conclusions.
+
+== What makes Gradle different?
+
+At the core of this blog post is the thing that the "big picture" of Gradle is unclear.
+There are several things to say here.
+First of all, Gradle is not a new, shiny toy to play with: it was born more than 10 years ago, and saw its v1.0 release on Jun 12, 2012.
+Second, there's not a "single" problem with Gradle: there are different problems, some more important than the others, but there are also many, many benefits.
+As such, one should draw a complete picture, which is sometimes hard for build tools, something that developers tend to underestimate, in particular in terms of impact on developer productivity.
+
+Gradle is designed to improve developer productivity which is achieved via incremental builds, incremental tasks, parallel execution, reproducibility and many other features.
+Let's put it this way: if you look at Gradle from the DSL point of view, that is, the look and feel, instead of its capabilities, the engine, you will miss the most interesting parts.
+The beauty of Gradle is not in its "flexibility" offered because it uses configuration as code: it's the engine which is designed to model software properly and optimizes building software.
+
+== Do you have to know everything?
+
+Bruce states that with Gradle, "To do anything you have to know everything".
+
+While the formula is elegant, this is a bold statement: this simply doesn't align with the reality of the Gradle ecosystem, our community and larger user base.
+
+What is true, however, is that the learning curve of Gradle is higher than with other build tools (say, Maven for example).
+I always said that the learning curve of Gradle is difficult, but once you get it, the benefit is just amazing: we have customers who tell stories about dramatic productivity boosts after migrating to Gradle, simplified maintenance and coordination of large development teams via corporate plugins.
+
+One of the reasons is that Gradle is fundamentally different from other build tools: it focuses on modeling software components and their relationships, and as such it can be considered as a language for building _any_ kind of application. It raises the concept of convention over configuration to another level.
+
+That's no surprise that Gradle has been successfully used to build software in various ecosystems: the JVM, where it's born (with Java, Groovy, Scala in particular), but also native development (take a look at https://nokee.dev/[Nokee] if you are interested), Go (https://github.com/gogradle/gogradle[Go Gradle]), ...
+
+Some ecosystems actually build on top of unique features of Gradle, in particular in terms of dependency management: Android (with multiple flavors of libraries and applications) or Kotlin in particular (with Kotlin Multiplatform).
+
+Why is that? Gradle is an execution engine optimized for build workflows, with intelligence about how to build things incrementally.
+
+Nonetheless, improving the experience of first time users is something the Gradle team focuses on, as we will see below.
+
+== Tasks vs dependencies: a simplistic view
+
+Bruce says that any build system is basically the combination of two essential ingredients: _tasks_ and _dependencies_, where dependencies are seen as artifacts.
+
+That is not quite correct in case for Gradle: Gradle is responsible for wiring units of work together, either through explicit or implicit dependencies.
+It's important to understand that "dependency" here has a wider meaning: it's something which is required to be able to execute a unit of work.
+There is, technically speaking, no difference between an external and an internal dependency. What matters is that we have units of work, which have inputs and outputs.
+The role of Gradle is to wire things so that everything is ordered properly and optimized for execution (parallelism, caching, ...).
+It's a mistake to think that there are only tasks and dependencies (files, mostly): there are work units, inputs and outputs.
+A task (say, `JavaCompile`) is just _one kind_ of work unit, but that's not the only one. Here are some other kind of work units: transforming artifacts (for example, transform a _jar_ into something else before it is consumed), downloading a toolchain, uploading an artifact to the build cache, ... A task itself can be splitted into several work units in order to maximize incrementality and parallelism.
+
+A lot of the criticism we see on Gradle is because there's a mismatch between the mental model of what Gradle is, and the surface, which is the language(s) it uses to configure the actual model.
+
+A lot of the confusion comes from the fact that while Gradle has a vision, it should be better shared and explained.
+It's also victim of its age which means success: the road towards fine grained execution, safe parallelism, configuration, ... is hard and there are some APIs which are sub-optimal for this, and https://docs.google.com/forms/d/e/1FAIpQLSc9aQrjjsxVqXDkYR35ExeiI1yEIksRXVtN6asuaem084l3aA/viewform[maintaining backwards compatibility is a day-to-day challenge].
+
+Let's explain a bit what Gradle has to do, when you say that you want to execute a _task_:
+
+- configure the task (execute its _configuration phase_), which means executing plugins which configure the default values, use your configuration, etc.
+- compute the _dependencies_ of the task, which can either be explicit (typically the `dependsOn` clause) or _implicit_ (because you configured a task input as the output of another task, typically): this is basically a directed graph resolution engine, which is very fine grained and where each node is a unit of work.
+- and finally executes the nodes of the graph in an optimized way
+
+Historically, Gradle has separated the _configuration phase_ from the _execution phase_, but it doesn't have to be that way: as soon as the inputs of a task are ready, we should be able to execute it, and we shouldn't have to wait for the configuration of other tasks to be ready to do it.
+Also Gradle made it easy, in the beginning, to _inline_ the definition of tasks, including their execution phase, in a build script, but it is, for quite some time, considered a bad design principle: don't write _build logic_ in build scripts. The whole blog post from Bruce never mentions this term a single time: https://docs.gradle.org/current/userguide/custom_plugins.html[write plugins]!
+
+Despite our efforts, lots of resources on the web still focus on how to declare tasks, how flexible Gradle is, without taking time to leverage good engineering practices. In Java nobody writes a giant single class with all the logic _and_ the data as code, right? So don't do it in your build, that's as simple as that.
+
+Let's be honest: it's partly our fault, and for that I agree with Bruce: the documentation of Gradle is huge and things can be made better, especially for beginners.
+It's also true that the docs contain _outdated patterns_ and it's often very difficult to realize that you have outdated info in thousands of pages of docs.
+
+There is, however, a good amount of resources for beginners:
+
+- samples: https://docs.gradle.org/current/samples/index.html
+- guides (slowly replaced with the samples above): https://gradle.org/guides/
+- free trainings: https://gradle.com/training/
+- webcasts: https://gradle.com/blog/tag/webcast/
+
+=== Deconstructing the myth
+
+[quote, Bruce Eckel, The Problem With Gradle]
+____
+We are still in the early days of the “adding a build system atop an existing language” paradigm. Gradle is an experiment in this paradigm, so we expect some sub-optimal choices. However, by understanding its issues you might have less frustration learning Gradle than I did.
+____
+
+This is incorrect. Thinking that Gradle is just about calling methods is the wrong mental model. Thinking that Gradle is "programming a build" is wrong. Gradle uses a programming language as a foundation for "configuration as code", but it is _really_ about configuration, not _programming_. Surely a programming language is interesting to use in the "configuration as code" paradigm, but focusing on that aspect and assuming that it works as a general purpose language is wrong and will inevitably lead to confusion.
+
+Gradle is also _not_ an experiment: it's the most advanced tool you can find in this area, and it works _because_ the language builds on top of an engine which is made to execute workflows.
+A number of build tools, including modern ones, are only fast because they put the maintenance and optimization burden on the build author: declare everything, re-generate build scripts, etc.
+We, in the Gradle team, think that we can be more correct, more performant _without_ having to compromise on user experience.
+
+We even had teams challenging us on performance with modern tools like Bazel, and we proved that with unique features like https://docs.gradle.org/current/userguide/configuration_cache.html#header[configuration caching], Gradle was able to outperform it in almost all scenarios: you get the benefit of terse, maintainable scripts, with performance. win-win.
+
+At this stage, it's time to deconstruct some misconceptions of the blog post, because as long as this message is propagated, we will not achieve what should be the focus of our industry: safer, faster, reproducible builds for everyone.
+
+==== 1. You're not Configuring, You’re Programming
+
+You should see _Gradle build scripts_ as _configuration scripts_, which actually configure a _model_. 
+The surface is a DSL, a language, but what you do, what you _should do_, is to declaratively model your software.
+
+For example, this Groovy script:
+
+```groovy
+plugins {
+   id 'java-library'
+}
+
+dependencies {
+    api 'org.
+    implementation 'org.apache.commons:commons-lang3:3.3.10'
+}
+
+```
+
+Is a build script which configures a library written in Java, while this build script, written in Kotlin, configures a different kind of software component:
+
+```kotlin
+plugins {
+    id("org.gradle.presentation.asciidoctor")
+}
+
+presentation {
+    githubUserName.set("melix")
+    githubRepoName.set("gradle-6-whats-new")
+    useAsciidoctorDiagram()
+}
+```
+
+which is actually a `reveal.js` slide deck, built with Gradle! This is the _full_ build script for this, and it's extremely important to realize that: the "code" that you get shouldn't have any custom tasks, in particular: all of the complexity, which is nothing more than the "model", is hidden in a _plugin_.
+
+I strongly encourage you to read my https://melix.github.io/blog/2019/11/gradle-scripting.html[Gradle myth busting: scripting] blog post which describes exactly that.
+
+In addition, you can watch this 10 minute video I made about writing idiomatic build scripts:
+
++++
+<iframe width="560" height="315" src="https://www.youtube.com/embed/MaansFoPHKg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
++++
+
+
+What it means is that while Gradle build scripts are _executed_, this is code which _configures the model_, so you're "programming the configuration", if you will.
+
+==== 2. Groovy is Not Java
+
+There's not much to say here, because it barely has anything to do with Gradle.
+
+You will notice that when I showed build scripts above, I showed a _Groovy_ build script and a _Kotlin_ one. It's important to notice that Gradle allows both, because under the hood, it's an API.
+As I said, Gradle provides a foundation for building software components, a dependency resolution engine, an execution engine.
+_Plugins_ are at the core of the system and are responsible for building _models_ of software we build: a Java library is different from an Android application, so there's _no reason_ to have the same source layout, for example.
+The fact that Gradle uses Groovy as a language to do its configuration is an _implementation detail_.
+I think it's a mistake to consider that you need a programming language to do what Gradle does: it helps, and lots of people actually appreciate Gradle's flexibility in that regard, but it's not what you should focus on.
+
+Both Groovy and Kotlin have pros and cons. If you use Intellij IDEA, for example, the Kotlin DSL has very good arguments and makes this model completely visible: completion is available, you don't have to "guess" what to type: depending on the plugins you apply, you get the configuration blocks you need, and nothing more!
+
+To come back to this section, a common misconception is that Gradle is written in Groovy. It's not. Gradle is written in Java, mostly. There's a lot of Groovy code in Gradle for testing (we use Spock, in particular), but we also have Kotlin code. The build scripts, however, use Groovy or Kotlin.
+
+The DSL design definitely was influenced by Groovy, though, that's very true.
+
+==== 3. Gradle Uses a Domain-Specific Language
+
+Yes it does. I should say it's an "extensible" DSL. But when I'm reading this:
+
+> How helpful is this DSL syntax, really? I have to translate it into function calls in my head when I read it. So for me it’s additional cognitive overhead which is ultimately a hindrance. The DSL operations can all be done with function calls, and programmers already understand function calls.
+
+I'm thinking that this is again seeing the problem from the wrong angle. You should _not_ see this as function calls, or code being executed. You should see this as a model being configured. You can't, actually, assume _when_ this code is going to be called (because, we have configuration avoidance, for example). So a DSL is really what it means: it's a language meant to configure the model, nothing more. By trying to interpret _how_ Gradle does this, you're actually distracted from what matters: what are you trying to build?
+
+==== 4. There are Many Ways to do the Same Thing
+
+This one is one of my favourites. I always read "there are too many ways to do the same thing". Sure there are. Just like in Java, can you tell me how many ways you can write a loop? Let's see...
+
+.indexed loop
+```
+for (int i=0; i<items.length(); i++) {
+   ...
+}
+```
+
+.foreach loop
+```
+for (String item: items) {
+...
+}
+```
+
+.while loop
+```
+Iterator<String> it = items.iterator();
+while (it.hasNext()) {
+  ...
+}
+```
+
+(not mentioning the `do...while` variant)
+
+.streams
+```
+items.stream()
+   .map(...)
+```
+
+.streams again
+```
+items.forEach(...)
+```
+
+Does anyone complain that Java has too many ways to do the same thing? Certainly not, because there are different reasons: historical (good old loops came first), performance (sometimes streams are not that fast), semantic (iterator lets you delete things while iterating), ... Even Python has many ways to do the same thing. Isn't it the case when you're free to write code? Some consider it's a reason alone _not to use Gradle_. It would be a mistake, because you don't stop programming Java because it has too many ways to write a loop.
+
+The thing is "use the right tool for the right job". Gradle is no different. Except that there are not so many ways to do things 😉 Some are legacy patterns, and there we need to do better at documenting, some are just because people are trying to write code in their build scripts when _they shouldn't_ (write plugins!).
+
+I should mention that we started something called the **idiomatic Gradle** project for these excellent reasons.
+The goal is to encourage best practices, document the most idiomatic way to do something, covering multiple use cases and their differences.
+There will be a blog post from the team about this project, in the meantime you can already read some results:
+
+- a sample showing how to build https://docs.gradle.org/current/samples/sample_building_java_applications_multi_project.html[multi-project Java applications]
+- documentation about https://docs.gradle.org/6.8-rc-5/userguide/structuring_software_products.html[structuring larger builds]
+- a https://jjohannes.github.io/joker-conf-2020/#/[presentation] from my colleague Jendrik Johannes about idiomatic Gradle at JokerConf
+
+Last but not least, we have ongoing conversations about a "strict mode" in Gradle to actually enforce some language constructs, or even a different DSL, to limit what you can actually do in a build script.
+
+==== 5. Magic
+
+[quote, Arthur C. Clarke, Profiles of the Future: An Inquiry Into the Limits of the Possible]
+____
+Any sufficiently advanced technology is indistinguishable from magic.
+____
+
+
+This whole section is basically about understanding the separation between _configuration_ and _execution_ phases, but really what bothers me most is that it's much easier to grasp if you just _don't write inline tasks into build scripts_.
+
+For example, if I write, in a plugin:
+
+```java
+public abstract class ProcessTemplates extends DefaultTask {
+
+    @Input
+    public abstract Property<TemplateEngineType> getTemplateEngine();
+
+    @InputFiles
+    public abstract ConfigurableFileCollection getSourceFiles();
+    
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
+
+    @TaskAction
+    void execute() { ... }
+```
+
+then the separation between _inputs_ (properties annotated with `@InputXXX`), outputs `@OutputDirectory` and the actual task execution `@TaskAction` is obvious.
+More importantly, if you do this Gradle helps you by providing you guidance on what annotations to use, how to make it compatible with caching, etc for free (via embedded linting).
+
+I repeat, nobody should every inline _build logic_ in a build script. Nobody.
+
+Accidentally, the scripts Bruce shows in this section are using Groovy, which, for backwards compatibility reasons, uses _eager configuration APIs_.
+If you use Kotlin scripts, all the task creation, registration, is done lazily, avoiding unnecessary configuration. You can do this in Groovy too, if you use the https://docs.gradle.org/current/userguide/task_configuration_avoidance.html[configuration avoidance APIs].
+
+==== 5bis, the lifecyle
+
+This section again discusses _configuration_ vs _execution_. Just a terminology comment here: a _lifecyle_ in Gradle and other build tools is a different thing. See my other https://melix.github.io/blog/2018/09/gradle-lifecycle.html[Gradle myth busting: lifecyle] blog post for reference.
+
+==== Other Issues
+
+> The Gradle documentation assumes you already know a lot.
+ 
+Yes, and no. The Gradle documentation is large and as I said in the intro, we do have sections for beginners. What is true, and I'm quite mad about this, is that our docs layout is terrible, and that good documentation is very difficult to find out.
+
+We also started to rewrite sections so that they are _use case centered_, see the https://docs.gradle.org/current/userguide/dependency_management.html[dependency management] docs for example.
+
+> Slow startup times
+
+In most cases, "slow startup times" actually refer to "slow configuration times". This is in general because of too much code being executed at configuration time. That's why we have https://docs.gradle.org/current/userguide/task_configuration_avoidance.html[configuration avoidance APIs] and that you can possibly use https://scans.gradle.com[build scans] which tell you that you are doing too much at configuration time.
+However, with the experimental https://docs.gradle.org/current/userguide/configuration_cache.html[configuration cache], those configuration time issues should soon be a thing of the past.
+
+Be careful with some (very) popular plugins: some plugin authors just don't realize that the way they configure builds, reach to other projects or perform cross-configuration has a significant impact on build performance, and therefore user experience.
+
+All that said, we're doing even more: I mentioned the https://docs.gradle.org/current/userguide/configuration_cache.html[configuration cache] earlier. This is still work in progress, but we have amazing results with this. Very large multi-project builds are configured very quickly. We're working with customers and the Android team on this. 
+
+> It’s not that easy to discover Gradle’s abilities, and there are so many abilities that you often don’t know what’s possible 
+
+Oh yes. Oh, yes. Gradle is probably the most advanced build tool of the market. It has dozens of features, including unique features you don't find in any other build tool. They are hardly discoverable. We need more advocacy on those, and make them more visible. I am not sure how we can do this, honestly.
+
+==== Now That I Get It
+
+The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is _much_ easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the Jetbrains team, which is working on performance of the compiler, https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance[Gradle 6.8 will also provide some nice Kotlin DSL performance improvements].
+
+=== Conclusion
+
+In this blog post I have commented on some remaining misconceptions about Gradle, which are still visible in Bruce's blog post. However, there's no blocker there. I would however really encourage you to go the idiomatic Gradle route and try to follow modern Gradle design principles. If you have time, here's a talk I gave recently at the Madrid Groovy User Group about modernizing the Groovy build, I think it summarizes quite a lot why a number of the patterns described in Bruce's blog post are outdated and shouldn't be promoted:
+
++++
+<iframe width="560" height="315" src="https://www.youtube.com/embed/HXAV9pL5Rf8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
++++
+
+
