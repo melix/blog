@@ -6,9 +6,458 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 14 Oct 2020 20:44:33 +0200</pubDate>
-    <lastBuildDate>Wed, 14 Oct 2020 20:44:33 +0200</lastBuildDate>
+    <pubDate>Wed, 6 Jan 2021 18:46:25 +0100</pubDate>
+    <lastBuildDate>Wed, 6 Jan 2021 18:46:25 +0100</lastBuildDate>
 
+    <item>
+      <title>The problem with Gradle: really?</title>
+      <link>https://melix.github.io/blog/2021/01/the-problem-with-gradle.html</link>
+      <pubDate>Wed, 6 Jan 2021 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2021/01/the-problem-with-gradle.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Disclaimer: I&amp;#8217;m a former Groovy committer and a Gradle Inc. employee.
+However, I started using Gradle long before I joined Gradle, and I have quite some experience with Java build tools: I started with Ant, but I also used Maven quite a lot, then fell in love with Gradle, for many reasons.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.bruceeckel.com/2021/01/02/the-problem-with-gradle/&quot;&gt;A blog post from Bruce Eckel&lt;/a&gt; made quite some noise on Reddit (no wonder, Bruce is a guru!).
+It&amp;#8217;s not the first time I read comments about Gradle, this article in itself is balanced and not that negative.
+Most of the criticism is on the title itself, which is misleading and looks like a clickbait.
+One can easily be retweeted without actually reading the details, and most importantly the conclusion.
+Also, it doesn&amp;#8217;t compare with what you&amp;#8217;d have to do with &lt;em&gt;other&lt;/em&gt; build tools, which is important to draw good conclusions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_what_makes_gradle_different&quot;&gt;What makes Gradle different?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At the core of this blog post is the thing that the &quot;big picture&quot; of Gradle is unclear.
+There are several things to say here.
+First of all, Gradle is not a new, shiny toy to play with: it was born more than 10 years ago, and saw its v1.0 release on Jun 12, 2012.
+Second, there&amp;#8217;s not a &quot;single&quot; problem with Gradle: there are different problems, some more important than the others, but there are also many, many benefits.
+As such, one should draw a complete picture, which is sometimes hard for build tools, something that developers tend to underestimate, in particular in terms of impact on developer productivity.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle is designed to improve developer productivity which is achieved via incremental builds, incremental tasks, parallel execution, reproducibility and many other features.
+Let&amp;#8217;s put it this way: if you look at Gradle from the DSL point of view, that is, the look and feel, instead of its capabilities, the engine, you will miss the most interesting parts.
+The beauty of Gradle is not in its &quot;flexibility&quot; offered because it uses configuration as code: it&amp;#8217;s the engine which is designed to model software properly and optimizes building software.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_do_you_have_to_know_everything&quot;&gt;Do you have to know everything?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bruce states that with Gradle, &quot;To do anything you have to know everything&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While the formula is elegant, this is a bold statement: this simply doesn&amp;#8217;t align with the reality of the Gradle ecosystem, our community and larger user base.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What is true, however, is that the learning curve of Gradle is higher than with other build tools (say, Maven for example).
+I always said that the learning curve of Gradle is difficult, but once you get it, the benefit is just amazing: we have customers who tell stories about dramatic productivity boosts after migrating to Gradle, simplified maintenance and coordination of large development teams via corporate plugins.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the reasons is that Gradle is fundamentally different from other build tools: it focuses on modeling software components and their relationships, and as such it can be considered as a language for building &lt;em&gt;any&lt;/em&gt; kind of application. It raises the concept of convention over configuration to another level.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s no surprise that Gradle has been successfully used to build software in various ecosystems: the JVM, where it&amp;#8217;s born (with Java, Groovy, Scala in particular), but also native development (take a look at &lt;a href=&quot;https://nokee.dev/&quot;&gt;Nokee&lt;/a&gt; if you are interested), Go (&lt;a href=&quot;https://github.com/gogradle/gogradle&quot;&gt;Go Gradle&lt;/a&gt;), &amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Some ecosystems actually build on top of unique features of Gradle, in particular in terms of dependency management: Android (with multiple flavors of libraries and applications) or Kotlin in particular (with Kotlin Multiplatform).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Why is that? Gradle is an execution engine optimized for build workflows, with intelligence about how to build things incrementally.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nonetheless, improving the experience of first time users is something the Gradle team focuses on, as we will see below.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_tasks_vs_dependencies_a_simplistic_view&quot;&gt;Tasks vs dependencies: a simplistic view&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bruce says that any build system is basically the combination of two essential ingredients: &lt;em&gt;tasks&lt;/em&gt; and &lt;em&gt;dependencies&lt;/em&gt;, where dependencies are seen as artifacts.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That is not quite correct in case for Gradle: Gradle is responsible for wiring units of work together, either through explicit or implicit dependencies.
+It&amp;#8217;s important to understand that &quot;dependency&quot; here has a wider meaning: it&amp;#8217;s something which is required to be able to execute a unit of work.
+There is, technically speaking, no difference between an external and an internal dependency. What matters is that we have units of work, which have inputs and outputs.
+The role of Gradle is to wire things so that everything is ordered properly and optimized for execution (parallelism, caching, &amp;#8230;).
+It&amp;#8217;s a mistake to think that there are only tasks and dependencies (files, mostly): there are work units, inputs and outputs.
+A task (say, &lt;code&gt;JavaCompile&lt;/code&gt;) is just &lt;em&gt;one kind&lt;/em&gt; of work unit, but that&amp;#8217;s not the only one. Here are some other kind of work units: transforming artifacts (for example, transform a &lt;em&gt;jar&lt;/em&gt; into something else before it is consumed), downloading a toolchain, uploading an artifact to the build cache, &amp;#8230; A task itself can be splitted into several work units in order to maximize incrementality and parallelism.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A lot of the criticism we see on Gradle is because there&amp;#8217;s a mismatch between the mental model of what Gradle is, and the surface, which is the language(s) it uses to configure the actual model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A lot of the confusion comes from the fact that while Gradle has a vision, it should be better shared and explained.
+It&amp;#8217;s also victim of its age which means success: the road towards fine grained execution, safe parallelism, configuration, &amp;#8230; is hard and there are some APIs which are sub-optimal for this, and &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLSc9aQrjjsxVqXDkYR35ExeiI1yEIksRXVtN6asuaem084l3aA/viewform&quot;&gt;maintaining backwards compatibility is a day-to-day challenge&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s explain a bit what Gradle has to do, when you say that you want to execute a &lt;em&gt;task&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;configure the task (execute its &lt;em&gt;configuration phase&lt;/em&gt;), which means executing plugins which configure the default values, use your configuration, etc.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;compute the &lt;em&gt;dependencies&lt;/em&gt; of the task, which can either be explicit (typically the &lt;code&gt;dependsOn&lt;/code&gt; clause) or &lt;em&gt;implicit&lt;/em&gt; (because you configured a task input as the output of another task, typically): this is basically a directed graph resolution engine, which is very fine grained and where each node is a unit of work.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;and finally executes the nodes of the graph in an optimized way&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Historically, Gradle has separated the &lt;em&gt;configuration phase&lt;/em&gt; from the &lt;em&gt;execution phase&lt;/em&gt;, but it doesn&amp;#8217;t have to be that way: as soon as the inputs of a task are ready, we should be able to execute it, and we shouldn&amp;#8217;t have to wait for the configuration of other tasks to be ready to do it.
+Also Gradle made it easy, in the beginning, to &lt;em&gt;inline&lt;/em&gt; the definition of tasks, including their execution phase, in a build script, but it is, for quite some time, considered a bad design principle: don&amp;#8217;t write &lt;em&gt;build logic&lt;/em&gt; in build scripts. The whole blog post from Bruce never mentions this term a single time: &lt;a href=&quot;https://docs.gradle.org/current/userguide/custom_plugins.html&quot;&gt;write plugins&lt;/a&gt;!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Despite our efforts, lots of resources on the web still focus on how to declare tasks, how flexible Gradle is, without taking time to leverage good engineering practices. In Java nobody writes a giant single class with all the logic &lt;em&gt;and&lt;/em&gt; the data as code, right? So don&amp;#8217;t do it in your build, that&amp;#8217;s as simple as that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s be honest: it&amp;#8217;s partly our fault, and for that I agree with Bruce: the documentation of Gradle is huge and things can be made better, especially for beginners.
+It&amp;#8217;s also true that the docs contain &lt;em&gt;outdated patterns&lt;/em&gt; and it&amp;#8217;s often very difficult to realize that you have outdated info in thousands of pages of docs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There is, however, a good amount of resources for beginners:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;samples: &lt;a href=&quot;https://docs.gradle.org/current/samples/index.html&quot;&gt;https://docs.gradle.org/current/samples/index.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;guides (slowly replaced with the samples above): &lt;a href=&quot;https://gradle.org/guides/&quot;&gt;https://gradle.org/guides/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;free trainings: &lt;a href=&quot;https://gradle.com/training/&quot;&gt;https://gradle.com/training/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;webcasts: &lt;a href=&quot;https://gradle.com/blog/tag/webcast/&quot;&gt;https://gradle.com/blog/tag/webcast/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_deconstructing_the_myth&quot;&gt;Deconstructing the myth&lt;/h3&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We are still in the early days of the “adding a build system atop an existing language” paradigm. Gradle is an experiment in this paradigm, so we expect some sub-optimal choices. However, by understanding its issues you might have less frustration learning Gradle than I did.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;div class=&quot;attribution&quot;&gt;
+&lt;cite&gt;The Problem With Gradle&lt;/cite&gt;&lt;br&gt;
+&amp;#8212; Bruce Eckel
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is incorrect. Thinking that Gradle is just about calling methods is the wrong mental model. Thinking that Gradle is &quot;programming a build&quot; is wrong. Gradle uses a programming language as a foundation for &quot;configuration as code&quot;, but it is &lt;em&gt;really&lt;/em&gt; about configuration, not &lt;em&gt;programming&lt;/em&gt;. Surely a programming language is interesting to use in the &quot;configuration as code&quot; paradigm, but focusing on that aspect and assuming that it works as a general purpose language is wrong and will inevitably lead to confusion.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle is also &lt;em&gt;not&lt;/em&gt; an experiment: it&amp;#8217;s the most advanced tool you can find in this area, and it works &lt;em&gt;because&lt;/em&gt; the language builds on top of an engine which is made to execute workflows.
+A number of build tools, including modern ones, are only fast because they put the maintenance and optimization burden on the build author: declare everything, re-generate build scripts, etc.
+We, in the Gradle team, think that we can be more correct, more performant &lt;em&gt;without&lt;/em&gt; having to compromise on user experience.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We even had teams challenging us on performance with modern tools like Bazel, and we proved that with unique features like &lt;a href=&quot;https://docs.gradle.org/current/userguide/configuration_cache.html#header&quot;&gt;configuration caching&lt;/a&gt;, Gradle was able to outperform it in almost all scenarios: you get the benefit of terse, maintainable scripts, with performance. win-win.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this stage, it&amp;#8217;s time to deconstruct some misconceptions of the blog post, because as long as this message is propagated, we will not achieve what should be the focus of our industry: safer, faster, reproducible builds for everyone.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_1_you_re_not_configuring_you_re_programming&quot;&gt;1. You&amp;#8217;re not Configuring, You’re Programming&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You should see &lt;em&gt;Gradle build scripts&lt;/em&gt; as &lt;em&gt;configuration scripts&lt;/em&gt;, which actually configure a &lt;em&gt;model&lt;/em&gt;.
+The surface is a DSL, a language, but what you do, what you &lt;em&gt;should do&lt;/em&gt;, is to declaratively model your software.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, this Groovy script:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+   id &apos;java-library&apos;
+}
+
+dependencies {
+    api &apos;org.
+    implementation &apos;org.apache.commons:commons-lang3:3.3.10&apos;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Is a build script which configures a library written in Java, while this build script, written in Kotlin, configures a different kind of software component:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;plugins {
+    id(&quot;org.gradle.presentation.asciidoctor&quot;)
+}
+
+presentation {
+    githubUserName.set(&quot;melix&quot;)
+    githubRepoName.set(&quot;gradle-6-whats-new&quot;)
+    useAsciidoctorDiagram()
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;which is actually a &lt;code&gt;reveal.js&lt;/code&gt; slide deck, built with Gradle! This is the &lt;em&gt;full&lt;/em&gt; build script for this, and it&amp;#8217;s extremely important to realize that: the &quot;code&quot; that you get shouldn&amp;#8217;t have any custom tasks, in particular: all of the complexity, which is nothing more than the &quot;model&quot;, is hidden in a &lt;em&gt;plugin&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I strongly encourage you to read my &lt;a href=&quot;https://melix.github.io/blog/2019/11/gradle-scripting.html&quot;&gt;Gradle myth busting: scripting&lt;/a&gt; blog post which describes exactly that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In addition, you can watch this 10 minute video I made about writing idiomatic build scripts:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/MaansFoPHKg&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What it means is that while Gradle build scripts are &lt;em&gt;executed&lt;/em&gt;, this is code which &lt;em&gt;configures the model&lt;/em&gt;, so you&amp;#8217;re &quot;programming the configuration&quot;, if you will.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_2_groovy_is_not_java&quot;&gt;2. Groovy is Not Java&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s not much to say here, because it barely has anything to do with Gradle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You will notice that when I showed build scripts above, I showed a &lt;em&gt;Groovy&lt;/em&gt; build script and a &lt;em&gt;Kotlin&lt;/em&gt; one. It&amp;#8217;s important to notice that Gradle allows both, because under the hood, it&amp;#8217;s an API.
+As I said, Gradle provides a foundation for building software components, a dependency resolution engine, an execution engine.
+&lt;em&gt;Plugins&lt;/em&gt; are at the core of the system and are responsible for building &lt;em&gt;models&lt;/em&gt; of software we build: a Java library is different from an Android application, so there&amp;#8217;s &lt;em&gt;no reason&lt;/em&gt; to have the same source layout, for example.
+The fact that Gradle uses Groovy as a language to do its configuration is an &lt;em&gt;implementation detail&lt;/em&gt;.
+I think it&amp;#8217;s a mistake to consider that you need a programming language to do what Gradle does: it helps, and lots of people actually appreciate Gradle&amp;#8217;s flexibility in that regard, but it&amp;#8217;s not what you should focus on.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Both Groovy and Kotlin have pros and cons. If you use Intellij IDEA, for example, the Kotlin DSL has very good arguments and makes this model completely visible: completion is available, you don&amp;#8217;t have to &quot;guess&quot; what to type: depending on the plugins you apply, you get the configuration blocks you need, and nothing more!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To come back to this section, a common misconception is that Gradle is written in Groovy. It&amp;#8217;s not. Gradle is written in Java, mostly. There&amp;#8217;s a lot of Groovy code in Gradle for testing (we use Spock, in particular), but we also have Kotlin code. The build scripts, however, use Groovy or Kotlin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The DSL design definitely was influenced by Groovy, though, that&amp;#8217;s very true.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_3_gradle_uses_a_domain_specific_language&quot;&gt;3. Gradle Uses a Domain-Specific Language&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yes it does. I should say it&amp;#8217;s an &quot;extensible&quot; DSL. But when I&amp;#8217;m reading this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;How helpful is this DSL syntax, really? I have to translate it into function calls in my head when I read it. So for me it’s additional cognitive overhead which is ultimately a hindrance. The DSL operations can all be done with function calls, and programmers already understand function calls.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m thinking that this is again seeing the problem from the wrong angle. You should &lt;em&gt;not&lt;/em&gt; see this as function calls, or code being executed. You should see this as a model being configured. You can&amp;#8217;t, actually, assume &lt;em&gt;when&lt;/em&gt; this code is going to be called (because, we have configuration avoidance, for example). So a DSL is really what it means: it&amp;#8217;s a language meant to configure the model, nothing more. By trying to interpret &lt;em&gt;how&lt;/em&gt; Gradle does this, you&amp;#8217;re actually distracted from what matters: what are you trying to build?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_4_there_are_many_ways_to_do_the_same_thing&quot;&gt;4. There are Many Ways to do the Same Thing&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This one is one of my favourites. I always read &quot;there are too many ways to do the same thing&quot;. Sure there are. Just like in Java, can you tell me how many ways you can write a loop? Let&amp;#8217;s see&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;indexed loop&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;for (int i=0; i&amp;lt;items.length(); i++) {
+   ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;foreach loop&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;for (String item: items) {
+...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;while loop&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;Iterator&amp;lt;String&amp;gt; it = items.iterator();
+while (it.hasNext()) {
+  ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;(not mentioning the &lt;code&gt;do...while&lt;/code&gt; variant)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;streams&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;items.stream()
+   .map(...)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;streams again&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;items.forEach(...)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Does anyone complain that Java has too many ways to do the same thing? Certainly not, because there are different reasons: historical (good old loops came first), performance (sometimes streams are not that fast), semantic (iterator lets you delete things while iterating), &amp;#8230; Even Python has many ways to do the same thing. Isn&amp;#8217;t it the case when you&amp;#8217;re free to write code? Some consider it&amp;#8217;s a reason alone &lt;em&gt;not to use Gradle&lt;/em&gt;. It would be a mistake, because you don&amp;#8217;t stop programming Java because it has too many ways to write a loop.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The thing is &quot;use the right tool for the right job&quot;. Gradle is no different. Except that there are not so many ways to do things 😉 Some are legacy patterns, and there we need to do better at documenting, some are just because people are trying to write code in their build scripts when &lt;em&gt;they shouldn&amp;#8217;t&lt;/em&gt; (write plugins!).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I should mention that we started something called the &lt;strong&gt;idiomatic Gradle&lt;/strong&gt; project for these excellent reasons.
+The goal is to encourage best practices, document the most idiomatic way to do something, covering multiple use cases and their differences.
+There will be a blog post from the team about this project, in the meantime you can already read some results:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a sample showing how to build &lt;a href=&quot;https://docs.gradle.org/current/samples/sample_building_java_applications_multi_project.html&quot;&gt;multi-project Java applications&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;documentation about &lt;a href=&quot;https://docs.gradle.org/6.8-rc-5/userguide/structuring_software_products.html&quot;&gt;structuring larger builds&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;a href=&quot;https://jjohannes.github.io/joker-conf-2020/#/&quot;&gt;presentation&lt;/a&gt; from my colleague Jendrik Johannes about idiomatic Gradle at JokerConf&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last but not least, we have ongoing conversations about a &quot;strict mode&quot; in Gradle to actually enforce some language constructs, or even a different DSL, to limit what you can actually do in a build script.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_5_magic&quot;&gt;5. Magic&lt;/h4&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Any sufficiently advanced technology is indistinguishable from magic.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;div class=&quot;attribution&quot;&gt;
+&lt;cite&gt;Profiles of the Future: An Inquiry Into the Limits of the Possible&lt;/cite&gt;&lt;br&gt;
+&amp;#8212; Arthur C. Clarke
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This whole section is basically about understanding the separation between &lt;em&gt;configuration&lt;/em&gt; and &lt;em&gt;execution&lt;/em&gt; phases, but really what bothers me most is that it&amp;#8217;s much easier to grasp if you just &lt;em&gt;don&amp;#8217;t write inline tasks into build scripts&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, if I write, in a plugin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public abstract class ProcessTemplates extends DefaultTask {
+
+    @Input
+    public abstract Property&amp;lt;TemplateEngineType&amp;gt; getTemplateEngine();
+
+    @InputFiles
+    public abstract ConfigurableFileCollection getSourceFiles();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
+
+    @TaskAction
+    void execute() { ... }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;then the separation between &lt;em&gt;inputs&lt;/em&gt; (properties annotated with &lt;code&gt;@InputXXX&lt;/code&gt;), outputs &lt;code&gt;@OutputDirectory&lt;/code&gt; and the actual task execution &lt;code&gt;@TaskAction&lt;/code&gt; is obvious.
+More importantly, if you do this Gradle helps you by providing you guidance on what annotations to use, how to make it compatible with caching, etc for free (via embedded linting).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I repeat, nobody should every inline &lt;em&gt;build logic&lt;/em&gt; in a build script. Nobody.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Accidentally, the scripts Bruce shows in this section are using Groovy, which, for backwards compatibility reasons, uses &lt;em&gt;eager configuration APIs&lt;/em&gt;.
+If you use Kotlin scripts, all the task creation, registration, is done lazily, avoiding unnecessary configuration. You can do this in Groovy too, if you use the &lt;a href=&quot;https://docs.gradle.org/current/userguide/task_configuration_avoidance.html&quot;&gt;configuration avoidance APIs&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_5bis_the_lifecyle&quot;&gt;5bis, the lifecyle&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This section again discusses &lt;em&gt;configuration&lt;/em&gt; vs &lt;em&gt;execution&lt;/em&gt;. Just a terminology comment here: a &lt;em&gt;lifecyle&lt;/em&gt; in Gradle and other build tools is a different thing. See my other &lt;a href=&quot;https://melix.github.io/blog/2018/09/gradle-lifecycle.html&quot;&gt;Gradle myth busting: lifecyle&lt;/a&gt; blog post for reference.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_other_issues&quot;&gt;Other Issues&lt;/h4&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Gradle documentation assumes you already know a lot.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yes, and no. The Gradle documentation is large and as I said in the intro, we do have sections for beginners. What is true, and I&amp;#8217;m quite mad about this, is that our docs layout is terrible, and that good documentation is very difficult to find out.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We also started to rewrite sections so that they are &lt;em&gt;use case centered&lt;/em&gt;, see the &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_management.html&quot;&gt;dependency management&lt;/a&gt; docs for example.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Slow startup times&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In most cases, &quot;slow startup times&quot; actually refer to &quot;slow configuration times&quot;. This is in general because of too much code being executed at configuration time. That&amp;#8217;s why we have &lt;a href=&quot;https://docs.gradle.org/current/userguide/task_configuration_avoidance.html&quot;&gt;configuration avoidance APIs&lt;/a&gt; and that you can possibly use &lt;a href=&quot;https://scans.gradle.com&quot;&gt;build scans&lt;/a&gt; which tell you that you are doing too much at configuration time.
+However, with the experimental &lt;a href=&quot;https://docs.gradle.org/current/userguide/configuration_cache.html&quot;&gt;configuration cache&lt;/a&gt;, those configuration time issues should soon be a thing of the past.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Be careful with some (very) popular plugins: some plugin authors just don&amp;#8217;t realize that the way they configure builds, reach to other projects or perform cross-configuration has a significant impact on build performance, and therefore user experience.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All that said, we&amp;#8217;re doing even more: I mentioned the &lt;a href=&quot;https://docs.gradle.org/current/userguide/configuration_cache.html&quot;&gt;configuration cache&lt;/a&gt; earlier. This is still work in progress, but we have amazing results with this. Very large multi-project builds are configured very quickly. We&amp;#8217;re working with customers and the Android team on this.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It’s not that easy to discover Gradle’s abilities, and there are so many abilities that you often don’t know what’s possible&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Oh yes. Oh, yes. Gradle is probably the most advanced build tool of the market. It has dozens of features, including unique features you don&amp;#8217;t find in any other build tool. They are hardly discoverable. We need more advocacy on those, and make them more visible. I am not sure how we can do this, honestly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_now_that_i_get_it&quot;&gt;Now That I Get It&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is &lt;em&gt;much&lt;/em&gt; easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the Jetbrains team, which is working on performance of the compiler, &lt;a href=&quot;https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance&quot;&gt;Gradle 6.8 will also provide some nice Kotlin DSL performance improvements&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post I have commented on some remaining misconceptions about Gradle, which are still visible in Bruce&amp;#8217;s blog post. However, there&amp;#8217;s no blocker there. I would however really encourage you to go the idiomatic Gradle route and try to follow modern Gradle design principles. If you have time, here&amp;#8217;s a talk I gave recently at the Madrid Groovy User Group about modernizing the Groovy build, I think it summarizes quite a lot why a number of the patterns described in Bruce&amp;#8217;s blog post are outdated and shouldn&amp;#8217;t be promoted:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/HXAV9pL5Rf8&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Dependabot and automated dependency upgrades</title>
       <link>https://melix.github.io/blog/2020/10/about-dependabot.html</link>
@@ -704,234 +1153,6 @@ Je me présente humblement sur la liste de Vincent MATHIEU, une liste composée 
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Comme l&amp;#8217;a si bient dit Michel PAVAGEAU, le doyen de notre liste, à Commune Nouvelle, Équipe Nouvelle !&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Chronicles of an introvert remote worker</title>
-      <link>https://melix.github.io/blog/2020/01/introvert-remote.html</link>
-      <pubDate>Fri, 3 Jan 2020 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2020/01/introvert-remote.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;admonitionblock note&quot;&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class=&quot;icon&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class=&quot;content&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This post is the translation in English of the most popular blog post I wrote in October, 2019, which was originally posted in french.
-Lots of folks commented they found it useful and that they recognized themselves in the description so I decided to translate it to English.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The other day I was listening to &lt;a href=&quot;https://lescastcodeurs.com/2019/09/16/lcc-216-l-episode-ou-on-a-perdu-le-compte/&quot;&gt;Les Cast Codeurs podcast&lt;/a&gt; which mentioned the topic of remote working.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Some comments made me raise an eyebrow, this post is going to talk about my own experience.
-This post is mostly about me and being an introvert.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_remote_working_and_being_an_introvert&quot;&gt;Remote working and being an introvert&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;ve been &lt;em&gt;almost&lt;/em&gt; full-time remote worker for almost 10 years.
-I&amp;#8217;m saying &lt;em&gt;almost&lt;/em&gt; because in practice, I&amp;#8217;m moving from time to time for profesional reasons (conferences, meetings).
-However, for my daily job, everything is done from home.
-Before being a remote worker, I was driving a lot: my job was in Nantes, around 45km from home.
-That was about ~90km a day, but more importantly between 2 and 3 hours of commute a day.
-The day I switched jobs, working for VMware on the Groovy language, the first shock was that I was recovering those 2 to 3 hours a day.
-That&amp;#8217;s a lot of time to spend with your kids (dropping them at school, driving them to sports, &amp;#8230;) or doing housekeeping (fixing, gardening, sports, &amp;#8230;).
-I won&amp;#8217;t come back to those advantages because they are mostly known, the only real drawback to me is being capable of handling your own work hours, that is to say, contrary to the belief, not working &lt;em&gt;too much&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The thing I want to talk about is this comment from Antonio Goncalvés who said:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Dump your coffee maker, go out, see people, it&amp;#8217;s important to see other human beings!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This &lt;a href=&quot;https://twitter.com/CedricChampeau/status/1173893698997936130&quot;&gt;made me react&lt;/a&gt; so I wanted to come back to this topic.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, this advice only works if you live in a city, which is not my case.
-I (intentionally) live in the countryside, 5kms from the town center.
-A &quot;small coffee break&quot; turns into an expedition in those conditions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But let&amp;#8217;s come to the core of the topic: &quot;It&amp;#8217;s important to see and talk to human beings&quot;, which relates to the &lt;em&gt;necessity not to be alone&lt;/em&gt;.
-This is a topic I care about and resonates with a question I often answered when I&amp;#8217;m talking about remote work:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But aren&amp;#8217;t you tired of being alone and not seeing anybody?&quot;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Honest answer: &lt;strong&gt;no&lt;/strong&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I understand people who need this, but &lt;strong&gt;don&amp;#8217;t think everybody works like you&lt;/strong&gt; and &lt;em&gt;need&lt;/em&gt; to see other people.
-Some folks like me live perfectly well without seeing anybody.
-I can spend days alone, without me going mad or missing any social relationship.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;m part of this population called the &lt;em&gt;introverts&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;An &lt;em&gt;introvert&lt;/em&gt;, contrary to the popular belief, isn&amp;#8217;t antisocial, selfish or without any kind of empathy.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;An &lt;em&gt;introvert&lt;/em&gt; is someone whose energy is drained by the crowd, by social relationships. It&amp;#8217;s the opposite of an &lt;em&gt;extravert&lt;/em&gt; who needs to see people to recover energy.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;An &lt;em&gt;introvert&lt;/em&gt; is someone who can&amp;#8217;t stand smalltalk, because they don&amp;#8217;t bring anything to him/her except from draining their energy.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;An &lt;em&gt;introver&lt;/em&gt; is someone who can talk hours on a topic (s)he&amp;#8217;s passionate about because it&amp;#8217;s &lt;em&gt;worth their energy&lt;/em&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;When I was a kid I already avoided being in a group of people.
-I didn&amp;#8217;t have many friends (but the friends I had back then I still have them today).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I always freaked out at the idea of being in a group where I knew nobody, be it at school, at sport or even family parties.
-Even if I &lt;em&gt;knew&lt;/em&gt; someone, being &lt;em&gt;in a group&lt;/em&gt;, having to entertain social relationships was of extreme difficulty (and it still is today, to some extent).
-Everything I cared as a child about back then was being &quot;excellent&quot; at school and my parents be proud of me.
-This caused me to get some nicknames (&quot;the nerd&quot;), being hassled or even get some not so nice words written on the back of my classroom photographs, for a large part of my childhood.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As an example, I always refused to go to summer camps (the only experience I got, a week in a stud farm, was so painful to me I still remember it).
-I also refused going to snow camps.
-However, I &lt;em&gt;did&lt;/em&gt; accept going to England, Ireland and Spain with school, not without fighting myself, because I knew I could learn something out of it, but also because I knew I would be in a small group with a friend.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Similarly, having to stand in front of the rest of the classroom to recite a poem, or worse, sing, was pure torture to me.
-On the contrary, I loved being at the University of Science in Nantes, where I could spend some time with 2 or 3 friends max at the coffee shop, discussing with them.
-I didn&amp;#8217;t like much the software engineering school I joined to after that, where I had to be extremely creative to avoid the student integration parties, after-work parties and all those driking games most students were fond of: it was incredibly difficult to be recognized as a person without being excluded because I didn&amp;#8217;t participate in those events.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s talk about those &quot;integration&quot; parties. What&amp;#8217;s fun for some, being drunk, &quot;gently&quot; humiliating others, was just disgust and fear for me.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now that I think about it, few people know it, but I spent my whole scolarity in Nantes, not because everything was available there (it was, really), but because I was petrified at the idea of beling &quot;alone&quot; in a new University, an engineering school, somewhere else at the other end of France, &amp;#8230;
-I remember a teacher who blamed me for not going in a well known French school despite I had the &quot;capacity&quot; do it.
-In retrospect I don&amp;#8217;t think it was a big mistake, I&amp;#8217;m quite happy where I am today!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_i_would_never_hire_someone_like_you&quot;&gt;I would never hire someone like you!&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Everything I explained may sound surprising from someone who, today, gives talks at conferences, sometimes in front of hundreds of people, which sounds a bit irrealistic.
-So what&amp;#8217;s the difference?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Well the difference is that when I talk to you in a such a context, I &lt;strong&gt;understand the topic&lt;/strong&gt; (or at least I think I understand it ;)).
-I can talk to you openly because I know the questions I will get are directly related to the topic I&amp;#8217;m talking about.
-There&amp;#8217;s almost no room for the &lt;em&gt;unknown&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s also for this reason that it&amp;#8217;s still very difficult to me, even today, to reach out to others.
-I am still completely incapable of doing small talk.
-This goes even beyond that: I&amp;#8217;ve traveled abroad a number of times, multiple times in the US for example, but I &lt;em&gt;never&lt;/em&gt; went outside alone to visit (at best I can walk an hour or two in the neighorhood).
-That&amp;#8217;s because doing this drives me outside of my comfort zone: having to talk to people I don&amp;#8217;t know, ordering a meal, asking for directions: all this is draining my energy. It&amp;#8217;s always easy to say you should go out of your comfort zone when doing this is not a trial for you.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;However, if I know one or two people and that they kindly ask me to join them, in most cases it will be fine and I would appreciate visiting!
-Everybody&amp;#8217;s telling me I&amp;#8217;m incredibly lucky to travel.
-Well, maybe, but I, for one, hate this, at least I hate it if I have to do this without my family&amp;#8230;
-Even going to Paris, realizing how many people live there, feeling like an ant in the anthill, remind me how much I hate this!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As a consequence, I avoid as much as I can &quot;parties&quot; like speaker dinners or corporate events.
-They are often described as the &lt;em&gt;must do&lt;/em&gt; of networking.
-While it&amp;#8217;s true that you can learn a lot in those events, they are also incredibly stressful to me.
-When I join them, most of the time I&amp;#8217;m trying to identify someone I know, stick with them but I would often leave early and I have to go to my hotel room alone to recover.
-I wouldn&amp;#8217;t necessarily &lt;em&gt;sleep&lt;/em&gt;, as some people think I do: often I would work late in my hotel room, I just need to be &lt;em&gt;alone&lt;/em&gt;.
-The most terrifying thing to me in those parties is when conversations become &lt;em&gt;extra-professional&lt;/em&gt; which is something I have no &quot;skill&quot; for.
-Some would say I&amp;#8217;m a boring guy, that there&amp;#8217;s no interest in talking to me and that&amp;#8217;s probably right if you&amp;#8217;re looking for someone with an extraordinary life, mine is not that much :)&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A natural conclusion that some people draw from this is that of course I can&amp;#8217;t be a good team player.
-In fact I think that&amp;#8217;s quite the opposite: I value &lt;em&gt;trust&lt;/em&gt; like no one else and I think you can &lt;em&gt;trust&lt;/em&gt; me.
-One shouldn&amp;#8217;t mix my incapacity to have simple inter-personal relationships with my capacity to have useful professional interactions, which is another totally different dimension.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As I explained, I&amp;#8217;m regularly giving talks and I love more than anything else sharing knowledge and information, helping others.
-I also enjoy working with people more competent than me so that I can continue to learn and make progress: in this context working in a team is extremely effective.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Also, it&amp;#8217;s not because you&amp;#8217;re working remotely that you don&amp;#8217;t see anyone and that, effectively, you work &lt;em&gt;alone&lt;/em&gt;.
-It&amp;#8217;s quite the opposite: we work as a team.
-As other teams we do daily standups (via hangouts or Slack), we organize work.
-Sometimes we even do face to face meetings or leverage conferences to meet together and do some work.
-So it&amp;#8217;s not because you&amp;#8217;re an introvert that it&amp;#8217;s a problem: I think my colleagues would tell you that it works pretty well actually.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In short, don&amp;#8217;t be afraid of this aspect: being alone is not a problem for everyone. Maybe it is for you, but definitely not for everyone.
-On the opposite, being alone can also boost productivity: no interruption, no useless meetings, ability to focus on a problem for hours etc&amp;#8230;
-Being introvert doesn&amp;#8217;t mean either that someone is not capable of working in a team: it doesn&amp;#8217;t prevent &lt;em&gt;at all&lt;/em&gt; from helping others, colleagues or customers.
-On the contrary, the professional relationship is focused.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So how does it work in practice?
-At Gradle, almost everybody is working remotely.
-For the socializing aspect, we have an &lt;em&gt;optional&lt;/em&gt; weekly meeting, called &quot;coffee time&quot;, that anyone willing to can join and chat about extra-work topics.
-Some need this, I don&amp;#8217;t: the good thing is that we recognize not everybody&amp;#8217;s the same.
-Actually I would be in difficulty to join this meeting and know &lt;em&gt;what&lt;/em&gt; to talk about.
-Sometimes I even try to avoid being the first one joining a remote call to avoid having to do some small talk because I&amp;#8217;m so uncomfortable with this.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;However, again, talk to me about a topic I know about or that I&amp;#8217;m passionate about. Ask me about a problem to solve, ask me about helping others and I&amp;#8217;ll be happy to do so because there&amp;#8217;s no room for the unknown.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Similarly if we meet in person at a conference and that you wish to talk to me, go ahead: it&amp;#8217;s very likely I will enjoy our conversation: I had several times the opportunity to talk to very famous folks of the Java community (James Gosling, Brian Goetz, Mark Reinholds, &amp;#8230;) and so many others but I just &lt;em&gt;couldn&amp;#8217;t&lt;/em&gt;, it was, physically, impossible to me.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In fact I have so much difficulties coming to someone and opening a discussion that if you do the first step it&amp;#8217;s &lt;em&gt;much&lt;/em&gt; easier.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So: don&amp;#8217;t be surprised if I walk the area 3 times in a row without asking for directions. Don&amp;#8217;t be surprised if I don&amp;#8217;t phone or text you. I&amp;#8217;m not ignoring you.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_don_t_be_ashamed_of_being_an_introvert_but_make_others_understand_what_it_means&quot;&gt;Don&amp;#8217;t be ashamed of being an introvert but make others understand what it means&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last, in a &lt;a href=&quot;https://twitter.com/CedricChampeau/status/1173893698997936130&quot;&gt;Tweet&lt;/a&gt; I was saying that I was &quot;healing myself&quot;.
-That&amp;#8217;s both true and false at the same time.
-It&amp;#8217;s true because I&amp;#8217;m aware of the importance of the ignorance of a lot of people about this condition of mine, so I try to work, for example, speaking with others in different contexts.
-I am for example the secretary of my karate club, which forces me to talk to people I don&amp;#8217;t know.
-I am also the coach of my younger boy&amp;#8217;s (10 yo) basketball team, which I enjoy very much doing: it&amp;#8217;s an activity which allows both spending time with my kid, requires some public communication skills and is very gratifying (seeing kids happy to play, win a match, share this with their parents etc&amp;#8230;).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last but not least it&amp;#8217;s also a message for my son who I know feels very much like me: he also has difficulties speaking to others and I know he works hard to get accepted. He&amp;#8217;s also so proud when he gets recognition from his community.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It took me years to put a name on what I am: I&amp;#8217;m an &lt;em&gt;introvert&lt;/em&gt; and often I have to fight myself not to be ashamed of this.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
