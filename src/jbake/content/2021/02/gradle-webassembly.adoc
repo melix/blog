@@ -93,7 +93,7 @@ We can see that the inputs of this function are integers and that it returns ano
 So, what if we could actually simplify the implementation of the Gradle task itself?
 With all this in mind, I decided to prototype an annotation processor which would generate the boilerplate code for me.
 
-To transform the Rust function above into a full Gradle task, all I have to write is to declare what I call its I/O protocol:
+To transform the Rust function above into a full Gradle task, https://github.com/melix/gradle-wasm-plugin/blob/main/plugin/src/main/java/me/champeau/gradle/wasm/auto/SumIO.java[all I have to write] is a declaration of what I call its I/O protocol:
 
 ```java
 @WasmProtocol(
