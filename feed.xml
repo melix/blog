@@ -6,9 +6,377 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 6 Jan 2021 18:46:25 +0100</pubDate>
-    <lastBuildDate>Wed, 6 Jan 2021 18:46:25 +0100</lastBuildDate>
+    <pubDate>Sun, 21 Feb 2021 20:34:58 +0100</pubDate>
+    <lastBuildDate>Sun, 21 Feb 2021 20:34:58 +0100</lastBuildDate>
 
+    <item>
+      <title>Gradle + WebAssembly</title>
+      <link>https://melix.github.io/blog/2021/02/gradle-webassembly.html</link>
+      <pubDate>Sun, 21 Feb 2021 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2021/02/gradle-webassembly.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A couple weeks ago, I listened to an &lt;a href=&quot;https://medium.com/electro-monkeys/64-la-face-cach%C3%A9e-de-webassembly-avec-geoffroy-couprie-et-ivan-enderline-bd20e5482893&quot;&gt;interview (in French)&lt;/a&gt; of &lt;a href=&quot;https://twitter.com/gcouprie&quot;&gt;Geoffroy Couprie&lt;/a&gt; and &lt;a href=&quot;https://twitter.com/mnt_io&quot;&gt;Ivan Enderlin&lt;/a&gt; who gave a very nice overview of what WebAssembly is and what it&amp;#8217;s good for.
+To be honest it wasn&amp;#8217;t clear to me what the advantages of WebAssembly were, compared to a good old JVM: all in all, both are virtual machines, and both promise the same thing, that is to say write once run everywhere.
+Also, in my mind, WebAssembly was some kind of restricted version of JavaScript like &lt;a href=&quot;https://en.wikipedia.org/wiki/Asm.js&quot;&gt;asm.js&lt;/a&gt;.
+I was wrong: it&amp;#8217;s more than that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_why_webassembly&quot;&gt;Why WebAssembly?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the aspects which were discussed during this interview was basically sandboxing: with WebAssembly, it&amp;#8217;s the responsibility of the embedder to give access, for example, to I/O to the wasm program. In practice, it means that wasm binaries are by default very restricted.
+In fact, by design, they are restricted to pure computations, which makes them very suitable for isolation of work.
+Extensions from embedders are responsible for giving access to the host resources (for example the GPU, or the file system).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another promise of WebAssembly is running at close-to-native speeds.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, a crazy idea came to me: what if I could use a wasm binary as a task implemention in Gradle?
+This, for example, would let us use whatever language compiling to WASM as an implementation language for Gradle tasks. &lt;em&gt;mmmmmmm&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The result of this experience is available at &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin&quot;&gt;this repository&lt;/a&gt;.
+The results are quite promising.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_isolating_task_inputs_from_the_task_execution&quot;&gt;Isolating task inputs from the task execution&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a nutshell, a Gradle task can be seen as a function which takes a number of inputs and returns a value.
+Cacheability is derived from the &quot;pureness&quot; of the function: for the same inputs, the output should be the same.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This makes it very suitable to the WebAssembly model where functions are exported to an embedder.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In reality, it&amp;#8217;s more complicated: Gradle tasks most likely use files as inputs, and also produce files.
+This means that the WebAssembly runtime would need to provide I/O access for this to be really useful.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After some support from &lt;a href=&quot;https://twitter.com/mnt_io&quot;&gt;Ivan Enderlin&lt;/a&gt;, I quickly figured out that it would be difficult to make file access work, so I simplified the problem.
+In the prototype, my WASM tasks are not able to produce a file output and are limited to simply display the execution result on the console.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For tasks which actually have files as inputs, I&amp;#8217;m reading the file contents from Java code into byte arrays which are &quot;propagated&quot; to the WASM runtime memory.
+This means, effectively, that the WASM functions I played with don&amp;#8217;t have any kind of access to the file system and remain pure functions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With those limitations in mind, here&amp;#8217;s what I came up with.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_declaring_the_task_i_o_protocol&quot;&gt;Declaring the task I/O protocol&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle is evolving fast and nowadays the idiomatic way to declare inputs and outputs of a task is to use the &lt;a href=&quot;https://docs.gradle.org/current/userguide/lazy_configuration.html&quot;&gt;lazy configuration API&lt;/a&gt;.
+However, this isn&amp;#8217;t enforced and nobody prevents you from writing tasks which do not use this API.
+As an implementor of a new integration mechanism, I can set the rules and actually restrict the scope to tasks which use this API, which has a number of advantages.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Say that we want to write a task which computes the sum of two integers.
+With the lazy configuration API, you need two &quot;properties&quot; corresponding to the input numbers:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;abstract class MyTask extends DefaultTask {
+   abstract Property&amp;lt;Integer&amp;gt; getX(); // implementation is generated by Gradle
+   abstract Property&amp;lt;Integer&amp;gt; getY();&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The actual value is &quot;lazy&quot; in the sense that it can be set via a plugin, overriden in a build script, mapped from another property, etc.
+For example, that the value of the &lt;code&gt;x&lt;/code&gt; property can be computed from the output of another task:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;x.set(myOtherTask.outputFile.map { ... }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The advantage of this is that Gradle can track the inputs and outputs of tasks for you and that you don&amp;#8217;t have to declare any explicit dependency between tasks, making the build less brittle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, once you&amp;#8217;re about to &lt;em&gt;execute&lt;/em&gt; a task, you don&amp;#8217;t really care about the &lt;code&gt;Property&amp;lt;...&amp;gt;&lt;/code&gt; wrappers anymore: what matters are the actual values, that you can &lt;code&gt;get()&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;int x = getX().get();
+int y = getY().get();&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This often leads to some boilerplate code in task implementations.
+In our case, the &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; integers are actually the only thing we care about to call our WASM function: we don&amp;#8217;t need to pass the richer &lt;code&gt;Provider&lt;/code&gt; type to the functions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s imagine that we have this function written in Rust:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint rust language-rust&quot;&gt;&lt;code&gt;#[no_mangle]
+pub extern fn sum(x: i32, y: i32) -&amp;gt; i32 {
+    x + y
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can see that the inputs of this function are integers and that it returns another integer: it&amp;#8217;s that simple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So, what if we could actually simplify the implementation of the Gradle task itself?
+With all this in mind, I decided to prototype an annotation processor which would generate the boilerplate code for me.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To transform the Rust function above into a full Gradle task, all I have to write is to declare what I call its I/O protocol:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;@WasmProtocol(
+        taskName = &quot;Sum&quot;,
+        classpathBinary = &quot;demo_lib&quot;,
+        functionName = &quot;sum&quot;
+)
+public interface SumIO {
+    @Input
+    Property&amp;lt;Integer&amp;gt; getX();
+
+    @Input
+    Property&amp;lt;Integer&amp;gt; getY();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This will generate a task of type &lt;code&gt;Sum&lt;/code&gt;, which will use a wasm binary found on classpath named &lt;code&gt;demo_lib&lt;/code&gt;, and use the function &lt;code&gt;sum&lt;/code&gt; from that binary as the task implementation.
+That&amp;#8217;s it!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that this protocol isn&amp;#8217;t declaring any output: that&amp;#8217;s a limitation of the prototype right now, which is inherently caused by this whole &quot;Gradle tasks are mostly generating files&quot; problem.
+But we don&amp;#8217;t really care for now.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_a_more_realistic_example&quot;&gt;A more realistic example&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For my tests, I used 3 different functions: this &lt;code&gt;sum&lt;/code&gt; function, a &lt;code&gt;fib&lt;/code&gt; function (the Fibonacci suite function) and I wanted to try something more complicated like computing an md5 hash.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This, for example, is how I would define the protocol for the MD5 hashing function:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public interface HasherIO {
+    @InputFile
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    RegularFileProperty getInputFile();
+
+    @OutputFile
+    RegularFileProperty getOutputFile();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Except that in this case, because the input is a file, I couldn&amp;#8217;t use my code annotation processor code generator yet (but it&amp;#8217;s planned).
+Instead I wrote code to read the file manually, allocate WebAssembly memory buffers, in order to call the function which is implemented in Rust:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint rust language-rust&quot;&gt;&lt;code&gt;#[no_mangle]
+pub extern fn process(bytes: *const u8, len: usize) -&amp;gt; *const c_void {
+    let data: &amp;amp;[u8] = unsafe { std::slice::from_raw_parts(bytes, len) };
+    let mut hasher = Md5::new();
+    hasher.update(data);
+    let result = hasher.finalize_fixed();
+    let pointer = result
+        .to_vec()
+        .as_ptr();
+    mem::forget(pointer);
+
+    pointer as *const c_void
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then all I need is to use this task in a build script. Let&amp;#8217;s see how it performs&amp;#8230;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_webassembly_runtimes&quot;&gt;The WebAssembly runtimes&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I wrote 2 different implementations of the WASM integration runtime: the first one was pretty straightforward to write and makes use of &lt;a href=&quot;https://github.com/wasmerio/wasmer-java&quot;&gt;wasmer-java&lt;/a&gt;.
+The second one took me significantly more time to implement and is using &lt;a href=&quot;https://www.graalvm.org/&quot;&gt;GraalVM&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Integrating &lt;a href=&quot;https://github.com/wasmerio/wasmer-java&quot;&gt;Wasmer&lt;/a&gt; was easy for different reasons:
+1. it&amp;#8217;s just a library which you have to add to your classpath
+2. it&amp;#8217;s relatively well documented&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;GraalVM was more complicated because:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;you actually need to run your program &lt;em&gt;on&lt;/em&gt; GraalVM&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you need to install the WASM support separately (it&amp;#8217;s not downloadable as a regular Maven dependency, for example)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you still need to add the GraalVM polyglot API on classpath&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it&amp;#8217;s poorly documented at this stage (in particular, there&amp;#8217;s no documentation whatsoever on how to share memory between the Java host and the WASM guest)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Anyway, I think (but I haven&amp;#8217;t done it yet) that the GraalVM runtime will be easier to support I/O since it already offers the configuration options to let the WASM host access the host file system.
+Wasmer doesn&amp;#8217;t support I/O yet.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s talk about performance, now.
+Disclaimer: this isn&amp;#8217;t proper benchmarking. The results you will see were obtained via functional testing of a plugin. There&amp;#8217;s a lot of variance, but they were reproducible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_measuring_the_wasmer_runtime&quot;&gt;Measuring the wasmer runtime&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In short, the wasmer runtime is very promising: it&amp;#8217;s easy to setup and actually performs extremely well.
+The API is not very Java friendly, but the &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin/tree/main/wasm-invoker&quot;&gt;abstraction layer I wrote (which supports both wasmer and GraalVM)&lt;/a&gt; makes it significanly easier.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here are some results for a memoized Fibonacci, which compares a version I wrote in Java vs the one I wrote in Rust:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Memoized Fibonacci on wasmer&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;Java fib(90) = 2880067194370816120
+Took 3ms
+Precompiled Rust fib(90) = 2880067194370816120
+Took 366μs&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The WASM version compiled from Rust is already faster than the Java version!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s see how it performs when hashing a MD5 file (remember that for this use case, I&amp;#8217;m actually passing a &lt;em&gt;byte array&lt;/em&gt; to the WASM program, not a file):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Hashing a 4MB file on wasmer&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
+Took 64ms
+hash from Rust is 49DFDCEF6751973A236D35401B6CBFC8
+Took 58ms&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again, the WASM version is still faster!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On both operations, the WASM binary performs better than the pure Java version. However, there&amp;#8217;s a catch: in order to reach that level of performance, the WASM binary has to be precompiled to a native binary by wasmer.
+This, already takes time. If you include this in the whole picture, the numbers are different: 36ms for Fibonacci (compared to 3ms in Java, 10x slower).
+However, this is in practice not a big deal since those binaries can actually be cached, meaning that if we have to call them multiple times, or from different builds, we can actually fetch them from the cache.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All in all, it means that the wasmer runtime is very fast and integrates quite well with Java.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_measuring_the_graalvm_runtime&quot;&gt;Measuring the GraalVM runtime&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;a href=&quot;https://docs.oracle.com/en/graalvm/enterprise/20/docs/reference-manual/wasm/&quot;&gt;WebAssembly support for GraalVM&lt;/a&gt; is still experimental.
+However, it has the advantage of taking advantage of the Truffle API, which promises better integration between languages and, eventually, better performance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In my case, that wasn&amp;#8217;t quite true. Again as usual don&amp;#8217;t trust benchmarks, but here are the numbers:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Memoized Fibonacci on wasmer&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;Java fib(90) = 2880067194370816120
+Took 3ms
+Precompiled Rust fib(90) = 2880067194370816120
+Took 21ms&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This time, the WASM code is significantly slower. The explanation is probably that contrary to the wasmer runtime, the WASM binary has to be parsed and transformed into a model that the Truffle API can understand, and as far as I could tell, this is not cacheable. However, this isn&amp;#8217;t the only explanation, as we can see with the hash example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;.Hashing a 4MB file on GraalVM&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
+Took 57ms
+hash from Rust is 49DFDCEF6751973A236D35401B6CBFC8
+Took 407ms&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again we can see that the performance is significantly worse with GraalVM.
+I must again say that maybe I&amp;#8217;m not using the API properly.
+In particular, I have found no better way to pass the &lt;code&gt;byte[]&lt;/code&gt; to the WASM memory model other than &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin/blob/main/wasm-invoker/src/main/java/me/champeau/wasm/invocation/internal/GraalVMInvoker.java#L99-L103&quot;&gt;byte by byte!&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_what_we_ve_learnt&quot;&gt;What we&amp;#8217;ve learnt&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post, we&amp;#8217;ve seen that we can use a wasm binary in Gradle as the implementation of a task.
+This binary can be written in any language which supports compiling to WebAssembly.
+In my [test project], I have written tasks in 2 different languages: &lt;a href=&quot;https://www.rust-lang.org/&quot;&gt;Rust&lt;/a&gt; and &lt;a href=&quot;https://github.com/AssemblyScript/assemblyscript&quot;&gt;AssemblyScript&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;ve seen that we can integrate WASM binaries using 2 different &quot;runtimes&quot;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/wasmerio/wasmer-java&quot;&gt;Wasmer&lt;/a&gt;, which is using JNI and compiles, as far as I understand, WebAssembly binaries to native code&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.graalvm.org/&quot;&gt;GraalVM&lt;/a&gt;, which is a different Java Virtual Machine, which usually performs extremely well with Java, and provides a &lt;a href=&quot;https://www.graalvm.org/reference-manual/polyglot-programming/&quot;&gt;Polyglot runtime&lt;/a&gt; leveraging the &lt;a href=&quot;https://www.graalvm.org/graalvm-as-a-platform/language-implementation-framework/&quot;&gt;Truffle API&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As of today, the Wasmer version performs significantly better and WASM functions can be executed even faster than Java code!
+The GraalVM version is still experimental and performs quite poorly compared to using native Java code. It&amp;#8217;s also more painful to test because it&amp;#8217;s not enough to install GraalVM: you also have to install components separately, which is not build friendly, nor CI friendly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The next step for me is to try to integrate more directly with the file system: at the current stage, none of the approaches is suitable for Gradle as we need to read and write files.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Also, one has to keep in mind that it&amp;#8217;s pretty rare that you&amp;#8217;d like to integrate in a build arbitrary code like this: in general, you want to call external tools (&lt;code&gt;javac&lt;/code&gt;, &lt;code&gt;gcc&lt;/code&gt;, &amp;#8230;).
+Nevertheless, this experiment is quite fun and I&amp;#8217;m going to experiment more with this annotation processing API, which, I think, would be valuable in any case.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>The problem with Gradle: really?</title>
       <link>https://melix.github.io/blog/2021/01/the-problem-with-gradle.html</link>
@@ -984,175 +1352,6 @@ In the mean time, if for some reason your Gradle build doesn&amp;#8217;t want to
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Now you don&amp;#8217;t have any excuse not to try feature previews!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Mon engagement pour Montaigu-Vendée</title>
-      <link>https://melix.github.io/blog/2020/03/mvea2020.html</link>
-      <pubDate>Sat, 7 Mar 2020 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2020/03/mvea2020.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;J&amp;#8217;ai 40 ans et je suis arrivé sur Montaigu voici 17 ans. Comme beaucoup d&amp;#8217;entre nous, c&amp;#8217;est pour des raisons professionnelles que nous y avons emménagé avec ma jeune épouse.
-Elle avait trouvé un travail sur Les Herbiers, je travaillais sur Nantes, Montaigu était l&amp;#8217;endroit idéal pour nous.
-Nous voici en 2020, nous avons 2 grands garçons, et si notre situation professionnelle a évolué (nous sommes tous 2 télétravailleurs) et que nous aurions pu déménager, nous avons au contraire choisi de faire notre vie ici et sommes attachés à ce territoire.
-Il y a 6 ans, nous quittions notre petit logement sur Montaigu et achetions donc notre maison sur Saint Hilaire de Loulay, en village.
-Après presque deux décennies passées ici, après nos engagements associatifs, nos nouveaux amis ici, il était temps, enfin, d&amp;#8217;entrer au service des citoyens de Montaigu-Vendée.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/blog/img/mvea-logo.jpg&quot; alt=&quot;mvea logo&quot;&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_la_liste_montaigu_vend_e_ensemble_et_autrement&quot;&gt;La liste Montaigu-Vendée Ensemble et Autrement&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Si le territoire de Montaigu-Vendée est riche et, économiquement, le territoire est attractif, il y a beaucoup de choses à améliorer.
-J&amp;#8217;ai choisi de m&amp;#8217;engager sur la liste de &lt;a href=&quot;https://mvea2020.fr&quot;&gt;Vincent MATHIEU&lt;/a&gt; parce que je suis convaincu qu&amp;#8217;une autre voie est possible, basée sur 3 piliers qui sont aussi chers à mon coeur:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;la transition écologique, parce que je suis convaincu que c&amp;#8217;est en travaillant au niveau local, en engageant des actions simples à notre niveau que nous feront de ruisseaux de grandes rivières&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;la démocratie participative, où comment remettre le citoyen au coeur des décisions, avoir des élus au service des citoyens et non l&amp;#8217;inverse&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;le mieux vivre ensemble, en prenant en compte &lt;strong&gt;tous&lt;/strong&gt; les habitants, personnes âgées, jeunes, personnes en situation de handicap, de tous milieux sociaux et en exploitant notre très actif réseau associatif&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_la_transition_ecologique&quot;&gt;La Transition Ecologique&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Je suis particulièrement attaché à l&apos;écologie depuis ma jeunesse.
-Lorsque je parle d&apos;écologie, je prône toujours une écologie pragmatique, pas dogmatique et encore moins ésotérique.
-Je suis pour l&apos;écologie qui fait avancer les choses dans la concertation, une écologie qui prend en compte &lt;strong&gt;tous&lt;/strong&gt; les acteurs, entreprises, paysans, citoyens et enfants.
-Le 5 mars dernier, nous étions le &quot;jour du dérèglement&quot;, ce jour de basculement où en France, nous commençons à produire plus de carbone que l&apos;écosystème peut en absorber.
-C&amp;#8217;est dire l&amp;#8217;urgence de la situation, mais l&apos;écologie ne se limite pas au prisme du réchauffemenent climatique.
-En campagne, il est facile de constater les ravages sur la biodiversité: en 40 ans, ce sont 60% des espèces sauvages qui ont disparu, 40 ans seulement!
-Comme le citait Antoine de Saint Exupéry, &lt;strong&gt;nous n&amp;#8217;héritons pas de la terres de nos ancêtres, nous empruntons celle de nos enfants&lt;/strong&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;C&amp;#8217;est ici une différence fondamentale avec la majorité sortante, qui, soyons clairs, n&amp;#8217;a rien fait pour l&apos;écologie.
-Pire, lorsqu&amp;#8217;elle affirme dans les journaux que Vincent MATHIEU &quot;n&amp;#8217;est pas issu du cru local, ses parents n&amp;#8217;ont pas de pieds de vigne dans le secteur&quot;, nous constatons avec effarement un tel mépris de notre génération, des générations futures, mais aussi des 600 nouveaux habitants qui chaque année, arrivent sur notre terroire. 600 habitants, que, au passage, les élus actuels sont heureux de voir participer à l&amp;#8217;activité économique, heureux d&amp;#8217;avoir pour qu&amp;#8217;il soit, come une fois de plus annoncé dans les journaux, nommé Président d&amp;#8217;une Communauté d&amp;#8217;Agglomération qui n&amp;#8217;existe pas encore (faute d&amp;#8217;habitants suffisants !), mais dont il nie l&amp;#8217;expression de la démocratie lorsqu&amp;#8217;ils ne sont pas issus du secteur. Dont acte.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A titre personnel, je suis aussi attaché à la lutte contre la pollution lumineuse.
-Je constate, en tant qu&amp;#8217;astronome amateur, la dégradation du ciel nocture.
-Je constate que les gens sont surpris lorsqu&amp;#8217;ils découvrent, lors de la manifestation des Etoiles du Lac à La Guyonnière (dont l&amp;#8217;existence est menacée par la majorité en place), qu&amp;#8217;ils peuvent voir la voie lactée.
-Je constate aussi que nous n&amp;#8217;avons, même ici en campagne, presque plus de papillons de nuit et que les insectes ont presque tous disparus.
-Il s&amp;#8217;agit d&amp;#8217;une catastrophe contre laquelle nous pouvons, tous ensemble, lutter.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Que dire de cette majorité, qui, à l&amp;#8217;heure où l&amp;#8217;on parle de planter des arbres, a rasé tous les arbres de la place de la mairie ? Que dire de cette majorité qui a coupé les magnifiques cerisiers en fleurs du Boulevard Auguste Durand pour les remplacer par&amp;#8230; du goudron ! Que dire lorsque &lt;strong&gt;tous&lt;/strong&gt; les cours d&amp;#8217;eau du territoire ont leurs indicateurs de qualité dans le rouge ?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Alors peut-on faire mieux ? Avec un tel bilan pour la majorité sortante, ça n&amp;#8217;est pas compliqué.
-Je vous invite à lire notre &lt;a href=&quot;https://mvea2020.fr/transition-ecologique.html&quot;&gt;programme sur la transition écologique&lt;/a&gt;.
-J&amp;#8217;insisterai sur ces points:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;nous souhaitons aider toutes celles et ceux, entreprises ou particuliers, qui sont prêts à s&amp;#8217;engager dans la transition écologique.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;nous favoriserons l&amp;#8217;implantation d&amp;#8217;entreprises vertueuses, et aiderons les entreprises existantes pour qu&amp;#8217;elles réalisent des économies d&apos;énergie (et donc d&amp;#8217;argent !) et réduisent leur impact. Ceci passera par la mise en place d&amp;#8217;indicateurs et de mesure du progrès tout au long du mandat&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;nous aiderons les habitants de villages dans la mise au normes de l&amp;#8217;assainissmenent. Des solutions écologiques et collectives existent, et aujourd&amp;#8217;hui &lt;em&gt;personne&lt;/em&gt; n&amp;#8217;aide ces habitants dans des choix qui sont souvent extrêmenent onéreux.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;nous favoriserons l&amp;#8217;accueil de nouveaux paysans bio ou 0-pesticide et développerons l&amp;#8217;alimentation collective par l&amp;#8217;approvisionnement local, tel que celà se fait sur la Guyonnière&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;nous rendrons l&amp;#8217;accès à la déchetterie plus simple et gratuit. Nous mettrons aussi à disposition des outils pour ceux qui ne peuvent pas facilement se déplacer (broyage, compostage, &amp;#8230;)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;nous développerons et sécuriserons les développements doux (pistes cyclables, chemins piétonniers, &amp;#8230;) et mettrons en place des solutions de transport collectif entre les communes déléguées&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_la_d_mocratie_participative&quot;&gt;La démocratie participative&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Ah, la belle démocratie Montacutaine ! Qui, il y a 6 ans, avait lu qu&amp;#8217;il y aurait fusion des communes dans les programmes ? Qui a été consulté pour cette fusion ? Nous avons bel et bien eu une consultation, celle pour choisir le nom de la commune.
-D&amp;#8217;ailleurs, nous, habitants, avions choisi &quot;Montaigu Les Maines&quot;, mais nos élus avaient déja choisi Montaigu-Vendée.
-Tout, absolument tout sur Montaigu est à cette image: les élus prennent les décisions dans leur coin, et informent les citoyens a posteriori.
-Ceci n&amp;#8217;est pas ma vision de la démocratie.
-Même s&amp;#8217;il fallait faire cette fusion, il était nécessaire d&amp;#8217;en informer et de faire une concertation avec les citoyens.
-Nous ne sommes pas dupes, à Montaigu, l&apos;élu est au service du Maire, ses ambitions personnelles annoncées par voie de presse, et non le contraire.
-Je ne suis même pas certain qu&amp;#8217;ils se rendent compte de ce qu&amp;#8217;ils font.
-Qui, par exemple, a déja vu sur l&amp;#8217;affichage public l&amp;#8217;annonce des conseils municipaux ?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nous souhaitons remettre le citoyen au coeur des décisions, et celà se fera en mettant en place des structures adaptées, participatives: rganisation de conseils municipaux délégués, composés pour moitié d&apos;élus et pour l&amp;#8217;autre moitié de citoyens tirés au sort parmi les volontaires. Il ne s&amp;#8217;agit pas, comme le propose l&amp;#8217;autre liste, de choisir nous mêmes les participants, ça n&amp;#8217;est pas notre vision de la démocratie: nous souhaitons une vision non partisane des choses !&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Notre territoire est grand et aussi organisé en villages et quartiers. Il nous semble donc indispensable de refléter cet aspect dans les prises de décision, avec l&amp;#8217;organisation de comités locaux, par thématique, afin que les riverains puissent prendre part aux décisions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Il est &lt;a href=&quot;https://mvea2020.fr/democratie-participative.html&quot;&gt;temps que le citoyen redevienne le centre de la discussion publique&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_le_mieux_vivre_ensemble&quot;&gt;Le mieux-vivre ensemble&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Il s&amp;#8217;agit encore d&amp;#8217;un point qui me tient particulièrement à coeur.
-Notre territoire se doit d&apos;être accueillant, quelle que soit la population.
-Nos élus, par exemple, on fait le choix de payer des amendes plutôt que de respecter l&amp;#8217;obligation de 20% de logements sociaux.
-Ils mettent aussi en place des &quot;nouveaux quartiers&quot; tels que les Hauts de Montaigu, où le ticket d&amp;#8217;entrée pour une maison de 110m2 et un terrain de 250m2 se situe aux alentours de 250k€ !
-Nous pensons que nous pouvons, que nous &lt;strong&gt;devons&lt;/strong&gt; faire autrement: création d&apos;éco-quartiers intergénérationnels, par exemple.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Ces quartiers ont à la fois un intérêt écologique, mais aussi de relation sociale. Avec une partie de la population qui veillit et une autre partie de la population qui croit rapidement (pour des raisons économiques), nous pensons que nous pouvons organiser nos quartiers de manière à encourager la mixité sociale, la relation entre personnes âgées et jeunes en vivant Ensemble et Autrement.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nous pensons qu&amp;#8217;il y a une alternative aux EHPAD et qu&amp;#8217;en particulier le maitien des personnes âgées dans un environnement au milieu d&amp;#8217;actifs et de jeunes est à la fois une garantie d&amp;#8217;un veillissement dans de meilleures conditions, mais aussi plus humaine.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nous avons aussi la chance, sur notre territoire, d&amp;#8217;avoir un tissu associatif extrêmement actif.
-Toutes ces bonnes volontés ont besoin d&apos;être encouragées.
-Il est déja très difficile de trouver des bénévoles, alors que dire lorsque la municipalité ne s&amp;#8217;engage pas ou, pire, tente de saboter des projets parce qu&amp;#8217;ils sont jugés trop &quot;populaires&quot; ?
-Nous nous appuierons au contraire sur ces associations et nous mettrons en place la transparence dans l&amp;#8217;attribution des subventions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nous transformerons aussi nos mairies annexes en maisons de services aux citoyen, de façon à favoriser l&amp;#8217;interaction, mais aussi aider toutes les personnes en difficulté.
-Parfois, il s&amp;#8217;agira de difficultés de logement, économiques, mais aussi parfois des difficultés dans l&amp;#8217;appréhension des outils numériques (nous pensons par exemple à la télé-déclaration de revenus).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nous pensons aussi à tous les citoyens, en particulier ceux en situation de handicap.
-La situation de la ville de Montaigu est catastrophique à cet égard: impossible pour une personne en fauteuil roulant de faire ses courses en centre-ville.
-Nous souhaitons, au contraire, renforcer les centre-villes en les rendant accessibles &lt;strong&gt;pour tous&lt;/strong&gt;, en travaillant avec les petits commerçants qui font vivre nos villes, plutôt qu&amp;#8217;en développant, comme à l&amp;#8217;heure actuelle, les grandes surfaces commerciales en périphérie.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Enfin, il s&amp;#8217;agit aussi d&amp;#8217;aider notre jeunesse.
-Combien de fois avez-vous croisé des jeunes en train de faire du skate sur la voie publique ? Notre majorité actuelle a préféré offrir une réduction sur le tarif des terrains aux promoteurs immobiliers, plutôt que d&amp;#8217;investir 80k€ (sur un budget de 16M€) pour donner à nos jeunes des lieux où s&amp;#8217;amuser. Que dire de l&apos;état des pistes cyclables ? Pensez-vous que vos enfants peuvent, en toute sécurité, partir du collège et se rendre à leur entraînement de sport à Saint Georges de Montaigu ?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Bref, dans une semaine, le 15 Mars, vous devrez choisir vos élus.
-Je me présente humblement sur la liste de Vincent MATHIEU, une liste composée de citoyens impliqués, d&amp;#8217;horizons et compétences différents et j&amp;#8217;espère être bientôt à votre service pour une vie meilleure, Ensemble et Autrement.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Comme l&amp;#8217;a si bient dit Michel PAVAGEAU, le doyen de notre liste, à Commune Nouvelle, Équipe Nouvelle !&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
