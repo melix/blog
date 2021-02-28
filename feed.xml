@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 21 Feb 2021 20:34:58 +0100</pubDate>
-    <lastBuildDate>Sun, 21 Feb 2021 20:34:58 +0100</lastBuildDate>
+    <pubDate>Sun, 28 Feb 2021 20:20:34 +0100</pubDate>
+    <lastBuildDate>Sun, 28 Feb 2021 20:20:34 +0100</lastBuildDate>
 
     <item>
       <title>Gradle + WebAssembly</title>
@@ -136,7 +136,7 @@ pub extern fn sum(x: i32, y: i32) -&amp;gt; i32 {
 With all this in mind, I decided to prototype an annotation processor which would generate the boilerplate code for me.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To transform the Rust function above into a full Gradle task, all I have to write is to declare what I call its I/O protocol:&lt;/p&gt;
+&lt;p&gt;To transform the Rust function above into a full Gradle task, &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin/blob/main/plugin/src/main/java/me/champeau/gradle/wasm/auto/SumIO.java&quot;&gt;all I have to write&lt;/a&gt; is a declaration of what I call its I/O protocol:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -321,12 +321,8 @@ Took 21ms&lt;/pre&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;This time, the WASM code is significantly slower. The explanation is probably that contrary to the wasmer runtime, the WASM binary has to be parsed and transformed into a model that the Truffle API can understand, and as far as I could tell, this is not cacheable. However, this isn&amp;#8217;t the only explanation, as we can see with the hash example:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;literalblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;.Hashing a 4MB file on GraalVM&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Hashing a 4MB file on GraalVM&lt;/div&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;pre&gt;hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
 Took 57ms
@@ -1228,6 +1224,9 @@ To do this, go to &lt;code&gt;Settings&lt;/code&gt; &amp;#8594; &lt;code&gt;Bran
 	&lt;div id=&quot;preamble&quot;&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;This blog post has been updated with the latest Java Toolchain support from Gradle, making it even easier!&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;You&amp;#8217;ve probably heard about Java providing features like &lt;a href=&quot;https://blogs.oracle.com/javamagazine/records-come-to-java&quot;&gt;records&lt;/a&gt;, &lt;a href=&quot;https://docs.oracle.com/en/java/javase/13/text_blocks/index.html&quot;&gt;multi-line text blocks&lt;/a&gt; or &lt;a href=&quot;https://blogs.oracle.com/javamagazine/inside-the-language-sealed-types&quot;&gt;sealed types&lt;/a&gt; and you&amp;#8217;d like to try them.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -1325,29 +1324,16 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.&lt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Usually, people use the same JDK version for running Gradle, than they use to compile and execute tests.
-It doesn&amp;#8217;t have to be that way, and actually the Gradle team is working on adding support for toolchains to simplify the configuration of builds in this case.
-In the mean time, if for some reason your Gradle build doesn&amp;#8217;t want to start on JDK 15, but it works on 14, then you can easily configure Gradle to fork compilation and execution.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You can for example configure the build to use a JDK found externally by specifying an environment variable like in the example below:&lt;/p&gt;
+It doesn&amp;#8217;t have to be that way, and actually the Gradle team added support for toolchains to simplify the configuration of builds in this case.
+All you need is to tell what JDK to use and Gradle will take care of finding a JDK on your machine which matches the spec, or download it!&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;providers.environmentVariable(&quot;JDK15&quot;)
-        .forUseAtConfigurationTime()
-        .map(::File)
-        .orNull?.let { javaHome -&amp;gt;
-            println(&quot;Configuring your build to use JDK 15 from $javaHome&quot;)
-            tasks.withType&amp;lt;Test&amp;gt;().configureEach {
-                executable = &quot;${javaHome}/bin/java&quot;
-            }
-
-            tasks.withType&amp;lt;JavaCompile&amp;gt;().configureEach {
-                options.isFork = true
-                options.forkOptions.javaHome = javaHome
-                options.compilerArgs.addAll(listOf(&quot;--release&quot;, &quot;15&quot;))
-            }
-        }&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(15))
+    }
+}&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;

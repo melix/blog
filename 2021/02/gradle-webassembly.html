@@ -197,7 +197,7 @@ pub extern fn sum(x: i32, y: i32) -&gt; i32 {
 With all this in mind, I decided to prototype an annotation processor which would generate the boilerplate code for me.</p>
 </div>
 <div class="paragraph">
-<p>To transform the Rust function above into a full Gradle task, all I have to write is to declare what I call its I/O protocol:</p>
+<p>To transform the Rust function above into a full Gradle task, <a href="https://github.com/melix/gradle-wasm-plugin/blob/main/plugin/src/main/java/me/champeau/gradle/wasm/auto/SumIO.java">all I have to write</a> is a declaration of what I call its I/O protocol:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -382,12 +382,8 @@ Took 21ms</pre>
 <div class="paragraph">
 <p>This time, the WASM code is significantly slower. The explanation is probably that contrary to the wasmer runtime, the WASM binary has to be parsed and transformed into a model that the Truffle API can understand, and as far as I could tell, this is not cacheable. However, this isn&#8217;t the only explanation, as we can see with the hash example:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>.Hashing a 4MB file on GraalVM</pre>
-</div>
-</div>
 <div class="listingblock">
+<div class="title">Hashing a 4MB file on GraalVM</div>
 <div class="content">
 <pre>hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
 Took 57ms
@@ -442,7 +438,7 @@ Nevertheless, this experiment is quite fun and I&#8217;m going to experiment mor
 <div id="disqus_thread"></div>
     <script type="text/javascript">
         var disqus_shortname = 'melixblog';
-	var disqus_identifier = 'gradle-webassembly-draft';
+	var disqus_identifier = 'gradle-webassembly';
         /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

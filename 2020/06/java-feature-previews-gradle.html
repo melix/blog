@@ -81,6 +81,9 @@
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
+<p><em>This blog post has been updated with the latest Java Toolchain support from Gradle, making it even easier!</em></p>
+</div>
+<div class="paragraph">
 <p>You&#8217;ve probably heard about Java providing features like <a href="https://blogs.oracle.com/javamagazine/records-come-to-java">records</a>, <a href="https://docs.oracle.com/en/java/javase/13/text_blocks/index.html">multi-line text blocks</a> or <a href="https://blogs.oracle.com/javamagazine/inside-the-language-sealed-types">sealed types</a> and you&#8217;d like to try them.</p>
 </div>
 <div class="paragraph">
@@ -178,29 +181,16 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Usually, people use the same JDK version for running Gradle, than they use to compile and execute tests.
-It doesn&#8217;t have to be that way, and actually the Gradle team is working on adding support for toolchains to simplify the configuration of builds in this case.
-In the mean time, if for some reason your Gradle build doesn&#8217;t want to start on JDK 15, but it works on 14, then you can easily configure Gradle to fork compilation and execution.</p>
-</div>
-<div class="paragraph">
-<p>You can for example configure the build to use a JDK found externally by specifying an environment variable like in the example below:</p>
+It doesn&#8217;t have to be that way, and actually the Gradle team added support for toolchains to simplify the configuration of builds in this case.
+All you need is to tell what JDK to use and Gradle will take care of finding a JDK on your machine which matches the spec, or download it!</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>providers.environmentVariable("JDK15")
-        .forUseAtConfigurationTime()
-        .map(::File)
-        .orNull?.let { javaHome -&gt;
-            println("Configuring your build to use JDK 15 from $javaHome")
-            tasks.withType&lt;Test&gt;().configureEach {
-                executable = "${javaHome}/bin/java"
-            }
-
-            tasks.withType&lt;JavaCompile&gt;().configureEach {
-                options.isFork = true
-                options.forkOptions.javaHome = javaHome
-                options.compilerArgs.addAll(listOf("--release", "15"))
-            }
-        }</code></pre>
+<pre class="prettyprint kotlin language-kotlin"><code>java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(15))
+    }
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
