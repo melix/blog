@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 28 Feb 2021 20:20:34 +0100</pubDate>
-    <lastBuildDate>Sun, 28 Feb 2021 20:20:34 +0100</lastBuildDate>
+    <pubDate>Tue, 9 Mar 2021 21:10:21 +0100</pubDate>
+    <lastBuildDate>Tue, 9 Mar 2021 21:10:21 +0100</lastBuildDate>
 
     <item>
       <title>Gradle + WebAssembly</title>
@@ -551,7 +551,7 @@ The surface is a DSL, a language, but what you do, what you &lt;em&gt;should do&
 }
 
 dependencies {
-    api &apos;org.
+    api &apos;org.springframework:spring-core:2.5.6&apos;
     implementation &apos;org.apache.commons:commons-lang3:3.3.10&apos;
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -803,7 +803,7 @@ However, with the experimental &lt;a href=&quot;https://docs.gradle.org/current/
 &lt;div class=&quot;sect3&quot;&gt;
 &lt;h4 id=&quot;_now_that_i_get_it&quot;&gt;Now That I Get It&lt;/h4&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is &lt;em&gt;much&lt;/em&gt; easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the Jetbrains team, which is working on performance of the compiler, &lt;a href=&quot;https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance&quot;&gt;Gradle 6.8 will also provide some nice Kotlin DSL performance improvements&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is &lt;em&gt;much&lt;/em&gt; easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the JetBrains team, which is working on performance of the compiler, &lt;a href=&quot;https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance&quot;&gt;Gradle 6.8 will also provide some nice Kotlin DSL performance improvements&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
