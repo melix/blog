@@ -115,7 +115,7 @@ plugins {
 }
 
 dependencies {
-    api 'org.
+    api 'org.springframework:spring-core:2.5.6'
     implementation 'org.apache.commons:commons-lang3:3.3.10'
 }
 
@@ -288,7 +288,7 @@ Oh yes. Oh, yes. Gradle is probably the most advanced build tool of the market. 
 
 ==== Now That I Get It
 
-The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is _much_ easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the Jetbrains team, which is working on performance of the compiler, https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance[Gradle 6.8 will also provide some nice Kotlin DSL performance improvements].
+The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is _much_ easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the JetBrains team, which is working on performance of the compiler, https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance[Gradle 6.8 will also provide some nice Kotlin DSL performance improvements].
 
 === Conclusion
 

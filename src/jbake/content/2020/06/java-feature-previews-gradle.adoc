@@ -8,6 +8,8 @@ Cédric Champeau
 :id: gradle-java-feature-previews
 :linkattrs:
 
+_This blog post has been updated with the latest Java Toolchain support from Gradle, making it even easier!_
+
 You've probably heard about Java providing features like https://blogs.oracle.com/javamagazine/records-come-to-java[records], https://docs.oracle.com/en/java/javase/13/text_blocks/index.html[multi-line text blocks] or https://blogs.oracle.com/javamagazine/inside-the-language-sealed-types[sealed types] and you'd like to try them.
 
 Those features are called _feature previews_ and it means a couple of things:
@@ -76,27 +78,15 @@ And that's it, you can run the build with `./gradlew test`.
 == Configuring Gradle to use a different JDK from its own runtime
 
 Usually, people use the same JDK version for running Gradle, than they use to compile and execute tests.
-It doesn't have to be that way, and actually the Gradle team is working on adding support for toolchains to simplify the configuration of builds in this case.
-In the mean time, if for some reason your Gradle build doesn't want to start on JDK 15, but it works on 14, then you can easily configure Gradle to fork compilation and execution.
-
-You can for example configure the build to use a JDK found externally by specifying an environment variable like in the example below:
+It doesn't have to be that way, and actually the Gradle team added support for toolchains to simplify the configuration of builds in this case.
+All you need is to tell what JDK to use and Gradle will take care of finding a JDK on your machine which matches the spec, or download it!
 
 ```kotlin
-providers.environmentVariable("JDK15")
-        .forUseAtConfigurationTime()
-        .map(::File)
-        .orNull?.let { javaHome ->
-            println("Configuring your build to use JDK 15 from $javaHome")
-            tasks.withType<Test>().configureEach {
-                executable = "${javaHome}/bin/java"
-            }
-
-            tasks.withType<JavaCompile>().configureEach {
-                options.isFork = true
-                options.forkOptions.javaHome = javaHome
-                options.compilerArgs.addAll(listOf("--release", "15"))
-            }
-        }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(15))
+    }
+}
 ```
 
 Now you don't have any excuse not to try feature previews!
