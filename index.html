@@ -311,6 +311,17 @@ To some extent, it&#8217;s good news, it means that Gradle is really using Java 
 Congrats, you have your first Java 16 app running!</p>
 </div>
 <div class="paragraph">
+<p>Alternatively to disabling incremental compilation, you might just want to let Gradle access the JDK internals.
+This solution is better for performance, even if a bit "hackish":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>tasks.withType(JavaCompile).configureEach {
+    options.forkOptions.jvmArgs.addAll( ['--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'] )
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>In case you want to use one of the experimental features that Java 16 provides, the setup I&#8217;ve described in a <a href="https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html">previous post about Java Feature Previews</a> still hold and is a good follow-up to this post!</p>
 </div>
 </div>
