@@ -69,6 +69,254 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2021/03/gradle-java16.html"><h1>Using Java 16 with Gradle</h1></a>
+  			<p>17 March 2021</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/java16.html"> java16</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://twitter.com/java/status/1371842658256228356">Java 16 is out</a> and I&#8217;m seeing a number of folks trying to figure out how to use Java 16 with Gradle.
+Often they would try to run Gradle with JDK 16 and see it fail.
+There&#8217;s a <a href="https://github.com/gradle/gradle/issues/13481">ticket about Java 16 support in Gradle</a> but in most cases you can already work with JDK 16 without waiting for official support.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_happy_path">The happy path</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gradle 7, which is due soon, will provide official support for Java 16.
+If you have an existing build that you want to try on Java 16, you can update the wrapper to use the latest Gradle 7.0 milestone release:</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle/wrapper/gradle-wrapper.properties</div>
+<div class="content">
+<pre class="prettyprint"><code>distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-milestone-3-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you are lucky this is all you need to do.</p>
+</div>
+<div class="paragraph">
+<p>However, Gradle 7 is a major release, and as such it brings a number of changes which <em>may</em> break your build (deprecated methods being removed, or, in particular for the Java 16 support, upgrading to Groovy 3 internally).
+It may be a bit involved to migrate to Gradle 7 just to try Java 16.</p>
+</div>
+<div class="sect2">
+<h3 id="_decouple_the_java_version_used_for_gradle_itself_from_the_version_you_need">Decouple the Java version used for Gradle itself from the version you need!</h3>
+<div class="paragraph">
+<p>It&#8217;s actually better to <em>decouple the version of Java required to run Gradle</em> from the <em>version of Java your application requires</em>.
+In general, it&#8217;s actually considered the <strong>best practice</strong> to use whatever version of the JDK Gradle officially supports to run Gradle itself, and configure the build to <strong>use a different JDK</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_java_toolchains">Configuring Java toolchains</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In Gradle terminology, this is called activating <a href="https://docs.gradle.org/6.8.3/userguide/toolchains.html">Java Toolchains</a>.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s get started with a sample project running on latest stable Gradle, which is 6.8.3.
+Make sure that you have Gradle 6.8.3 on your PATH to get started.
+I&#8217;m personally recommending to use <a href="https://sdkman.io/">sdkman!</a> to install Gradle:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>$ sdk install gradle 6.8.3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At the same time, we want to make sure we run Gradle with a supported version, which is anything between Java 8 and 15:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>$ java -version
+java -version
+openjdk version "11.0.9.1" 2020-11-04
+OpenJDK Runtime Environment 18.9 (build 11.0.9.1+1)
+OpenJDK 64-Bit Server VM 18.9 (build 11.0.9.1+1, mixed mode)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If it outputs something else than 8 to 15, please make sure to update your PATH to point to such a JDK.
+Again you can do this with sdkman!:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>$ sdk install java 11.0.9.open</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_demo_application">Demo application</h3>
+<div class="paragraph">
+<p>Now, let&#8217;s create a sample Gradle project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>$ mkdir demo-app
+$ cd demo-app
+$ gradle init</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then select:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>Select type of project to generate:
+  1: basic
+  2: application
+  3: library
+  4: Gradle plugin
+Enter selection (default: basic) [1..4] 2
+
+Select implementation language:
+  1: C++
+  2: Groovy
+  3: Java
+  4: Kotlin
+  5: Scala
+  6: Swift
+Enter selection (default: Java) [1..6] 3
+
+Split functionality across multiple subprojects?:
+  1: no - only one application project
+  2: yes - application and library projects
+Enter selection (default: no - only one application project) [1..2] 1
+
+Select build script DSL:
+  1: Groovy
+  2: Kotlin
+Enter selection (default: Groovy) [1..2] 1
+
+Select test framework:
+  1: JUnit 4
+  2: TestNG
+  3: Spock
+  4: JUnit Jupiter
+Enter selection (default: JUnit 4) [1..4] 4
+
+Project name (default: demo-app):
+Source package (default: demo.app):</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and confirm the default name and packages.</p>
+</div>
+<div class="paragraph">
+<p>Then let&#8217;s run our app:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>$ ./gradlew run
+
+&gt; Task :app:run
+Hello World!
+
+BUILD SUCCESSFUL in 4s
+2 actionable tasks: 2 executed</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_migrating_the_application_to_java_16">Migrating the application to Java 16</h3>
+<div class="paragraph">
+<p>All good! Now let&#8217;s configure Gradle to use Java 16 to build and run our app instead.
+Let&#8217;s open the build script, found under <code>app</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">app/build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+    // Apply the application plugin to add support for building a CLI application in Java.
+    id 'application'
+}
+
+// Add this under the `plugins` section:
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>java.toolchain</code> block lets us configure the <em>toolchain</em> that Gradle is going to use to build and run your application.
+We&#8217;re setting 16, which means that we&#8217;re going to compile the main and test sources as well as execute the with a Java 16 JDK.
+Gradle will automatically try to find if you have a Java 16 installation in a conventional location.
+If it cannot find one you will see something like this happening:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Provisioning toolchain adoptopenjdk-16-x64-linux.tar.gz &gt; adoptopenjdk-16-x64-linux.tar.gz &gt; 66 MiB/195.8 MiB</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>which means that Gradle is downloading the JDK for you!</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s check:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>./gradlew run</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Dang!</strong> The <a href="https://scans.gradle.com/s/gogpwzdj5zf6q/console-log?anchor=14">build fails!</a>.
+To some extent, it&#8217;s good news, it means that Gradle is really using Java 16, but why is it failing?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disabling_incremental_compilation">Disabling incremental compilation</h3>
+<div class="paragraph">
+<p>Well, you&#8217;re facing one of the bugs we fixed in 7, which is that our <em>incremental compiler</em> isn&#8217;t compatible with Java 16 because we&#8217;re using classes which have been made "hidden" by the module system in Java 16.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s an easy fix: let&#8217;s disable incremental compilation!</p>
+</div>
+<div class="paragraph">
+<p>Again, let&#8217;s open our <code>app/build.gradle</code> file and add this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>tasks.withType(JavaCompile).configureEach {
+	// disable incremental compilation
+    options.incremental = false
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And let&#8217;s run the build again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>./gradlew run</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Yay! This time the <a href="https://scans.gradle.com/s/czapxbvfqxt72/console-log?anchor=7">build passed!</a>
+Congrats, you have your first Java 16 app running!</p>
+</div>
+<div class="paragraph">
+<p>In case you want to use one of the experimental features that Java 16 provides, the setup I&#8217;ve described in a <a href="https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html">previous post about Java Feature Previews</a> still hold and is a good follow-up to this post!</p>
+</div>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2021/03/gradle-java16.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2021/02/gradle-webassembly.html"><h1>Gradle + WebAssembly</h1></a>
   			<p>21 February 2021</p>
 			<p><em>Tags: </em>
@@ -1145,142 +1393,6 @@ However, we have alternate solutions. For example a few weeks ago I experimented
 <p>Eventually, the key takeaway of this blog post should be: don&#8217;t assume that you are safe because you use Dependabot. You&#8217;re not.</p>
 </div></p>
 			<p><a href="/blog/2020/10/about-dependabot.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2020/06/updating-git.html"><h1>Configuring git to use main instead of master</h1></a>
-  			<p>17 June 2020</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/git.html">git</a> 
-	
-		<a href="/blog/tags/github.html"> github</a> 
-	
-		<a href="/blog/tags/blacklivesmatter.html"> blacklivesmatter</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>I don&#8217;t need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name: technical issues shouldn&#8217;t be a reason to stop us from improving.</p>
-</div>
-<div class="paragraph">
-<p>Actually, if you are reading this, there are good chances you&#8217;re already in the mindset of removing potentially offensive language from your project, thank you!</p>
-</div>
-<div class="paragraph">
-<p>The fact is, we have better, more descriptive technical names than "master" and "slave" and we don&#8217;t have to use terms which refer to dark ages of our history, so let&#8217;s get rid of them in tech.</p>
-</div>
-<div class="paragraph">
-<p>In this blog post, you will learn:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>how to make <code>git init</code> create your project with a <code>main</code> branch instead of <code>master</code></p>
-</li>
-<li>
-<p>how to rename your <code>master</code> branch to <code>main</code></p>
-</li>
-<li>
-<p>how to make the change on GitHub</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Be aware that renaming branches may break your existing integrations (typically with CI or Slack notifications) so only do it when you&#8217;re ready.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuring_git_init">Configuring git init</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>By default, when you create a new project, <code>git init</code> will create a <code>master</code> branch.
-There&#8217;s no option in <code>git init</code> to change this, but it&#8217;s actually quite easy to set it up differently.</p>
-</div>
-<div class="paragraph">
-<p>First, in your <code>~/.gitconfig</code> file, add the following:</p>
-</div>
-<div class="listingblock">
-<div class="title">~/.gitconfig</div>
-<div class="content">
-<pre class="prettyprint"><code>[init]
-    templateDir = ~/.config/git/template/</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then create, if it doesn&#8217;t exist, the following directory:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>mkdir ~/.config/git/template</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>next create this file:</p>
-</div>
-<div class="listingblock">
-<div class="title">~/.config/git/template/HEAD</div>
-<div class="content">
-<pre class="prettyprint"><code>ref: refs/heads/main</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>(don&#8217;t forget to add a new line at the end of the first line)</p>
-</div>
-<div class="paragraph">
-<p>Starting from now, calling <code>git init</code> will create a <code>main</code> branch instead of <code>master</code>!</p>
-</div>
-<div class="paragraph">
-<p>Now let&#8217;s deal with existing projects.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_renaming_your_master_branch">Renaming your master branch</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>For your current projects, you may want to rename the <code>master</code> branch to <code>main</code>.
-This is also single command in <code>git</code>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>git checkout master
-git branch -m main</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then you can push the branch to your remote&#8230; but be careful, it will create a <em>new branch</em> on the remote:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>git push origin main</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuring_github_to_use_code_main_code_instead_of_code_master_code">Configuring GitHub to use <code>main</code> instead of <code>master</code></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you&#8217;ve pushed your new branch, you need to tell GitHub that this is your new "default branch".
-To do this, go to <code>Settings</code> &#8594; <code>Branches</code> and select your new branch as the default one:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/github-branch.png" alt="github branch">
-</div>
-</div>
-<div class="paragraph">
-<p>Last but not least, you need to delete the old branch from GitHub, which can be done by calling this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>git push origin :master</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Done!</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2020/06/updating-git.html#disqus_thread">Comments</a></p>
 	
 	<hr />
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>

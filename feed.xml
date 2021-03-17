@@ -6,9 +6,256 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 9 Mar 2021 21:10:21 +0100</pubDate>
-    <lastBuildDate>Tue, 9 Mar 2021 21:10:21 +0100</lastBuildDate>
+    <pubDate>Wed, 17 Mar 2021 15:57:20 +0100</pubDate>
+    <lastBuildDate>Wed, 17 Mar 2021 15:57:20 +0100</lastBuildDate>
 
+    <item>
+      <title>Using Java 16 with Gradle</title>
+      <link>https://melix.github.io/blog/2021/03/gradle-java16.html</link>
+      <pubDate>Wed, 17 Mar 2021 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2021/03/gradle-java16.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://twitter.com/java/status/1371842658256228356&quot;&gt;Java 16 is out&lt;/a&gt; and I&amp;#8217;m seeing a number of folks trying to figure out how to use Java 16 with Gradle.
+Often they would try to run Gradle with JDK 16 and see it fail.
+There&amp;#8217;s a &lt;a href=&quot;https://github.com/gradle/gradle/issues/13481&quot;&gt;ticket about Java 16 support in Gradle&lt;/a&gt; but in most cases you can already work with JDK 16 without waiting for official support.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_happy_path&quot;&gt;The happy path&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle 7, which is due soon, will provide official support for Java 16.
+If you have an existing build that you want to try on Java 16, you can update the wrapper to use the latest Gradle 7.0 milestone release:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gradle/wrapper/gradle-wrapper.properties&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-milestone-3-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you are lucky this is all you need to do.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, Gradle 7 is a major release, and as such it brings a number of changes which &lt;em&gt;may&lt;/em&gt; break your build (deprecated methods being removed, or, in particular for the Java 16 support, upgrading to Groovy 3 internally).
+It may be a bit involved to migrate to Gradle 7 just to try Java 16.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_decouple_the_java_version_used_for_gradle_itself_from_the_version_you_need&quot;&gt;Decouple the Java version used for Gradle itself from the version you need!&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s actually better to &lt;em&gt;decouple the version of Java required to run Gradle&lt;/em&gt; from the &lt;em&gt;version of Java your application requires&lt;/em&gt;.
+In general, it&amp;#8217;s actually considered the &lt;strong&gt;best practice&lt;/strong&gt; to use whatever version of the JDK Gradle officially supports to run Gradle itself, and configure the build to &lt;strong&gt;use a different JDK&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_configuring_java_toolchains&quot;&gt;Configuring Java toolchains&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Gradle terminology, this is called activating &lt;a href=&quot;https://docs.gradle.org/6.8.3/userguide/toolchains.html&quot;&gt;Java Toolchains&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s get started with a sample project running on latest stable Gradle, which is 6.8.3.
+Make sure that you have Gradle 6.8.3 on your PATH to get started.
+I&amp;#8217;m personally recommending to use &lt;a href=&quot;https://sdkman.io/&quot;&gt;sdkman!&lt;/a&gt; to install Gradle:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ sdk install gradle 6.8.3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At the same time, we want to make sure we run Gradle with a supported version, which is anything between Java 8 and 15:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ java -version
+java -version
+openjdk version &quot;11.0.9.1&quot; 2020-11-04
+OpenJDK Runtime Environment 18.9 (build 11.0.9.1+1)
+OpenJDK 64-Bit Server VM 18.9 (build 11.0.9.1+1, mixed mode)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If it outputs something else than 8 to 15, please make sure to update your PATH to point to such a JDK.
+Again you can do this with sdkman!:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ sdk install java 11.0.9.open&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_demo_application&quot;&gt;Demo application&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, let&amp;#8217;s create a sample Gradle project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ mkdir demo-app
+$ cd demo-app
+$ gradle init&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then select:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;Select type of project to generate:
+  1: basic
+  2: application
+  3: library
+  4: Gradle plugin
+Enter selection (default: basic) [1..4] 2
+
+Select implementation language:
+  1: C++
+  2: Groovy
+  3: Java
+  4: Kotlin
+  5: Scala
+  6: Swift
+Enter selection (default: Java) [1..6] 3
+
+Split functionality across multiple subprojects?:
+  1: no - only one application project
+  2: yes - application and library projects
+Enter selection (default: no - only one application project) [1..2] 1
+
+Select build script DSL:
+  1: Groovy
+  2: Kotlin
+Enter selection (default: Groovy) [1..2] 1
+
+Select test framework:
+  1: JUnit 4
+  2: TestNG
+  3: Spock
+  4: JUnit Jupiter
+Enter selection (default: JUnit 4) [1..4] 4
+
+Project name (default: demo-app):
+Source package (default: demo.app):&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and confirm the default name and packages.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then let&amp;#8217;s run our app:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ ./gradlew run
+
+&amp;gt; Task :app:run
+Hello World!
+
+BUILD SUCCESSFUL in 4s
+2 actionable tasks: 2 executed&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_migrating_the_application_to_java_16&quot;&gt;Migrating the application to Java 16&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All good! Now let&amp;#8217;s configure Gradle to use Java 16 to build and run our app instead.
+Let&amp;#8217;s open the build script, found under &lt;code&gt;app&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;app/build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+    // Apply the application plugin to add support for building a CLI application in Java.
+    id &apos;application&apos;
+}
+
+// Add this under the `plugins` section:
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;code&gt;java.toolchain&lt;/code&gt; block lets us configure the &lt;em&gt;toolchain&lt;/em&gt; that Gradle is going to use to build and run your application.
+We&amp;#8217;re setting 16, which means that we&amp;#8217;re going to compile the main and test sources as well as execute the with a Java 16 JDK.
+Gradle will automatically try to find if you have a Java 16 installation in a conventional location.
+If it cannot find one you will see something like this happening:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Provisioning toolchain adoptopenjdk-16-x64-linux.tar.gz &amp;gt; adoptopenjdk-16-x64-linux.tar.gz &amp;gt; 66 MiB/195.8 MiB&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;which means that Gradle is downloading the JDK for you!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s check:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;./gradlew run&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Dang!&lt;/strong&gt; The &lt;a href=&quot;https://scans.gradle.com/s/gogpwzdj5zf6q/console-log?anchor=14&quot;&gt;build fails!&lt;/a&gt;.
+To some extent, it&amp;#8217;s good news, it means that Gradle is really using Java 16, but why is it failing?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_disabling_incremental_compilation&quot;&gt;Disabling incremental compilation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well, you&amp;#8217;re facing one of the bugs we fixed in 7, which is that our &lt;em&gt;incremental compiler&lt;/em&gt; isn&amp;#8217;t compatible with Java 16 because we&amp;#8217;re using classes which have been made &quot;hidden&quot; by the module system in Java 16.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s an easy fix: let&amp;#8217;s disable incremental compilation!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again, let&amp;#8217;s open our &lt;code&gt;app/build.gradle&lt;/code&gt; file and add this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.withType(JavaCompile).configureEach {
+	// disable incremental compilation
+    options.incremental = false
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And let&amp;#8217;s run the build again:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;./gradlew run&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yay! This time the &lt;a href=&quot;https://scans.gradle.com/s/czapxbvfqxt72/console-log?anchor=7&quot;&gt;build passed!&lt;/a&gt;
+Congrats, you have your first Java 16 app running!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In case you want to use one of the experimental features that Java 16 provides, the setup I&amp;#8217;ve described in a &lt;a href=&quot;https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html&quot;&gt;previous post about Java Feature Previews&lt;/a&gt; still hold and is a good follow-up to this post!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Gradle + WebAssembly</title>
       <link>https://melix.github.io/blog/2021/02/gradle-webassembly.html</link>
@@ -1210,134 +1457,6 @@ To do this, go to &lt;code&gt;Settings&lt;/code&gt; &amp;#8594; &lt;code&gt;Bran
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Done!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Using Java feature previews with Gradle</title>
-      <link>https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html</link>
-      <pubDate>Thu, 11 Jun 2020 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2020/06/java-feature-previews-gradle.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;em&gt;This blog post has been updated with the latest Java Toolchain support from Gradle, making it even easier!&lt;/em&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You&amp;#8217;ve probably heard about Java providing features like &lt;a href=&quot;https://blogs.oracle.com/javamagazine/records-come-to-java&quot;&gt;records&lt;/a&gt;, &lt;a href=&quot;https://docs.oracle.com/en/java/javase/13/text_blocks/index.html&quot;&gt;multi-line text blocks&lt;/a&gt; or &lt;a href=&quot;https://blogs.oracle.com/javamagazine/inside-the-language-sealed-types&quot;&gt;sealed types&lt;/a&gt; and you&amp;#8217;d like to try them.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Those features are called &lt;em&gt;feature previews&lt;/em&gt; and it means a couple of things:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;olist arabic&quot;&gt;
-&lt;ol class=&quot;arabic&quot;&gt;
-&lt;li&gt;
-&lt;p&gt;the Java team wants you to test them and give feedback. They want honest feedback about how it &lt;em&gt;feels&lt;/em&gt; to use them, whether you like them or not. Both ways, feedback is important.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;because they are feature previews, you &lt;em&gt;shouldn&amp;#8217;t&lt;/em&gt; them use in production, but you can play with them for toy projects.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There&amp;#8217;s actually an important thing about point 2 if you are a &lt;em&gt;library author&lt;/em&gt;: &lt;strong&gt;never, ever publish a library which uses feature previews on Maven Central&lt;/strong&gt;. The reason is that the feature previews &lt;em&gt;leak to consumers&lt;/em&gt;: as soon as &lt;em&gt;you&lt;/em&gt; start using them, any project depending on your code will also have to enable them. This is not a problem for toy projects, it&amp;#8217;s clearly a problem for published libraries. In particular, there are no guarantees that the generated bytecode will be compatible with future Java releases, and there are no guarantees that the feature preview will make it to Java eventually.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The goal of this blog post is not to explain what records or sealed classes are, there&amp;#8217;s already a lot of litterature about it.
-Instead, we&amp;#8217;re going to explain how to configure your Gradle build to use feature previews and therefore report issues/bugs to the JDK team.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_configuring_your_gradle_build&quot;&gt;Configuring your Gradle build&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The code in this blog post is available on a &lt;a href=&quot;https://github.com/melix/gradle-java-feature-previews&quot;&gt;GitHub repository&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, make sure you are using latest Gradle versions.
-If you use the repository above, the Gradle wrapper will make sure that you do.
-Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Imagine that you want to compile the following record:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public record Person(
-        String firstName,
-        String lastName,
-        boolean likeJavaRecords) {
-
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And execute this test:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;class PersonTest {
-    @Test void testRecord() {
-        Person cedric = new Person(&quot;Cédric&quot;, &quot;Champeau&quot;, true);
-        Person otherCedric = new Person(&quot;Cédric&quot;, &quot;Champeau&quot;, true);
-        assertEquals(cedric, otherCedric);
-        assertTrue(cedric.likeJavaRecords());
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then you need to configure the build to do a couple of things:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, we need to tell the Java compiler to use feature previews:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;tasks.withType&amp;lt;JavaCompile&amp;gt;().configureEach {
-    options.compilerArgs.add(&quot;--enable-preview&quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then we need to tell the test runtime to use feature previews:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;tasks.withType&amp;lt;Test&amp;gt;().configureEach {
-    useJUnitPlatform()
-    jvmArgs(&quot;--enable-preview&quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And that&amp;#8217;s it, you can run the build with &lt;code&gt;./gradlew test&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_configuring_gradle_to_use_a_different_jdk_from_its_own_runtime&quot;&gt;Configuring Gradle to use a different JDK from its own runtime&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Usually, people use the same JDK version for running Gradle, than they use to compile and execute tests.
-It doesn&amp;#8217;t have to be that way, and actually the Gradle team added support for toolchains to simplify the configuration of builds in this case.
-All you need is to tell what JDK to use and Gradle will take care of finding a JDK on your machine which matches the spec, or download it!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(15))
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now you don&amp;#8217;t have any excuse not to try feature previews!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
