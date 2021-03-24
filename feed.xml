@@ -6,9 +6,314 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 17 Mar 2021 16:59:47 +0100</pubDate>
-    <lastBuildDate>Wed, 17 Mar 2021 16:59:47 +0100</lastBuildDate>
+    <pubDate>Wed, 24 Mar 2021 21:06:54 +0100</pubDate>
+    <lastBuildDate>Wed, 24 Mar 2021 21:06:54 +0100</lastBuildDate>
 
+    <item>
+      <title>Simplified version management with Gradle 7</title>
+      <link>https://melix.github.io/blog/2021/03/version-catalogs.html</link>
+      <pubDate>Wed, 24 Mar 2021 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2021/03/version-catalogs.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle 7 introduces the concept of &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html&quot;&gt;version catalogs&lt;/a&gt;, which I&amp;#8217;ve been working on for several months already. Long story short, I&amp;#8217;m extremely excited by this new feature which should make dependency management easier with Gradle. Let&amp;#8217;s get started!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_sharing_dependencies_between_projects&quot;&gt;Sharing dependencies between projects&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the most frequent questions raised by Gradle users is how to properly share dependency versions between projects.
+For example, let&amp;#8217;s imagine that you have a multi-project build with this layout:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;root
+ |---- client
+ |---- server&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because they live in the same &quot;multi-project&quot;, it is expected that both &lt;code&gt;client&lt;/code&gt; and &lt;code&gt;server&lt;/code&gt; would require the same dependencies.
+For example, both of them would need Guava as an implementation detail and JUnit 5 for testing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
+    implementation(&quot;com.google.guava:guava:30.0-jre&quot;)
+    testImplementation(&quot;org.junit.jupiter:junit-jupiter-api:5.7.1&quot;)
+    testRuntimeOnly(&quot;org.junit.jupiter:junit-jupiter-engine&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Without any sharing mechanism, both projects would replicate the dependency declarations, which is subject to a number of drawbacks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;upgrading a library requires updating all build files which use it&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you have to remember about the dependency coordinates (group, artifact, version) of all dependencies&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you might accidentally use different versions in different projects&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;some dependencies are always used together but you have to duplicate entries in build files&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_existing_patterns&quot;&gt;Existing patterns&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For these reasons, users have invented over the years different patterns for dealing with dependency versions over time.
+For example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Versions in properties files:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gradle.properties&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;guavaVersion=30.0-jre&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;then in a build file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
+	implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Or versions in &quot;extra properties&quot; in the root project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;extra properties&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;ext {
+   guavaVersion = &apos;30.0-jre&apos;
+}
+
+// ...
+
+dependencies {
+	implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Sometimes you even find full coordinates in &lt;code&gt;dependencies.gradle&lt;/code&gt; files.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And since the rise of the Kotlin DSL, another pattern became extremely popular in the Android world: declaring libraries in &lt;code&gt;buildSrc&lt;/code&gt; then using type-safe accessors to declare dependencies in build scripts:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;buildSrc/src/main/kotlin/Libs.kt&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;object Libs {
+   val guava = &quot;com.google.guava:guava:30.0-jre&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and in a build script:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
+	implementation(Libs.guava)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This last example is interesting because it goes into the direction of having more type-safety, more compile-time errors (as opposed to runtime errors).
+But it has a major drawback: any change to any dependency will trigger recompilation of build scripts and invalidate the build script classpath, causing up-to-date checkness to fail and in the end, rebuilding a lot more than what you should do for a single version change.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introducing_version_catalogs&quot;&gt;Introducing version catalogs&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A version catalog is basically a replacement for all the previous patterns, supported by Gradle, without the drawbacks of the previous approaches.
+To add support for version catalogs, you need to enable the experimental feature in your settings file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;enableFeaturePreview(&quot;VERSION_CATALOGS&quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In its simplest form, a catalog is a file found in a conventional location and uses the &lt;a href=&quot;https://toml.io/en/&quot;&gt;TOML&lt;/a&gt; configuration format:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gradle/libs.versions.toml&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
+guava = &quot;com.google.guava:guava:30.0-jre&quot;
+junit-jupiter = &quot;org.junit.jupiter:junit-jupiter-api:5.7.1&quot;
+junit-engine = { module = &quot;org.junit.jupiter:junit-jupiter-engine&quot; }
+
+[bundles]
+testDependencies = [&quot;junit-jupiter&quot;, &quot;junit-engine&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This declares the &lt;em&gt;dependency coordinates&lt;/em&gt; which will be used in build scripts.
+You still have to declare your dependencies, but this now can be done using a &lt;em&gt;typesafe&lt;/em&gt; API:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
+    implementation(libs.guava)
+    testImplementation(libs.testDependencies)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The benefit of type-safe APIs is immediately visible in the IDE:&lt;/p&gt;
+&lt;/div&gt;
+&lt;video controls autoplay height=&quot;450&quot;&gt;
+    &lt;source src=&quot;../../video/ide-completion.webm&quot;
+            type=&quot;video/webm&quot;&gt;
+&lt;/video&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the catalog file above, we inlined dependency versions directly in the coordinates.
+However, it&amp;#8217;s possible to externalize them so that you can share a dependency version between dependencies.
+For example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gradle/libs.versions.toml&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[versions]
+groovy = &quot;2.5.14&quot;
+guava = &quot;30.0-jre&quot;
+jupiter = &quot;5.7.1&quot;
+
+[libraries]
+guava = { module = &quot;com.google.guava:guava&quot;, version.ref=&quot;guava&quot; }
+junit-jupiter = { module = &quot;org.junit.jupiter:junit-jupiter-api&quot;, version.ref=&quot;jupiter&quot; }
+junit-engine = { module = &quot;org.junit.jupiter:junit-jupiter-engine&quot; }
+
+groovy-core = { module = &quot;org.codehaus.groovy:groovy&quot;, version.ref=&quot;groovy&quot; }
+groovy-json = { module = &quot;org.codehaus.groovy:groovy-json&quot;, version.ref=&quot;groovy&quot; }
+
+[bundles]
+testDependencies = [&quot;junit-jupiter&quot;, &quot;junit-engine&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This new feature makes it trivial to update a dependency version: you have a single place where to look at.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This comes with other benenefits like the fact that updating the GAV coordinates (group, artifact or version) of a dependency doesn&amp;#8217;t trigger recompilation of build scripts.
+The TOML format also provides us with the ability to declare &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/rich_versions.html&quot;&gt;rich versions&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_under_the_hood&quot;&gt;Under the hood&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Under the hood, Gradle provides an API to declare catalogs. This API is found on the &lt;code&gt;Settings&lt;/code&gt;, which means that plugin authors can contribute catalogs, for example via convention plugins applied to the &lt;code&gt;settings.gradle(.kts)&lt;/code&gt; file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This API is more verbose than when you use the TOML file, but is designed for type-safety. The equivalent of the catalog above would be this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencyResolutionManagement {
+   versionCatalogs {
+      libs {
+      	 alias(&quot;guava&quot;).to(&quot;com.google.guava&quot;, &quot;guava&quot;).versionRef(&quot;guava&quot;)
+      	 alias(&quot;junit-jupiter&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-api&quot;).versionRef(&quot;jupiter&quot;)
+      	 alias(&quot;junit-engine&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-engine&quot;).withoutVersion()
+      	 alias(&quot;groovy-core&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy&quot;).versionRef=&quot;groovy&quot;)
+      	 alias(&quot;groovy-json&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy-json&quot;).versionRef=&quot;groovy&quot;)
+
+      	 version(&quot;groovy&quot;, &quot;2.5.14&quot;)
+      	 version(&quot;guava&quot;, &quot;30.0-jre&quot;)
+      	 version(&quot;jupiter&quot;, &quot;5.7.1&quot;)
+      }
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This API actually must be used if you are &lt;em&gt;consuming an external catalog&lt;/em&gt;.
+That&amp;#8217;s one of the big selling points of this feature: it allows teams (or framework authors) to &lt;em&gt;publish catalogs&lt;/em&gt;, so that users can get recommendations.
+For example, let&amp;#8217;s imagine that the Spring Boot team &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sec:version-catalog-plugin&quot;&gt;publishes a catalog of recommendations&lt;/a&gt; (they do something similar today with a BOM, but BOMs will have an impact on your transitive dependencies that you might not want).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Consuming this catalog it in a Gradle build would look like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencyResolutionManagement {
+   versionCatalogs {
+       spring {
+           from(&quot;org.springframework:spring-catalog:1.0&apos;)
+       }
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This would make a catalog available under the &lt;code&gt;spring&lt;/code&gt; namespace in your build scripts.
+Therefore, you&amp;#8217;d be able to use whatever version of SLF4J the Spring team recommends by declaring this dependency:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
+    implementation(spring.slf4j)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Such a catalog would be published on a regular Maven repository, as a TOML file.
+Thanks to Gradle&amp;#8217;s advanced dependency resolution engine, it&amp;#8217;s totally transparent to the user that the actual dependency is a &lt;em&gt;catalog&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_what_version_catalogs_are_not&quot;&gt;What version catalogs are not&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this stage, it becomes important to state what version catalogs are &lt;strong&gt;not&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;they &lt;strong&gt;are not&lt;/strong&gt; the &quot;single source of truth&quot; for your dependencies: it&amp;#8217;s not because you have a catalog that you can&amp;#8217;t directly declare dependencies using the &quot;old&quot; notation in build scripts. Nor does it prevent plugins from adding dependencies. Long story short: the presence of a catalog makes discoverability and maintenance easier, but it doesn&amp;#8217;t remove any of the flexibility that Gradle offers. We&amp;#8217;re thinking about ways to &lt;em&gt;enforce&lt;/em&gt; that all direct dependencies are declared via a catalog in the future.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the version declared in a catalog &lt;strong&gt;is not&lt;/strong&gt; necessarily the one which is going to be resolved: a catalog only talks about direct dependencies (not transitives) and the version that you use is the one used as an &lt;em&gt;input&lt;/em&gt; to dependency resolution. With transitive dependencies, it&amp;#8217;s typically possible that a version gets upgraded, for example.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;while it makes it possible for third-party tooling to &quot;update automatically&quot; versions, this wasn&amp;#8217;t a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the &lt;em&gt;input&lt;/em&gt; (what is written) to assume what is going to be resolved, you&amp;#8217;re only &lt;em&gt;wishing&lt;/em&gt; that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my &lt;a href=&quot;https://melix.github.io/blog/2020/10/about-dependabot.html&quot;&gt;blog post about Dependabot&lt;/a&gt; for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Please take a look at the &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sub:central-declaration-of-dependencies&quot;&gt;documentation&lt;/a&gt; for further details, and give us your feedback!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Using Java 16 with Gradle</title>
       <link>https://melix.github.io/blog/2021/03/gradle-java16.html</link>
@@ -1337,139 +1642,6 @@ However, we have alternate solutions. For example a few weeks ago I experimented
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Eventually, the key takeaway of this blog post should be: don&amp;#8217;t assume that you are safe because you use Dependabot. You&amp;#8217;re not.&lt;/p&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Configuring git to use main instead of master</title>
-      <link>https://melix.github.io/blog/2020/06/updating-git.html</link>
-      <pubDate>Wed, 17 Jun 2020 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2020/06/updating-git.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I don&amp;#8217;t need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name: technical issues shouldn&amp;#8217;t be a reason to stop us from improving.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Actually, if you are reading this, there are good chances you&amp;#8217;re already in the mindset of removing potentially offensive language from your project, thank you!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The fact is, we have better, more descriptive technical names than &quot;master&quot; and &quot;slave&quot; and we don&amp;#8217;t have to use terms which refer to dark ages of our history, so let&amp;#8217;s get rid of them in tech.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this blog post, you will learn:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;how to make &lt;code&gt;git init&lt;/code&gt; create your project with a &lt;code&gt;main&lt;/code&gt; branch instead of &lt;code&gt;master&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;how to rename your &lt;code&gt;master&lt;/code&gt; branch to &lt;code&gt;main&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;how to make the change on GitHub&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Be aware that renaming branches may break your existing integrations (typically with CI or Slack notifications) so only do it when you&amp;#8217;re ready.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_configuring_git_init&quot;&gt;Configuring git init&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;By default, when you create a new project, &lt;code&gt;git init&lt;/code&gt; will create a &lt;code&gt;master&lt;/code&gt; branch.
-There&amp;#8217;s no option in &lt;code&gt;git init&lt;/code&gt; to change this, but it&amp;#8217;s actually quite easy to set it up differently.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, in your &lt;code&gt;~/.gitconfig&lt;/code&gt; file, add the following:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;~/.gitconfig&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;[init]
-    templateDir = ~/.config/git/template/&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then create, if it doesn&amp;#8217;t exist, the following directory:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;mkdir ~/.config/git/template&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;next create this file:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;~/.config/git/template/HEAD&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;ref: refs/heads/main&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;(don&amp;#8217;t forget to add a new line at the end of the first line)&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Starting from now, calling &lt;code&gt;git init&lt;/code&gt; will create a &lt;code&gt;main&lt;/code&gt; branch instead of &lt;code&gt;master&lt;/code&gt;!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now let&amp;#8217;s deal with existing projects.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_renaming_your_master_branch&quot;&gt;Renaming your master branch&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For your current projects, you may want to rename the &lt;code&gt;master&lt;/code&gt; branch to &lt;code&gt;main&lt;/code&gt;.
-This is also single command in &lt;code&gt;git&lt;/code&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;git checkout master
-git branch -m main&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then you can push the branch to your remote&amp;#8230; but be careful, it will create a &lt;em&gt;new branch&lt;/em&gt; on the remote:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;git push origin main&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_configuring_github_to_use_code_main_code_instead_of_code_master_code&quot;&gt;Configuring GitHub to use &lt;code&gt;main&lt;/code&gt; instead of &lt;code&gt;master&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Once you&amp;#8217;ve pushed your new branch, you need to tell GitHub that this is your new &quot;default branch&quot;.
-To do this, go to &lt;code&gt;Settings&lt;/code&gt; &amp;#8594; &lt;code&gt;Branches&lt;/code&gt; and select your new branch as the default one:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/blog/img/github-branch.png&quot; alt=&quot;github branch&quot;&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last but not least, you need to delete the old branch from GitHub, which can be done by calling this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;git push origin :master&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Done!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
 &lt;/div&gt;
 	</description>
     </item>

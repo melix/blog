@@ -69,6 +69,314 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2021/03/version-catalogs.html"><h1>Simplified version management with Gradle 7</h1></a>
+  			<p>24 March 2021</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/catalog.html"> catalog</a> 
+	
+		<a href="/blog/tags/convenience.html"> convenience</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gradle 7 introduces the concept of <a href="https://docs.gradle.org/7.0-rc-1/userguide/platforms.html">version catalogs</a>, which I&#8217;ve been working on for several months already. Long story short, I&#8217;m extremely excited by this new feature which should make dependency management easier with Gradle. Let&#8217;s get started!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sharing_dependencies_between_projects">Sharing dependencies between projects</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the most frequent questions raised by Gradle users is how to properly share dependency versions between projects.
+For example, let&#8217;s imagine that you have a multi-project build with this layout:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>root
+ |---- client
+ |---- server</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because they live in the same "multi-project", it is expected that both <code>client</code> and <code>server</code> would require the same dependencies.
+For example, both of them would need Guava as an implementation detail and JUnit 5 for testing:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencies {
+    implementation("com.google.guava:guava:30.0-jre")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Without any sharing mechanism, both projects would replicate the dependency declarations, which is subject to a number of drawbacks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>upgrading a library requires updating all build files which use it</p>
+</li>
+<li>
+<p>you have to remember about the dependency coordinates (group, artifact, version) of all dependencies</p>
+</li>
+<li>
+<p>you might accidentally use different versions in different projects</p>
+</li>
+<li>
+<p>some dependencies are always used together but you have to duplicate entries in build files</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_existing_patterns">Existing patterns</h3>
+<div class="paragraph">
+<p>For these reasons, users have invented over the years different patterns for dealing with dependency versions over time.
+For example:</p>
+</div>
+<div class="paragraph">
+<p>Versions in properties files:</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle.properties</div>
+<div class="content">
+<pre class="prettyprint"><code>guavaVersion=30.0-jre</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then in a build file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>dependencies {
+	implementation("com.google.guava:guava:${guavaVersion}")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or versions in "extra properties" in the root project:</p>
+</div>
+<div class="listingblock">
+<div class="title">extra properties</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>ext {
+   guavaVersion = '30.0-jre'
+}
+
+// ...
+
+dependencies {
+	implementation("com.google.guava:guava:${guavaVersion}")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sometimes you even find full coordinates in <code>dependencies.gradle</code> files.</p>
+</div>
+<div class="paragraph">
+<p>And since the rise of the Kotlin DSL, another pattern became extremely popular in the Android world: declaring libraries in <code>buildSrc</code> then using type-safe accessors to declare dependencies in build scripts:</p>
+</div>
+<div class="listingblock">
+<div class="title">buildSrc/src/main/kotlin/Libs.kt</div>
+<div class="content">
+<pre class="prettyprint kotlin language-kotlin"><code>object Libs {
+   val guava = "com.google.guava:guava:30.0-jre"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and in a build script:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint"><code>dependencies {
+	implementation(Libs.guava)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This last example is interesting because it goes into the direction of having more type-safety, more compile-time errors (as opposed to runtime errors).
+But it has a major drawback: any change to any dependency will trigger recompilation of build scripts and invalidate the build script classpath, causing up-to-date checkness to fail and in the end, rebuilding a lot more than what you should do for a single version change.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introducing_version_catalogs">Introducing version catalogs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A version catalog is basically a replacement for all the previous patterns, supported by Gradle, without the drawbacks of the previous approaches.
+To add support for version catalogs, you need to enable the experimental feature in your settings file:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>enableFeaturePreview("VERSION_CATALOGS")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In its simplest form, a catalog is a file found in a conventional location and uses the <a href="https://toml.io/en/">TOML</a> configuration format:</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle/libs.versions.toml</div>
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[libraries]
+guava = "com.google.guava:guava:30.0-jre"
+junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+
+[bundles]
+testDependencies = ["junit-jupiter", "junit-engine"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This declares the <em>dependency coordinates</em> which will be used in build scripts.
+You still have to declare your dependencies, but this now can be done using a <em>typesafe</em> API:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencies {
+    implementation(libs.guava)
+    testImplementation(libs.testDependencies)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The benefit of type-safe APIs is immediately visible in the IDE:</p>
+</div>
+<video controls autoplay height="450">
+    <source src="../../video/ide-completion.webm"
+            type="video/webm">
+</video>
+<div class="paragraph">
+<p>In the catalog file above, we inlined dependency versions directly in the coordinates.
+However, it&#8217;s possible to externalize them so that you can share a dependency version between dependencies.
+For example:</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle/libs.versions.toml</div>
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[versions]
+groovy = "2.5.14"
+guava = "30.0-jre"
+jupiter = "5.7.1"
+
+[libraries]
+guava = { module = "com.google.guava:guava", version.ref="guava" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref="jupiter" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+
+groovy-core = { module = "org.codehaus.groovy:groovy", version.ref="groovy" }
+groovy-json = { module = "org.codehaus.groovy:groovy-json", version.ref="groovy" }
+
+[bundles]
+testDependencies = ["junit-jupiter", "junit-engine"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This new feature makes it trivial to update a dependency version: you have a single place where to look at.</p>
+</div>
+<div class="paragraph">
+<p>This comes with other benenefits like the fact that updating the GAV coordinates (group, artifact or version) of a dependency doesn&#8217;t trigger recompilation of build scripts.
+The TOML format also provides us with the ability to declare <a href="https://docs.gradle.org/7.0-rc-1/userguide/rich_versions.html">rich versions</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="_under_the_hood">Under the hood</h3>
+<div class="paragraph">
+<p>Under the hood, Gradle provides an API to declare catalogs. This API is found on the <code>Settings</code>, which means that plugin authors can contribute catalogs, for example via convention plugins applied to the <code>settings.gradle(.kts)</code> file.</p>
+</div>
+<div class="paragraph">
+<p>This API is more verbose than when you use the TOML file, but is designed for type-safety. The equivalent of the catalog above would be this:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
+   versionCatalogs {
+      libs {
+      	 alias("guava").to("com.google.guava", "guava").versionRef("guava")
+      	 alias("junit-jupiter").to("org.junit.jupiter", "junit-jupiter-api").versionRef("jupiter")
+      	 alias("junit-engine").to("org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
+      	 alias("groovy-core").to("org.codehaus.groovy", "groovy").versionRef="groovy")
+      	 alias("groovy-json").to("org.codehaus.groovy", "groovy-json").versionRef="groovy")
+
+      	 version("groovy", "2.5.14")
+      	 version("guava", "30.0-jre")
+      	 version("jupiter", "5.7.1")
+      }
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This API actually must be used if you are <em>consuming an external catalog</em>.
+That&#8217;s one of the big selling points of this feature: it allows teams (or framework authors) to <em>publish catalogs</em>, so that users can get recommendations.
+For example, let&#8217;s imagine that the Spring Boot team <a href="https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sec:version-catalog-plugin">publishes a catalog of recommendations</a> (they do something similar today with a BOM, but BOMs will have an impact on your transitive dependencies that you might not want).</p>
+</div>
+<div class="paragraph">
+<p>Consuming this catalog it in a Gradle build would look like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
+   versionCatalogs {
+       spring {
+           from("org.springframework:spring-catalog:1.0')
+       }
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This would make a catalog available under the <code>spring</code> namespace in your build scripts.
+Therefore, you&#8217;d be able to use whatever version of SLF4J the Spring team recommends by declaring this dependency:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencies {
+    implementation(spring.slf4j)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Such a catalog would be published on a regular Maven repository, as a TOML file.
+Thanks to Gradle&#8217;s advanced dependency resolution engine, it&#8217;s totally transparent to the user that the actual dependency is a <em>catalog</em>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_what_version_catalogs_are_not">What version catalogs are not</h3>
+<div class="paragraph">
+<p>At this stage, it becomes important to state what version catalogs are <strong>not</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>they <strong>are not</strong> the "single source of truth" for your dependencies: it&#8217;s not because you have a catalog that you can&#8217;t directly declare dependencies using the "old" notation in build scripts. Nor does it prevent plugins from adding dependencies. Long story short: the presence of a catalog makes discoverability and maintenance easier, but it doesn&#8217;t remove any of the flexibility that Gradle offers. We&#8217;re thinking about ways to <em>enforce</em> that all direct dependencies are declared via a catalog in the future.</p>
+</li>
+<li>
+<p>the version declared in a catalog <strong>is not</strong> necessarily the one which is going to be resolved: a catalog only talks about direct dependencies (not transitives) and the version that you use is the one used as an <em>input</em> to dependency resolution. With transitive dependencies, it&#8217;s typically possible that a version gets upgraded, for example.</p>
+</li>
+<li>
+<p>while it makes it possible for third-party tooling to "update automatically" versions, this wasn&#8217;t a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the <em>input</em> (what is written) to assume what is going to be resolved, you&#8217;re only <em>wishing</em> that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my <a href="https://melix.github.io/blog/2020/10/about-dependabot.html">blog post about Dependabot</a> for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Please take a look at the <a href="https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sub:central-declaration-of-dependencies">documentation</a> for further details, and give us your feedback!</p>
+</div>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2021/03/version-catalogs.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2021/03/gradle-java16.html"><h1>Using Java 16 with Gradle</h1></a>
   			<p>17 March 2021</p>
 			<p><em>Tags: </em>
@@ -1143,267 +1451,6 @@ However, with the experimental <a href="https://docs.gradle.org/current/userguid
 </div>
 </div></p>
 			<p><a href="/blog/2021/01/the-problem-with-gradle.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2020/10/about-dependabot.html"><h1>Dependabot and automated dependency upgrades</h1></a>
-  			<p>11 October 2020</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/dependabot.html"> dependabot</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="https://dependabot.com/">Dependabot</a> starts with a great idea: the state of our industry, in terms of dependency management, is sad.
-In particular, maintaining dependencies up-to-date is difficult and while some solutions exist, the vast majority of projects are out of date.
-This isn&#8217;t a big deal for bugfixes and feature updates, but it is clearly a problem for security issues.</p>
-</div>
-<div class="paragraph">
-<p>Therefore, any kind of automation to make the situation better is a good idea.
-I am in deep empathy with people working in this area: this is a difficult problem and there are no perfect solutions: as an example, in order to improve security of builds and reduce the risks of attacks via the toolchain, <a href="https://docs.gradle.org/current/userguide/dependency_verification.html">Gradle introduced dependency verification</a> as a first-class citizen.
-We deeply care about security and definitely support any attempt to make things better in this area.</p>
-</div>
-<div class="paragraph">
-<p>The genius idea about <a href="https://dependabot.com/">Dependabot</a> is that it does it at scale <strong>and submits pull requests</strong> that you just have to review and merge if everything goes ok.</p>
-</div>
-<div class="paragraph">
-<p>The best example in the Java ecosystem happened yesterday: the JUnit team fixed a <a href="https://github.com/junit-team/junit4/security/advisories/GHSA-269g-pwp5-87pp">security vulnerability in JUnit 4.13</a>.
-At first, you might wonder what kind of security problems you can have with a testing framework, which, by definition, just like a build tool, runs any arbitrary code on your machine.
-The reality is that most people are unaffected by this problem: it would only be the case if your tests write sensitive data (like credentials) in a shared environment, or that you somehow expose whatever is written in the test directory to the outside world.</p>
-</div>
-<div class="paragraph">
-<p>Nevertheless, because it&#8217;s a CVE, Dependabot submitted automated pull-requests to all projects using JUnit 4 and <a href="https://github.com/search?o=desc&amp;q=Bump+junit+from+to+4.13.1+GHSA-269g-pwp5-87pp&amp;s=&amp;type=Issues">Dependarmaggedon happened</a>: tens of thousands of pull requests.
-This might sound cool, a security fix needs to be fixed, but I find this noisy, and in the end dangerous.</p>
-</div>
-<div class="paragraph">
-<p>Here&#8217;s why.</p>
-</div>
-</div>
-</div>
-<h1 id="_automatic_detection" class="sect0">Automatic detection</h1>
-<div class="paragraph">
-<p><a href="https://dependabot.com/">Dependabot</a> is as good as an automated tool can be.
-I mean that its <em>implementation</em>, at least in the Java and JVM ecosystem in general, is too simplistic and that it&#8217;s inherently <strong>wrong</strong>.
-I don&#8217;t have the expertise to tell if it&#8217;s different in the other supported ecosystems (Go) but I suspect a lot of the problems I&#8217;m going to describe here exist also in those ecosystems.</p>
-</div>
-<div class="paragraph">
-<p>In practice, Dependabot is nothing more than a search and replace engine: it looks into some particular files that it knows about (think <code>pom.xml</code>), looks for some patterns, then tries to identify dependency coordinates and eventually replaces them. I&#8217;m simplifying a bit, because it does some interpretation of the versions it finds, for example to match version ranges, but that&#8217;s roughtly how it works.</p>
-</div>
-<div class="paragraph">
-<p>For example, it will identify this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;dependency&gt;
-   &lt;group&gt;junit&lt;/group&gt;
-   &lt;name&gt;junit&lt;/version&gt;
-   &lt;version&gt;4.13&lt;/version&gt;
-   &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>and it will replace the <code>4.13</code> with <code>4.13.1</code>, then submit a PR for you to review. WIN!</p>
-</div>
-<div class="paragraph">
-<p>Yes, and no. Because this is extremely easy to defeat.</p>
-</div>
-<div class="paragraph">
-<p>First, as I said, it only looks for known files. For Maven, it&#8217;s pretty simple, there&#8217;s only one place to look for: <code>pom.xml</code> files, but for other build tools, like Gradle, Ivy, Ant, Bazel, Pants, &#8230; that&#8217;s not the case: dependencies can be declared in different files, not all named the same. Dependency versions can be separate (in properties files) or inherited from context (parent POMs, platforms, &#8230;).</p>
-</div>
-<div class="paragraph">
-<p>A more complete strategy is to look for patterns too, like <code>*.gradle</code>, but then, they also miss the <code>*.gradle.kts</code> files (they do), or the plugins which can contribute dependencies.
-In short: it&#8217;s a whack-a-mole game.</p>
-</div>
-<div class="paragraph">
-<p>One must think that it&#8217;s not a big deal, because catching <em>some cases</em> is better than not catching at all, and I agree, but that&#8217;s not the expectation when you read what the tool promises.</p>
-</div>
-<div class="paragraph">
-<p>In the end, any tool which tries to parse build files and tries to interpret its model based on string evaluations is doomed to fail.</p>
-</div>
-<div class="paragraph">
-<p>Even if it manages to catch some problems, things can go wrong. As an example, here&#8217;s what we got at Gradle for this JUnit upgrade:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/dependabomb.jpg" alt="dependabomb">
-</div>
-</div>
-<div class="paragraph">
-<p>For a <strong>single repository</strong>, it created <strong>dozens</strong> of individual pull requests to ask us to upgrade.
-That&#8217;s nice of you, Dependabot, but it&#8217;s totally missing the point: this repository contains generated code, used in performance testing.
-The way the code is layout, the repetition of dependency declarations, etc, everything is intentional.</p>
-</div>
-<div class="paragraph">
-<p>If you put apart the fact that Dependabot could have created a single pull request for all dependencies, instead of creating hundreds, it highlights a general problem with those automated detection tools:</p>
-</div>
-<h1 id="_context_matters" class="sect0">Context matters!</h1>
-<div class="paragraph">
-<p>At Gradle, we often receive emails from security teams telling us things like: "The Gradle distribution contains a dependency on this X library which has vulnerability Y".
-However, in almost all cases we&#8217;ve investigated, this was a no issue for us.
-Because of the nature of Gradle, the fact that by definition it runs arbitrary code on a machine, most vulnerabilities are not a problem in this environment: context matters.
-What&#8217;s more, even if your tool uses a library that has a critical vulnerability (we use Jackson for example, which had a number of thems recently), it doesn&#8217;t mean that your code <strong>exercises the path which is vulnerable</strong>: context matters!</p>
-</div>
-<div class="paragraph">
-<p>It&#8217;s not harmful to upgrade, but it creates a lot of noise.</p>
-</div>
-<h1 id="_wrong_impression_of_security" class="sect0">Wrong impression of security</h1>
-<div class="paragraph">
-<p>But the biggest problem with such tools, and again I&#8217;m using Dependabot as an example, is that they <strong>give a wrong impression of security</strong>.</p>
-</div>
-<div class="paragraph">
-<p>As I explained, Dependabot will basically read your POM files, or Gradle files, or whatever build tool files you use, and <em>assume that the version it reads is the version which is going to be used</em>.
-We, as developers, and even more as build tool authors, know that this is wrong: the dependencies you declare are rarely the ones you resolve.</p>
-</div>
-<div class="paragraph">
-<p>That&#8217;s the reason why tools like NPM (Javascript), Gradle (multi-language) or Cargo (Rust) make use of <a href="https://docs.gradle.org/current/userguide/dependency_locking.html">dependency locking</a>.
-Dependency locking is a concept which helps with build reproducibility.
-Say, for example, that you write:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
-   implementation 'org.mylib:awesome:[1.0, 2['
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This means that Gradle can pick whatever version of <code>awesome</code> as long as it&#8217;s in the range.
-This is a typical declaration for semantic versioning, when you expect a library to be upgradable up to the next major.
-In Gradle you can even improve this by explaining what version you prefer in the range, if nobody else cares:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
-   implementation('org.mylib:awesome') {
-      version {
-          require '[1.0, 2['
-          prefer '1.3'
-      }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>However, ranges come at a price: if a new dependency version is released, your build would suddenly start using this new version, which breaks reproducibility in case you checkout old code, for example, for a bugfix.
-Therefore, as soon as you use ranges (and by extension any <em>dynamic dependency version</em>), you should use it with <em>dependency locking</em>.
-Dependency locking will make sure that whatever version of a library resolved at time T is used at time T+N even if a new version is out.
-It does so by writing the result of the dependency resolution process in a lock file.</p>
-</div>
-<div class="paragraph">
-<p>Upgrading dependencies becomes an intentional process that you do from time to time by generating a new lock file.</p>
-</div>
-<div class="paragraph">
-<p>What is the relationship with tools like Dependabot?</p>
-</div>
-<div class="paragraph">
-<p>By using the versions you <em>declare</em>, they have absolutely no guarantee that the versions you resolve are <em>not vulnerable</em>.</p>
-</div>
-<div class="paragraph">
-<p>In the example above, imagine that I use range <code>[1.0, 2[</code> and that I&#8217;m resolving 1.3.
-At some point in time, version 2.1 is released and is vulnerable.
-You could imagine that because you used a range and that 2.1 is out of the range, you are safe.
-That&#8217;s what those tools would assume, but they would be wrong: the reality is that despite this declaration, by the play of conflict resolution (Ivy, Gradle, &#8230;) or ordering (Maven), a totally different version can be selected, even 2.1!</p>
-</div>
-<div class="paragraph">
-<p>Again there are <a href="https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html">tools to mitigate this problem</a>, but the reality is that by just reading the declaration, you&#8217;re not safe.</p>
-</div>
-<div class="paragraph">
-<p>It&#8217;s even worse than that: what about transitive dependencies?</p>
-</div>
-<div class="paragraph">
-<p>Imagine that you have:</p>
-</div>
-<div class="paragraph">
-<p><code>Foo -&gt; Bar -&gt; Baz</code></p>
-</div>
-<div class="paragraph">
-<p>And that you depend on <code>Foo</code>. What if a vulnerability is discovered on <code>Baz</code>? Will you be notified? What kind of automated pull request can such a tool make to make sure that you upgrade <code>Baz</code>?</p>
-</div>
-<h1 id="_can_we_do_better" class="sect0">Can we do better?</h1>
-<div class="paragraph">
-<p>I have some good and bad news for you.</p>
-</div>
-<div class="paragraph">
-<p>The good news is that we can do better.
-The bad news is that it&#8217;s not easy.</p>
-</div>
-<div class="paragraph">
-<p>First, instead of relying on the declaration, those tools should really rely on the result of dependency resolution.
-If, for example, they used the lock files instead of the build files, they would know exactly what a build resolves.
-This, however, is only possible if the build uses dependency locking, and only for dependency graphs which are actually locked.
-It&#8217;s a reasonable assumption to say that what is locked is the most relevant information, though.</p>
-</div>
-<div class="paragraph">
-<p>Of course, I said there were bad news.
-As soon as you use the resolution result, you almost have to give up on automated remediation (pull requests).
-One thing they <em>could</em> do is patching the lock file.
-However, this is in general not a good idea, because, as I explained, lock files are generated: they present to you the result of resolution.
-Partially upgrading a lock file, manually, is possible but then you cannot make any guarantee that the app is going to work, because introducing a different dependency version may introduce different transitive dependencies!</p>
-</div>
-<div class="paragraph">
-<p>An alternate solution is to gather the information about resolved dependencies during the build: this is what <a href="https://scans.gradle.com/">build scans</a> do for Gradle and Maven, for example.
-This information can be extracted during the build and Dependabot would know precisely, reliably, what is resolved by a project.
-We even offer a Tooling API to do this kind of work.</p>
-</div>
-<div class="paragraph">
-<p>Then there&#8217;s remediation.
-This is the hardest problem.
-Because what most people like about Dependabot is actually the automated remediation: pull requests are nice, we all love that.</p>
-</div>
-<div class="paragraph">
-<p>But say, that to fix the transitive dependency issue above, Dependabot suggested to add a first level dependency with a different version.
-For Maven, this would work, since it&#8217;s order and depth sensitive.
-But it would break your model: the application doesn&#8217;t depend on <code>Baz</code>: it depends on <code>Foo</code>, which, by the transitive game, depends on <code>Baz</code>.
-You don&#8217;t want to introduce a first level dependency on <code>Baz</code> because it doesn&#8217;t make sense.</p>
-</div>
-<div class="paragraph">
-<p>For Gradle, you could use dependency constraints instead: constraints are meant for this use case.
-A <a href="https://docs.gradle.org/current/userguide/dependency_constraints.html#sec:adding-constraints-transitive-deps">constraint</a> adds, as it name implies, a constraint to the equation of the resolution of the graph (a bit like in constraint programming).
-They would participate in the dependency graph resolution if, and only if, the dependency they talk about appears in the graph.
-In that sense, they don&#8217;t break the application model, by introducing arbitrary first-level dependencies.</p>
-</div>
-<div class="paragraph">
-<p>Our Java ecosystem is polluted by hundreds of accidental first level dependencies and exclusions because of this lack of modeling: it is important to get things right.</p>
-</div>
-<div class="paragraph">
-<p>Last but not least, how you declare dependencies matters.
-In Gradle, using <a href="https://docs.gradle.org/current/userguide/rich_versions.html#header">rich version constraints</a>, you can explicitly reject bad versions, and you can explain why.</p>
-</div>
-<h1 id="_conclusion" class="sect0">Conclusion</h1>
-<div class="paragraph">
-<p>In conclusion, I think that Dependabot&#8217;s intent is legitimate and that today it&#8217;s better than nothing. Let&#8217;s detect projects using vulnerable dependencies and propose automated remediation.</p>
-</div>
-<div class="paragraph">
-<p>We, as build tool authors, also need to consider the wider context, which is dependency resolution in general, which isn&#8217;t as simple as it seems.
-In particular we consider that <em>detection</em> is an easy problem if you use the right tools, while <em>remediation</em> is a hard one.</p>
-</div>
-<div class="paragraph">
-<p>I think the current implementation of Dependabot is mostly wrong (at least in the Java ecosystem) as it relies on the declaration. This raises a number of issues:
-- it is dependent to the patterns it recognizes
-- it assumes that what you see is what you get
-- it cannot recognize transitive dependencies actually resolved by your project, so it misses real vulnerabilities
-- it doesn&#8217;t matter about the context of use of your dependencies</p>
-</div>
-<div class="paragraph">
-<p>The context thing is difficult to solve, but it&#8217;s actually painful because of the noise it creates, in case the "vulnerable dependency" is actually not in your case.
-However, I think there are improvements which can me made by actually using the actual resolution results instead.
-Then it raises some interesting technical challenges, like how to sandbox execution of builds (GitHub actions already do this) but more importantly how to create an automated pull request from the result of the analysis.</p>
-</div>
-<div class="paragraph">
-<p>Note that I also understand that from a Dependabot creator point of view, having to implement build-tool specific logic, like calling the Tooling API, to gather information about resolved dependencies might sound scary.
-I still think this is the right thing to do to be correct and, if our goal is really to make the industry safer, that&#8217;s what we should do.
-However, we have alternate solutions. For example a few weeks ago I experimented with a <a href="https://github.com/melix/gradle-command-action/tree/dump-dependencies">fork of my friend and colleague Paul Merlin&#8217;s Gradle Command GitHub Action</a> which automatically generates a JSON file of resolved dependencies during the build.</p>
-</div>
-<div class="paragraph">
-<p><a href="https://twitter.com/ysb33r/">Schalk Cronjé</a> also mentioned to me the <a href="https://github.com/jeremylong/dependency-check-gradle">OWASP plugin</a>, which I forgot to mention when I originally wrote this blog post, but I think it a great answer and currently better answer because it does exactly what I describe: rely on what you actually resolve, not what you declare, and lets you carefully review the results via a generated report.</p>
-</div>
-<div class="paragraph">
-<p>I&#8217;m not sure this is the best answer, but it shows that we can attack the problem from different angles.</p>
-</div>
-<div class="paragraph">
-<p>Eventually, the key takeaway of this blog post should be: don&#8217;t assume that you are safe because you use Dependabot. You&#8217;re not.</p>
-</div></p>
-			<p><a href="/blog/2020/10/about-dependabot.html#disqus_thread">Comments</a></p>
 	
 	<hr />
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
@@ -1458,6 +1505,5 @@ However, we have alternate solutions. For example a few weeks ago I experimented
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>
