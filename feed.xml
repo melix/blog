@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 25 Mar 2021 13:14:13 +0100</pubDate>
-    <lastBuildDate>Thu, 25 Mar 2021 13:14:13 +0100</lastBuildDate>
+    <pubDate>Thu, 25 Mar 2021 16:07:16 +0100</pubDate>
+    <lastBuildDate>Thu, 25 Mar 2021 16:07:16 +0100</lastBuildDate>
 
     <item>
       <title>Simplified version management with Gradle 7</title>
@@ -302,7 +302,7 @@ Thanks to Gradle&amp;#8217;s advanced dependency resolution engine, it&amp;#8217
 &lt;p&gt;the version declared in a catalog &lt;strong&gt;is not&lt;/strong&gt; necessarily the one which is going to be resolved: a catalog only talks about direct dependencies (not transitives) and the version that you use is the one used as an &lt;em&gt;input&lt;/em&gt; to dependency resolution. With transitive dependencies, it&amp;#8217;s typically possible that a version gets upgraded, for example.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;while it makes it possible for third-party tooling to &quot;update automatically&quot; versions, this wasn&amp;#8217;t a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the &lt;em&gt;input&lt;/em&gt; (what is written) to assume what is going to be resolved, you&amp;#8217;re only &lt;em&gt;wishing&lt;/em&gt; that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my &lt;a href=&quot;https://melix.github.io/blog/2020/10/about-dependabot.html&quot;&gt;blog post about Dependabot&lt;/a&gt; for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup.&lt;/p&gt;
+&lt;p&gt;while it makes it possible for third-party tooling to &quot;update automatically&quot; versions, this wasn&amp;#8217;t a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the &lt;em&gt;input&lt;/em&gt; (what is written) to assume what is going to be resolved, you&amp;#8217;re only &lt;em&gt;wishing&lt;/em&gt; that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my &lt;a href=&quot;https://melix.github.io/blog/2020/10/about-dependabot.html&quot;&gt;blog post about Dependabot&lt;/a&gt; for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup. I&amp;#8217;m going to repeat myself, but &lt;strong&gt;don&amp;#8217;t assume that the version you see in a config file is the one you will get&lt;/strong&gt;.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
