@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 24 Mar 2021 21:06:54 +0100</pubDate>
-    <lastBuildDate>Wed, 24 Mar 2021 21:06:54 +0100</lastBuildDate>
+    <pubDate>Thu, 25 Mar 2021 13:08:19 +0100</pubDate>
+    <lastBuildDate>Thu, 25 Mar 2021 13:08:19 +0100</lastBuildDate>
 
     <item>
       <title>Simplified version management with Gradle 7</title>
@@ -90,7 +90,7 @@ For example:&lt;/p&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
-	implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
+    implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -107,7 +107,7 @@ For example:&lt;/p&gt;
 // ...
 
 dependencies {
-	implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
+    implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -132,7 +132,7 @@ dependencies {
 &lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
-	implementation(Libs.guava)
+    implementation(Libs.guava)
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -237,15 +237,15 @@ The TOML format also provides us with the ability to declare &lt;a href=&quot;ht
 &lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencyResolutionManagement {
    versionCatalogs {
       libs {
-      	 alias(&quot;guava&quot;).to(&quot;com.google.guava&quot;, &quot;guava&quot;).versionRef(&quot;guava&quot;)
-      	 alias(&quot;junit-jupiter&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-api&quot;).versionRef(&quot;jupiter&quot;)
-      	 alias(&quot;junit-engine&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-engine&quot;).withoutVersion()
-      	 alias(&quot;groovy-core&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy&quot;).versionRef=&quot;groovy&quot;)
-      	 alias(&quot;groovy-json&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy-json&quot;).versionRef=&quot;groovy&quot;)
+           alias(&quot;guava&quot;).to(&quot;com.google.guava&quot;, &quot;guava&quot;).versionRef(&quot;guava&quot;)
+           alias(&quot;junit-jupiter&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-api&quot;).versionRef(&quot;jupiter&quot;)
+           alias(&quot;junit-engine&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-engine&quot;).withoutVersion()
+           alias(&quot;groovy-core&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy&quot;).versionRef(&quot;groovy&quot;)
+           alias(&quot;groovy-json&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy-json&quot;).versionRef=&quot;groovy&quot;)
 
-      	 version(&quot;groovy&quot;, &quot;2.5.14&quot;)
-      	 version(&quot;guava&quot;, &quot;30.0-jre&quot;)
-      	 version(&quot;jupiter&quot;, &quot;5.7.1&quot;)
+           version(&quot;groovy&quot;, &quot;2.5.14&quot;)
+           version(&quot;guava&quot;, &quot;30.0-jre&quot;)
+           version(&quot;jupiter&quot;, &quot;5.7.1&quot;)
       }
    }
 }&lt;/code&gt;&lt;/pre&gt;

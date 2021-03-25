@@ -154,7 +154,7 @@ For example:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="prettyprint"><code>dependencies {
-	implementation("com.google.guava:guava:${guavaVersion}")
+    implementation("com.google.guava:guava:${guavaVersion}")
 }</code></pre>
 </div>
 </div>
@@ -171,7 +171,7 @@ For example:</p>
 // ...
 
 dependencies {
-	implementation("com.google.guava:guava:${guavaVersion}")
+    implementation("com.google.guava:guava:${guavaVersion}")
 }</code></pre>
 </div>
 </div>
@@ -196,7 +196,7 @@ dependencies {
 <div class="title">build.gradle</div>
 <div class="content">
 <pre class="prettyprint"><code>dependencies {
-	implementation(Libs.guava)
+    implementation(Libs.guava)
 }</code></pre>
 </div>
 </div>
@@ -301,15 +301,15 @@ The TOML format also provides us with the ability to declare <a href="https://do
 <pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
    versionCatalogs {
       libs {
-      	 alias("guava").to("com.google.guava", "guava").versionRef("guava")
-      	 alias("junit-jupiter").to("org.junit.jupiter", "junit-jupiter-api").versionRef("jupiter")
-      	 alias("junit-engine").to("org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
-      	 alias("groovy-core").to("org.codehaus.groovy", "groovy").versionRef="groovy")
-      	 alias("groovy-json").to("org.codehaus.groovy", "groovy-json").versionRef="groovy")
+           alias("guava").to("com.google.guava", "guava").versionRef("guava")
+           alias("junit-jupiter").to("org.junit.jupiter", "junit-jupiter-api").versionRef("jupiter")
+           alias("junit-engine").to("org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
+           alias("groovy-core").to("org.codehaus.groovy", "groovy").versionRef("groovy")
+           alias("groovy-json").to("org.codehaus.groovy", "groovy-json").versionRef="groovy")
 
-      	 version("groovy", "2.5.14")
-      	 version("guava", "30.0-jre")
-      	 version("jupiter", "5.7.1")
+           version("groovy", "2.5.14")
+           version("guava", "30.0-jre")
+           version("jupiter", "5.7.1")
       }
    }
 }</code></pre>
