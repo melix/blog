@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 25 Mar 2021 13:08:19 +0100</pubDate>
-    <lastBuildDate>Thu, 25 Mar 2021 13:08:19 +0100</lastBuildDate>
+    <pubDate>Thu, 25 Mar 2021 13:14:13 +0100</pubDate>
+    <lastBuildDate>Thu, 25 Mar 2021 13:14:13 +0100</lastBuildDate>
 
     <item>
       <title>Simplified version management with Gradle 7</title>
@@ -165,7 +165,7 @@ To add support for version catalogs, you need to enable the experimental feature
 &lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
 guava = &quot;com.google.guava:guava:30.0-jre&quot;
 junit-jupiter = &quot;org.junit.jupiter:junit-jupiter-api:5.7.1&quot;
-junit-engine = { module = &quot;org.junit.jupiter:junit-jupiter-engine&quot; }
+junit-engine = { module=&quot;org.junit.jupiter:junit-jupiter-engine&quot; }
 
 [bundles]
 testDependencies = [&quot;junit-jupiter&quot;, &quot;junit-engine&quot;]&lt;/code&gt;&lt;/pre&gt;
@@ -205,12 +205,12 @@ guava = &quot;30.0-jre&quot;
 jupiter = &quot;5.7.1&quot;
 
 [libraries]
-guava = { module = &quot;com.google.guava:guava&quot;, version.ref=&quot;guava&quot; }
-junit-jupiter = { module = &quot;org.junit.jupiter:junit-jupiter-api&quot;, version.ref=&quot;jupiter&quot; }
-junit-engine = { module = &quot;org.junit.jupiter:junit-jupiter-engine&quot; }
+guava = { module=&quot;com.google.guava:guava&quot;, version.ref=&quot;guava&quot; }
+junit-jupiter = { module=&quot;org.junit.jupiter:junit-jupiter-api&quot;, version.ref=&quot;jupiter&quot; }
+junit-engine = { module=&quot;org.junit.jupiter:junit-jupiter-engine&quot; }
 
-groovy-core = { module = &quot;org.codehaus.groovy:groovy&quot;, version.ref=&quot;groovy&quot; }
-groovy-json = { module = &quot;org.codehaus.groovy:groovy-json&quot;, version.ref=&quot;groovy&quot; }
+groovy-core = { module=&quot;org.codehaus.groovy:groovy&quot;, version.ref=&quot;groovy&quot; }
+groovy-json = { module=&quot;org.codehaus.groovy:groovy-json&quot;, version.ref=&quot;groovy&quot; }
 
 [bundles]
 testDependencies = [&quot;junit-jupiter&quot;, &quot;junit-engine&quot;]&lt;/code&gt;&lt;/pre&gt;

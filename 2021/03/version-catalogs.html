@@ -228,7 +228,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <pre class="prettyprint toml language-toml"><code>[libraries]
 guava = "com.google.guava:guava:30.0-jre"
 junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
-junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
 
 [bundles]
 testDependencies = ["junit-jupiter", "junit-engine"]</code></pre>
@@ -268,12 +268,12 @@ guava = "30.0-jre"
 jupiter = "5.7.1"
 
 [libraries]
-guava = { module = "com.google.guava:guava", version.ref="guava" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref="jupiter" }
-junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+guava = { module="com.google.guava:guava", version.ref="guava" }
+junit-jupiter = { module="org.junit.jupiter:junit-jupiter-api", version.ref="jupiter" }
+junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
 
-groovy-core = { module = "org.codehaus.groovy:groovy", version.ref="groovy" }
-groovy-json = { module = "org.codehaus.groovy:groovy-json", version.ref="groovy" }
+groovy-core = { module="org.codehaus.groovy:groovy", version.ref="groovy" }
+groovy-json = { module="org.codehaus.groovy:groovy-json", version.ref="groovy" }
 
 [bundles]
 testDependencies = ["junit-jupiter", "junit-engine"]</code></pre>
