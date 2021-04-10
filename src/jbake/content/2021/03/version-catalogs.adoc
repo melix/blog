@@ -1,0 +1,237 @@
+= Simplified version management with Gradle 7
+Cédric Champeau
+2021-03-24
+:jbake-type: post
+:jbake-tags: gradle, catalog, convenience
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-7-version-catalog
+:linkattrs:
+
+Gradle 7 introduces the concept of https://docs.gradle.org/7.0-rc-1/userguide/platforms.html[version catalogs], which I've been working on for several months already. Long story short, I'm extremely excited by this new feature which should make dependency management easier with Gradle. Let's get started!
+
+== Sharing dependencies between projects
+
+One of the most frequent questions raised by Gradle users is how to properly share dependency versions between projects.
+For example, let's imagine that you have a multi-project build with this layout:
+
+```
+root
+ |---- client
+ |---- server
+```
+
+Because they live in the same "multi-project", it is expected that both `client` and `server` would require the same dependencies.
+For example, both of them would need Guava as an implementation detail and JUnit 5 for testing:
+
+.build.gradle
+```groovy
+dependencies {
+    implementation("com.google.guava:guava:30.0-jre")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+}
+```
+
+Without any sharing mechanism, both projects would replicate the dependency declarations, which is subject to a number of drawbacks:
+
+- upgrading a library requires updating all build files which use it
+- you have to remember about the dependency coordinates (group, artifact, version) of all dependencies
+- you might accidentally use different versions in different projects
+- some dependencies are always used together but you have to duplicate entries in build files
+
+=== Existing patterns
+
+For these reasons, users have invented over the years different patterns for dealing with dependency versions over time.
+For example:
+
+Versions in properties files:
+
+.gradle.properties
+```
+guavaVersion=30.0-jre
+```
+
+then in a build file:
+
+```
+dependencies {
+    implementation("com.google.guava:guava:${guavaVersion}")
+}
+```
+
+Or versions in "extra properties" in the root project:
+
+.extra properties
+```groovy
+ext {
+   guavaVersion = '30.0-jre'
+}
+
+// ...
+
+dependencies {
+    implementation("com.google.guava:guava:${guavaVersion}")
+}
+```
+
+Sometimes you even find full coordinates in `dependencies.gradle` files.
+
+And since the rise of the Kotlin DSL, another pattern became extremely popular in the Android world: declaring libraries in `buildSrc` then using type-safe accessors to declare dependencies in build scripts:
+
+.buildSrc/src/main/kotlin/Libs.kt
+```kotlin
+object Libs {
+   val guava = "com.google.guava:guava:30.0-jre"
+}
+```
+
+and in a build script:
+
+.build.gradle
+```
+dependencies {
+    implementation(Libs.guava)
+}
+```
+
+This last example is interesting because it goes into the direction of having more type-safety, more compile-time errors (as opposed to runtime errors).
+But it has a major drawback: any change to any dependency will trigger recompilation of build scripts and invalidate the build script classpath, causing up-to-date checkness to fail and in the end, rebuilding a lot more than what you should do for a single version change.
+
+== Introducing version catalogs
+
+A version catalog is basically a replacement for all the previous patterns, supported by Gradle, without the drawbacks of the previous approaches.
+To add support for version catalogs, you need to enable the experimental feature in your settings file:
+
+.settings.gradle
+```groovy
+enableFeaturePreview("VERSION_CATALOGS")
+```
+
+In its simplest form, a catalog is a file found in a conventional location and uses the https://toml.io/en/[TOML] configuration format:
+
+.gradle/libs.versions.toml
+```toml
+[libraries]
+guava = "com.google.guava:guava:30.0-jre"
+junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
+junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
+
+[bundles]
+testDependencies = ["junit-jupiter", "junit-engine"]
+```
+
+This declares the _dependency coordinates_ which will be used in build scripts.
+You still have to declare your dependencies, but this now can be done using a _typesafe_ API:
+
+.build.gradle
+```groovy
+dependencies {
+    implementation(libs.guava)
+    testImplementation(libs.testDependencies)
+}
+```
+
+The benefit of type-safe APIs is immediately visible in the IDE:
+
+++++
+<video controls autoplay height="450">
+    <source src="/blog/video/ide-completion.webm"
+            type="video/webm">
+</video>
+++++
+
+
+In the catalog file above, we inlined dependency versions directly in the coordinates.
+However, it's possible to externalize them so that you can share a dependency version between dependencies.
+For example:
+
+.gradle/libs.versions.toml
+```toml
+[versions]
+groovy = "2.5.14"
+guava = "30.0-jre"
+jupiter = "5.7.1"
+
+[libraries]
+guava = { module="com.google.guava:guava", version.ref="guava" }
+junit-jupiter = { module="org.junit.jupiter:junit-jupiter-api", version.ref="jupiter" }
+junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
+
+groovy-core = { module="org.codehaus.groovy:groovy", version.ref="groovy" }
+groovy-json = { module="org.codehaus.groovy:groovy-json", version.ref="groovy" }
+
+[bundles]
+testDependencies = ["junit-jupiter", "junit-engine"]
+```
+
+This new feature makes it trivial to update a dependency version: you have a single place where to look at.
+
+This comes with other benenefits like the fact that updating the GAV coordinates (group, artifact or version) of a dependency doesn't trigger recompilation of build scripts.
+The TOML format also provides us with the ability to declare https://docs.gradle.org/7.0-rc-1/userguide/rich_versions.html[rich versions].
+
+=== Under the hood
+
+Under the hood, Gradle provides an API to declare catalogs. This API is found on the `Settings`, which means that plugin authors can contribute catalogs, for example via convention plugins applied to the `settings.gradle(.kts)` file.
+
+This API is more verbose than when you use the TOML file, but is designed for type-safety. The equivalent of the catalog above would be this:
+
+.settings.gradle
+```groovy
+dependencyResolutionManagement {
+   versionCatalogs {
+      libs {
+           alias("guava").to("com.google.guava", "guava").versionRef("guava")
+           alias("junit-jupiter").to("org.junit.jupiter", "junit-jupiter-api").versionRef("jupiter")
+           alias("junit-engine").to("org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
+           alias("groovy-core").to("org.codehaus.groovy", "groovy").versionRef("groovy")
+           alias("groovy-json").to("org.codehaus.groovy", "groovy-json").versionRef="groovy")
+           
+           version("groovy", "2.5.14")
+           version("guava", "30.0-jre")
+           version("jupiter", "5.7.1")
+      }
+   }
+}
+```
+
+This API actually must be used if you are _consuming an external catalog_.
+That's one of the big selling points of this feature: it allows teams (or framework authors) to _publish catalogs_, so that users can get recommendations.
+For example, let's imagine that the Spring Boot team https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sec:version-catalog-plugin[publishes a catalog of recommendations] (they do something similar today with a BOM, but BOMs will have an impact on your transitive dependencies that you might not want).
+
+Consuming this catalog it in a Gradle build would look like this:
+
+.settings.gradle
+```groovy
+dependencyResolutionManagement {
+   versionCatalogs {
+       spring {
+           from("org.springframework:spring-catalog:1.0')
+       }
+   }
+}
+```
+
+This would make a catalog available under the `spring` namespace in your build scripts.
+Therefore, you'd be able to use whatever version of SLF4J the Spring team recommends by declaring this dependency:
+
+.build.gradle
+```groovy
+dependencies {
+    implementation(spring.slf4j)
+}
+```
+
+Such a catalog would be published on a regular Maven repository, as a TOML file.
+Thanks to Gradle's advanced dependency resolution engine, it's totally transparent to the user that the actual dependency is a _catalog_.
+
+=== What version catalogs are not
+
+At this stage, it becomes important to state what version catalogs are **not**:
+
+- they **are not** the "single source of truth" for your dependencies: it's not because you have a catalog that you can't directly declare dependencies using the "old" notation in build scripts. Nor does it prevent plugins from adding dependencies. Long story short: the presence of a catalog makes discoverability and maintenance easier, but it doesn't remove any of the flexibility that Gradle offers. We're thinking about ways to _enforce_ that all direct dependencies are declared via a catalog in the future.
+- the version declared in a catalog **is not** necessarily the one which is going to be resolved: a catalog only talks about direct dependencies (not transitives) and the version that you use is the one used as an _input_ to dependency resolution. With transitive dependencies, it's typically possible that a version gets upgraded, for example.
+- while it makes it possible for third-party tooling to "update automatically" versions, this wasn't a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the _input_ (what is written) to assume what is going to be resolved, you're only _wishing_ that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my https://melix.github.io/blog/2020/10/about-dependabot.html[blog post about Dependabot] for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup. I'm going to repeat myself, but **don't assume that the version you see in a config file is the one you will get**.
+
+Please take a look at the https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sub:central-declaration-of-dependencies[documentation] for further details, and give us your feedback!
+
