@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 11 Apr 2021 14:16:50 +0200</pubDate>
-    <lastBuildDate>Sun, 11 Apr 2021 14:16:50 +0200</lastBuildDate>
+    <pubDate>Sun, 11 Apr 2021 14:19:26 +0200</pubDate>
+    <lastBuildDate>Sun, 11 Apr 2021 14:19:26 +0200</lastBuildDate>
 
     <item>
       <title>Frequently asked questions about version catalogs</title>
@@ -39,6 +39,7 @@ This blog post will be updated as I&amp;#8217;m seeing more questions.&lt;/p&gt;
 &lt;li&gt;&lt;a href=&quot;#_why_can_t_i_use_an_alias_with_dots_directly&quot;&gt;Why can&amp;#8217;t I use an alias with dots directly?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code&quot;&gt;Should I use &lt;code&gt;commons-lang3&lt;/code&gt; as an alias or &lt;code&gt;commonsLang3&lt;/code&gt;?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_should_i_use_the_settings_api_or_the_toml_file&quot;&gt;Should I use the settings API or the TOML file?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_where_should_i_report_bugs_or_feature_requests&quot;&gt;Where should I report bugs or feature requests?&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
@@ -263,6 +264,12 @@ Proper guidance on what to use will be discussed later, based on your feedback a
 &lt;p&gt;Gradle comes with both a settings API to declare the catalog, or a convenience TOML file.
 I would personally say that most people should only care about the TOML file as it covers 80% of use cases.
 The settings API is great as soon as you want to implement &lt;em&gt;settings plugins&lt;/em&gt; or, for example, that you want to use your own, existing format to declare a catalog, instead of using the TOML format.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_where_should_i_report_bugs_or_feature_requests&quot;&gt;Where should I report bugs or feature requests?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As usual, on our &lt;a href=&quot;https://github.com/gradle/gradle/issues&quot;&gt;issue tracker&lt;/a&gt;. There&amp;#8217;s also the dedicated &lt;a href=&quot;https://github.com/gradle/gradle/issues/15352&quot;&gt;epic&lt;/a&gt; where you will find the initial specification linked, which explains a lot of the design process.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
