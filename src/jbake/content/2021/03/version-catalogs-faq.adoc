@@ -1,0 +1,219 @@
+= Frequently asked questions about version catalogs
+Cédric Champeau
+2021-04-11
+:jbake-type: post
+:jbake-tags: gradle, catalog, convenience
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-7-version-catalog-faq
+:linkattrs:
+:toc:
+:toc-placement: macro
+
+This post is a follow up to my link:/blog/2021/03/version-catalogs.html[version catalogs intro blog post] and answers some frequently asked questions.
+Ideally, this should be part of the Gradle docs itself but we don't have a good place for this kind of docs yet (I'm working on it!), so in the meantime, here you go!
+This blog post will be updated as I'm seeing more questions.
+
+toc::[]
+
+== Version catalogs FAQ
+
+=== Can I use a version catalog to declare plugin versions?
+
+No.The initial implementation of the version catalogs had, in TOML files, a dedicated section for plugins:
+
+```toml
+[plugins]
+id.of.my.awesome.plugin="1.2.3"
+```
+
+However, after community feedback and for https://github.com/gradle/gradle/issues/16078[consistency reasons], we removed this feature from the initial release.
+This means that _currently_, you have to use the `pluginManagement` section of the settings file to deal with your plugin versions, and this cannot use, in particular, the TOML file to declare plugin versions:
+
+.settings.gradle
+```
+pluginManagement { 
+    plugins { 
+        id("me.champeau.jmh") version("0.6.3")
+    }
+}
+```
+
+It may look surprising that you can't use `version(libs.plugins.jmh)` for example in the `pluginManagement` block, but it's a chicken and egg problem: the `pluginManagement` block has to be evaluated _before_ the catalogs are defined, because _settings plugins_ may contribute more catalogs or enhance the existing catalogs. Therefore, the `libs` extension doesn't exist when this block is evaluated.
+
+The limitation of not being able to deal with plugin versions in catalogs will be lifted in one way or another in the future.
+
+=== Can I use the version catalog in buildSrc?
+
+Yes you can. Not only in `buildSrc`, but basically in any included build too. You have several options, but the easiest is to include the TOML catalog in your `buildSrc/settings.gradle(.kts)` file:
+
+.buildSrc/settings.gradle
+```groovy
+dependencyResolutionManagement {
+    versionCatalogs {
+        lib {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
+}
+``` 
+
+=== But how can I use the catalog in _plugins_ defined in `buildSrc`?
+
+The solution above lets you use the catalogs in the build scripts of `buildSrc` itself, but what if you want to use the catalog(s) in the plugins that `buildSrc` defines, or precompiled script plugins?
+Long story short, currently, you can do it using a _type unsafe_ API only.
+
+First you need to access the version catalogs extension to your plugin/build script, for example in Groovy:
+
+```groovy
+def catalogs = project.extensions.getByType(VersionCatalogsExtension)
+```
+
+or in Kotlin:
+
+```kotlin
+val catalogs = extensions.getByType<VersionCatalogsExtension>()
+```
+
+then you can access the version catalogs in your script, for example writing:
+
+```kotlin
+pluginManager.withPlugin("java") {
+    val libs = catalogs.named("libs")
+    dependencies.addProvider("implementation", libs.findDependency("lib").get())
+}
+```
+
+Note that this API doesn't provide any static accessor but is nevertheless safe, using the `Optional` API.
+There's a reason why you cannot access type-safe accessors in plugins/precompiled script plugins, you will find more details on this https://github.com/gradle/gradle/issues/15383[issue].
+In a nutshell, that's because `buildSrc` plugins (precompiled or not) are _plugins_ which can be applied to any kind of project and we don't know what the _target project catalogs_ will be: there's no inherent reason why they would be the same.
+In the future we will probably provide a way to explain that, at your own risk, expect the target catalog model to be the same.
+
+=== Can I use version catalogs in production code?
+
+No, you can't. Version catalogs are only accessible to build scripts/plugins, not your production code.
+
+=== Should I use a platform or a catalog?
+
+You should probably use both, look at our https://docs.gradle.org/7.0/userguide/platforms.html#sub:platforms-vs-catalog[docs] for a complete explanation.
+
+=== Why did you choose TOML and not YAML?
+
+or XML (or pick your favorite format). The rationale is described in the https://github.com/gradle/gradle/files/5646826/2020-12-05-Central.declaration.of.dependencies.Shared.externally.pdf[design document].
+
+=== My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error
+
+If you are seeing this error:
+
+image::/blog/img/missing-dependency.png[]
+
+upgrade to the latest IntelliJ IDEA 2021.1, which fixes this problem.
+
+=== Why can't I have nested aliases with the same prefix?
+
+Imagine that you want to have 2 aliases, say `junit` and `junit-jupiter` and that both represent distinct dependencies: Gradle won't let you do this and you will have to rename your aliases to, say `junit-core` and `junit-jupiter`.
+That's because Gradle will map those aliases to _accessors_, that is to say `libs.getJunit()` and `libs.getJUnit().getJupiter()`.
+The problem is that you can't have an accessor which is both a _leaf_ (represents a dependency notation) and a _node_ (that is to say an intermediate node to access a real dependency).
+The reason we can't do this is that we're using lazy accessors of type `Provider<MinimalExternalDependency>` for leaves and that type _cannot_ be extended to provide accessors for "children" dependencies.
+In other words, the type which represents a _node with children_ provides accessors which return `Provider<...>` for dependencies, but a provider itself cannot have children.
+A potential workaround for this would be to support, in the future, an explicit call to say "I'm stopping here, that's the dependency I need", for example:
+
+```
+dependencies {
+    testImplementation(libs.junit.get())
+    // or
+    testImplemementation(libs.junit.peek()) // because `get()` might be confusing as it would return a `Provider` on which you can call `get()` itself
+}
+```
+
+For now the team has decided to restrict what you can do by preventing having aliases which have "name clashes".
+
+=== Why can't I use an alias with dots directly?
+
+You will have noticed that if you declare an alias like this:
+
+```toml
+[libraries]
+junit-jupiter = "..."
+```
+
+then Gradle will generate the following accessor: `libs.junit.jupiter` (basically the dashes are transformed to dots).
+The question is, why can't we just write:
+
+```toml
+[libraries]
+junit.jupiter = "..."
+```
+
+And the reason is: tooling support. The previous declaration is actually equivalent to writing:
+
+```toml
+[libraries]
+   [junit]
+   jupiter = "..."
+```
+
+but technically, it's undecidable where the "nesting hierarchy" stops, which would prevent tools from providing good completion (for example, where you can use `{ module = "..."}`.
+It also makes it harder for tooling to automatically patch the file since they wouldn't know where to look for.
+
+As a consequence, we've decided to keep the format simple and implement this mapping strategy.
+
+=== Should I use `commons-lang3` as an alias or `commonsLang3`?
+
+Problably neither one nor the other :) By choosing `commons-lang3`, you're implicitly creating a _group of dependencies_ called `commons`, which will include a number of dependencies, including `lang3`.
+The question then is, does that `commons` group make sense? It's rather abstract, no? Does it actually say it's "Apache Commons"?
+
+A better solution would therefore be to use `commonsLang3` as the alias, but then you'd realize that you have chosen a version in the alias name, so why not `commonsLang` directly?
+
+Therefore:
+
+```toml
+[libraries]
+commonsLang = { module="org.apache.commons:commons-lang3:3.3.1" }
+```
+
+This means that the dashes should be limited to grouping of dependencies, so that they are organized in "folders".
+This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you'd have to know in which subtree to look at.
+Proper guidance on what to use will be discussed later, based on your feedback and practices.
+
+=== Should I use the settings API or the TOML file?
+
+Gradle comes with both a settings API to declare the catalog, or a convenience TOML file.
+I would personally say that most people should only care about the TOML file as it covers 80% of use cases.
+The settings API is great as soon as you want to implement _settings plugins_ or, for example, that you want to use your own, existing format to declare a catalog, instead of using the TOML format.
+
+=== Why can't I use excludes or classifiers?
+
+By design, version catalogs talk about _dependency coordinates_ only.
+The choice of applying excludes is on the consumer side: for example, for a specific project, you might need to exclude a transitive dependency because you don't use the code path which exercises this dependency, but this might not be the case for all places.
+Similarly, a classifier falls into the category of _variant selectors_ (see https://docs.gradle.org/current/userguide/variant_model.html[the variant model]): for the same dependency coordinates, one might want classifier X, another classifier Y, and it's not necessarily allowed to have both in the same graph.
+Therefore, classifiers need to be declared on the _dependency declaration site_:
+
+```
+dependencies {
+   implementation(variantOf(libs.myLib) { classifier('test-fixtures') })
+}
+```
+
+The rationale being this limitation is that the use of classifiers is an artifact of the poor `pom.xml` modeling, which doesn't assign semantics to classifiers (we don't know what they represent), contrary to Gradle Module Metadata.
+Therefore, a consumer should only care about the dependency coordinates, and the right variant (e.g classifier) should be selected automatically by the dependency resolution engine.
+We want to encourage this model, rather than supporting _adhoc_ classifiers which will eventually require more work for all consumers.
+
+=== How do I tell Gradle to use a specific _artifact_?
+
+Similarly to classifiers or excludes, _artifact selectors_ belong to the dependency declaration site. You need to write:
+
+```groovy
+dependencies {
+    implementation(libs.myLib) {
+        artifact {
+            name = 'my-lib' // note that ideally this will go away, see https://github.com/gradle/gradle/issues/16768
+            type = 'aar'
+        }
+    }
+}
+```
+
+=== Where should I report bugs or feature requests?
+
+As usual, on our https://github.com/gradle/gradle/issues[issue tracker]. There's also the dedicated https://github.com/gradle/gradle/issues/15352[epic] where you will find the initial specification linked, which explains a lot of the design process.
