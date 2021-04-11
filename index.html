@@ -347,6 +347,11 @@ Therefore, classifiers need to be declared on the <em>dependency declaration sit
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The rationale being this limitation is that the use of classifiers is an artifact of the poor <code>pom.xml</code> modeling, which doesn&#8217;t assign semantics to classifiers (we don&#8217;t know what they represent), contrary to Gradle Module Metadata.
+Therefore, a consumer should only care about the dependency coordinates, and the right variant (e.g classifier) should be selected automatically by the dependency resolution engine.
+We want to encourage this model, rather than supporting <em>adhoc</em> classifiers which will eventually require more work for all consumers.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em">How do I tell Gradle to use a specific <em>artifact</em>?</h3>
