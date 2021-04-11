@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Frequently asked questions about version catalogs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Frequently asked questions about version catalogs</h1>
+	</div>
+
+	<p><em>11 April 2021</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/catalog.html"> catalog</a> 
+	</em>
+		<a href="/blog/tags/convenience.html"> convenience</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This post is a follow up to my <a href="/blog/2021/03/version-catalogs.html">version catalogs intro blog post</a> and answers some frequently asked questions.
+Ideally, this should be part of the Gradle docs itself but we don&#8217;t have a good place for this kind of docs yet (I&#8217;m working on it!), so in the meantime, here you go!
+This blog post will be updated as I&#8217;m seeing more questions.</p>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle" class="title">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_version_catalogs_faq">Version catalogs FAQ</a></li>
+<li>
+<ul class="sectlevel2">
+<li><a href="#_can_i_use_a_version_catalog_to_declare_plugin_versions">Can I use a version catalog to declare plugin versions?</a></li>
+<li><a href="#_can_i_use_the_version_catalog_in_buildsrc">Can I use the version catalog in buildSrc?</a></li>
+<li><a href="#_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</a></li>
+<li><a href="#_can_i_use_version_catalogs_in_production_code">Can I use version catalogs in production code?</a></li>
+<li><a href="#_you_i_use_a_platform_or_a_catalog">You I use a platform or a catalog?</a></li>
+<li><a href="#_why_did_you_choose_toml_and_not_yaml">Why did you choose TOML and not YAML?</a></li>
+<li><a href="#_my_ide_is_red_everywhere_missing_dependency_class_error">My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error</a></li>
+<li><a href="#_why_can_t_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</a></li>
+<li><a href="#_why_can_t_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</a></li>
+<li><a href="#_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</a></li>
+<li><a href="#_should_i_use_the_settings_api_or_the_toml_file">Should I use the settings API or the TOML file?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_version_catalogs_faq">Version catalogs FAQ</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_can_i_use_a_version_catalog_to_declare_plugin_versions">Can I use a version catalog to declare plugin versions?</h3>
+<div class="paragraph">
+<p>No.The initial implementation of the version catalogs had, in TOML files, a dedicated section for plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[plugins]
+id.of.my.awesome.plugin="1.2.3"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, after community feedback and for <a href="https://github.com/gradle/gradle/issues/16078">consistency reasons</a>, we removed this feature from the initial release.
+This means that <em>currently</em>, you have to use the <code>pluginManagement</code> section of the settings file to deal with your plugin versions, and this cannot use, in particular, the TOML file to declare plugin versions:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="prettyprint"><code>pluginManagement {
+    plugins {
+        id("me.champeau.jmh") version("0.6.3")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It may look surprising that you can&#8217;t use <code>version(libs.plugins.jmh)</code> for example in the <code>pluginManagement</code> block, but it&#8217;s a chicken and egg problem: the <code>pluginManagement</code> block has to be evaluated <em>before</em> the catalogs are defined, because <em>settings plugins</em> may contribute more catalogs or enhance the existing catalogs. Therefore, the <code>libs</code> extension doesn&#8217;t exist when this block is evaluated.</p>
+</div>
+<div class="paragraph">
+<p>The limitation of not being able to deal with plugin versions in catalogs will be lifted in one way or another in the future.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_can_i_use_the_version_catalog_in_buildsrc">Can I use the version catalog in buildSrc?</h3>
+<div class="paragraph">
+<p>Yes you can. Not only in <code>buildSrc</code>, but basically in any included build too. You have several options, but the easiest is to include the TOML catalog in your <code>buildSrc/settings.gradle(.kts)</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="title">buildSrc/settings.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
+    versionCatalogs {
+        lib {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</h3>
+<div class="paragraph">
+<p>The solution above lets you use the catalogs in the build scripts of <code>buildSrc</code> itself, but what if you want to use the catalog(s) in the plugins that <code>buildSrc</code> defines, or precompiled script plugins?
+Long story short, currently, you can do it using a <em>type unsafe</em> API only.</p>
+</div>
+<div class="paragraph">
+<p>First you need to access the version catalogs extension to your plugin/build script, for example in Groovy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>def catalogs = project.extensions.getByType(VersionCatalogsExtension)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or in Kotlin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint kotlin language-kotlin"><code>val catalogs = extensions.getByType&lt;VersionCatalogsExtension&gt;()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then you can access the version catalogs in your script, for example writing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint kotlin language-kotlin"><code>pluginManager.withPlugin("java") {
+    val libs = catalogs.named("libs")
+    dependencies.addProvider("implementation", libs.findDependency("lib").get())
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that this API doesn&#8217;t provide any static accessor but is nevertheless safe, using the <code>Optional</code> API.
+There&#8217;s a reason why you cannot access type-safe accessors in plugins/precompiled script plugins, you will find more details on this <a href="https://github.com/gradle/gradle/issues/15383">issue</a>.
+In a nutshell, that&#8217;s because <code>buildSrc</code> plugins (precompiled or not) are <em>plugins</em> which can be applied to any kind of project and we don&#8217;t know what the <em>target project catalogs</em> will be: there&#8217;s no inherent reason why they would be the same.
+In the future we will probably provide a way to explain that, at your own risk, expect the target catalog model to be the same.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_can_i_use_version_catalogs_in_production_code">Can I use version catalogs in production code?</h3>
+<div class="paragraph">
+<p>No, you can&#8217;t. Version catalogs are only accessible to build scripts/plugins, not your production code.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_you_i_use_a_platform_or_a_catalog">You I use a platform or a catalog?</h3>
+<div class="paragraph">
+<p>You should probably use both, look at our <a href="https://docs.gradle.org/7.0/userguide/platforms.html#sub:platforms-vs-catalog">docs</a> for a complete explanation.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_why_did_you_choose_toml_and_not_yaml">Why did you choose TOML and not YAML?</h3>
+<div class="paragraph">
+<p>or XML (or pick your favorite format). The rationale is described in the <a href="https://github.com/gradle/gradle/files/5646826/2020-12-05-Central.declaration.of.dependencies.Shared.externally.pdf">design document</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_my_ide_is_red_everywhere_missing_dependency_class_error">My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error</h3>
+<div class="paragraph">
+<p>If you are seeing this error:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/missing-dependency.png" alt="missing dependency">
+</div>
+</div>
+<div class="paragraph">
+<p>upgrade to the latest IntelliJ IDEA 2021.1, which fixes this problem.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_why_can_t_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</h3>
+<div class="paragraph">
+<p>Imagine that you want to have 2 aliases, say <code>junit</code> and <code>junit-jupiter</code> and that both represent distinct dependencies: Gradle won&#8217;t let you do this and you will have to rename your aliases to, say <code>junit-core</code> and <code>junit-jupiter</code>.
+That&#8217;s because Gradle will map those aliases to <em>accessors</em>, that is to say <code>libs.getJunit()</code> and <code>libs.getUnit().getJupiter()</code>.
+The problem is that you can&#8217;t have an accessor which is both a <em>leaf</em> (represents a dependency notation) and a <em>node</em> (that is to say an intermediate node to access a real dependency).
+The reason we can&#8217;t do this is that we&#8217;re using lazy accessors of type <code>Provider&lt;MinimalExternalDependency&gt;</code> for leaves and that type <em>cannot</em> be extended to provide accessors for "children" dependencies.
+In other words, the type which represents a <em>node with children</em> provides accessors which return <code>Provider&lt;...&gt;</code> for dependencies, but a provider itself cannot have children.
+A potential workaround for this would be to support, in the future, an explicit call to say "I&#8217;m stopping here, that&#8217;s the dependency I need", for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>dependencies {
+    testImplementation(libs.junit.get())
+    // or
+    testImplemementation(libs.junit.peek()) // because `get()` might be confusing as it would return a `Provider` on which you can call `get()` itself
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For now the team has decided to restrict what you can do by preventing having aliases which have "name clashes".</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_why_can_t_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</h3>
+<div class="paragraph">
+<p>You will have noticed that if you declare an alias like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[libraries]
+junit-jupiter = "..."</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then Gradle will generate the following accessor: <code>libs.junit.jupiter</code> (basically the dashes are transformed to dots).
+The question is, why can&#8217;t we just write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[libraries]
+junit.jupiter = "..."</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the reason is: tooling support. The following declaration is actually equivalent to writing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[libraries]
+   [junit]
+   jupiter = "..."</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>but technically, it&#8217;s undecidable where the "nesting hierarchy" stops, which would prevent tools from providing good completion (for example, where you can use <code>{ module = "..."}</code>.
+It also makes it harder for tooling to automatically patch the file since they wouldn&#8217;t know where to look for.</p>
+</div>
+<div class="paragraph">
+<p>As a consequence, we&#8217;ve decided to keep the format simple and implement this mapping strategy.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</h3>
+<div class="paragraph">
+<p>Problably neither one nor the other :) By choosing <code>commons-lang3</code>, you&#8217;re implicitly creating a <em>group of dependencies` called _commons</em>, which will include a number of dependencies, including <code>lang3</code>.
+The question then is, does that <code>commons</code> group make sense? It&#8217;s rather abstract, no? Does it actually say it&#8217;s "Apache Commons"?</p>
+</div>
+<div class="paragraph">
+<p>A better solution would therefore to use <code>commonsLang3</code> as the alias, but then you&#8217;d realize that you have chosen a version in the alias name, so why not <code>commonsLang</code> directly?</p>
+</div>
+<div class="paragraph">
+<p>Therefore:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint toml language-toml"><code>[libraries]
+commonsLang = { module="org.apache.commons:commons-lang3:3.3.1" }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This means that the dashes should be limited to grouping of dependencies, so that they are organized in "folders".
+This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you&#8217;d have to know in why subtree to look at.
+Proper guidance on what to use will be discussed later, based on your feedback and practices.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_should_i_use_the_settings_api_or_the_toml_file">Should I use the settings API or the TOML file?</h3>
+<div class="paragraph">
+<p>Gradle comes with both a settings API to declare the catalog, or a convenience TOML file.
+I would personally say that most people should only care about the TOML file as it covers 80% of use cases.
+The settings API is great as soon as you want to implement <em>settings plugins</em> or, for example, that you want to use your own, existing format to declare a catalog, instead of using the TOML format.</p>
+</div>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-7-version-catalog-faq-draft';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

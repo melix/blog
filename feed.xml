@@ -6,9 +6,269 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sat, 10 Apr 2021 12:10:16 +0200</pubDate>
-    <lastBuildDate>Sat, 10 Apr 2021 12:10:16 +0200</lastBuildDate>
+    <pubDate>Sun, 11 Apr 2021 14:16:50 +0200</pubDate>
+    <lastBuildDate>Sun, 11 Apr 2021 14:16:50 +0200</lastBuildDate>
 
+    <item>
+      <title>Frequently asked questions about version catalogs</title>
+      <link>https://melix.github.io/blog/2021/03/version-catalogs-faq.html</link>
+      <pubDate>Sun, 11 Apr 2021 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2021/03/version-catalogs-faq.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This post is a follow up to my &lt;a href=&quot;/blog/2021/03/version-catalogs.html&quot;&gt;version catalogs intro blog post&lt;/a&gt; and answers some frequently asked questions.
+Ideally, this should be part of the Gradle docs itself but we don&amp;#8217;t have a good place for this kind of docs yet (I&amp;#8217;m working on it!), so in the meantime, here you go!
+This blog post will be updated as I&amp;#8217;m seeing more questions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;toc&quot; class=&quot;toc&quot;&gt;
+&lt;div id=&quot;toctitle&quot; class=&quot;title&quot;&gt;Table of Contents&lt;/div&gt;
+&lt;ul class=&quot;sectlevel1&quot;&gt;
+&lt;li&gt;&lt;a href=&quot;#_version_catalogs_faq&quot;&gt;Version catalogs FAQ&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;ul class=&quot;sectlevel2&quot;&gt;
+&lt;li&gt;&lt;a href=&quot;#_can_i_use_a_version_catalog_to_declare_plugin_versions&quot;&gt;Can I use a version catalog to declare plugin versions?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_can_i_use_the_version_catalog_in_buildsrc&quot;&gt;Can I use the version catalog in buildSrc?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code&quot;&gt;But how can I use the catalog in &lt;em&gt;plugins&lt;/em&gt; defined in &lt;code&gt;buildSrc&lt;/code&gt;?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_can_i_use_version_catalogs_in_production_code&quot;&gt;Can I use version catalogs in production code?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_you_i_use_a_platform_or_a_catalog&quot;&gt;You I use a platform or a catalog?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_why_did_you_choose_toml_and_not_yaml&quot;&gt;Why did you choose TOML and not YAML?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_my_ide_is_red_everywhere_missing_dependency_class_error&quot;&gt;My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_why_can_t_i_have_nested_aliases_with_the_same_prefix&quot;&gt;Why can&amp;#8217;t I have nested aliases with the same prefix?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_why_can_t_i_use_an_alias_with_dots_directly&quot;&gt;Why can&amp;#8217;t I use an alias with dots directly?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code&quot;&gt;Should I use &lt;code&gt;commons-lang3&lt;/code&gt; as an alias or &lt;code&gt;commonsLang3&lt;/code&gt;?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_should_i_use_the_settings_api_or_the_toml_file&quot;&gt;Should I use the settings API or the TOML file?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_version_catalogs_faq&quot;&gt;Version catalogs FAQ&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_can_i_use_a_version_catalog_to_declare_plugin_versions&quot;&gt;Can I use a version catalog to declare plugin versions?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;No.The initial implementation of the version catalogs had, in TOML files, a dedicated section for plugins:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[plugins]
+id.of.my.awesome.plugin=&quot;1.2.3&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, after community feedback and for &lt;a href=&quot;https://github.com/gradle/gradle/issues/16078&quot;&gt;consistency reasons&lt;/a&gt;, we removed this feature from the initial release.
+This means that &lt;em&gt;currently&lt;/em&gt;, you have to use the &lt;code&gt;pluginManagement&lt;/code&gt; section of the settings file to deal with your plugin versions, and this cannot use, in particular, the TOML file to declare plugin versions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;pluginManagement {
+    plugins {
+        id(&quot;me.champeau.jmh&quot;) version(&quot;0.6.3&quot;)
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It may look surprising that you can&amp;#8217;t use &lt;code&gt;version(libs.plugins.jmh)&lt;/code&gt; for example in the &lt;code&gt;pluginManagement&lt;/code&gt; block, but it&amp;#8217;s a chicken and egg problem: the &lt;code&gt;pluginManagement&lt;/code&gt; block has to be evaluated &lt;em&gt;before&lt;/em&gt; the catalogs are defined, because &lt;em&gt;settings plugins&lt;/em&gt; may contribute more catalogs or enhance the existing catalogs. Therefore, the &lt;code&gt;libs&lt;/code&gt; extension doesn&amp;#8217;t exist when this block is evaluated.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The limitation of not being able to deal with plugin versions in catalogs will be lifted in one way or another in the future.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_can_i_use_the_version_catalog_in_buildsrc&quot;&gt;Can I use the version catalog in buildSrc?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yes you can. Not only in &lt;code&gt;buildSrc&lt;/code&gt;, but basically in any included build too. You have several options, but the easiest is to include the TOML catalog in your &lt;code&gt;buildSrc/settings.gradle(.kts)&lt;/code&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;buildSrc/settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencyResolutionManagement {
+    versionCatalogs {
+        lib {
+            from(files(&quot;../gradle/libs.versions.toml&quot;))
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code&quot;&gt;But how can I use the catalog in &lt;em&gt;plugins&lt;/em&gt; defined in &lt;code&gt;buildSrc&lt;/code&gt;?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The solution above lets you use the catalogs in the build scripts of &lt;code&gt;buildSrc&lt;/code&gt; itself, but what if you want to use the catalog(s) in the plugins that &lt;code&gt;buildSrc&lt;/code&gt; defines, or precompiled script plugins?
+Long story short, currently, you can do it using a &lt;em&gt;type unsafe&lt;/em&gt; API only.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First you need to access the version catalogs extension to your plugin/build script, for example in Groovy:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;def catalogs = project.extensions.getByType(VersionCatalogsExtension)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;or in Kotlin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;val catalogs = extensions.getByType&amp;lt;VersionCatalogsExtension&amp;gt;()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;then you can access the version catalogs in your script, for example writing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;pluginManager.withPlugin(&quot;java&quot;) {
+    val libs = catalogs.named(&quot;libs&quot;)
+    dependencies.addProvider(&quot;implementation&quot;, libs.findDependency(&quot;lib&quot;).get())
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that this API doesn&amp;#8217;t provide any static accessor but is nevertheless safe, using the &lt;code&gt;Optional&lt;/code&gt; API.
+There&amp;#8217;s a reason why you cannot access type-safe accessors in plugins/precompiled script plugins, you will find more details on this &lt;a href=&quot;https://github.com/gradle/gradle/issues/15383&quot;&gt;issue&lt;/a&gt;.
+In a nutshell, that&amp;#8217;s because &lt;code&gt;buildSrc&lt;/code&gt; plugins (precompiled or not) are &lt;em&gt;plugins&lt;/em&gt; which can be applied to any kind of project and we don&amp;#8217;t know what the &lt;em&gt;target project catalogs&lt;/em&gt; will be: there&amp;#8217;s no inherent reason why they would be the same.
+In the future we will probably provide a way to explain that, at your own risk, expect the target catalog model to be the same.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_can_i_use_version_catalogs_in_production_code&quot;&gt;Can I use version catalogs in production code?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;No, you can&amp;#8217;t. Version catalogs are only accessible to build scripts/plugins, not your production code.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_you_i_use_a_platform_or_a_catalog&quot;&gt;You I use a platform or a catalog?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You should probably use both, look at our &lt;a href=&quot;https://docs.gradle.org/7.0/userguide/platforms.html#sub:platforms-vs-catalog&quot;&gt;docs&lt;/a&gt; for a complete explanation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_why_did_you_choose_toml_and_not_yaml&quot;&gt;Why did you choose TOML and not YAML?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;or XML (or pick your favorite format). The rationale is described in the &lt;a href=&quot;https://github.com/gradle/gradle/files/5646826/2020-12-05-Central.declaration.of.dependencies.Shared.externally.pdf&quot;&gt;design document&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_my_ide_is_red_everywhere_missing_dependency_class_error&quot;&gt;My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you are seeing this error:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/missing-dependency.png&quot; alt=&quot;missing dependency&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;upgrade to the latest IntelliJ IDEA 2021.1, which fixes this problem.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_why_can_t_i_have_nested_aliases_with_the_same_prefix&quot;&gt;Why can&amp;#8217;t I have nested aliases with the same prefix?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Imagine that you want to have 2 aliases, say &lt;code&gt;junit&lt;/code&gt; and &lt;code&gt;junit-jupiter&lt;/code&gt; and that both represent distinct dependencies: Gradle won&amp;#8217;t let you do this and you will have to rename your aliases to, say &lt;code&gt;junit-core&lt;/code&gt; and &lt;code&gt;junit-jupiter&lt;/code&gt;.
+That&amp;#8217;s because Gradle will map those aliases to &lt;em&gt;accessors&lt;/em&gt;, that is to say &lt;code&gt;libs.getJunit()&lt;/code&gt; and &lt;code&gt;libs.getUnit().getJupiter()&lt;/code&gt;.
+The problem is that you can&amp;#8217;t have an accessor which is both a &lt;em&gt;leaf&lt;/em&gt; (represents a dependency notation) and a &lt;em&gt;node&lt;/em&gt; (that is to say an intermediate node to access a real dependency).
+The reason we can&amp;#8217;t do this is that we&amp;#8217;re using lazy accessors of type &lt;code&gt;Provider&amp;lt;MinimalExternalDependency&amp;gt;&lt;/code&gt; for leaves and that type &lt;em&gt;cannot&lt;/em&gt; be extended to provide accessors for &quot;children&quot; dependencies.
+In other words, the type which represents a &lt;em&gt;node with children&lt;/em&gt; provides accessors which return &lt;code&gt;Provider&amp;lt;...&amp;gt;&lt;/code&gt; for dependencies, but a provider itself cannot have children.
+A potential workaround for this would be to support, in the future, an explicit call to say &quot;I&amp;#8217;m stopping here, that&amp;#8217;s the dependency I need&quot;, for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
+    testImplementation(libs.junit.get())
+    // or
+    testImplemementation(libs.junit.peek()) // because `get()` might be confusing as it would return a `Provider` on which you can call `get()` itself
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For now the team has decided to restrict what you can do by preventing having aliases which have &quot;name clashes&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_why_can_t_i_use_an_alias_with_dots_directly&quot;&gt;Why can&amp;#8217;t I use an alias with dots directly?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You will have noticed that if you declare an alias like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
+junit-jupiter = &quot;...&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;then Gradle will generate the following accessor: &lt;code&gt;libs.junit.jupiter&lt;/code&gt; (basically the dashes are transformed to dots).
+The question is, why can&amp;#8217;t we just write:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
+junit.jupiter = &quot;...&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And the reason is: tooling support. The following declaration is actually equivalent to writing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
+   [junit]
+   jupiter = &quot;...&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;but technically, it&amp;#8217;s undecidable where the &quot;nesting hierarchy&quot; stops, which would prevent tools from providing good completion (for example, where you can use &lt;code&gt;{ module = &quot;...&quot;}&lt;/code&gt;.
+It also makes it harder for tooling to automatically patch the file since they wouldn&amp;#8217;t know where to look for.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a consequence, we&amp;#8217;ve decided to keep the format simple and implement this mapping strategy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code&quot;&gt;Should I use &lt;code&gt;commons-lang3&lt;/code&gt; as an alias or &lt;code&gt;commonsLang3&lt;/code&gt;?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Problably neither one nor the other :) By choosing &lt;code&gt;commons-lang3&lt;/code&gt;, you&amp;#8217;re implicitly creating a &lt;em&gt;group of dependencies` called _commons&lt;/em&gt;, which will include a number of dependencies, including &lt;code&gt;lang3&lt;/code&gt;.
+The question then is, does that &lt;code&gt;commons&lt;/code&gt; group make sense? It&amp;#8217;s rather abstract, no? Does it actually say it&amp;#8217;s &quot;Apache Commons&quot;?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A better solution would therefore to use &lt;code&gt;commonsLang3&lt;/code&gt; as the alias, but then you&amp;#8217;d realize that you have chosen a version in the alias name, so why not &lt;code&gt;commonsLang&lt;/code&gt; directly?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
+commonsLang = { module=&quot;org.apache.commons:commons-lang3:3.3.1&quot; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This means that the dashes should be limited to grouping of dependencies, so that they are organized in &quot;folders&quot;.
+This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you&amp;#8217;d have to know in why subtree to look at.
+Proper guidance on what to use will be discussed later, based on your feedback and practices.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_should_i_use_the_settings_api_or_the_toml_file&quot;&gt;Should I use the settings API or the TOML file?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle comes with both a settings API to declare the catalog, or a convenience TOML file.
+I would personally say that most people should only care about the TOML file as it covers 80% of use cases.
+The settings API is great as soon as you want to implement &lt;em&gt;settings plugins&lt;/em&gt; or, for example, that you want to use your own, existing format to declare a catalog, instead of using the TOML format.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Simplified version management with Gradle 7</title>
       <link>https://melix.github.io/blog/2021/03/version-catalogs.html</link>
@@ -19,6 +279,9 @@
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Gradle 7 introduces the concept of &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html&quot;&gt;version catalogs&lt;/a&gt;, which I&amp;#8217;ve been working on for several months already. Long story short, I&amp;#8217;m extremely excited by this new feature which should make dependency management easier with Gradle. Let&amp;#8217;s get started!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;Please also read my &lt;a href=&quot;/blog/2021/03/version-catalogs-faq.html&quot;&gt;Version catalogs FAQ&lt;/a&gt; follow up post if you have more questions!&lt;/em&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -1382,266 +1645,6 @@ However, with the experimental &lt;a href=&quot;https://docs.gradle.org/current/
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Dependabot and automated dependency upgrades</title>
-      <link>https://melix.github.io/blog/2020/10/about-dependabot.html</link>
-      <pubDate>Sun, 11 Oct 2020 00:00:00 +0200</pubDate>
-      <guid isPermaLink="false">2020/10/about-dependabot.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;a href=&quot;https://dependabot.com/&quot;&gt;Dependabot&lt;/a&gt; starts with a great idea: the state of our industry, in terms of dependency management, is sad.
-In particular, maintaining dependencies up-to-date is difficult and while some solutions exist, the vast majority of projects are out of date.
-This isn&amp;#8217;t a big deal for bugfixes and feature updates, but it is clearly a problem for security issues.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Therefore, any kind of automation to make the situation better is a good idea.
-I am in deep empathy with people working in this area: this is a difficult problem and there are no perfect solutions: as an example, in order to improve security of builds and reduce the risks of attacks via the toolchain, &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_verification.html&quot;&gt;Gradle introduced dependency verification&lt;/a&gt; as a first-class citizen.
-We deeply care about security and definitely support any attempt to make things better in this area.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The genius idea about &lt;a href=&quot;https://dependabot.com/&quot;&gt;Dependabot&lt;/a&gt; is that it does it at scale &lt;strong&gt;and submits pull requests&lt;/strong&gt; that you just have to review and merge if everything goes ok.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The best example in the Java ecosystem happened yesterday: the JUnit team fixed a &lt;a href=&quot;https://github.com/junit-team/junit4/security/advisories/GHSA-269g-pwp5-87pp&quot;&gt;security vulnerability in JUnit 4.13&lt;/a&gt;.
-At first, you might wonder what kind of security problems you can have with a testing framework, which, by definition, just like a build tool, runs any arbitrary code on your machine.
-The reality is that most people are unaffected by this problem: it would only be the case if your tests write sensitive data (like credentials) in a shared environment, or that you somehow expose whatever is written in the test directory to the outside world.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nevertheless, because it&amp;#8217;s a CVE, Dependabot submitted automated pull-requests to all projects using JUnit 4 and &lt;a href=&quot;https://github.com/search?o=desc&amp;amp;q=Bump+junit+from+to+4.13.1+GHSA-269g-pwp5-87pp&amp;amp;s=&amp;amp;type=Issues&quot;&gt;Dependarmaggedon happened&lt;/a&gt;: tens of thousands of pull requests.
-This might sound cool, a security fix needs to be fixed, but I find this noisy, and in the end dangerous.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Here&amp;#8217;s why.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;h1 id=&quot;_automatic_detection&quot; class=&quot;sect0&quot;&gt;Automatic detection&lt;/h1&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;a href=&quot;https://dependabot.com/&quot;&gt;Dependabot&lt;/a&gt; is as good as an automated tool can be.
-I mean that its &lt;em&gt;implementation&lt;/em&gt;, at least in the Java and JVM ecosystem in general, is too simplistic and that it&amp;#8217;s inherently &lt;strong&gt;wrong&lt;/strong&gt;.
-I don&amp;#8217;t have the expertise to tell if it&amp;#8217;s different in the other supported ecosystems (Go) but I suspect a lot of the problems I&amp;#8217;m going to describe here exist also in those ecosystems.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In practice, Dependabot is nothing more than a search and replace engine: it looks into some particular files that it knows about (think &lt;code&gt;pom.xml&lt;/code&gt;), looks for some patterns, then tries to identify dependency coordinates and eventually replaces them. I&amp;#8217;m simplifying a bit, because it does some interpretation of the versions it finds, for example to match version ranges, but that&amp;#8217;s roughtly how it works.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For example, it will identify this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint xml language-xml&quot;&gt;&lt;code&gt;&amp;lt;dependency&amp;gt;
-   &amp;lt;group&amp;gt;junit&amp;lt;/group&amp;gt;
-   &amp;lt;name&amp;gt;junit&amp;lt;/version&amp;gt;
-   &amp;lt;version&amp;gt;4.13&amp;lt;/version&amp;gt;
-   &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;and it will replace the &lt;code&gt;4.13&lt;/code&gt; with &lt;code&gt;4.13.1&lt;/code&gt;, then submit a PR for you to review. WIN!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yes, and no. Because this is extremely easy to defeat.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, as I said, it only looks for known files. For Maven, it&amp;#8217;s pretty simple, there&amp;#8217;s only one place to look for: &lt;code&gt;pom.xml&lt;/code&gt; files, but for other build tools, like Gradle, Ivy, Ant, Bazel, Pants, &amp;#8230; that&amp;#8217;s not the case: dependencies can be declared in different files, not all named the same. Dependency versions can be separate (in properties files) or inherited from context (parent POMs, platforms, &amp;#8230;).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A more complete strategy is to look for patterns too, like &lt;code&gt;*.gradle&lt;/code&gt;, but then, they also miss the &lt;code&gt;*.gradle.kts&lt;/code&gt; files (they do), or the plugins which can contribute dependencies.
-In short: it&amp;#8217;s a whack-a-mole game.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;One must think that it&amp;#8217;s not a big deal, because catching &lt;em&gt;some cases&lt;/em&gt; is better than not catching at all, and I agree, but that&amp;#8217;s not the expectation when you read what the tool promises.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the end, any tool which tries to parse build files and tries to interpret its model based on string evaluations is doomed to fail.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Even if it manages to catch some problems, things can go wrong. As an example, here&amp;#8217;s what we got at Gradle for this JUnit upgrade:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/blog/img/dependabomb.jpg&quot; alt=&quot;dependabomb&quot;&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For a &lt;strong&gt;single repository&lt;/strong&gt;, it created &lt;strong&gt;dozens&lt;/strong&gt; of individual pull requests to ask us to upgrade.
-That&amp;#8217;s nice of you, Dependabot, but it&amp;#8217;s totally missing the point: this repository contains generated code, used in performance testing.
-The way the code is layout, the repetition of dependency declarations, etc, everything is intentional.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If you put apart the fact that Dependabot could have created a single pull request for all dependencies, instead of creating hundreds, it highlights a general problem with those automated detection tools:&lt;/p&gt;
-&lt;/div&gt;
-&lt;h1 id=&quot;_context_matters&quot; class=&quot;sect0&quot;&gt;Context matters!&lt;/h1&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At Gradle, we often receive emails from security teams telling us things like: &quot;The Gradle distribution contains a dependency on this X library which has vulnerability Y&quot;.
-However, in almost all cases we&amp;#8217;ve investigated, this was a no issue for us.
-Because of the nature of Gradle, the fact that by definition it runs arbitrary code on a machine, most vulnerabilities are not a problem in this environment: context matters.
-What&amp;#8217;s more, even if your tool uses a library that has a critical vulnerability (we use Jackson for example, which had a number of thems recently), it doesn&amp;#8217;t mean that your code &lt;strong&gt;exercises the path which is vulnerable&lt;/strong&gt;: context matters!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It&amp;#8217;s not harmful to upgrade, but it creates a lot of noise.&lt;/p&gt;
-&lt;/div&gt;
-&lt;h1 id=&quot;_wrong_impression_of_security&quot; class=&quot;sect0&quot;&gt;Wrong impression of security&lt;/h1&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But the biggest problem with such tools, and again I&amp;#8217;m using Dependabot as an example, is that they &lt;strong&gt;give a wrong impression of security&lt;/strong&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As I explained, Dependabot will basically read your POM files, or Gradle files, or whatever build tool files you use, and &lt;em&gt;assume that the version it reads is the version which is going to be used&lt;/em&gt;.
-We, as developers, and even more as build tool authors, know that this is wrong: the dependencies you declare are rarely the ones you resolve.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s the reason why tools like NPM (Javascript), Gradle (multi-language) or Cargo (Rust) make use of &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_locking.html&quot;&gt;dependency locking&lt;/a&gt;.
-Dependency locking is a concept which helps with build reproducibility.
-Say, for example, that you write:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
-   implementation &apos;org.mylib:awesome:[1.0, 2[&apos;
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This means that Gradle can pick whatever version of &lt;code&gt;awesome&lt;/code&gt; as long as it&amp;#8217;s in the range.
-This is a typical declaration for semantic versioning, when you expect a library to be upgradable up to the next major.
-In Gradle you can even improve this by explaining what version you prefer in the range, if nobody else cares:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
-   implementation(&apos;org.mylib:awesome&apos;) {
-      version {
-          require &apos;[1.0, 2[&apos;
-          prefer &apos;1.3&apos;
-      }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;However, ranges come at a price: if a new dependency version is released, your build would suddenly start using this new version, which breaks reproducibility in case you checkout old code, for example, for a bugfix.
-Therefore, as soon as you use ranges (and by extension any &lt;em&gt;dynamic dependency version&lt;/em&gt;), you should use it with &lt;em&gt;dependency locking&lt;/em&gt;.
-Dependency locking will make sure that whatever version of a library resolved at time T is used at time T+N even if a new version is out.
-It does so by writing the result of the dependency resolution process in a lock file.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Upgrading dependencies becomes an intentional process that you do from time to time by generating a new lock file.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What is the relationship with tools like Dependabot?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;By using the versions you &lt;em&gt;declare&lt;/em&gt;, they have absolutely no guarantee that the versions you resolve are &lt;em&gt;not vulnerable&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the example above, imagine that I use range &lt;code&gt;[1.0, 2[&lt;/code&gt; and that I&amp;#8217;m resolving 1.3.
-At some point in time, version 2.1 is released and is vulnerable.
-You could imagine that because you used a range and that 2.1 is out of the range, you are safe.
-That&amp;#8217;s what those tools would assume, but they would be wrong: the reality is that despite this declaration, by the play of conflict resolution (Ivy, Gradle, &amp;#8230;) or ordering (Maven), a totally different version can be selected, even 2.1!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Again there are &lt;a href=&quot;https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html&quot;&gt;tools to mitigate this problem&lt;/a&gt;, but the reality is that by just reading the declaration, you&amp;#8217;re not safe.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It&amp;#8217;s even worse than that: what about transitive dependencies?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Imagine that you have:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;code&gt;Foo -&amp;gt; Bar -&amp;gt; Baz&lt;/code&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And that you depend on &lt;code&gt;Foo&lt;/code&gt;. What if a vulnerability is discovered on &lt;code&gt;Baz&lt;/code&gt;? Will you be notified? What kind of automated pull request can such a tool make to make sure that you upgrade &lt;code&gt;Baz&lt;/code&gt;?&lt;/p&gt;
-&lt;/div&gt;
-&lt;h1 id=&quot;_can_we_do_better&quot; class=&quot;sect0&quot;&gt;Can we do better?&lt;/h1&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I have some good and bad news for you.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The good news is that we can do better.
-The bad news is that it&amp;#8217;s not easy.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;First, instead of relying on the declaration, those tools should really rely on the result of dependency resolution.
-If, for example, they used the lock files instead of the build files, they would know exactly what a build resolves.
-This, however, is only possible if the build uses dependency locking, and only for dependency graphs which are actually locked.
-It&amp;#8217;s a reasonable assumption to say that what is locked is the most relevant information, though.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Of course, I said there were bad news.
-As soon as you use the resolution result, you almost have to give up on automated remediation (pull requests).
-One thing they &lt;em&gt;could&lt;/em&gt; do is patching the lock file.
-However, this is in general not a good idea, because, as I explained, lock files are generated: they present to you the result of resolution.
-Partially upgrading a lock file, manually, is possible but then you cannot make any guarantee that the app is going to work, because introducing a different dependency version may introduce different transitive dependencies!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;An alternate solution is to gather the information about resolved dependencies during the build: this is what &lt;a href=&quot;https://scans.gradle.com/&quot;&gt;build scans&lt;/a&gt; do for Gradle and Maven, for example.
-This information can be extracted during the build and Dependabot would know precisely, reliably, what is resolved by a project.
-We even offer a Tooling API to do this kind of work.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then there&amp;#8217;s remediation.
-This is the hardest problem.
-Because what most people like about Dependabot is actually the automated remediation: pull requests are nice, we all love that.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But say, that to fix the transitive dependency issue above, Dependabot suggested to add a first level dependency with a different version.
-For Maven, this would work, since it&amp;#8217;s order and depth sensitive.
-But it would break your model: the application doesn&amp;#8217;t depend on &lt;code&gt;Baz&lt;/code&gt;: it depends on &lt;code&gt;Foo&lt;/code&gt;, which, by the transitive game, depends on &lt;code&gt;Baz&lt;/code&gt;.
-You don&amp;#8217;t want to introduce a first level dependency on &lt;code&gt;Baz&lt;/code&gt; because it doesn&amp;#8217;t make sense.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For Gradle, you could use dependency constraints instead: constraints are meant for this use case.
-A &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_constraints.html#sec:adding-constraints-transitive-deps&quot;&gt;constraint&lt;/a&gt; adds, as it name implies, a constraint to the equation of the resolution of the graph (a bit like in constraint programming).
-They would participate in the dependency graph resolution if, and only if, the dependency they talk about appears in the graph.
-In that sense, they don&amp;#8217;t break the application model, by introducing arbitrary first-level dependencies.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Our Java ecosystem is polluted by hundreds of accidental first level dependencies and exclusions because of this lack of modeling: it is important to get things right.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last but not least, how you declare dependencies matters.
-In Gradle, using &lt;a href=&quot;https://docs.gradle.org/current/userguide/rich_versions.html#header&quot;&gt;rich version constraints&lt;/a&gt;, you can explicitly reject bad versions, and you can explain why.&lt;/p&gt;
-&lt;/div&gt;
-&lt;h1 id=&quot;_conclusion&quot; class=&quot;sect0&quot;&gt;Conclusion&lt;/h1&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In conclusion, I think that Dependabot&amp;#8217;s intent is legitimate and that today it&amp;#8217;s better than nothing. Let&amp;#8217;s detect projects using vulnerable dependencies and propose automated remediation.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We, as build tool authors, also need to consider the wider context, which is dependency resolution in general, which isn&amp;#8217;t as simple as it seems.
-In particular we consider that &lt;em&gt;detection&lt;/em&gt; is an easy problem if you use the right tools, while &lt;em&gt;remediation&lt;/em&gt; is a hard one.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I think the current implementation of Dependabot is mostly wrong (at least in the Java ecosystem) as it relies on the declaration. This raises a number of issues:
-- it is dependent to the patterns it recognizes
-- it assumes that what you see is what you get
-- it cannot recognize transitive dependencies actually resolved by your project, so it misses real vulnerabilities
-- it doesn&amp;#8217;t matter about the context of use of your dependencies&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The context thing is difficult to solve, but it&amp;#8217;s actually painful because of the noise it creates, in case the &quot;vulnerable dependency&quot; is actually not in your case.
-However, I think there are improvements which can me made by actually using the actual resolution results instead.
-Then it raises some interesting technical challenges, like how to sandbox execution of builds (GitHub actions already do this) but more importantly how to create an automated pull request from the result of the analysis.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Note that I also understand that from a Dependabot creator point of view, having to implement build-tool specific logic, like calling the Tooling API, to gather information about resolved dependencies might sound scary.
-I still think this is the right thing to do to be correct and, if our goal is really to make the industry safer, that&amp;#8217;s what we should do.
-However, we have alternate solutions. For example a few weeks ago I experimented with a &lt;a href=&quot;https://github.com/melix/gradle-command-action/tree/dump-dependencies&quot;&gt;fork of my friend and colleague Paul Merlin&amp;#8217;s Gradle Command GitHub Action&lt;/a&gt; which automatically generates a JSON file of resolved dependencies during the build.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;a href=&quot;https://twitter.com/ysb33r/&quot;&gt;Schalk Cronjé&lt;/a&gt; also mentioned to me the &lt;a href=&quot;https://github.com/jeremylong/dependency-check-gradle&quot;&gt;OWASP plugin&lt;/a&gt;, which I forgot to mention when I originally wrote this blog post, but I think it a great answer and currently better answer because it does exactly what I describe: rely on what you actually resolve, not what you declare, and lets you carefully review the results via a generated report.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;m not sure this is the best answer, but it shows that we can attack the problem from different angles.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Eventually, the key takeaway of this blog post should be: don&amp;#8217;t assume that you are safe because you use Dependabot. You&amp;#8217;re not.&lt;/p&gt;
 &lt;/div&gt;
 	</description>
     </item>
