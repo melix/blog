@@ -96,7 +96,7 @@ This blog post will be updated as I&#8217;m seeing more questions.</p>
 <li><a href="#_can_i_use_the_version_catalog_in_buildsrc">Can I use the version catalog in buildSrc?</a></li>
 <li><a href="#_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</a></li>
 <li><a href="#_can_i_use_version_catalogs_in_production_code">Can I use version catalogs in production code?</a></li>
-<li><a href="#_you_i_use_a_platform_or_a_catalog">You I use a platform or a catalog?</a></li>
+<li><a href="#_should_i_use_a_platform_or_a_catalog">Should I use a platform or a catalog?</a></li>
 <li><a href="#_why_did_you_choose_toml_and_not_yaml">Why did you choose TOML and not YAML?</a></li>
 <li><a href="#_my_ide_is_red_everywhere_missing_dependency_class_error">My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error</a></li>
 <li><a href="#_why_can_t_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</a></li>
@@ -213,7 +213,7 @@ In the future we will probably provide a way to explain that, at your own risk, 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_you_i_use_a_platform_or_a_catalog">You I use a platform or a catalog?</h3>
+<h3 id="_should_i_use_a_platform_or_a_catalog">Should I use a platform or a catalog?</h3>
 <div class="paragraph">
 <p>You should probably use both, look at our <a href="https://docs.gradle.org/7.0/userguide/platforms.html#sub:platforms-vs-catalog">docs</a> for a complete explanation.</p>
 </div>
@@ -242,7 +242,7 @@ In the future we will probably provide a way to explain that, at your own risk, 
 <h3 id="_why_can_t_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</h3>
 <div class="paragraph">
 <p>Imagine that you want to have 2 aliases, say <code>junit</code> and <code>junit-jupiter</code> and that both represent distinct dependencies: Gradle won&#8217;t let you do this and you will have to rename your aliases to, say <code>junit-core</code> and <code>junit-jupiter</code>.
-That&#8217;s because Gradle will map those aliases to <em>accessors</em>, that is to say <code>libs.getJunit()</code> and <code>libs.getUnit().getJupiter()</code>.
+That&#8217;s because Gradle will map those aliases to <em>accessors</em>, that is to say <code>libs.getJunit()</code> and <code>libs.getJUnit().getJupiter()</code>.
 The problem is that you can&#8217;t have an accessor which is both a <em>leaf</em> (represents a dependency notation) and a <em>node</em> (that is to say an intermediate node to access a real dependency).
 The reason we can&#8217;t do this is that we&#8217;re using lazy accessors of type <code>Provider&lt;MinimalExternalDependency&gt;</code> for leaves and that type <em>cannot</em> be extended to provide accessors for "children" dependencies.
 In other words, the type which represents a <em>node with children</em> provides accessors which return <code>Provider&lt;...&gt;</code> for dependencies, but a provider itself cannot have children.
@@ -283,7 +283,7 @@ junit.jupiter = "..."</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>And the reason is: tooling support. The following declaration is actually equivalent to writing:</p>
+<p>And the reason is: tooling support. The previous declaration is actually equivalent to writing:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -303,11 +303,11 @@ It also makes it harder for tooling to automatically patch the file since they w
 <div class="sect2">
 <h3 id="_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</h3>
 <div class="paragraph">
-<p>Problably neither one nor the other :) By choosing <code>commons-lang3</code>, you&#8217;re implicitly creating a <em>group of dependencies` called _commons</em>, which will include a number of dependencies, including <code>lang3</code>.
+<p>Problably neither one nor the other :) By choosing <code>commons-lang3</code>, you&#8217;re implicitly creating a <em>group of dependencies</em> called <code>commons</code>, which will include a number of dependencies, including <code>lang3</code>.
 The question then is, does that <code>commons</code> group make sense? It&#8217;s rather abstract, no? Does it actually say it&#8217;s "Apache Commons"?</p>
 </div>
 <div class="paragraph">
-<p>A better solution would therefore to use <code>commonsLang3</code> as the alias, but then you&#8217;d realize that you have chosen a version in the alias name, so why not <code>commonsLang</code> directly?</p>
+<p>A better solution would therefore be to use <code>commonsLang3</code> as the alias, but then you&#8217;d realize that you have chosen a version in the alias name, so why not <code>commonsLang</code> directly?</p>
 </div>
 <div class="paragraph">
 <p>Therefore:</p>
@@ -320,7 +320,7 @@ commonsLang = { module="org.apache.commons:commons-lang3:3.3.1" }</code></pre>
 </div>
 <div class="paragraph">
 <p>This means that the dashes should be limited to grouping of dependencies, so that they are organized in "folders".
-This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you&#8217;d have to know in why subtree to look at.
+This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you&#8217;d have to know in which subtree to look at.
 Proper guidance on what to use will be discussed later, based on your feedback and practices.</p>
 </div>
 </div>

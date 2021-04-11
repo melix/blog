@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 11 Apr 2021 14:43:09 +0200</pubDate>
-    <lastBuildDate>Sun, 11 Apr 2021 14:43:09 +0200</lastBuildDate>
+    <pubDate>Sun, 11 Apr 2021 14:45:17 +0200</pubDate>
+    <lastBuildDate>Sun, 11 Apr 2021 14:45:17 +0200</lastBuildDate>
 
     <item>
       <title>Frequently asked questions about version catalogs</title>
@@ -32,7 +32,7 @@ This blog post will be updated as I&amp;#8217;m seeing more questions.&lt;/p&gt;
 &lt;li&gt;&lt;a href=&quot;#_can_i_use_the_version_catalog_in_buildsrc&quot;&gt;Can I use the version catalog in buildSrc?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code&quot;&gt;But how can I use the catalog in &lt;em&gt;plugins&lt;/em&gt; defined in &lt;code&gt;buildSrc&lt;/code&gt;?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_can_i_use_version_catalogs_in_production_code&quot;&gt;Can I use version catalogs in production code?&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;#_you_i_use_a_platform_or_a_catalog&quot;&gt;You I use a platform or a catalog?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_should_i_use_a_platform_or_a_catalog&quot;&gt;Should I use a platform or a catalog?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_why_did_you_choose_toml_and_not_yaml&quot;&gt;Why did you choose TOML and not YAML?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_my_ide_is_red_everywhere_missing_dependency_class_error&quot;&gt;My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_why_can_t_i_have_nested_aliases_with_the_same_prefix&quot;&gt;Why can&amp;#8217;t I have nested aliases with the same prefix?&lt;/a&gt;&lt;/li&gt;
@@ -149,7 +149,7 @@ In the future we will probably provide a way to explain that, at your own risk, 
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_you_i_use_a_platform_or_a_catalog&quot;&gt;You I use a platform or a catalog?&lt;/h3&gt;
+&lt;h3 id=&quot;_should_i_use_a_platform_or_a_catalog&quot;&gt;Should I use a platform or a catalog?&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;You should probably use both, look at our &lt;a href=&quot;https://docs.gradle.org/7.0/userguide/platforms.html#sub:platforms-vs-catalog&quot;&gt;docs&lt;/a&gt; for a complete explanation.&lt;/p&gt;
 &lt;/div&gt;
@@ -178,7 +178,7 @@ In the future we will probably provide a way to explain that, at your own risk, 
 &lt;h3 id=&quot;_why_can_t_i_have_nested_aliases_with_the_same_prefix&quot;&gt;Why can&amp;#8217;t I have nested aliases with the same prefix?&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Imagine that you want to have 2 aliases, say &lt;code&gt;junit&lt;/code&gt; and &lt;code&gt;junit-jupiter&lt;/code&gt; and that both represent distinct dependencies: Gradle won&amp;#8217;t let you do this and you will have to rename your aliases to, say &lt;code&gt;junit-core&lt;/code&gt; and &lt;code&gt;junit-jupiter&lt;/code&gt;.
-That&amp;#8217;s because Gradle will map those aliases to &lt;em&gt;accessors&lt;/em&gt;, that is to say &lt;code&gt;libs.getJunit()&lt;/code&gt; and &lt;code&gt;libs.getUnit().getJupiter()&lt;/code&gt;.
+That&amp;#8217;s because Gradle will map those aliases to &lt;em&gt;accessors&lt;/em&gt;, that is to say &lt;code&gt;libs.getJunit()&lt;/code&gt; and &lt;code&gt;libs.getJUnit().getJupiter()&lt;/code&gt;.
 The problem is that you can&amp;#8217;t have an accessor which is both a &lt;em&gt;leaf&lt;/em&gt; (represents a dependency notation) and a &lt;em&gt;node&lt;/em&gt; (that is to say an intermediate node to access a real dependency).
 The reason we can&amp;#8217;t do this is that we&amp;#8217;re using lazy accessors of type &lt;code&gt;Provider&amp;lt;MinimalExternalDependency&amp;gt;&lt;/code&gt; for leaves and that type &lt;em&gt;cannot&lt;/em&gt; be extended to provide accessors for &quot;children&quot; dependencies.
 In other words, the type which represents a &lt;em&gt;node with children&lt;/em&gt; provides accessors which return &lt;code&gt;Provider&amp;lt;...&amp;gt;&lt;/code&gt; for dependencies, but a provider itself cannot have children.
@@ -219,7 +219,7 @@ junit.jupiter = &quot;...&quot;&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And the reason is: tooling support. The following declaration is actually equivalent to writing:&lt;/p&gt;
+&lt;p&gt;And the reason is: tooling support. The previous declaration is actually equivalent to writing:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -239,11 +239,11 @@ It also makes it harder for tooling to automatically patch the file since they w
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code&quot;&gt;Should I use &lt;code&gt;commons-lang3&lt;/code&gt; as an alias or &lt;code&gt;commonsLang3&lt;/code&gt;?&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Problably neither one nor the other :) By choosing &lt;code&gt;commons-lang3&lt;/code&gt;, you&amp;#8217;re implicitly creating a &lt;em&gt;group of dependencies` called _commons&lt;/em&gt;, which will include a number of dependencies, including &lt;code&gt;lang3&lt;/code&gt;.
+&lt;p&gt;Problably neither one nor the other :) By choosing &lt;code&gt;commons-lang3&lt;/code&gt;, you&amp;#8217;re implicitly creating a &lt;em&gt;group of dependencies&lt;/em&gt; called &lt;code&gt;commons&lt;/code&gt;, which will include a number of dependencies, including &lt;code&gt;lang3&lt;/code&gt;.
 The question then is, does that &lt;code&gt;commons&lt;/code&gt; group make sense? It&amp;#8217;s rather abstract, no? Does it actually say it&amp;#8217;s &quot;Apache Commons&quot;?&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A better solution would therefore to use &lt;code&gt;commonsLang3&lt;/code&gt; as the alias, but then you&amp;#8217;d realize that you have chosen a version in the alias name, so why not &lt;code&gt;commonsLang&lt;/code&gt; directly?&lt;/p&gt;
+&lt;p&gt;A better solution would therefore be to use &lt;code&gt;commonsLang3&lt;/code&gt; as the alias, but then you&amp;#8217;d realize that you have chosen a version in the alias name, so why not &lt;code&gt;commonsLang&lt;/code&gt; directly?&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Therefore:&lt;/p&gt;
@@ -256,7 +256,7 @@ commonsLang = { module=&quot;org.apache.commons:commons-lang3:3.3.1&quot; }&lt;/
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;This means that the dashes should be limited to grouping of dependencies, so that they are organized in &quot;folders&quot;.
-This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you&amp;#8217;d have to know in why subtree to look at.
+This can make it practical when you have lots of dependencies, but it also makes them less discoverable by completion, since you&amp;#8217;d have to know in which subtree to look at.
 Proper guidance on what to use will be discussed later, based on your feedback and practices.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
