@@ -103,6 +103,8 @@ This blog post will be updated as I&#8217;m seeing more questions.</p>
 <li><a href="#_why_can_t_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</a></li>
 <li><a href="#_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</a></li>
 <li><a href="#_should_i_use_the_settings_api_or_the_toml_file">Should I use the settings API or the TOML file?</a></li>
+<li><a href="#_why_can_t_i_use_excludes_or_classifiers">Why can&#8217;t I use excludes or classifiers?</a></li>
+<li><a href="#_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em">How do I tell Gradle to use a specific <em>artifact</em>?</a></li>
 <li><a href="#_where_should_i_report_bugs_or_feature_requests">Where should I report bugs or feature requests?</a></li>
 </ul>
 </li>
@@ -328,6 +330,40 @@ Proper guidance on what to use will be discussed later, based on your feedback a
 <p>Gradle comes with both a settings API to declare the catalog, or a convenience TOML file.
 I would personally say that most people should only care about the TOML file as it covers 80% of use cases.
 The settings API is great as soon as you want to implement <em>settings plugins</em> or, for example, that you want to use your own, existing format to declare a catalog, instead of using the TOML format.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_why_can_t_i_use_excludes_or_classifiers">Why can&#8217;t I use excludes or classifiers?</h3>
+<div class="paragraph">
+<p>By design, version catalogs talk about <em>dependency coordinates</em> only.
+The choice of applying excludes is on the consumer side: for example, for a specific project, you might need to exclude a transitive dependency because you don&#8217;t use the code path which exercises this dependency, but this might not be the case for all places.
+Similarly, a classifier falls into the category of <em>variant selectors</em> (see <a href="https://docs.gradle.org/current/userguide/variant_model.html">the variant model</a>): for the same dependency coordinates, one might want classifier X, another classifier Y, and it&#8217;s not necessarily allowed to have both in the same graph.
+Therefore, classifiers need to be declared on the <em>dependency declaration site</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>dependencies {
+   implementation(variantOf(libs.myLib) { classifier('test-fixtures') })
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em">How do I tell Gradle to use a specific <em>artifact</em>?</h3>
+<div class="paragraph">
+<p>Similarly to classifiers or excludes, <em>artifact selectors</em> belong to the dependency declaration site. You need to write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>dependencies {
+    implementation(libs.myLib) {
+        artifact {
+            name = 'my-lib' // note that ideally this will go away, see https://github.com/gradle/gradle/issues/16768
+            type = 'aar'
+        }
+    }
+}</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">

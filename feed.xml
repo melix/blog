@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 11 Apr 2021 14:19:26 +0200</pubDate>
-    <lastBuildDate>Sun, 11 Apr 2021 14:19:26 +0200</lastBuildDate>
+    <pubDate>Sun, 11 Apr 2021 14:40:47 +0200</pubDate>
+    <lastBuildDate>Sun, 11 Apr 2021 14:40:47 +0200</lastBuildDate>
 
     <item>
       <title>Frequently asked questions about version catalogs</title>
@@ -39,6 +39,8 @@ This blog post will be updated as I&amp;#8217;m seeing more questions.&lt;/p&gt;
 &lt;li&gt;&lt;a href=&quot;#_why_can_t_i_use_an_alias_with_dots_directly&quot;&gt;Why can&amp;#8217;t I use an alias with dots directly?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code&quot;&gt;Should I use &lt;code&gt;commons-lang3&lt;/code&gt; as an alias or &lt;code&gt;commonsLang3&lt;/code&gt;?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_should_i_use_the_settings_api_or_the_toml_file&quot;&gt;Should I use the settings API or the TOML file?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_why_can_t_i_use_excludes_or_classifiers&quot;&gt;Why can&amp;#8217;t I use excludes or classifiers?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em&quot;&gt;How do I tell Gradle to use a specific &lt;em&gt;artifact&lt;/em&gt;?&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#_where_should_i_report_bugs_or_feature_requests&quot;&gt;Where should I report bugs or feature requests?&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -264,6 +266,40 @@ Proper guidance on what to use will be discussed later, based on your feedback a
 &lt;p&gt;Gradle comes with both a settings API to declare the catalog, or a convenience TOML file.
 I would personally say that most people should only care about the TOML file as it covers 80% of use cases.
 The settings API is great as soon as you want to implement &lt;em&gt;settings plugins&lt;/em&gt; or, for example, that you want to use your own, existing format to declare a catalog, instead of using the TOML format.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_why_can_t_i_use_excludes_or_classifiers&quot;&gt;Why can&amp;#8217;t I use excludes or classifiers?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By design, version catalogs talk about &lt;em&gt;dependency coordinates&lt;/em&gt; only.
+The choice of applying excludes is on the consumer side: for example, for a specific project, you might need to exclude a transitive dependency because you don&amp;#8217;t use the code path which exercises this dependency, but this might not be the case for all places.
+Similarly, a classifier falls into the category of &lt;em&gt;variant selectors&lt;/em&gt; (see &lt;a href=&quot;https://docs.gradle.org/current/userguide/variant_model.html&quot;&gt;the variant model&lt;/a&gt;): for the same dependency coordinates, one might want classifier X, another classifier Y, and it&amp;#8217;s not necessarily allowed to have both in the same graph.
+Therefore, classifiers need to be declared on the &lt;em&gt;dependency declaration site&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
+   implementation(variantOf(libs.myLib) { classifier(&apos;test-fixtures&apos;) })
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em&quot;&gt;How do I tell Gradle to use a specific &lt;em&gt;artifact&lt;/em&gt;?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Similarly to classifiers or excludes, &lt;em&gt;artifact selectors&lt;/em&gt; belong to the dependency declaration site. You need to write:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
+    implementation(libs.myLib) {
+        artifact {
+            name = &apos;my-lib&apos; // note that ideally this will go away, see https://github.com/gradle/gradle/issues/16768
+            type = &apos;aar&apos;
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
