@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 6 Oct 2021 12:27:16 +0200</pubDate>
-    <lastBuildDate>Wed, 6 Oct 2021 12:27:16 +0200</lastBuildDate>
+    <pubDate>Wed, 6 Oct 2021 12:59:22 +0200</pubDate>
+    <lastBuildDate>Wed, 6 Oct 2021 12:59:22 +0200</lastBuildDate>
 
     <item>
       <title>A Gradle quickie: properly using dependsOn</title>
@@ -95,6 +95,9 @@ You&amp;#8217;re thinking &quot;there&amp;#8217;s a task, jar, which basically p
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;it&amp;#8217;s opaque to Gradle: the code above executes a copy in a &lt;code&gt;doLast&lt;/code&gt; block. Nothing tells Gradle that the &quot;classes&quot; have additional output.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;imagine another task which needs the &lt;code&gt;classes&lt;/code&gt; only. Depending on when it executes, it &lt;em&gt;may&lt;/em&gt; or may not, include the &lt;code&gt;docsFileJar&lt;/code&gt; that it doesn&amp;#8217;t care about. This makes builds non-reproducible (note that this is exactly the reason why Maven build cannot be trusted and that you need to run &lt;code&gt;clean&lt;/code&gt;, because any &quot;goal&quot; can write to any directory at any time, making it impossible to infer who contributed what).&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;it requires to declare an &lt;em&gt;explicit dependency&lt;/em&gt; between the &lt;code&gt;jar&lt;/code&gt; task and the &lt;code&gt;docsFileJar&lt;/code&gt; task, to make sure that if we execute &lt;code&gt;jar&lt;/code&gt;, our &quot;docs jar&quot; file is present&lt;/p&gt;

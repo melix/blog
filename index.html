@@ -159,6 +159,9 @@ You&#8217;re thinking "there&#8217;s a task, jar, which basically packages every
 <p>it&#8217;s opaque to Gradle: the code above executes a copy in a <code>doLast</code> block. Nothing tells Gradle that the "classes" have additional output.</p>
 </li>
 <li>
+<p>imagine another task which needs the <code>classes</code> only. Depending on when it executes, it <em>may</em> or may not, include the <code>docsFileJar</code> that it doesn&#8217;t care about. This makes builds non-reproducible (note that this is exactly the reason why Maven build cannot be trusted and that you need to run <code>clean</code>, because any "goal" can write to any directory at any time, making it impossible to infer who contributed what).</p>
+</li>
+<li>
 <p>it requires to declare an <em>explicit dependency</em> between the <code>jar</code> task and the <code>docsFileJar</code> task, to make sure that if we execute <code>jar</code>, our "docs jar" file is present</p>
 </li>
 <li>
