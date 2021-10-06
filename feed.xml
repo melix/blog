@@ -6,9 +6,220 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 11 Apr 2021 16:15:10 +0200</pubDate>
-    <lastBuildDate>Sun, 11 Apr 2021 16:15:10 +0200</lastBuildDate>
+    <pubDate>Wed, 6 Oct 2021 12:27:16 +0200</pubDate>
+    <lastBuildDate>Wed, 6 Oct 2021 12:27:16 +0200</lastBuildDate>
 
+    <item>
+      <title>A Gradle quickie: properly using dependsOn</title>
+      <link>https://melix.github.io/blog/2021/10/gradle-quickie-dependson.html</link>
+      <pubDate>Wed, 6 Oct 2021 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2021/10/gradle-quickie-dependson.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Today I&amp;#8217;d like to share a small example of what &lt;em&gt;not to do&lt;/em&gt; with Gradle.
+Some of you may already know that I recently joined the &lt;a href=&quot;https://micronaut.io/&quot;&gt;Micronaut team at Oracle&lt;/a&gt;, and part of my job is to improve the build experience, be it for Micronaut itself or Micronaut users.
+Today I&amp;#8217;m going to focus on an example I found in the Micronaut build itself.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;TL/DR&lt;/strong&gt;: If you use &lt;code&gt;dependsOn&lt;/code&gt;, you&amp;#8217;re likely doing it wrong.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_when_should_you_use_dependson&quot;&gt;When should you use dependsOn?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a nutshell, Gradle works by computing a graph of task dependencies.
+Say that you want to build a JAR file: you&amp;#8217;re going to call the &lt;code&gt;jar&lt;/code&gt; task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc&amp;#8230;
+Determining the &lt;em&gt;task dependencies&lt;/em&gt;, that is to say what other tasks need to be executed, is done by looking up at 3 different things:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;the task &lt;code&gt;dependsOn&lt;/code&gt; dependencies. For example, &lt;code&gt;assemble.dependsOn(jar)&lt;/code&gt; means that if you run &lt;code&gt;assemble&lt;/code&gt;, then the &lt;code&gt;jar&lt;/code&gt; task must be executed before&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the task &lt;em&gt;transitive dependencies&lt;/em&gt;, in which case we&amp;#8217;re not talking about tasks, but &quot;publications&quot;. For example, when you need to compile project &lt;code&gt;A&lt;/code&gt;, you need on classpath project &lt;code&gt;B&lt;/code&gt;, which implies running &lt;em&gt;some&lt;/em&gt; tasks of &lt;code&gt;B&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;and last but not least, the &lt;em&gt;task inputs&lt;/em&gt;, that is to say, what it needs to execute its work&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In practice, it&amp;#8217;s worth noting that 2. is a subset of 3. but I added it for clarity.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s look at this snippet:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint gradle language-gradle&quot;&gt;&lt;code&gt;task docFilesJar(type: Jar, description: &apos;Package up files used for generating documentation.&apos;) {
+    archiveVersion = null
+    archiveFileName = &quot;grails-doc-files.jar&quot;
+    from &quot;src/main/template&quot;
+    doLast {
+        copy {
+            from docFilesJar.archivePath
+            into &quot;${buildDir}/classes/groovy/main&quot;
+        }
+    }
+}
+
+jar.dependsOn docFilesJar&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, let&amp;#8217;s realize that this snippet is &lt;em&gt;years old&lt;/em&gt;. I mean, very years old, copied from Grails, which was using early releases of Gradle.
+Yet, there&amp;#8217;s something interesting in what it does, which is a &lt;strong&gt;typical mistake I see in all builds I modernize&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s tempting, especially when you&amp;#8217;re not used to Gradle, to think the same way as other build tools do, like Maven or Ant.
+You&amp;#8217;re thinking &quot;there&amp;#8217;s a task, jar, which basically packages everything it finds in &lt;code&gt;classes/groovy/main&lt;/code&gt;, so if I want to add more stuff to the jar task, let&amp;#8217;s put more stuff in &lt;code&gt;classes/groovy/main&lt;/code&gt;&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;This is wrong!&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is wrong for different reasons, most notably:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;when the &lt;code&gt;docsFilesJar&lt;/code&gt; task is going to be executed, it will contribute more files to the &quot;classes&quot; directory, but, wait, those are not classes that we&amp;#8217;re putting in there, right? It&amp;#8217;s just a jar, resources. Shouldn&amp;#8217;t we use &lt;code&gt;resources/groovy/main&lt;/code&gt; instead? Or is it &lt;code&gt;classes/groovy/resources&lt;/code&gt;? Or what? Well, you &lt;strong&gt;shoudn&amp;#8217;t care&lt;/strong&gt; because it&amp;#8217;s not your concern where the Java compile task is going to put its output!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it breaks &lt;em&gt;cacheability&lt;/em&gt;: Gradle has a &lt;em&gt;build cache&lt;/em&gt;, and multiple tasks contributing to the same output directory is the typical example of what would break caching. In fact, it breaks all kinds of up-to-date checking, that is to say the ability for Gradle to understand that it doesn&amp;#8217;t need to execute a task when nothing changed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it&amp;#8217;s opaque to Gradle: the code above executes a copy in a &lt;code&gt;doLast&lt;/code&gt; block. Nothing tells Gradle that the &quot;classes&quot; have additional output.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it requires to declare an &lt;em&gt;explicit dependency&lt;/em&gt; between the &lt;code&gt;jar&lt;/code&gt; task and the &lt;code&gt;docsFileJar&lt;/code&gt; task, to make sure that if we execute &lt;code&gt;jar&lt;/code&gt;, our &quot;docs jar&quot; file is present&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it doesn&amp;#8217;t tell &lt;em&gt;why&lt;/em&gt; there&amp;#8217;s a dependency: is it because you want to &lt;em&gt;order&lt;/em&gt; things, or is it because you require an &lt;em&gt;artifact&lt;/em&gt; produced by the dependent task? Something else?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it&amp;#8217;s easy to forget about those: because you may run &lt;code&gt;build&lt;/code&gt; often, you might think that your build works, because &lt;code&gt;jar&lt;/code&gt; is part of the task graph, and &lt;em&gt;by accident&lt;/em&gt;, the &lt;code&gt;docsFileJar&lt;/code&gt; would be executed before&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it creates accidental extra work: most often a &lt;code&gt;dependsOn&lt;/code&gt; will trigger too much work. Gradle is a smart build tool which can compute &lt;em&gt;precisely&lt;/em&gt; what it needs to execute for each specific task. By using &lt;code&gt;dependsOn&lt;/code&gt;, you&amp;#8217;re a bit using a hammer and forcing it to integrate something in the graph which wasn&amp;#8217;t necessarily needed. In short: you&amp;#8217;re doing too much work.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it&amp;#8217;s difficult to get rid of them: when you see a &lt;code&gt;dependsOn&lt;/code&gt;, because it doesn&amp;#8217;t tell &lt;em&gt;why&lt;/em&gt; it&amp;#8217;s needed, it&amp;#8217;s often hard to get rid of such dependencies when optimizing builds&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_use_implicit_dependencies_instead&quot;&gt;Use implicit dependencies instead!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The answer to our problem is actually simpler to reason about: reverse the logic.
+Instead of thinking &quot;where should I put those things so that it&amp;#8217;s picked up by jar&quot;, think &quot;let&amp;#8217;s tell the &lt;code&gt;jar&lt;/code&gt; task that it also needs to pick up my resources&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All in all, it&amp;#8217;s about &lt;em&gt;properly declaring your task inputs&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Instead of patching up the output of another task (seriously, forget about this!), every single task must be thought as a function which takes inputs and produces an output: it&amp;#8217;s &lt;strong&gt;isolated&lt;/strong&gt;.
+So, what are the inputs of our &lt;code&gt;docsFileJar&lt;/code&gt;? The resources we want to package. What are its outputs? The &lt;code&gt;jar&lt;/code&gt; itself. There&amp;#8217;s &lt;em&gt;nothing&lt;/em&gt; about where we should put the jar, we let Gradle pick a reasonable place for us.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then what are the inputs of the &lt;code&gt;jar&lt;/code&gt; task itself? Well, it&amp;#8217;s regular inputs &lt;strong&gt;plus&lt;/strong&gt; our jar. It&amp;#8217;s easier to reason about, and as bonus, it&amp;#8217;s even shorter to write!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So let&amp;#8217;s rewrite the code above to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;task docFilesJar(type: Jar, description: &apos;Package up files used for generating documentation.&apos;) {
+    archiveVersion = null
+    archiveFileName = &quot;grails-doc-files.jar&quot;
+    from &quot;src/main/template&quot;
+}
+
+jar {
+    from docFilesJar
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Can you spot the difference? We got rid of the &lt;code&gt;copy&lt;/code&gt; in the &lt;code&gt;docFilesJar&lt;/code&gt; task, we don&amp;#8217;t want to do this. What we want, instead, is to say &quot;when you build the jar, also pick this &lt;code&gt;docsFileJar&lt;/code&gt;. And that&amp;#8217;s what we&amp;#8217;re doing by telling &lt;code&gt;from docsFileJar&lt;/code&gt;. Gradle is smart enough to know that when it will need to execute the &lt;code&gt;jar&lt;/code&gt; task, first, it will need to build the &lt;code&gt;docsFilesJar&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are several advantages to this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;the dependency becomes &lt;em&gt;implicit&lt;/em&gt;: if we don&amp;#8217;t want to include the jar anymore, we just have to remove it from the specification of the inputs.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it doesn&amp;#8217;t pollute the outputs of other tasks&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you can execute the &lt;code&gt;docsFileJar&lt;/code&gt; independently of &lt;code&gt;jar&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All in all, it&amp;#8217;s about isolating things from each other and reducing the risks of breaking a build accidentally!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_all_things_lazy&quot;&gt;All things lazy!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The modified code isn&amp;#8217;t 2021 compliant. The code above works, but it has one drawback: the &lt;code&gt;docFilesJar&lt;/code&gt; and &lt;code&gt;jar&lt;/code&gt; tasks are going to be configured (instantitated) even if we call something that doesn&amp;#8217;t need it. For example, imagine that you call &lt;code&gt;gradle compileJava&lt;/code&gt;: there&amp;#8217;s no reason to configure the &lt;code&gt;jar&lt;/code&gt; tasks there because we won&amp;#8217;t execute them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For this purpose, to make builds faster, Gradle provides a &lt;em&gt;lazy API&lt;/em&gt; instead:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.register(&apos;docFilesJar&apos;, Jar) {
+    description = &apos;Package up files used for generating documentation.&apos;
+    archiveVersion = null
+    archiveFileName = &quot;grails-doc-files.jar&quot;
+    from &quot;src/main/template&quot;
+}
+
+tasks.named(&apos;jar&apos;, Jar) {
+    from docFilesJar
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a conclusion:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;avoid using explicit &lt;code&gt;dependsOn&lt;/code&gt; &lt;em&gt;as much as you can&lt;/em&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;I tend to say that the only reasonable use case for &lt;code&gt;dependsOn&lt;/code&gt; is for lifecycle tasks (lifecycle tasks are tasks which goal is only there to &quot;organize the build&quot;, for example &lt;code&gt;build&lt;/code&gt;, &lt;code&gt;assemble&lt;/code&gt;, &lt;code&gt;check&lt;/code&gt;: they don&amp;#8217;t do anything by themselves, they just bind a number of dependents together)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;if you find use cases which are not lifecycle tasks and cannot be expressed by &lt;em&gt;implicit task dependencies&lt;/em&gt; (e.g declaring inputs instead of &lt;code&gt;dependsOn&lt;/code&gt;), then report it to the Gradle team&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Frequently asked questions about version catalogs</title>
       <link>https://melix.github.io/blog/2021/03/version-catalogs-faq.html</link>
@@ -1242,455 +1453,6 @@ The GraalVM version is still experimental and performs quite poorly compared to 
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Also, one has to keep in mind that it&amp;#8217;s pretty rare that you&amp;#8217;d like to integrate in a build arbitrary code like this: in general, you want to call external tools (&lt;code&gt;javac&lt;/code&gt;, &lt;code&gt;gcc&lt;/code&gt;, &amp;#8230;).
 Nevertheless, this experiment is quite fun and I&amp;#8217;m going to experiment more with this annotation processing API, which, I think, would be valuable in any case.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>The problem with Gradle: really?</title>
-      <link>https://melix.github.io/blog/2021/01/the-problem-with-gradle.html</link>
-      <pubDate>Wed, 6 Jan 2021 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2021/01/the-problem-with-gradle.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Disclaimer: I&amp;#8217;m a former Groovy committer and a Gradle Inc. employee.
-However, I started using Gradle long before I joined Gradle, and I have quite some experience with Java build tools: I started with Ant, but I also used Maven quite a lot, then fell in love with Gradle, for many reasons.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;a href=&quot;https://www.bruceeckel.com/2021/01/02/the-problem-with-gradle/&quot;&gt;A blog post from Bruce Eckel&lt;/a&gt; made quite some noise on Reddit (no wonder, Bruce is a guru!).
-It&amp;#8217;s not the first time I read comments about Gradle, this article in itself is balanced and not that negative.
-Most of the criticism is on the title itself, which is misleading and looks like a clickbait.
-One can easily be retweeted without actually reading the details, and most importantly the conclusion.
-Also, it doesn&amp;#8217;t compare with what you&amp;#8217;d have to do with &lt;em&gt;other&lt;/em&gt; build tools, which is important to draw good conclusions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_what_makes_gradle_different&quot;&gt;What makes Gradle different?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At the core of this blog post is the thing that the &quot;big picture&quot; of Gradle is unclear.
-There are several things to say here.
-First of all, Gradle is not a new, shiny toy to play with: it was born more than 10 years ago, and saw its v1.0 release on Jun 12, 2012.
-Second, there&amp;#8217;s not a &quot;single&quot; problem with Gradle: there are different problems, some more important than the others, but there are also many, many benefits.
-As such, one should draw a complete picture, which is sometimes hard for build tools, something that developers tend to underestimate, in particular in terms of impact on developer productivity.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle is designed to improve developer productivity which is achieved via incremental builds, incremental tasks, parallel execution, reproducibility and many other features.
-Let&amp;#8217;s put it this way: if you look at Gradle from the DSL point of view, that is, the look and feel, instead of its capabilities, the engine, you will miss the most interesting parts.
-The beauty of Gradle is not in its &quot;flexibility&quot; offered because it uses configuration as code: it&amp;#8217;s the engine which is designed to model software properly and optimizes building software.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_do_you_have_to_know_everything&quot;&gt;Do you have to know everything?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Bruce states that with Gradle, &quot;To do anything you have to know everything&quot;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;While the formula is elegant, this is a bold statement: this simply doesn&amp;#8217;t align with the reality of the Gradle ecosystem, our community and larger user base.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What is true, however, is that the learning curve of Gradle is higher than with other build tools (say, Maven for example).
-I always said that the learning curve of Gradle is difficult, but once you get it, the benefit is just amazing: we have customers who tell stories about dramatic productivity boosts after migrating to Gradle, simplified maintenance and coordination of large development teams via corporate plugins.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;One of the reasons is that Gradle is fundamentally different from other build tools: it focuses on modeling software components and their relationships, and as such it can be considered as a language for building &lt;em&gt;any&lt;/em&gt; kind of application. It raises the concept of convention over configuration to another level.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That&amp;#8217;s no surprise that Gradle has been successfully used to build software in various ecosystems: the JVM, where it&amp;#8217;s born (with Java, Groovy, Scala in particular), but also native development (take a look at &lt;a href=&quot;https://nokee.dev/&quot;&gt;Nokee&lt;/a&gt; if you are interested), Go (&lt;a href=&quot;https://github.com/gogradle/gogradle&quot;&gt;Go Gradle&lt;/a&gt;), &amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Some ecosystems actually build on top of unique features of Gradle, in particular in terms of dependency management: Android (with multiple flavors of libraries and applications) or Kotlin in particular (with Kotlin Multiplatform).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Why is that? Gradle is an execution engine optimized for build workflows, with intelligence about how to build things incrementally.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Nonetheless, improving the experience of first time users is something the Gradle team focuses on, as we will see below.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_tasks_vs_dependencies_a_simplistic_view&quot;&gt;Tasks vs dependencies: a simplistic view&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Bruce says that any build system is basically the combination of two essential ingredients: &lt;em&gt;tasks&lt;/em&gt; and &lt;em&gt;dependencies&lt;/em&gt;, where dependencies are seen as artifacts.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;That is not quite correct in case for Gradle: Gradle is responsible for wiring units of work together, either through explicit or implicit dependencies.
-It&amp;#8217;s important to understand that &quot;dependency&quot; here has a wider meaning: it&amp;#8217;s something which is required to be able to execute a unit of work.
-There is, technically speaking, no difference between an external and an internal dependency. What matters is that we have units of work, which have inputs and outputs.
-The role of Gradle is to wire things so that everything is ordered properly and optimized for execution (parallelism, caching, &amp;#8230;).
-It&amp;#8217;s a mistake to think that there are only tasks and dependencies (files, mostly): there are work units, inputs and outputs.
-A task (say, &lt;code&gt;JavaCompile&lt;/code&gt;) is just &lt;em&gt;one kind&lt;/em&gt; of work unit, but that&amp;#8217;s not the only one. Here are some other kind of work units: transforming artifacts (for example, transform a &lt;em&gt;jar&lt;/em&gt; into something else before it is consumed), downloading a toolchain, uploading an artifact to the build cache, &amp;#8230; A task itself can be splitted into several work units in order to maximize incrementality and parallelism.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A lot of the criticism we see on Gradle is because there&amp;#8217;s a mismatch between the mental model of what Gradle is, and the surface, which is the language(s) it uses to configure the actual model.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A lot of the confusion comes from the fact that while Gradle has a vision, it should be better shared and explained.
-It&amp;#8217;s also victim of its age which means success: the road towards fine grained execution, safe parallelism, configuration, &amp;#8230; is hard and there are some APIs which are sub-optimal for this, and &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLSc9aQrjjsxVqXDkYR35ExeiI1yEIksRXVtN6asuaem084l3aA/viewform&quot;&gt;maintaining backwards compatibility is a day-to-day challenge&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s explain a bit what Gradle has to do, when you say that you want to execute a &lt;em&gt;task&lt;/em&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;configure the task (execute its &lt;em&gt;configuration phase&lt;/em&gt;), which means executing plugins which configure the default values, use your configuration, etc.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;compute the &lt;em&gt;dependencies&lt;/em&gt; of the task, which can either be explicit (typically the &lt;code&gt;dependsOn&lt;/code&gt; clause) or &lt;em&gt;implicit&lt;/em&gt; (because you configured a task input as the output of another task, typically): this is basically a directed graph resolution engine, which is very fine grained and where each node is a unit of work.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;and finally executes the nodes of the graph in an optimized way&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Historically, Gradle has separated the &lt;em&gt;configuration phase&lt;/em&gt; from the &lt;em&gt;execution phase&lt;/em&gt;, but it doesn&amp;#8217;t have to be that way: as soon as the inputs of a task are ready, we should be able to execute it, and we shouldn&amp;#8217;t have to wait for the configuration of other tasks to be ready to do it.
-Also Gradle made it easy, in the beginning, to &lt;em&gt;inline&lt;/em&gt; the definition of tasks, including their execution phase, in a build script, but it is, for quite some time, considered a bad design principle: don&amp;#8217;t write &lt;em&gt;build logic&lt;/em&gt; in build scripts. The whole blog post from Bruce never mentions this term a single time: &lt;a href=&quot;https://docs.gradle.org/current/userguide/custom_plugins.html&quot;&gt;write plugins&lt;/a&gt;!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Despite our efforts, lots of resources on the web still focus on how to declare tasks, how flexible Gradle is, without taking time to leverage good engineering practices. In Java nobody writes a giant single class with all the logic &lt;em&gt;and&lt;/em&gt; the data as code, right? So don&amp;#8217;t do it in your build, that&amp;#8217;s as simple as that.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s be honest: it&amp;#8217;s partly our fault, and for that I agree with Bruce: the documentation of Gradle is huge and things can be made better, especially for beginners.
-It&amp;#8217;s also true that the docs contain &lt;em&gt;outdated patterns&lt;/em&gt; and it&amp;#8217;s often very difficult to realize that you have outdated info in thousands of pages of docs.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There is, however, a good amount of resources for beginners:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;samples: &lt;a href=&quot;https://docs.gradle.org/current/samples/index.html&quot;&gt;https://docs.gradle.org/current/samples/index.html&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;guides (slowly replaced with the samples above): &lt;a href=&quot;https://gradle.org/guides/&quot;&gt;https://gradle.org/guides/&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;free trainings: &lt;a href=&quot;https://gradle.com/training/&quot;&gt;https://gradle.com/training/&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;webcasts: &lt;a href=&quot;https://gradle.com/blog/tag/webcast/&quot;&gt;https://gradle.com/blog/tag/webcast/&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_deconstructing_the_myth&quot;&gt;Deconstructing the myth&lt;/h3&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We are still in the early days of the “adding a build system atop an existing language” paradigm. Gradle is an experiment in this paradigm, so we expect some sub-optimal choices. However, by understanding its issues you might have less frustration learning Gradle than I did.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;div class=&quot;attribution&quot;&gt;
-&lt;cite&gt;The Problem With Gradle&lt;/cite&gt;&lt;br&gt;
-&amp;#8212; Bruce Eckel
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This is incorrect. Thinking that Gradle is just about calling methods is the wrong mental model. Thinking that Gradle is &quot;programming a build&quot; is wrong. Gradle uses a programming language as a foundation for &quot;configuration as code&quot;, but it is &lt;em&gt;really&lt;/em&gt; about configuration, not &lt;em&gt;programming&lt;/em&gt;. Surely a programming language is interesting to use in the &quot;configuration as code&quot; paradigm, but focusing on that aspect and assuming that it works as a general purpose language is wrong and will inevitably lead to confusion.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle is also &lt;em&gt;not&lt;/em&gt; an experiment: it&amp;#8217;s the most advanced tool you can find in this area, and it works &lt;em&gt;because&lt;/em&gt; the language builds on top of an engine which is made to execute workflows.
-A number of build tools, including modern ones, are only fast because they put the maintenance and optimization burden on the build author: declare everything, re-generate build scripts, etc.
-We, in the Gradle team, think that we can be more correct, more performant &lt;em&gt;without&lt;/em&gt; having to compromise on user experience.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We even had teams challenging us on performance with modern tools like Bazel, and we proved that with unique features like &lt;a href=&quot;https://docs.gradle.org/current/userguide/configuration_cache.html#header&quot;&gt;configuration caching&lt;/a&gt;, Gradle was able to outperform it in almost all scenarios: you get the benefit of terse, maintainable scripts, with performance. win-win.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At this stage, it&amp;#8217;s time to deconstruct some misconceptions of the blog post, because as long as this message is propagated, we will not achieve what should be the focus of our industry: safer, faster, reproducible builds for everyone.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_1_you_re_not_configuring_you_re_programming&quot;&gt;1. You&amp;#8217;re not Configuring, You’re Programming&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You should see &lt;em&gt;Gradle build scripts&lt;/em&gt; as &lt;em&gt;configuration scripts&lt;/em&gt;, which actually configure a &lt;em&gt;model&lt;/em&gt;.
-The surface is a DSL, a language, but what you do, what you &lt;em&gt;should do&lt;/em&gt;, is to declaratively model your software.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For example, this Groovy script:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
-   id &apos;java-library&apos;
-}
-
-dependencies {
-    api &apos;org.springframework:spring-core:2.5.6&apos;
-    implementation &apos;org.apache.commons:commons-lang3:3.3.10&apos;
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Is a build script which configures a library written in Java, while this build script, written in Kotlin, configures a different kind of software component:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;plugins {
-    id(&quot;org.gradle.presentation.asciidoctor&quot;)
-}
-
-presentation {
-    githubUserName.set(&quot;melix&quot;)
-    githubRepoName.set(&quot;gradle-6-whats-new&quot;)
-    useAsciidoctorDiagram()
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;which is actually a &lt;code&gt;reveal.js&lt;/code&gt; slide deck, built with Gradle! This is the &lt;em&gt;full&lt;/em&gt; build script for this, and it&amp;#8217;s extremely important to realize that: the &quot;code&quot; that you get shouldn&amp;#8217;t have any custom tasks, in particular: all of the complexity, which is nothing more than the &quot;model&quot;, is hidden in a &lt;em&gt;plugin&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I strongly encourage you to read my &lt;a href=&quot;https://melix.github.io/blog/2019/11/gradle-scripting.html&quot;&gt;Gradle myth busting: scripting&lt;/a&gt; blog post which describes exactly that.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In addition, you can watch this 10 minute video I made about writing idiomatic build scripts:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;
-&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/MaansFoPHKg&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;What it means is that while Gradle build scripts are &lt;em&gt;executed&lt;/em&gt;, this is code which &lt;em&gt;configures the model&lt;/em&gt;, so you&amp;#8217;re &quot;programming the configuration&quot;, if you will.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_2_groovy_is_not_java&quot;&gt;2. Groovy is Not Java&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There&amp;#8217;s not much to say here, because it barely has anything to do with Gradle.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You will notice that when I showed build scripts above, I showed a &lt;em&gt;Groovy&lt;/em&gt; build script and a &lt;em&gt;Kotlin&lt;/em&gt; one. It&amp;#8217;s important to notice that Gradle allows both, because under the hood, it&amp;#8217;s an API.
-As I said, Gradle provides a foundation for building software components, a dependency resolution engine, an execution engine.
-&lt;em&gt;Plugins&lt;/em&gt; are at the core of the system and are responsible for building &lt;em&gt;models&lt;/em&gt; of software we build: a Java library is different from an Android application, so there&amp;#8217;s &lt;em&gt;no reason&lt;/em&gt; to have the same source layout, for example.
-The fact that Gradle uses Groovy as a language to do its configuration is an &lt;em&gt;implementation detail&lt;/em&gt;.
-I think it&amp;#8217;s a mistake to consider that you need a programming language to do what Gradle does: it helps, and lots of people actually appreciate Gradle&amp;#8217;s flexibility in that regard, but it&amp;#8217;s not what you should focus on.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Both Groovy and Kotlin have pros and cons. If you use Intellij IDEA, for example, the Kotlin DSL has very good arguments and makes this model completely visible: completion is available, you don&amp;#8217;t have to &quot;guess&quot; what to type: depending on the plugins you apply, you get the configuration blocks you need, and nothing more!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To come back to this section, a common misconception is that Gradle is written in Groovy. It&amp;#8217;s not. Gradle is written in Java, mostly. There&amp;#8217;s a lot of Groovy code in Gradle for testing (we use Spock, in particular), but we also have Kotlin code. The build scripts, however, use Groovy or Kotlin.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The DSL design definitely was influenced by Groovy, though, that&amp;#8217;s very true.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_3_gradle_uses_a_domain_specific_language&quot;&gt;3. Gradle Uses a Domain-Specific Language&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yes it does. I should say it&amp;#8217;s an &quot;extensible&quot; DSL. But when I&amp;#8217;m reading this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;How helpful is this DSL syntax, really? I have to translate it into function calls in my head when I read it. So for me it’s additional cognitive overhead which is ultimately a hindrance. The DSL operations can all be done with function calls, and programmers already understand function calls.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;m thinking that this is again seeing the problem from the wrong angle. You should &lt;em&gt;not&lt;/em&gt; see this as function calls, or code being executed. You should see this as a model being configured. You can&amp;#8217;t, actually, assume &lt;em&gt;when&lt;/em&gt; this code is going to be called (because, we have configuration avoidance, for example). So a DSL is really what it means: it&amp;#8217;s a language meant to configure the model, nothing more. By trying to interpret &lt;em&gt;how&lt;/em&gt; Gradle does this, you&amp;#8217;re actually distracted from what matters: what are you trying to build?&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_4_there_are_many_ways_to_do_the_same_thing&quot;&gt;4. There are Many Ways to do the Same Thing&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This one is one of my favourites. I always read &quot;there are too many ways to do the same thing&quot;. Sure there are. Just like in Java, can you tell me how many ways you can write a loop? Let&amp;#8217;s see&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;indexed loop&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;for (int i=0; i&amp;lt;items.length(); i++) {
-   ...
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;foreach loop&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;for (String item: items) {
-...
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;while loop&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;Iterator&amp;lt;String&amp;gt; it = items.iterator();
-while (it.hasNext()) {
-  ...
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;(not mentioning the &lt;code&gt;do...while&lt;/code&gt; variant)&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;streams&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;items.stream()
-   .map(...)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;streams again&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;items.forEach(...)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Does anyone complain that Java has too many ways to do the same thing? Certainly not, because there are different reasons: historical (good old loops came first), performance (sometimes streams are not that fast), semantic (iterator lets you delete things while iterating), &amp;#8230; Even Python has many ways to do the same thing. Isn&amp;#8217;t it the case when you&amp;#8217;re free to write code? Some consider it&amp;#8217;s a reason alone &lt;em&gt;not to use Gradle&lt;/em&gt;. It would be a mistake, because you don&amp;#8217;t stop programming Java because it has too many ways to write a loop.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The thing is &quot;use the right tool for the right job&quot;. Gradle is no different. Except that there are not so many ways to do things 😉 Some are legacy patterns, and there we need to do better at documenting, some are just because people are trying to write code in their build scripts when &lt;em&gt;they shouldn&amp;#8217;t&lt;/em&gt; (write plugins!).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I should mention that we started something called the &lt;strong&gt;idiomatic Gradle&lt;/strong&gt; project for these excellent reasons.
-The goal is to encourage best practices, document the most idiomatic way to do something, covering multiple use cases and their differences.
-There will be a blog post from the team about this project, in the meantime you can already read some results:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;a sample showing how to build &lt;a href=&quot;https://docs.gradle.org/current/samples/sample_building_java_applications_multi_project.html&quot;&gt;multi-project Java applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;documentation about &lt;a href=&quot;https://docs.gradle.org/6.8-rc-5/userguide/structuring_software_products.html&quot;&gt;structuring larger builds&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;a &lt;a href=&quot;https://jjohannes.github.io/joker-conf-2020/#/&quot;&gt;presentation&lt;/a&gt; from my colleague Jendrik Johannes about idiomatic Gradle at JokerConf&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Last but not least, we have ongoing conversations about a &quot;strict mode&quot; in Gradle to actually enforce some language constructs, or even a different DSL, to limit what you can actually do in a build script.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_5_magic&quot;&gt;5. Magic&lt;/h4&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Any sufficiently advanced technology is indistinguishable from magic.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;div class=&quot;attribution&quot;&gt;
-&lt;cite&gt;Profiles of the Future: An Inquiry Into the Limits of the Possible&lt;/cite&gt;&lt;br&gt;
-&amp;#8212; Arthur C. Clarke
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This whole section is basically about understanding the separation between &lt;em&gt;configuration&lt;/em&gt; and &lt;em&gt;execution&lt;/em&gt; phases, but really what bothers me most is that it&amp;#8217;s much easier to grasp if you just &lt;em&gt;don&amp;#8217;t write inline tasks into build scripts&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For example, if I write, in a plugin:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public abstract class ProcessTemplates extends DefaultTask {
-
-    @Input
-    public abstract Property&amp;lt;TemplateEngineType&amp;gt; getTemplateEngine();
-
-    @InputFiles
-    public abstract ConfigurableFileCollection getSourceFiles();
-
-    @OutputDirectory
-    public abstract DirectoryProperty getOutputDir();
-
-    @TaskAction
-    void execute() { ... }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;then the separation between &lt;em&gt;inputs&lt;/em&gt; (properties annotated with &lt;code&gt;@InputXXX&lt;/code&gt;), outputs &lt;code&gt;@OutputDirectory&lt;/code&gt; and the actual task execution &lt;code&gt;@TaskAction&lt;/code&gt; is obvious.
-More importantly, if you do this Gradle helps you by providing you guidance on what annotations to use, how to make it compatible with caching, etc for free (via embedded linting).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I repeat, nobody should every inline &lt;em&gt;build logic&lt;/em&gt; in a build script. Nobody.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Accidentally, the scripts Bruce shows in this section are using Groovy, which, for backwards compatibility reasons, uses &lt;em&gt;eager configuration APIs&lt;/em&gt;.
-If you use Kotlin scripts, all the task creation, registration, is done lazily, avoiding unnecessary configuration. You can do this in Groovy too, if you use the &lt;a href=&quot;https://docs.gradle.org/current/userguide/task_configuration_avoidance.html&quot;&gt;configuration avoidance APIs&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_5bis_the_lifecyle&quot;&gt;5bis, the lifecyle&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This section again discusses &lt;em&gt;configuration&lt;/em&gt; vs &lt;em&gt;execution&lt;/em&gt;. Just a terminology comment here: a &lt;em&gt;lifecyle&lt;/em&gt; in Gradle and other build tools is a different thing. See my other &lt;a href=&quot;https://melix.github.io/blog/2018/09/gradle-lifecycle.html&quot;&gt;Gradle myth busting: lifecyle&lt;/a&gt; blog post for reference.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_other_issues&quot;&gt;Other Issues&lt;/h4&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The Gradle documentation assumes you already know a lot.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yes, and no. The Gradle documentation is large and as I said in the intro, we do have sections for beginners. What is true, and I&amp;#8217;m quite mad about this, is that our docs layout is terrible, and that good documentation is very difficult to find out.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We also started to rewrite sections so that they are &lt;em&gt;use case centered&lt;/em&gt;, see the &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_management.html&quot;&gt;dependency management&lt;/a&gt; docs for example.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Slow startup times&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In most cases, &quot;slow startup times&quot; actually refer to &quot;slow configuration times&quot;. This is in general because of too much code being executed at configuration time. That&amp;#8217;s why we have &lt;a href=&quot;https://docs.gradle.org/current/userguide/task_configuration_avoidance.html&quot;&gt;configuration avoidance APIs&lt;/a&gt; and that you can possibly use &lt;a href=&quot;https://scans.gradle.com&quot;&gt;build scans&lt;/a&gt; which tell you that you are doing too much at configuration time.
-However, with the experimental &lt;a href=&quot;https://docs.gradle.org/current/userguide/configuration_cache.html&quot;&gt;configuration cache&lt;/a&gt;, those configuration time issues should soon be a thing of the past.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Be careful with some (very) popular plugins: some plugin authors just don&amp;#8217;t realize that the way they configure builds, reach to other projects or perform cross-configuration has a significant impact on build performance, and therefore user experience.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;All that said, we&amp;#8217;re doing even more: I mentioned the &lt;a href=&quot;https://docs.gradle.org/current/userguide/configuration_cache.html&quot;&gt;configuration cache&lt;/a&gt; earlier. This is still work in progress, but we have amazing results with this. Very large multi-project builds are configured very quickly. We&amp;#8217;re working with customers and the Android team on this.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It’s not that easy to discover Gradle’s abilities, and there are so many abilities that you often don’t know what’s possible&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Oh yes. Oh, yes. Gradle is probably the most advanced build tool of the market. It has dozens of features, including unique features you don&amp;#8217;t find in any other build tool. They are hardly discoverable. We need more advocacy on those, and make them more visible. I am not sure how we can do this, honestly.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect3&quot;&gt;
-&lt;h4 id=&quot;_now_that_i_get_it&quot;&gt;Now That I Get It&lt;/h4&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is &lt;em&gt;much&lt;/em&gt; easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the JetBrains team, which is working on performance of the compiler, &lt;a href=&quot;https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance&quot;&gt;Gradle 6.8 will also provide some nice Kotlin DSL performance improvements&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this blog post I have commented on some remaining misconceptions about Gradle, which are still visible in Bruce&amp;#8217;s blog post. However, there&amp;#8217;s no blocker there. I would however really encourage you to go the idiomatic Gradle route and try to follow modern Gradle design principles. If you have time, here&amp;#8217;s a talk I gave recently at the Madrid Groovy User Group about modernizing the Groovy build, I think it summarizes quite a lot why a number of the patterns described in Bruce&amp;#8217;s blog post are outdated and shouldn&amp;#8217;t be promoted:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;
-&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/HXAV9pL5Rf8&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;
-&lt;/p&gt;
-&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
