@@ -1,0 +1,133 @@
+= A Gradle quickie: properly using dependsOn
+Cédric Champeau
+2021-10-06
+:jbake-type: post
+:jbake-tags: gradle, micronaut
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-quickie-dependson
+:linkattrs:
+
+
+Today I'd like to share a small example of what _not to do_ with Gradle.
+Some of you may already know that I recently joined the https://micronaut.io/[Micronaut team at Oracle], and part of my job is to improve the build experience, be it for Micronaut itself or Micronaut users.
+Today I'm going to focus on an example I found in the Micronaut build itself.
+
+
+**TL/DR**: If you use `dependsOn`, you're likely doing it wrong.
+
+== When should you use dependsOn?
+
+In a nutshell, Gradle works by computing a graph of task dependencies.
+Say that you want to build a JAR file: you're going to call the `jar` task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc...
+Determining the _task dependencies_, that is to say what other tasks need to be executed, is done by looking up at 3 different things:
+
+1. the task `dependsOn` dependencies. For example, `assemble.dependsOn(jar)` means that if you run `assemble`, then the `jar` task must be executed before
+2. the task _transitive dependencies_, in which case we're not talking about tasks, but "publications". For example, when you need to compile project `A`, you need on classpath project `B`, which implies running _some_ tasks of `B`.
+3. and last but not least, the _task inputs_, that is to say, what it needs to execute its work
+
+In practice, it's worth noting that 2. is a subset of 3. but I added it for clarity.
+
+Now let's look at this snippet:
+
+```gradle
+task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+    archiveVersion = null
+    archiveFileName = "grails-doc-files.jar"
+    from "src/main/template"
+    doLast {
+        copy {
+            from docFilesJar.archivePath
+            into "${buildDir}/classes/groovy/main"
+        }
+    }
+}
+
+jar.dependsOn docFilesJar
+```
+
+First, let's realize that this snippet is _years old_. I mean, very years old, copied from Grails, which was using early releases of Gradle.
+Yet, there's something interesting in what it does, which is a **typical mistake I see in all builds I modernize**.
+
+It's tempting, especially when you're not used to Gradle, to think the same way as other build tools do, like Maven or Ant.
+You're thinking "there's a task, jar, which basically packages everything it finds in `classes/groovy/main`, so if I want to add more stuff to the jar task, let's put more stuff in `classes/groovy/main`".
+
+**This is wrong!**
+
+This is wrong for different reasons, most notably:
+
+- when the `docsFilesJar` task is going to be executed, it will contribute more files to the "classes" directory, but, wait, those are not classes that we're putting in there, right? It's just a jar, resources. Shouldn't we use `resources/groovy/main` instead? Or is it `classes/groovy/resources`? Or what? Well, you **shoudn't care** because it's not your concern where the Java compile task is going to put its output!
+- it breaks _cacheability_: Gradle has a _build cache_, and multiple tasks contributing to the same output directory is the typical example of what would break caching. In fact, it breaks all kinds of up-to-date checking, that is to say the ability for Gradle to understand that it doesn't need to execute a task when nothing changed.
+- it's opaque to Gradle: the code above executes a copy in a `doLast` block. Nothing tells Gradle that the "classes" have additional output.
+- imagine another task which needs the `classes` only. Depending on when it executes, it _may_ or may not, include the `docsFileJar` that it doesn't care about. This makes builds non-reproducible (note that this is exactly the reason why Maven build cannot be trusted and that you need to run `clean`, because any "goal" can write to any directory at any time, making it impossible to infer who contributed what).
+- it requires to declare an _explicit dependency_ between the `jar` task and the `docsFileJar` task, to make sure that if we execute `jar`, our "docs jar" file is present
+- it doesn't tell _why_ there's a dependency: is it because you want to _order_ things, or is it because you require an _artifact_ produced by the dependent task? Something else?
+- it's easy to forget about those: because you may run `build` often, you might think that your build works, because `jar` is part of the task graph, and _by accident_, the `docsFileJar` would be executed before
+- it creates accidental extra work: most often a `dependsOn` will trigger too much work. Gradle is a smart build tool which can compute _precisely_ what it needs to execute for each specific task. By using `dependsOn`, you're a bit using a hammer and forcing it to integrate something in the graph which wasn't necessarily needed. In short: you're doing too much work.
+- it's difficult to get rid of them: when you see a `dependsOn`, because it doesn't tell _why_ it's needed, it's often hard to get rid of such dependencies when optimizing builds
+
+
+== Use implicit dependencies instead!
+
+The answer to our problem is actually simpler to reason about: reverse the logic.
+Instead of thinking "where should I put those things so that it's picked up by jar", think "let's tell the `jar` task that it also needs to pick up my resources".
+
+All in all, it's about _properly declaring your task inputs_.
+
+Instead of patching up the output of another task (seriously, forget about this!), every single task must be thought as a function which takes inputs and produces an output: it's *isolated*.
+So, what are the inputs of our `docsFileJar`? The resources we want to package. What are its outputs? The `jar` itself. There's _nothing_ about where we should put the jar, we let Gradle pick a reasonable place for us.
+
+Then what are the inputs of the `jar` task itself? Well, it's regular inputs **plus** our jar. It's easier to reason about, and as bonus, it's even shorter to write!
+
+So let's rewrite the code above to:
+
+```groovy
+task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+    archiveVersion = null
+    archiveFileName = "grails-doc-files.jar"
+    from "src/main/template"
+}
+
+jar {
+    from docFilesJar
+}
+```
+
+Can you spot the difference? We got rid of the `copy` in the `docFilesJar` task, we don't want to do this. What we want, instead, is to say "when you build the jar, also pick this `docsFileJar`. And that's what we're doing by telling `from docsFileJar`. Gradle is smart enough to know that when it will need to execute the `jar` task, first, it will need to build the `docsFilesJar`.
+
+There are several advantages to this:
+
+- the dependency becomes _implicit_: if we don't want to include the jar anymore, we just have to remove it from the specification of the inputs.
+- it doesn't pollute the outputs of other tasks
+- you can execute the `docsFileJar` independently of `jar`
+
+All in all, it's about isolating things from each other and reducing the risks of breaking a build accidentally!
+
+== All things lazy!
+
+The modified code isn't 2021 compliant. The code above works, but it has one drawback: the `docFilesJar` and `jar` tasks are going to be configured (instantitated) even if we call something that doesn't need it. For example, imagine that you call `gradle compileJava`: there's no reason to configure the `jar` tasks there because we won't execute them.
+
+For this purpose, to make builds faster, Gradle provides a _lazy API_ instead:
+
+```groovy
+tasks.register('docFilesJar', Jar) {
+    description = 'Package up files used for generating documentation.'
+    archiveVersion = null
+    archiveFileName = "grails-doc-files.jar"
+    from "src/main/template"
+}
+
+tasks.named('jar', Jar) {
+    from docFilesJar
+}
+```
+
+== Conclusion
+
+As a conclusion:
+
+- avoid using explicit `dependsOn` _as much as you can_
+- I tend to say that the only reasonable use case for `dependsOn` is for lifecycle tasks (lifecycle tasks are tasks which goal is only there to "organize the build", for example `build`, `assemble`, `check`: they don't do anything by themselves, they just bind a number of dependents together)
+- if you find use cases which are not lifecycle tasks and cannot be expressed by _implicit task dependencies_ (e.g declaring inputs instead of `dependsOn`), then report it to the Gradle team
+
+
