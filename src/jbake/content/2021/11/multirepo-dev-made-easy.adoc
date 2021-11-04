@@ -1,0 +1,113 @@
+= Multi-repository development made easy
+Cédric Champeau
+2021-11-04
+:jbake-type: post
+:jbake-tags: gradle, multirepo development, micronaut
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-multirepo
+:linkattrs:
+
+== Are you working in a multi-repository setup? 
+
+In general, things start getting messy as soon as you have a feature which requires changes to more than one repository.
+For example, you may have a `core` repository, and a `module` repository, and the feature that you're working on for `module` requires API changes in `module`.
+
+If so, it's likely that you've been annoyed by the fact that to be able to test the changes to `module`, you minimally had to publish a local snapshot to your local Maven repository.
+While this can kind of work locally, it's easy to miss publishing from time to time, and therefore thinking that a change works when it actually relies on an outdated dependency.
+
+Things get more complicated as soon as CI is involved, or that you want to share the results of work in progress, for example for review, with your colleagues:
+
+- did you ever had to explain that they had to checkout `core/some-branch`, publish to Maven local, then checkout `module/some-feature-branch` and test it?
+- did you ever realize late that you forgot to push changes to `master` so that they could try?
+- did you ever complain that to make this happen on CI, you actually had to _eagerly merge_ your feature branch to `core`, just so that the other repository, on a _feature branch_, could see it?
+- did you ever want to see if your modules simply do not break with latest _master_, without having to change anything to your build scripts?
+
+If you answered yes to any of those questions, then I'm glad to say **there's a solution!**
+
+The underlying problem is that using Maven SNAPSHOTs to deal with multi-repository development is not a good enough.
+It cannot model the complexity of multi-repository development, with features being developed concurrently on different branches.
+Using SNAPSHOTs (binary dependencies) to coordinate projects leads to hard to diagnose bugs, broken integration processes. 
+You typically have to eagerly push changes, or wait for snapshots to be published on a shared repository, just so that you can actually verify that integration with other modules work.
+Those problems do not happen in a a _single repository_ world, because all changes are integrated at once.
+
+
+I faced this very same problem with Micronaut:I'm currently working on a feature which involves changes to multiple repositories at once:
+
+- https://github.com/micronaut-projects/micronaut-core/[Micronaut Core], with additional public APIs
+- https://github.com/micronaut-projects/micronaut-aot/[Micronaut AOT], the new module I'm actively working on
+- https://github.com/micronaut-projects/micronaut-gradle-plugin/[the Micronaut Gradle Plugin], which integrates the AOT module
+- and a local test project which uses the modified Gradle plugin
+
+That's, minimally 4 different projects, and a change to any of them is a pain to deal with.
+With my experience with Gradle, I _knew_ there was a better way.
+
+== A plugin to make it easier!
+
+Today, I'm happy to announce a new Gradle plugin which aims at making multi-repository development a breeze: https://melix.github.io/includegit-gradle-plugin[Included Git repositories plugin].
+
+This plugin lets you _import Git repositories_ as source dependencies, without having to change your dependency declarations.
+What does that mean?
+In the example above, it means that I can explain, when I'm working on `module`, that it needs to build against `core/some-branch`: Gradle will then automatically checkout the project, build the branch and _substitute_ any binary dependency corresponding to `core` with the source dependency.
+
+In a nutshell, the configuration would look like this:
+
+```groovy
+gitRepositories {
+	include('core') {
+		uri = 'git@github.com:mycompany/core.git'
+		branch = 'some-branch'
+	}
+}
+```
+
+That's it! No need to change your build scripts to update dependency coordinates, Gradle will do the magic!
+
+It completely changes the way of thinking about multi-repository development, because CI, or colleagues, would not have to care about instructions about how to build your particular branch: everything is known upfront.
+
+Of course, you're going to tell that well, that's cool but it still requires you to push your changes to the remote repository so that you can test things _locally_.
+Well, a good multi-repository development story must integrate both the _local_ and _remote_ experience.
+This is why this plugin actually makes it a breeze to support this pattern.
+
+There are actually 2 ways you can handle this.
+The first one is to explain to Gradle that instead of checking out the sources, it can simply use a local copy instead.
+In this case, the plugin will simply _ignore_ whatever you declared in the `gitRepositories` block for the repository, and use whatever is available locally.
+For this you'd set a `local.git.<repoName>` Gradle property (in your `gradle.properties` file) pointing to your local copy.
+In the example above, I would for example add a `local.git.core` property pointing to my local copy of `core`.
+
+Alternatively, if you keep things organized into checkout directories like I do, it's likely that you have all your `micronaut` related projects in a single `micronaut-projects` directory.
+In this case, by setting the `auto.include.git.dirs` Gradle property to the `micronaut-projects` directory, the plugin will automatically map directory names in that `micronaut-projects` directory to included Git repository names.
+So if I have:
+
+```groovy
+gitRepositories {
+	include('micronaut-core') {
+		uri = 'git@github.com:mycompany/core.git'
+		branch = 'some-branch'
+	}
+}
+```
+
+and a `micronaut-core` directory under `micronaut-projects`, then it will automatically be used instead of cloned from remote.
+
+Those options make it extremely convenient to develop locally, and only push changes when ready.
+On CI, builds would checkout the dependents automatically, and you'd have nothing to configure.
+
+== More complex use cases
+
+The very same mechanism can be used to create "integration" builds on CI.
+For example, it makes it very simple to have builds which would automatically build against the latest state of `master`, instead of having to wait for `SNAPSHOT` to be published, and more importantly, without having to change any build file.
+As a bonus, it also works for _transitive dependencies_: for example if you have A --depends on--> B --depends on--> C, then you may want to make sure that if `C` is changed, `A` still works. How do you do this with snapshots, if there's no direct dependency between `A` and `C`? This plugin makes it very simple to test: just declare a Git repository for C and you're done!
+
+== Need your help!
+
+I think this plugin has potential to dramatically change how we develop in the multi-repository world.
+The plugin is in very early stages, and I will need your help: report bugs, improve the documentation, improve testing, etc.
+It will also be interesting to get your user stories so that we, collectively, can improve it to support more scenarios.
+
+- Plugin documentation: https://melix.github.io/includegit-gradle-plugin
+- Plugin development home: https://github.com/melix/includegit-gradle-plugin
+- Plugin on Gradle plugin portal: https://plugins.gradle.org/plugin/me.champeau.includegit
+
+
+
