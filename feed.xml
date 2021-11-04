@@ -6,9 +6,173 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 6 Oct 2021 12:59:22 +0200</pubDate>
-    <lastBuildDate>Wed, 6 Oct 2021 12:59:22 +0200</lastBuildDate>
+    <pubDate>Thu, 4 Nov 2021 19:19:53 +0100</pubDate>
+    <lastBuildDate>Thu, 4 Nov 2021 19:19:53 +0100</lastBuildDate>
 
+    <item>
+      <title>Multi-repository development made easy</title>
+      <link>https://melix.github.io/blog/2021/11/multirepo-dev-made-easy.html</link>
+      <pubDate>Thu, 4 Nov 2021 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2021/11/multirepo-dev-made-easy.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_are_you_working_in_a_multi_repository_setup&quot;&gt;Are you working in a multi-repository setup?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In general, things start getting messy as soon as you have a feature which requires changes to more than one repository.
+For example, you may have a &lt;code&gt;core&lt;/code&gt; repository, and a &lt;code&gt;module&lt;/code&gt; repository, and the feature that you&amp;#8217;re working on for &lt;code&gt;module&lt;/code&gt; requires API changes in &lt;code&gt;module&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If so, it&amp;#8217;s likely that you&amp;#8217;ve been annoyed by the fact that to be able to test the changes to &lt;code&gt;module&lt;/code&gt;, you minimally had to publish a local snapshot to your local Maven repository.
+While this can kind of work locally, it&amp;#8217;s easy to miss publishing from time to time, and therefore thinking that a change works when it actually relies on an outdated dependency.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Things get more complicated as soon as CI is involved, or that you want to share the results of work in progress, for example for review, with your colleagues:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;did you ever had to explain that they had to checkout &lt;code&gt;core/some-branch&lt;/code&gt;, publish to Maven local, then checkout &lt;code&gt;module/some-feature-branch&lt;/code&gt; and test it?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;did you ever realize late that you forgot to push changes to &lt;code&gt;master&lt;/code&gt; so that they could try?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;did you ever complain that to make this happen on CI, you actually had to &lt;em&gt;eagerly merge&lt;/em&gt; your feature branch to &lt;code&gt;core&lt;/code&gt;, just so that the other repository, on a &lt;em&gt;feature branch&lt;/em&gt;, could see it?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;did you ever want to see if your modules simply do not break with latest &lt;em&gt;master&lt;/em&gt;, without having to change anything to your build scripts?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you answered yes to any of those questions, then I&amp;#8217;m glad to say &lt;strong&gt;there&amp;#8217;s a solution!&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The underlying problem is that using Maven SNAPSHOTs to deal with multi-repository development is not a good enough.
+It cannot model the complexity of multi-repository development, with features being developed concurrently on different branches.
+Using SNAPSHOTs (binary dependencies) to coordinate projects leads to hard to diagnose bugs, broken integration processes.
+You typically have to eagerly push changes, or wait for snapshots to be published on a shared repository, just so that you can actually verify that integration with other modules work.
+Those problems do not happen in a a &lt;em&gt;single repository&lt;/em&gt; world, because all changes are integrated at once.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I faced this very same problem with Micronaut:I&amp;#8217;m currently working on a feature which involves changes to multiple repositories at once:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/micronaut-projects/micronaut-core/&quot;&gt;Micronaut Core&lt;/a&gt;, with additional public APIs&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/micronaut-projects/micronaut-aot/&quot;&gt;Micronaut AOT&lt;/a&gt;, the new module I&amp;#8217;m actively working on&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/micronaut-projects/micronaut-gradle-plugin/&quot;&gt;the Micronaut Gradle Plugin&lt;/a&gt;, which integrates the AOT module&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;and a local test project which uses the modified Gradle plugin&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s, minimally 4 different projects, and a change to any of them is a pain to deal with.
+With my experience with Gradle, I &lt;em&gt;knew&lt;/em&gt; there was a better way.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_a_plugin_to_make_it_easier&quot;&gt;A plugin to make it easier!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Today, I&amp;#8217;m happy to announce a new Gradle plugin which aims at making multi-repository development a breeze: &lt;a href=&quot;https://melix.github.io/includegit-gradle-plugin&quot;&gt;Included Git repositories plugin&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This plugin lets you &lt;em&gt;import Git repositories&lt;/em&gt; as source dependencies, without having to change your dependency declarations.
+What does that mean?
+In the example above, it means that I can explain, when I&amp;#8217;m working on &lt;code&gt;module&lt;/code&gt;, that it needs to build against &lt;code&gt;core/some-branch&lt;/code&gt;: Gradle will then automatically checkout the project, build the branch and &lt;em&gt;substitute&lt;/em&gt; any binary dependency corresponding to &lt;code&gt;core&lt;/code&gt; with the source dependency.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a nutshell, the configuration would look like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;gitRepositories {
+	include(&apos;core&apos;) {
+		uri = &apos;git@github.com:mycompany/core.git&apos;
+		branch = &apos;some-branch&apos;
+	}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s it! No need to change your build scripts to update dependency coordinates, Gradle will do the magic!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It completely changes the way of thinking about multi-repository development, because CI, or colleagues, would not have to care about instructions about how to build your particular branch: everything is known upfront.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, you&amp;#8217;re going to tell that well, that&amp;#8217;s cool but it still requires you to push your changes to the remote repository so that you can test things &lt;em&gt;locally&lt;/em&gt;.
+Well, a good multi-repository development story must integrate both the &lt;em&gt;local&lt;/em&gt; and &lt;em&gt;remote&lt;/em&gt; experience.
+This is why this plugin actually makes it a breeze to support this pattern.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are actually 2 ways you can handle this.
+The first one is to explain to Gradle that instead of checking out the sources, it can simply use a local copy instead.
+In this case, the plugin will simply &lt;em&gt;ignore&lt;/em&gt; whatever you declared in the &lt;code&gt;gitRepositories&lt;/code&gt; block for the repository, and use whatever is available locally.
+For this you&amp;#8217;d set a &lt;code&gt;local.git.&amp;lt;repoName&amp;gt;&lt;/code&gt; Gradle property (in your &lt;code&gt;gradle.properties&lt;/code&gt; file) pointing to your local copy.
+In the example above, I would for example add a &lt;code&gt;local.git.core&lt;/code&gt; property pointing to my local copy of &lt;code&gt;core&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alternatively, if you keep things organized into checkout directories like I do, it&amp;#8217;s likely that you have all your &lt;code&gt;micronaut&lt;/code&gt; related projects in a single &lt;code&gt;micronaut-projects&lt;/code&gt; directory.
+In this case, by setting the &lt;code&gt;auto.include.git.dirs&lt;/code&gt; Gradle property to the &lt;code&gt;micronaut-projects&lt;/code&gt; directory, the plugin will automatically map directory names in that &lt;code&gt;micronaut-projects&lt;/code&gt; directory to included Git repository names.
+So if I have:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;gitRepositories {
+	include(&apos;micronaut-core&apos;) {
+		uri = &apos;git@github.com:mycompany/core.git&apos;
+		branch = &apos;some-branch&apos;
+	}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and a &lt;code&gt;micronaut-core&lt;/code&gt; directory under &lt;code&gt;micronaut-projects&lt;/code&gt;, then it will automatically be used instead of cloned from remote.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Those options make it extremely convenient to develop locally, and only push changes when ready.
+On CI, builds would checkout the dependents automatically, and you&amp;#8217;d have nothing to configure.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_more_complex_use_cases&quot;&gt;More complex use cases&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The very same mechanism can be used to create &quot;integration&quot; builds on CI.
+For example, it makes it very simple to have builds which would automatically build against the latest state of &lt;code&gt;master&lt;/code&gt;, instead of having to wait for &lt;code&gt;SNAPSHOT&lt;/code&gt; to be published, and more importantly, without having to change any build file.
+As a bonus, it also works for &lt;em&gt;transitive dependencies&lt;/em&gt;: for example if you have A --depends on-&amp;#8594; B --depends on-&amp;#8594; C, then you may want to make sure that if &lt;code&gt;C&lt;/code&gt; is changed, &lt;code&gt;A&lt;/code&gt; still works. How do you do this with snapshots, if there&amp;#8217;s no direct dependency between &lt;code&gt;A&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt;? This plugin makes it very simple to test: just declare a Git repository for C and you&amp;#8217;re done!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_need_your_help&quot;&gt;Need your help!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I think this plugin has potential to dramatically change how we develop in the multi-repository world.
+The plugin is in very early stages, and I will need your help: report bugs, improve the documentation, improve testing, etc.
+It will also be interesting to get your user stories so that we, collectively, can improve it to support more scenarios.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Plugin documentation: &lt;a href=&quot;https://melix.github.io/includegit-gradle-plugin&quot;&gt;https://melix.github.io/includegit-gradle-plugin&lt;/a&gt;
+Plugin development home: &lt;a href=&quot;https://github.com/melix/includegit-gradle-plugin&quot;&gt;https://github.com/melix/includegit-gradle-plugin&lt;/a&gt;
+Plugin on Gradle plugin portal: &lt;a href=&quot;https://plugins.gradle.org/plugin/me.champeau.includegit&quot;&gt;https://plugins.gradle.org/plugin/me.champeau.includegit&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>A Gradle quickie: properly using dependsOn</title>
       <link>https://melix.github.io/blog/2021/10/gradle-quickie-dependson.html</link>
@@ -1092,370 +1256,6 @@ This solution is better for performance, even if a bit &quot;hackish&quot;:&lt;/
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;In case you want to use one of the experimental features that Java 16 provides, the setup I&amp;#8217;ve described in a &lt;a href=&quot;https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html&quot;&gt;previous post about Java Feature Previews&lt;/a&gt; still hold and is a good follow-up to this post!&lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Gradle + WebAssembly</title>
-      <link>https://melix.github.io/blog/2021/02/gradle-webassembly.html</link>
-      <pubDate>Sun, 21 Feb 2021 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2021/02/gradle-webassembly.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A couple weeks ago, I listened to an &lt;a href=&quot;https://medium.com/electro-monkeys/64-la-face-cach%C3%A9e-de-webassembly-avec-geoffroy-couprie-et-ivan-enderline-bd20e5482893&quot;&gt;interview (in French)&lt;/a&gt; of &lt;a href=&quot;https://twitter.com/gcouprie&quot;&gt;Geoffroy Couprie&lt;/a&gt; and &lt;a href=&quot;https://twitter.com/mnt_io&quot;&gt;Ivan Enderlin&lt;/a&gt; who gave a very nice overview of what WebAssembly is and what it&amp;#8217;s good for.
-To be honest it wasn&amp;#8217;t clear to me what the advantages of WebAssembly were, compared to a good old JVM: all in all, both are virtual machines, and both promise the same thing, that is to say write once run everywhere.
-Also, in my mind, WebAssembly was some kind of restricted version of JavaScript like &lt;a href=&quot;https://en.wikipedia.org/wiki/Asm.js&quot;&gt;asm.js&lt;/a&gt;.
-I was wrong: it&amp;#8217;s more than that.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_why_webassembly&quot;&gt;Why WebAssembly?&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;One of the aspects which were discussed during this interview was basically sandboxing: with WebAssembly, it&amp;#8217;s the responsibility of the embedder to give access, for example, to I/O to the wasm program. In practice, it means that wasm binaries are by default very restricted.
-In fact, by design, they are restricted to pure computations, which makes them very suitable for isolation of work.
-Extensions from embedders are responsible for giving access to the host resources (for example the GPU, or the file system).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Another promise of WebAssembly is running at close-to-native speeds.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Therefore, a crazy idea came to me: what if I could use a wasm binary as a task implemention in Gradle?
-This, for example, would let us use whatever language compiling to WASM as an implementation language for Gradle tasks. &lt;em&gt;mmmmmmm&lt;/em&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The result of this experience is available at &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin&quot;&gt;this repository&lt;/a&gt;.
-The results are quite promising.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_isolating_task_inputs_from_the_task_execution&quot;&gt;Isolating task inputs from the task execution&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In a nutshell, a Gradle task can be seen as a function which takes a number of inputs and returns a value.
-Cacheability is derived from the &quot;pureness&quot; of the function: for the same inputs, the output should be the same.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This makes it very suitable to the WebAssembly model where functions are exported to an embedder.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In reality, it&amp;#8217;s more complicated: Gradle tasks most likely use files as inputs, and also produce files.
-This means that the WebAssembly runtime would need to provide I/O access for this to be really useful.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;After some support from &lt;a href=&quot;https://twitter.com/mnt_io&quot;&gt;Ivan Enderlin&lt;/a&gt;, I quickly figured out that it would be difficult to make file access work, so I simplified the problem.
-In the prototype, my WASM tasks are not able to produce a file output and are limited to simply display the execution result on the console.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For tasks which actually have files as inputs, I&amp;#8217;m reading the file contents from Java code into byte arrays which are &quot;propagated&quot; to the WASM runtime memory.
-This means, effectively, that the WASM functions I played with don&amp;#8217;t have any kind of access to the file system and remain pure functions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;With those limitations in mind, here&amp;#8217;s what I came up with.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_declaring_the_task_i_o_protocol&quot;&gt;Declaring the task I/O protocol&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle is evolving fast and nowadays the idiomatic way to declare inputs and outputs of a task is to use the &lt;a href=&quot;https://docs.gradle.org/current/userguide/lazy_configuration.html&quot;&gt;lazy configuration API&lt;/a&gt;.
-However, this isn&amp;#8217;t enforced and nobody prevents you from writing tasks which do not use this API.
-As an implementor of a new integration mechanism, I can set the rules and actually restrict the scope to tasks which use this API, which has a number of advantages.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Say that we want to write a task which computes the sum of two integers.
-With the lazy configuration API, you need two &quot;properties&quot; corresponding to the input numbers:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;abstract class MyTask extends DefaultTask {
-   abstract Property&amp;lt;Integer&amp;gt; getX(); // implementation is generated by Gradle
-   abstract Property&amp;lt;Integer&amp;gt; getY();&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The actual value is &quot;lazy&quot; in the sense that it can be set via a plugin, overriden in a build script, mapped from another property, etc.
-For example, that the value of the &lt;code&gt;x&lt;/code&gt; property can be computed from the output of another task:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;x.set(myOtherTask.outputFile.map { ... }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The advantage of this is that Gradle can track the inputs and outputs of tasks for you and that you don&amp;#8217;t have to declare any explicit dependency between tasks, making the build less brittle.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;However, once you&amp;#8217;re about to &lt;em&gt;execute&lt;/em&gt; a task, you don&amp;#8217;t really care about the &lt;code&gt;Property&amp;lt;...&amp;gt;&lt;/code&gt; wrappers anymore: what matters are the actual values, that you can &lt;code&gt;get()&lt;/code&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;int x = getX().get();
-int y = getY().get();&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This often leads to some boilerplate code in task implementations.
-In our case, the &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; integers are actually the only thing we care about to call our WASM function: we don&amp;#8217;t need to pass the richer &lt;code&gt;Provider&lt;/code&gt; type to the functions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s imagine that we have this function written in Rust:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint rust language-rust&quot;&gt;&lt;code&gt;#[no_mangle]
-pub extern fn sum(x: i32, y: i32) -&amp;gt; i32 {
-    x + y
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We can see that the inputs of this function are integers and that it returns another integer: it&amp;#8217;s that simple.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So, what if we could actually simplify the implementation of the Gradle task itself?
-With all this in mind, I decided to prototype an annotation processor which would generate the boilerplate code for me.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To transform the Rust function above into a full Gradle task, &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin/blob/main/plugin/src/main/java/me/champeau/gradle/wasm/auto/SumIO.java&quot;&gt;all I have to write&lt;/a&gt; is a declaration of what I call its I/O protocol:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;@WasmProtocol(
-        taskName = &quot;Sum&quot;,
-        classpathBinary = &quot;demo_lib&quot;,
-        functionName = &quot;sum&quot;
-)
-public interface SumIO {
-    @Input
-    Property&amp;lt;Integer&amp;gt; getX();
-
-    @Input
-    Property&amp;lt;Integer&amp;gt; getY();
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This will generate a task of type &lt;code&gt;Sum&lt;/code&gt;, which will use a wasm binary found on classpath named &lt;code&gt;demo_lib&lt;/code&gt;, and use the function &lt;code&gt;sum&lt;/code&gt; from that binary as the task implementation.
-That&amp;#8217;s it!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Note that this protocol isn&amp;#8217;t declaring any output: that&amp;#8217;s a limitation of the prototype right now, which is inherently caused by this whole &quot;Gradle tasks are mostly generating files&quot; problem.
-But we don&amp;#8217;t really care for now.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_a_more_realistic_example&quot;&gt;A more realistic example&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For my tests, I used 3 different functions: this &lt;code&gt;sum&lt;/code&gt; function, a &lt;code&gt;fib&lt;/code&gt; function (the Fibonacci suite function) and I wanted to try something more complicated like computing an md5 hash.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This, for example, is how I would define the protocol for the MD5 hashing function:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public interface HasherIO {
-    @InputFile
-    @PathSensitive(PathSensitivity.NAME_ONLY)
-    RegularFileProperty getInputFile();
-
-    @OutputFile
-    RegularFileProperty getOutputFile();
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Except that in this case, because the input is a file, I couldn&amp;#8217;t use my code annotation processor code generator yet (but it&amp;#8217;s planned).
-Instead I wrote code to read the file manually, allocate WebAssembly memory buffers, in order to call the function which is implemented in Rust:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint rust language-rust&quot;&gt;&lt;code&gt;#[no_mangle]
-pub extern fn process(bytes: *const u8, len: usize) -&amp;gt; *const c_void {
-    let data: &amp;amp;[u8] = unsafe { std::slice::from_raw_parts(bytes, len) };
-    let mut hasher = Md5::new();
-    hasher.update(data);
-    let result = hasher.finalize_fixed();
-    let pointer = result
-        .to_vec()
-        .as_ptr();
-    mem::forget(pointer);
-
-    pointer as *const c_void
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then all I need is to use this task in a build script. Let&amp;#8217;s see how it performs&amp;#8230;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_the_webassembly_runtimes&quot;&gt;The WebAssembly runtimes&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I wrote 2 different implementations of the WASM integration runtime: the first one was pretty straightforward to write and makes use of &lt;a href=&quot;https://github.com/wasmerio/wasmer-java&quot;&gt;wasmer-java&lt;/a&gt;.
-The second one took me significantly more time to implement and is using &lt;a href=&quot;https://www.graalvm.org/&quot;&gt;GraalVM&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Integrating &lt;a href=&quot;https://github.com/wasmerio/wasmer-java&quot;&gt;Wasmer&lt;/a&gt; was easy for different reasons:
-1. it&amp;#8217;s just a library which you have to add to your classpath
-2. it&amp;#8217;s relatively well documented&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;GraalVM was more complicated because:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;olist arabic&quot;&gt;
-&lt;ol class=&quot;arabic&quot;&gt;
-&lt;li&gt;
-&lt;p&gt;you actually need to run your program &lt;em&gt;on&lt;/em&gt; GraalVM&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;you need to install the WASM support separately (it&amp;#8217;s not downloadable as a regular Maven dependency, for example)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;you still need to add the GraalVM polyglot API on classpath&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;it&amp;#8217;s poorly documented at this stage (in particular, there&amp;#8217;s no documentation whatsoever on how to share memory between the Java host and the WASM guest)&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Anyway, I think (but I haven&amp;#8217;t done it yet) that the GraalVM runtime will be easier to support I/O since it already offers the configuration options to let the WASM host access the host file system.
-Wasmer doesn&amp;#8217;t support I/O yet.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s talk about performance, now.
-Disclaimer: this isn&amp;#8217;t proper benchmarking. The results you will see were obtained via functional testing of a plugin. There&amp;#8217;s a lot of variance, but they were reproducible.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_measuring_the_wasmer_runtime&quot;&gt;Measuring the wasmer runtime&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In short, the wasmer runtime is very promising: it&amp;#8217;s easy to setup and actually performs extremely well.
-The API is not very Java friendly, but the &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin/tree/main/wasm-invoker&quot;&gt;abstraction layer I wrote (which supports both wasmer and GraalVM)&lt;/a&gt; makes it significanly easier.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Here are some results for a memoized Fibonacci, which compares a version I wrote in Java vs the one I wrote in Rust:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;Memoized Fibonacci on wasmer&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;Java fib(90) = 2880067194370816120
-Took 3ms
-Precompiled Rust fib(90) = 2880067194370816120
-Took 366μs&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The WASM version compiled from Rust is already faster than the Java version!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s see how it performs when hashing a MD5 file (remember that for this use case, I&amp;#8217;m actually passing a &lt;em&gt;byte array&lt;/em&gt; to the WASM program, not a file):&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;Hashing a 4MB file on wasmer&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
-Took 64ms
-hash from Rust is 49DFDCEF6751973A236D35401B6CBFC8
-Took 58ms&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Again, the WASM version is still faster!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;On both operations, the WASM binary performs better than the pure Java version. However, there&amp;#8217;s a catch: in order to reach that level of performance, the WASM binary has to be precompiled to a native binary by wasmer.
-This, already takes time. If you include this in the whole picture, the numbers are different: 36ms for Fibonacci (compared to 3ms in Java, 10x slower).
-However, this is in practice not a big deal since those binaries can actually be cached, meaning that if we have to call them multiple times, or from different builds, we can actually fetch them from the cache.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;All in all, it means that the wasmer runtime is very fast and integrates quite well with Java.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_measuring_the_graalvm_runtime&quot;&gt;Measuring the GraalVM runtime&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The &lt;a href=&quot;https://docs.oracle.com/en/graalvm/enterprise/20/docs/reference-manual/wasm/&quot;&gt;WebAssembly support for GraalVM&lt;/a&gt; is still experimental.
-However, it has the advantage of taking advantage of the Truffle API, which promises better integration between languages and, eventually, better performance.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In my case, that wasn&amp;#8217;t quite true. Again as usual don&amp;#8217;t trust benchmarks, but here are the numbers:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;Memoized Fibonacci on wasmer&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;Java fib(90) = 2880067194370816120
-Took 3ms
-Precompiled Rust fib(90) = 2880067194370816120
-Took 21ms&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This time, the WASM code is significantly slower. The explanation is probably that contrary to the wasmer runtime, the WASM binary has to be parsed and transformed into a model that the Truffle API can understand, and as far as I could tell, this is not cacheable. However, this isn&amp;#8217;t the only explanation, as we can see with the hash example:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;Hashing a 4MB file on GraalVM&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre&gt;hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
-Took 57ms
-hash from Rust is 49DFDCEF6751973A236D35401B6CBFC8
-Took 407ms&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Again we can see that the performance is significantly worse with GraalVM.
-I must again say that maybe I&amp;#8217;m not using the API properly.
-In particular, I have found no better way to pass the &lt;code&gt;byte[]&lt;/code&gt; to the WASM memory model other than &lt;a href=&quot;https://github.com/melix/gradle-wasm-plugin/blob/main/wasm-invoker/src/main/java/me/champeau/wasm/invocation/internal/GraalVMInvoker.java#L99-L103&quot;&gt;byte by byte!&lt;/a&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_what_we_ve_learnt&quot;&gt;What we&amp;#8217;ve learnt&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In this blog post, we&amp;#8217;ve seen that we can use a wasm binary in Gradle as the implementation of a task.
-This binary can be written in any language which supports compiling to WebAssembly.
-In my [test project], I have written tasks in 2 different languages: &lt;a href=&quot;https://www.rust-lang.org/&quot;&gt;Rust&lt;/a&gt; and &lt;a href=&quot;https://github.com/AssemblyScript/assemblyscript&quot;&gt;AssemblyScript&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We&amp;#8217;ve seen that we can integrate WASM binaries using 2 different &quot;runtimes&quot;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;https://github.com/wasmerio/wasmer-java&quot;&gt;Wasmer&lt;/a&gt;, which is using JNI and compiles, as far as I understand, WebAssembly binaries to native code&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;https://www.graalvm.org/&quot;&gt;GraalVM&lt;/a&gt;, which is a different Java Virtual Machine, which usually performs extremely well with Java, and provides a &lt;a href=&quot;https://www.graalvm.org/reference-manual/polyglot-programming/&quot;&gt;Polyglot runtime&lt;/a&gt; leveraging the &lt;a href=&quot;https://www.graalvm.org/graalvm-as-a-platform/language-implementation-framework/&quot;&gt;Truffle API&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As of today, the Wasmer version performs significantly better and WASM functions can be executed even faster than Java code!
-The GraalVM version is still experimental and performs quite poorly compared to using native Java code. It&amp;#8217;s also more painful to test because it&amp;#8217;s not enough to install GraalVM: you also have to install components separately, which is not build friendly, nor CI friendly.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The next step for me is to try to integrate more directly with the file system: at the current stage, none of the approaches is suitable for Gradle as we need to read and write files.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Also, one has to keep in mind that it&amp;#8217;s pretty rare that you&amp;#8217;d like to integrate in a build arbitrary code like this: in general, you want to call external tools (&lt;code&gt;javac&lt;/code&gt;, &lt;code&gt;gcc&lt;/code&gt;, &amp;#8230;).
-Nevertheless, this experiment is quite fun and I&amp;#8217;m going to experiment more with this annotation processing API, which, I think, would be valuable in any case.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Multi-repository development made easy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Multi-repository development made easy</h1>
+	</div>
+
+	<p><em>04 November 2021</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/multirepo-development.html"> multirepo development</a> 
+	</em>
+		<a href="/blog/tags/micronaut.html"> micronaut</a> 
+	</p>
+	<p><div class="sect1">
+<h2 id="_are_you_working_in_a_multi_repository_setup">Are you working in a multi-repository setup?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In general, things start getting messy as soon as you have a feature which requires changes to more than one repository.
+For example, you may have a <code>core</code> repository, and a <code>module</code> repository, and the feature that you&#8217;re working on for <code>module</code> requires API changes in <code>module</code>.</p>
+</div>
+<div class="paragraph">
+<p>If so, it&#8217;s likely that you&#8217;ve been annoyed by the fact that to be able to test the changes to <code>module</code>, you minimally had to publish a local snapshot to your local Maven repository.
+While this can kind of work locally, it&#8217;s easy to miss publishing from time to time, and therefore thinking that a change works when it actually relies on an outdated dependency.</p>
+</div>
+<div class="paragraph">
+<p>Things get more complicated as soon as CI is involved, or that you want to share the results of work in progress, for example for review, with your colleagues:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>did you ever had to explain that they had to checkout <code>core/some-branch</code>, publish to Maven local, then checkout <code>module/some-feature-branch</code> and test it?</p>
+</li>
+<li>
+<p>did you ever realize late that you forgot to push changes to <code>master</code> so that they could try?</p>
+</li>
+<li>
+<p>did you ever complain that to make this happen on CI, you actually had to <em>eagerly merge</em> your feature branch to <code>core</code>, just so that the other repository, on a <em>feature branch</em>, could see it?</p>
+</li>
+<li>
+<p>did you ever want to see if your modules simply do not break with latest <em>master</em>, without having to change anything to your build scripts?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you answered yes to any of those questions, then I&#8217;m glad to say <strong>there&#8217;s a solution!</strong></p>
+</div>
+<div class="paragraph">
+<p>The underlying problem is that using Maven SNAPSHOTs to deal with multi-repository development is not a good enough.
+It cannot model the complexity of multi-repository development, with features being developed concurrently on different branches.
+Using SNAPSHOTs (binary dependencies) to coordinate projects leads to hard to diagnose bugs, broken integration processes.
+You typically have to eagerly push changes, or wait for snapshots to be published on a shared repository, just so that you can actually verify that integration with other modules work.
+Those problems do not happen in a a <em>single repository</em> world, because all changes are integrated at once.</p>
+</div>
+<div class="paragraph">
+<p>I faced this very same problem with Micronaut:I&#8217;m currently working on a feature which involves changes to multiple repositories at once:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/micronaut-projects/micronaut-core/">Micronaut Core</a>, with additional public APIs</p>
+</li>
+<li>
+<p><a href="https://github.com/micronaut-projects/micronaut-aot/">Micronaut AOT</a>, the new module I&#8217;m actively working on</p>
+</li>
+<li>
+<p><a href="https://github.com/micronaut-projects/micronaut-gradle-plugin/">the Micronaut Gradle Plugin</a>, which integrates the AOT module</p>
+</li>
+<li>
+<p>and a local test project which uses the modified Gradle plugin</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>That&#8217;s, minimally 4 different projects, and a change to any of them is a pain to deal with.
+With my experience with Gradle, I <em>knew</em> there was a better way.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_plugin_to_make_it_easier">A plugin to make it easier!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Today, I&#8217;m happy to announce a new Gradle plugin which aims at making multi-repository development a breeze: <a href="https://melix.github.io/includegit-gradle-plugin">Included Git repositories plugin</a>.</p>
+</div>
+<div class="paragraph">
+<p>This plugin lets you <em>import Git repositories</em> as source dependencies, without having to change your dependency declarations.
+What does that mean?
+In the example above, it means that I can explain, when I&#8217;m working on <code>module</code>, that it needs to build against <code>core/some-branch</code>: Gradle will then automatically checkout the project, build the branch and <em>substitute</em> any binary dependency corresponding to <code>core</code> with the source dependency.</p>
+</div>
+<div class="paragraph">
+<p>In a nutshell, the configuration would look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>gitRepositories {
+	include('core') {
+		uri = 'git@github.com:mycompany/core.git'
+		branch = 'some-branch'
+	}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s it! No need to change your build scripts to update dependency coordinates, Gradle will do the magic!</p>
+</div>
+<div class="paragraph">
+<p>It completely changes the way of thinking about multi-repository development, because CI, or colleagues, would not have to care about instructions about how to build your particular branch: everything is known upfront.</p>
+</div>
+<div class="paragraph">
+<p>Of course, you&#8217;re going to tell that well, that&#8217;s cool but it still requires you to push your changes to the remote repository so that you can test things <em>locally</em>.
+Well, a good multi-repository development story must integrate both the <em>local</em> and <em>remote</em> experience.
+This is why this plugin actually makes it a breeze to support this pattern.</p>
+</div>
+<div class="paragraph">
+<p>There are actually 2 ways you can handle this.
+The first one is to explain to Gradle that instead of checking out the sources, it can simply use a local copy instead.
+In this case, the plugin will simply <em>ignore</em> whatever you declared in the <code>gitRepositories</code> block for the repository, and use whatever is available locally.
+For this you&#8217;d set a <code>local.git.&lt;repoName&gt;</code> Gradle property (in your <code>gradle.properties</code> file) pointing to your local copy.
+In the example above, I would for example add a <code>local.git.core</code> property pointing to my local copy of <code>core</code>.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, if you keep things organized into checkout directories like I do, it&#8217;s likely that you have all your <code>micronaut</code> related projects in a single <code>micronaut-projects</code> directory.
+In this case, by setting the <code>auto.include.git.dirs</code> Gradle property to the <code>micronaut-projects</code> directory, the plugin will automatically map directory names in that <code>micronaut-projects</code> directory to included Git repository names.
+So if I have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>gitRepositories {
+	include('micronaut-core') {
+		uri = 'git@github.com:mycompany/core.git'
+		branch = 'some-branch'
+	}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and a <code>micronaut-core</code> directory under <code>micronaut-projects</code>, then it will automatically be used instead of cloned from remote.</p>
+</div>
+<div class="paragraph">
+<p>Those options make it extremely convenient to develop locally, and only push changes when ready.
+On CI, builds would checkout the dependents automatically, and you&#8217;d have nothing to configure.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_more_complex_use_cases">More complex use cases</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The very same mechanism can be used to create "integration" builds on CI.
+For example, it makes it very simple to have builds which would automatically build against the latest state of <code>master</code>, instead of having to wait for <code>SNAPSHOT</code> to be published, and more importantly, without having to change any build file.
+As a bonus, it also works for <em>transitive dependencies</em>: for example if you have A --depends on-&#8594; B --depends on-&#8594; C, then you may want to make sure that if <code>C</code> is changed, <code>A</code> still works. How do you do this with snapshots, if there&#8217;s no direct dependency between <code>A</code> and <code>C</code>? This plugin makes it very simple to test: just declare a Git repository for C and you&#8217;re done!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_need_your_help">Need your help!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I think this plugin has potential to dramatically change how we develop in the multi-repository world.
+The plugin is in very early stages, and I will need your help: report bugs, improve the documentation, improve testing, etc.
+It will also be interesting to get your user stories so that we, collectively, can improve it to support more scenarios.</p>
+</div>
+<div class="paragraph">
+<p>Plugin documentation: <a href="https://melix.github.io/includegit-gradle-plugin">https://melix.github.io/includegit-gradle-plugin</a>
+Plugin development home: <a href="https://github.com/melix/includegit-gradle-plugin">https://github.com/melix/includegit-gradle-plugin</a>
+Plugin on Gradle plugin portal: <a href="https://plugins.gradle.org/plugin/me.champeau.includegit">https://plugins.gradle.org/plugin/me.champeau.includegit</a></p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-multirepo';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
