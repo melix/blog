@@ -1,0 +1,266 @@
+= Composition over inheritance: Gradle vs Maven
+Cédric Champeau
+2021-12-01
+:jbake-type: post
+:jbake-tags: gradle, maven, composition, inheritance
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-maven-compo-inheritance
+:linkattrs:
+
+== Introduction
+
+In general, when I read comments about Maven vs Gradle, people focus on the cosmetics (XML vs Groovy/Kotlin) when it's from my point of view the least interesting aspect of the comparison.
+In this quickie, I want to focus on one particular aspect which differentiates the 2 build tools: the famous **composition over inheritance** paradigm.
+In different aspects (POM files, lifecycle), Apache Maven is using _inheritance_, while Gradle is using _composition_.
+It is a particularly important difference which completely changes the way we think about building software.
+
+== Inheritance in Maven builds
+
+A typical Maven project is built with a _pom.xml_ file, which declares everything the module needs to build:
+- the dependencies
+- the build plugins and their configuration
+
+Very quickly, it turns out that there are _common things_ that you want to share between modules:
+
+- they would use the same compiler options
+- they would use the same plugins and configuration
+- they would apply a number of common dependencies
+- etc.
+
+Let's imagine that we have a project which consists of 3 modules:
+- a `library` module, pure Java
+- an `application` module which uses the `library` and the https://micronaut.io[Micronaut Framework]
+- and a `documentation` module which provides a user manual for the application using https://asciidoctor.org[Asciidoctor].
+
+The idiomatic way to solve the problem of sharing the configuration of the `library` and `application` modules (which are both Java) in Maven is to define a so-called "parent POM" which declares all of these common things, for example:
+
+[source,xml]
+----
+<project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>example-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Common Config</name>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.jupiter.version>5.8.1</junit.jupiter.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+----
+
+To simplify things, we could call this a "convention": by convention, all modules which will use this parent POM will apply all those plugins and dependencies.
+
+Then a "child POM" only has to declare the parent to "inherit" from the parent:
+
+[source,xml]
+----
+<project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.example</groupId>
+        <artifactId>example-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>application</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>library</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+</project>
+----
+
+This model works really well when all modules have a lot in common, for example if they are all libraries.
+The inheritance model also makes it simple to override things.
+In the example above, we don't have to specify the `groupId` and `version` of our module because it will be inherited from the parent.
+
+However, this model comes with a number of drawbacks:
+
+- as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our `library` and `application` modules have something in common.
+- you can only have a _single_ parent, meaning that you cannot inherit from a framework parent POM _and_ from your own conventions.
+- it's not great for performance, because you end up configuring a lot of things which will never be necessary for your particular "child" module.
+
+This is typically the case when you are using a framework like https://micronaut.io[Micronaut] or https://spring.io/projects/spring-boot[Spring Boot].
+Because those frameworks are built with developer productivity in mind, they come with their own "parent POMs" which makes the lives of developers easier by avoiding a lot of copy and paste of hundreds of lines of XML.
+They also need to provide this parent POM because they would come with their own Maven plugin which works around the limitations of the lifecycle model.
+
+But then, we have a problem: on one side, you have this "parent POM" which is provided by the framework, and on the other side, you have your own "parent POM" which is providing, say, company-specific conventions (like checkstyle configuration, coordinates of Maven repositories for publication, ...).
+
+In order to be able to use both conventions, you have to create a new parent POM, and you have no choice but making your company convention parent POM inherit from the framework POM: obviously you can't change the framework POM!
+This is problematic, because it means that for every release of the framework, you have to update your company convention parent POM.
+This is also problematic for another aspect: not all the modules of your multi-project build are "Spring Boot" or "Micronaut" applications.
+Some of them may be simple Java libraries which are used by your app, but do _not_ require the framework. As a consequence, you have to create _multiple_ parents, and duplicate the configuration in each of those POM files.
+
+This inheritance problem surfaces in different places in Maven. Another one is, as I mentioned, the "lifecycle" which works in phases.
+Basically, in Maven everything is executed in linear phases: if you want to do _test_, then you _have to_ execute everything which is _before_ that phase.
+This may sound reasonable, but this model completely breaks: this is no surprise that _every single plugin_ has to implement their own `-DskipTest` variant, in order to avoid doing work which shouldn't be done.
+I had https://lists.apache.org/list?users@maven.apache.org:2021-9[an interesting use case when implementing the GraalVM native Maven plugin], which requires to configure the surefire plugin to pass extra arguments.
+Long story short: this isn't possible with Maven.
+Consequence: the only workaround is the multiplication of Maven profiles, which a user has to understand, maintain, and remember.
+
+=== Composition in Gradle builds
+
+Gradle builds use a very different model: **composit**.
+In a nutshell, in a Gradle project you don't explain _how to build_, but _what you build_: that is, you would say "this is a library", or "this is a CLI application" or "this is a documentation module".
+Because a library exposes an API and an application doesn't, those are _different things_, so their conventions, and capabilities, are different.
+
+The way you "say" this is in a Gradle build is by _applying plugins_.
+
+A typical Java library would apply the `java-library` plugin, while an application would apply the `application` plugin and a documentation project would apply, say, the `asciidoctor` plugin.
+What do a Java library project and a documentation project have in common? Barely nothing. A Java Library has Java sources, a number of dependencies, code quality plugins applied, etc. The documentation module, on its side, is a set of markdown or asciidoc files, and resources.
+The layout of the projects is different, the _conventions_ are different, and the set of plugins are different.
+Java projects may share the same conventions for source layout, but they are obviously different for the docs.
+Also, there's _no reason_ to let the user declare "implementation" dependencies on the documentation project: it doesn't make sense so it should be an error to do so.
+
+On the other hand all those modules may share a number of things:
+
+- they are all published to a Maven repository
+- they need to use the same Java toolchain
+- they need to comply to security policies of your company
+
+The way Gradle solves this problem is by _composing plugins_:
+
+- a plugin can "apply" another plugin
+- each plugin is guaranteed to be applied only once, even if several plugins use it
+- a plugin can "react" to the application of other plugins, allowing fine-grained customizations
+
+So in the example above, the `application` use case can be easily solved:
+first, you'd have your own "convention plugin" which defines your company conventions (e.g apply the `checkstyle` plugin with a number of rules).
+Then, you'd have the Micronaut application plugin.
+Finally, your application module would simply _apply both plugins_:
+
+[source,groovy]
+----
+plugins {
+   id 'com.mycompany.conventions' version '1.0.0'
+   id 'io.micronaut.application' version '3.0.0'
+}
+
+micronaut {
+    version '3.2.0'
+}
+----
+
+What becomes _more interesting_ is that you can (and you actually _should_)  create your own "component types" which apply a number of plugins.
+In the example above, we could replace the application of the 2 plugins with a single one:
+
+[source,groovy]
+----
+plugins {
+   id 'com.mycompany.micronaut-application' version '3.0.0'
+}
+----
+
+note that we moved the configuration of the `micronaut` version to our convention plugin.
+I'm not going to explain how to write a custom Gradle plugin in this blog post, but the _code_ of this plugin would very much look like this:
+
+[source,groovy]
+----
+plugins {
+    id 'com.mycompany.conventions' version '1.0.0'
+    id 'io.micronaut.application' version '3.0.0'
+}
+
+micronaut {
+    version '3.2.0'
+}
+----
+
+Does it look familiar? Yes it does, this is _exactly_ what we had in the beginning.
+I encourage you to take a look at https://docs.gradle.org/current/userguide/structuring_software_products.html[this documentation] for further details about writing your own convention plugins.
+
+Interestingly, as I said, in Gradle plugins are allowed to _react_ to the presence of other plugins.
+This makes it particularly interesting for defining dynamically more tasks depending on the context.
+For example, a plugin can do:
+
+[source,groovy]
+----
+pluginManager.withPlugin('io.micronaut.application') {
+    // configure the Micronaut application plugin
+}
+pluginManager.withPlugin('io.micronaut.library') {
+    // configure the Micronaut library plugin
+}
+pluginManager.withPlugin('io.spring.boot') {
+    // configure the Spring Boot plugin
+}
+----
+
+Which is very resilient to the fact that the plugins may be applied in any order and that they can combine with each other to provide higher level constructs.
+It also makes it possible to _give choice_ to users regarding their preferences: you provide a single convention plugin which is aware of what to do if the user prefers to use Spring Boot over Micronaut.
+
+In the end, `com.mycompany.micronaut-application` is defined as a combination of the `io.micronaut.application`, `your.company.conventions` plugins.
+Instead of declaring _how to build_ your company application, you simply described _what it is_.
+
+This is only touching the surface of the Gradle world here, but when I read that Gradle is "just Ant on steroids", nothing could be more wrong.
+Gradle in this case is much superior, because it focuses on _convention over configuration_, while providing better constructs than Maven to do it.
+
+But let's come back to our multi-project example: each of the modules would apply a different plugin (which is also why it's important to drop the _allprojects_ pattern, which is not enforcing good design):
+
+- `library` would apply the `com.mycompany.library` plugin
+- `application` would apply the `com.mycompany.application` plugin
+- `docs` would apply the `com.mycompany.docs` plugin
+
+The `com.mycompany.library` plugin would, for example, apply the `java-library` and `com.mycompany.java-conventions` plugin.
+The `com.mycompany.application` plugin would, for example, apply the `io.micronaut.application` and `com.mycompany.java-conventions` plugin (knowing that the `io.micronaut.application` plugin applied the `application` plugin and more, such as the GraalVM plugin)
+The `com.mycompany.docs` plugin would, for example, apply the `org.asciidoctor.jvm.convert` plugin and the `com.mycompany.docs` plugin.
+
+You'll notice how those actually combine together, making it easier to maintain and upgrade builds: should you change the company conventions, all you have to do is release a new version of the convention plugin.
+
+== Conclusion
+
+In this quickie, I have explained a major difference in how Maven and Gradle envision build configuration.
+While both of them are designed with _convention over configuration_ in mind, the inheritance model of Maven makes it difficult to build conventions on top of each other without duplication.
+On the other hand, Gradle uses a _composition_ model which makes it possible to design your own conventions while being aware of other plugins being applied by the user: Gradle builds are more lenient and more maintainable.
+
+As a complement, you might be interested in:
+
+- reading the https://docs.gradle.org/current/userguide/structuring_software_products.html[structuring large projects] documentation from the Gradle docs
+- watching my https://www.youtube.com/watch?v=MaansFoPHKg&feature=youtu.be[10 mins video] about authoring Gradle builds
+- following my former team mate Jendrik who created https://www.youtube.com/playlist?list=PLWQK2ZdV4Yl2k2OmC_gsjDpdIBTN0qqkE[a series of videos about modern Gradle]
+
+
