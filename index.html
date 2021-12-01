@@ -69,6 +69,371 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2021/12/composition-in-gradle.html"><h1>Composition over inheritance: Gradle vs Maven</h1></a>
+  			<p>01 December 2021</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/maven.html"> maven</a> 
+	
+		<a href="/blog/tags/composition.html"> composition</a> 
+	
+		<a href="/blog/tags/inheritance.html"> inheritance</a> 
+	</p>
+			
+  			<p><div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In general, when I read comments about Maven vs Gradle, people focus on the cosmetics (XML vs Groovy/Kotlin) when it&#8217;s from my point of view the least interesting aspect of the comparison.
+In this quickie, I want to focus on one particular aspect which differentiates the 2 build tools: the famous <strong>composition over inheritance</strong> paradigm.
+In different aspects (POM files, lifecycle), Apache Maven is using <em>inheritance</em>, while Gradle is using <em>composition</em>.
+It is a particularly important difference which completely changes the way we think about building software.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_inheritance_in_maven_builds">Inheritance in Maven builds</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A typical Maven project is built with a <em>pom.xml</em> file, which declares everything the module needs to build:
+- the dependencies
+- the build plugins and their configuration</p>
+</div>
+<div class="paragraph">
+<p>Very quickly, it turns out that there are <em>common things</em> that you want to share between modules:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>they would use the same compiler options</p>
+</li>
+<li>
+<p>they would use the same plugins and configuration</p>
+</li>
+<li>
+<p>they would apply a number of common dependencies</p>
+</li>
+<li>
+<p>etc.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s imagine that we have a project which consists of 3 modules:
+- a <code>library</code> module, pure Java
+- an <code>application</code> module which uses the <code>library</code> and the <a href="https://micronaut.io">Micronaut Framework</a>
+- and a <code>documentation</code> module which provides a user manual for the application using <a href="https://asciidoctor.org">Asciidoctor</a>.</p>
+</div>
+<div class="paragraph">
+<p>The idiomatic way to solve the problem of sharing the configuration of the <code>library</code> and <code>application</code> modules (which are both Java) in Maven is to define a so-called "parent POM" which declares all of these common things, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint xml language-xml"><code>&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;org.example&lt;/groupId&gt;
+    &lt;artifactId&gt;example-parent&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;packaging&gt;pom&lt;/packaging&gt;
+
+    &lt;name&gt;Common Config&lt;/name&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;junit.jupiter.version&gt;5.8.1&lt;/junit.jupiter.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+            &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+            &lt;version&gt;${junit.jupiter.version}&lt;/version&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.0.0-M5&lt;/version&gt;
+            &lt;/plugin&gt;
+
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.8.1&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;source&gt;${java.version}&lt;/source&gt;
+                    &lt;target&gt;1.8&lt;/target&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To simplify things, we could call this a "convention": by convention, all modules which will use this parent POM will apply all those plugins and dependencies.</p>
+</div>
+<div class="paragraph">
+<p>Then a "child POM" only has to declare the parent to "inherit" from the parent:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint xml language-xml"><code>&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;parent&gt;
+        &lt;groupId&gt;org.example&lt;/groupId&gt;
+        &lt;artifactId&gt;example-parent&lt;/artifactId&gt;
+        &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;/parent&gt;
+
+    &lt;artifactId&gt;application&lt;/artifactId&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.example&lt;/groupId&gt;
+            &lt;artifactId&gt;library&lt;/artifactId&gt;
+            &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This model works really well when all modules have a lot in common, for example if they are all libraries.
+The inheritance model also makes it simple to override things.
+In the example above, we don&#8217;t have to specify the <code>groupId</code> and <code>version</code> of our module because it will be inherited from the parent.</p>
+</div>
+<div class="paragraph">
+<p>However, this model comes with a number of drawbacks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common.</p>
+</li>
+<li>
+<p>you can only have a <em>single</em> parent, meaning that you cannot inherit from a framework parent POM <em>and</em> from your own conventions.</p>
+</li>
+<li>
+<p>it&#8217;s not great for performance, because you end up configuring a lot of things which will never be necessary for your particular "child" module.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is typically the case when you are using a framework like <a href="https://micronaut.io">Micronaut</a> or <a href="https://spring.io/projects/spring-boot">Spring Boot</a>.
+Because those frameworks are built with developer productivity in mind, they come with their own "parent POMs" which makes the lives of developers easier by avoiding a lot of copy and paste of hundreds of lines of XML.
+They also need to provide this parent POM because they would come with their own Maven plugin which works around the limitations of the lifecycle model.</p>
+</div>
+<div class="paragraph">
+<p>But then, we have a problem: on one side, you have this "parent POM" which is provided by the framework, and on the other side, you have your own "parent POM" which is providing, say, company-specific conventions (like checkstyle configuration, coordinates of Maven repositories for publication, &#8230;).</p>
+</div>
+<div class="paragraph">
+<p>In order to be able to use both conventions, you have to create a new parent POM, and you have no choice but making your company convention parent POM inherit from the framework POM: obviously you can&#8217;t change the framework POM!
+This is problematic, because it means that for every release of the framework, you have to update your company convention parent POM.
+This is also problematic for another aspect: not all the modules of your multi-project build are "Spring Boot" or "Micronaut" applications.
+Some of them may be simple Java libraries which are used by your app, but do <em>not</em> require the framework. As a consequence, you have to create <em>multiple</em> parents, and duplicate the configuration in each of those POM files.</p>
+</div>
+<div class="paragraph">
+<p>This inheritance problem surfaces in different places in Maven. Another one is, as I mentioned, the "lifecycle" which works in phases.
+Basically, in Maven everything is executed in linear phases: if you want to do <em>test</em>, then you <em>have to</em> execute everything which is <em>before</em> that phase.
+This may sound reasonable, but this model completely breaks: this is no surprise that <em>every single plugin</em> has to implement their own <code>-DskipTest</code> variant, in order to avoid doing work which shouldn&#8217;t be done.
+I had <a href="https://lists.apache.org/list?<a href="mailto:users@maven.apache.org">users@maven.apache.org</a>:2021-9">an interesting use case when implementing the GraalVM native Maven plugin</a>, which requires to configure the surefire plugin to pass extra arguments.
+Long story short: this isn&#8217;t possible with Maven.
+Consequence: the only workaround is the multiplication of Maven profiles, which a user has to understand, maintain, and remember.</p>
+</div>
+<div class="sect2">
+<h3 id="_composition_in_gradle_builds">Composition in Gradle builds</h3>
+<div class="paragraph">
+<p>Gradle builds use a very different model: <strong>composit</strong>.
+In a nutshell, in a Gradle project you don&#8217;t explain <em>how to build</em>, but <em>what you build</em>: that is, you would say "this is a library", or "this is a CLI application" or "this is a documentation module".
+Because a library exposes an API and an application doesn&#8217;t, those are <em>different things</em>, so their conventions, and capabilities, are different.</p>
+</div>
+<div class="paragraph">
+<p>The way you "say" this is in a Gradle build is by <em>applying plugins</em>.</p>
+</div>
+<div class="paragraph">
+<p>A typical Java library would apply the <code>java-library</code> plugin, while an application would apply the <code>application</code> plugin and a documentation project would apply, say, the <code>asciidoctor</code> plugin.
+What do a Java library project and a documentation project have in common? Barely nothing. A Java Library has Java sources, a number of dependencies, code quality plugins applied, etc. The documentation module, on its side, is a set of markdown or asciidoc files, and resources.
+The layout of the projects is different, the <em>conventions</em> are different, and the set of plugins are different.
+Java projects may share the same conventions for source layout, but they are obviously different for the docs.
+Also, there&#8217;s <em>no reason</em> to let the user declare "implementation" dependencies on the documentation project: it doesn&#8217;t make sense so it should be an error to do so.</p>
+</div>
+<div class="paragraph">
+<p>On the other hand all those modules may share a number of things:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>they are all published to a Maven repository</p>
+</li>
+<li>
+<p>they need to use the same Java toolchain</p>
+</li>
+<li>
+<p>they need to comply to security policies of your company</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The way Gradle solves this problem is by <em>composing plugins</em>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a plugin can "apply" another plugin</p>
+</li>
+<li>
+<p>each plugin is guaranteed to be applied only once, even if several plugins use it</p>
+</li>
+<li>
+<p>a plugin can "react" to the application of other plugins, allowing fine-grained customizations</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So in the example above, the <code>application</code> use case can be easily solved:
+first, you&#8217;d have your own "convention plugin" which defines your company conventions (e.g apply the <code>checkstyle</code> plugin with a number of rules).
+Then, you&#8217;d have the Micronaut application plugin.
+Finally, your application module would simply <em>apply both plugins</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+   id 'com.mycompany.conventions' version '1.0.0'
+   id 'io.micronaut.application' version '3.0.0'
+}
+
+micronaut {
+    version '3.2.0'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What becomes <em>more interesting</em> is that you can (and you actually <em>should</em>)  create your own "component types" which apply a number of plugins.
+In the example above, we could replace the application of the 2 plugins with a single one:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+   id 'com.mycompany.micronaut-application' version '3.0.0'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>note that we moved the configuration of the <code>micronaut</code> version to our convention plugin.
+I&#8217;m not going to explain how to write a custom Gradle plugin in this blog post, but the <em>code</em> of this plugin would very much look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+    id 'com.mycompany.conventions' version '1.0.0'
+    id 'io.micronaut.application' version '3.0.0'
+}
+
+micronaut {
+    version '3.2.0'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Does it look familiar? Yes it does, this is <em>exactly</em> what we had in the beginning.
+I encourage you to take a look at <a href="https://docs.gradle.org/current/userguide/structuring_software_products.html">this documentation</a> for further details about writing your own convention plugins.</p>
+</div>
+<div class="paragraph">
+<p>Interestingly, as I said, in Gradle plugins are allowed to <em>react</em> to the presence of other plugins.
+This makes it particularly interesting for defining dynamically more tasks depending on the context.
+For example, a plugin can do:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>pluginManager.withPlugin('io.micronaut.application') {
+    // configure the Micronaut application plugin
+}
+pluginManager.withPlugin('io.micronaut.library') {
+    // configure the Micronaut library plugin
+}
+pluginManager.withPlugin('io.spring.boot') {
+    // configure the Spring Boot plugin
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which is very resilient to the fact that the plugins may be applied in any order and that they can combine with each other to provide higher level constructs.
+It also makes it possible to <em>give choice</em> to users regarding their preferences: you provide a single convention plugin which is aware of what to do if the user prefers to use Spring Boot over Micronaut.</p>
+</div>
+<div class="paragraph">
+<p>In the end, <code>com.mycompany.micronaut-application</code> is defined as a combination of the <code>io.micronaut.application</code>, <code>your.company.conventions</code> plugins.
+Instead of declaring <em>how to build</em> your company application, you simply described <em>what it is</em>.</p>
+</div>
+<div class="paragraph">
+<p>This is only touching the surface of the Gradle world here, but when I read that Gradle is "just Ant on steroids", nothing could be more wrong.
+Gradle in this case is much superior, because it focuses on <em>convention over configuration</em>, while providing better constructs than Maven to do it.</p>
+</div>
+<div class="paragraph">
+<p>But let&#8217;s come back to our multi-project example: each of the modules would apply a different plugin (which is also why it&#8217;s important to drop the <em>allprojects</em> pattern, which is not enforcing good design):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>library</code> would apply the <code>com.mycompany.library</code> plugin</p>
+</li>
+<li>
+<p><code>application</code> would apply the <code>com.mycompany.application</code> plugin</p>
+</li>
+<li>
+<p><code>docs</code> would apply the <code>com.mycompany.docs</code> plugin</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>com.mycompany.library</code> plugin would, for example, apply the <code>java-library</code> and <code>com.mycompany.java-conventions</code> plugin.
+The <code>com.mycompany.application</code> plugin would, for example, apply the <code>io.micronaut.application</code> and <code>com.mycompany.java-conventions</code> plugin (knowing that the <code>io.micronaut.application</code> plugin applied the <code>application</code> plugin and more, such as the GraalVM plugin)
+The <code>com.mycompany.docs</code> plugin would, for example, apply the <code>org.asciidoctor.jvm.convert</code> plugin and the <code>com.mycompany.docs</code> plugin.</p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll notice how those actually combine together, making it easier to maintain and upgrade builds: should you change the company conventions, all you have to do is release a new version of the convention plugin.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this quickie, I have explained a major difference in how Maven and Gradle envision build configuration.
+While both of them are designed with <em>convention over configuration</em> in mind, the inheritance model of Maven makes it difficult to build conventions on top of each other without duplication.
+On the other hand, Gradle uses a <em>composition</em> model which makes it possible to design your own conventions while being aware of other plugins being applied by the user: Gradle builds are more lenient and more maintainable.</p>
+</div>
+<div class="paragraph">
+<p>As a complement, you might be interested in:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>reading the <a href="https://docs.gradle.org/current/userguide/structuring_software_products.html">structuring large projects</a> documentation from the Gradle docs</p>
+</li>
+<li>
+<p>watching my <a href="https://www.youtube.com/watch?v=MaansFoPHKg&amp;feature=youtu.be">10 mins video</a> about authoring Gradle builds</p>
+</li>
+<li>
+<p>following my former team mate Jendrik who created <a href="https://www.youtube.com/playlist?list=PLWQK2ZdV4Yl2k2OmC_gsjDpdIBTN0qqkE">a series of videos about modern Gradle</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2021/12/composition-in-gradle.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2021/11/multirepo-dev-made-easy.html"><h1>Multi-repository development made easy</h1></a>
   			<p>04 November 2021</p>
 			<p><em>Tags: </em>
@@ -770,317 +1135,6 @@ We want to encourage this model, rather than supporting <em>adhoc</em> classifie
 </div>
 </div></p>
 			<p><a href="/blog/2021/03/version-catalogs-faq.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2021/03/version-catalogs.html"><h1>Simplified version management with Gradle 7</h1></a>
-  			<p>24 March 2021</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/catalog.html"> catalog</a> 
-	
-		<a href="/blog/tags/convenience.html"> convenience</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>Gradle 7 introduces the concept of <a href="https://docs.gradle.org/7.0-rc-1/userguide/platforms.html">version catalogs</a>, which I&#8217;ve been working on for several months already. Long story short, I&#8217;m extremely excited by this new feature which should make dependency management easier with Gradle. Let&#8217;s get started!</p>
-</div>
-<div class="paragraph">
-<p><em>Please also read my <a href="/blog/2021/03/version-catalogs-faq.html">Version catalogs FAQ</a> follow up post if you have more questions!</em></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_sharing_dependencies_between_projects">Sharing dependencies between projects</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>One of the most frequent questions raised by Gradle users is how to properly share dependency versions between projects.
-For example, let&#8217;s imagine that you have a multi-project build with this layout:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>root
- |---- client
- |---- server</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Because they live in the same "multi-project", it is expected that both <code>client</code> and <code>server</code> would require the same dependencies.
-For example, both of them would need Guava as an implementation detail and JUnit 5 for testing:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
-    implementation("com.google.guava:guava:30.0-jre")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Without any sharing mechanism, both projects would replicate the dependency declarations, which is subject to a number of drawbacks:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>upgrading a library requires updating all build files which use it</p>
-</li>
-<li>
-<p>you have to remember about the dependency coordinates (group, artifact, version) of all dependencies</p>
-</li>
-<li>
-<p>you might accidentally use different versions in different projects</p>
-</li>
-<li>
-<p>some dependencies are always used together but you have to duplicate entries in build files</p>
-</li>
-</ul>
-</div>
-<div class="sect2">
-<h3 id="_existing_patterns">Existing patterns</h3>
-<div class="paragraph">
-<p>For these reasons, users have invented over the years different patterns for dealing with dependency versions over time.
-For example:</p>
-</div>
-<div class="paragraph">
-<p>Versions in properties files:</p>
-</div>
-<div class="listingblock">
-<div class="title">gradle.properties</div>
-<div class="content">
-<pre class="prettyprint"><code>guavaVersion=30.0-jre</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>then in a build file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint"><code>dependencies {
-    implementation("com.google.guava:guava:${guavaVersion}")
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Or versions in "extra properties" in the root project:</p>
-</div>
-<div class="listingblock">
-<div class="title">extra properties</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>ext {
-   guavaVersion = '30.0-jre'
-}
-
-// ...
-
-dependencies {
-    implementation("com.google.guava:guava:${guavaVersion}")
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Sometimes you even find full coordinates in <code>dependencies.gradle</code> files.</p>
-</div>
-<div class="paragraph">
-<p>And since the rise of the Kotlin DSL, another pattern became extremely popular in the Android world: declaring libraries in <code>buildSrc</code> then using type-safe accessors to declare dependencies in build scripts:</p>
-</div>
-<div class="listingblock">
-<div class="title">buildSrc/src/main/kotlin/Libs.kt</div>
-<div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>object Libs {
-   val guava = "com.google.guava:guava:30.0-jre"
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>and in a build script:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="prettyprint"><code>dependencies {
-    implementation(Libs.guava)
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This last example is interesting because it goes into the direction of having more type-safety, more compile-time errors (as opposed to runtime errors).
-But it has a major drawback: any change to any dependency will trigger recompilation of build scripts and invalidate the build script classpath, causing up-to-date checkness to fail and in the end, rebuilding a lot more than what you should do for a single version change.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_introducing_version_catalogs">Introducing version catalogs</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>A version catalog is basically a replacement for all the previous patterns, supported by Gradle, without the drawbacks of the previous approaches.
-To add support for version catalogs, you need to enable the experimental feature in your settings file:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>enableFeaturePreview("VERSION_CATALOGS")</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In its simplest form, a catalog is a file found in a conventional location and uses the <a href="https://toml.io/en/">TOML</a> configuration format:</p>
-</div>
-<div class="listingblock">
-<div class="title">gradle/libs.versions.toml</div>
-<div class="content">
-<pre class="prettyprint toml language-toml"><code>[libraries]
-guava = "com.google.guava:guava:30.0-jre"
-junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
-junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
-
-[bundles]
-testDependencies = ["junit-jupiter", "junit-engine"]</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This declares the <em>dependency coordinates</em> which will be used in build scripts.
-You still have to declare your dependencies, but this now can be done using a <em>typesafe</em> API:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
-    implementation(libs.guava)
-    testImplementation(libs.testDependencies)
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The benefit of type-safe APIs is immediately visible in the IDE:</p>
-</div>
-<video controls autoplay height="450">
-    <source src="/blog/video/ide-completion.webm"
-            type="video/webm">
-</video>
-<div class="paragraph">
-<p>In the catalog file above, we inlined dependency versions directly in the coordinates.
-However, it&#8217;s possible to externalize them so that you can share a dependency version between dependencies.
-For example:</p>
-</div>
-<div class="listingblock">
-<div class="title">gradle/libs.versions.toml</div>
-<div class="content">
-<pre class="prettyprint toml language-toml"><code>[versions]
-groovy = "2.5.14"
-guava = "30.0-jre"
-jupiter = "5.7.1"
-
-[libraries]
-guava = { module="com.google.guava:guava", version.ref="guava" }
-junit-jupiter = { module="org.junit.jupiter:junit-jupiter-api", version.ref="jupiter" }
-junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
-
-groovy-core = { module="org.codehaus.groovy:groovy", version.ref="groovy" }
-groovy-json = { module="org.codehaus.groovy:groovy-json", version.ref="groovy" }
-
-[bundles]
-testDependencies = ["junit-jupiter", "junit-engine"]</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This new feature makes it trivial to update a dependency version: you have a single place where to look at.</p>
-</div>
-<div class="paragraph">
-<p>This comes with other benenefits like the fact that updating the GAV coordinates (group, artifact or version) of a dependency doesn&#8217;t trigger recompilation of build scripts.
-The TOML format also provides us with the ability to declare <a href="https://docs.gradle.org/7.0-rc-1/userguide/rich_versions.html">rich versions</a>.</p>
-</div>
-<div class="sect2">
-<h3 id="_under_the_hood">Under the hood</h3>
-<div class="paragraph">
-<p>Under the hood, Gradle provides an API to declare catalogs. This API is found on the <code>Settings</code>, which means that plugin authors can contribute catalogs, for example via convention plugins applied to the <code>settings.gradle(.kts)</code> file.</p>
-</div>
-<div class="paragraph">
-<p>This API is more verbose than when you use the TOML file, but is designed for type-safety. The equivalent of the catalog above would be this:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
-   versionCatalogs {
-      libs {
-           alias("guava").to("com.google.guava", "guava").versionRef("guava")
-           alias("junit-jupiter").to("org.junit.jupiter", "junit-jupiter-api").versionRef("jupiter")
-           alias("junit-engine").to("org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
-           alias("groovy-core").to("org.codehaus.groovy", "groovy").versionRef("groovy")
-           alias("groovy-json").to("org.codehaus.groovy", "groovy-json").versionRef="groovy")
-
-           version("groovy", "2.5.14")
-           version("guava", "30.0-jre")
-           version("jupiter", "5.7.1")
-      }
-   }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This API actually must be used if you are <em>consuming an external catalog</em>.
-That&#8217;s one of the big selling points of this feature: it allows teams (or framework authors) to <em>publish catalogs</em>, so that users can get recommendations.
-For example, let&#8217;s imagine that the Spring Boot team <a href="https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sec:version-catalog-plugin">publishes a catalog of recommendations</a> (they do something similar today with a BOM, but BOMs will have an impact on your transitive dependencies that you might not want).</p>
-</div>
-<div class="paragraph">
-<p>Consuming this catalog it in a Gradle build would look like this:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
-   versionCatalogs {
-       spring {
-           from("org.springframework:spring-catalog:1.0')
-       }
-   }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This would make a catalog available under the <code>spring</code> namespace in your build scripts.
-Therefore, you&#8217;d be able to use whatever version of SLF4J the Spring team recommends by declaring this dependency:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
-    implementation(spring.slf4j)
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Such a catalog would be published on a regular Maven repository, as a TOML file.
-Thanks to Gradle&#8217;s advanced dependency resolution engine, it&#8217;s totally transparent to the user that the actual dependency is a <em>catalog</em>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_what_version_catalogs_are_not">What version catalogs are not</h3>
-<div class="paragraph">
-<p>At this stage, it becomes important to state what version catalogs are <strong>not</strong>:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>they <strong>are not</strong> the "single source of truth" for your dependencies: it&#8217;s not because you have a catalog that you can&#8217;t directly declare dependencies using the "old" notation in build scripts. Nor does it prevent plugins from adding dependencies. Long story short: the presence of a catalog makes discoverability and maintenance easier, but it doesn&#8217;t remove any of the flexibility that Gradle offers. We&#8217;re thinking about ways to <em>enforce</em> that all direct dependencies are declared via a catalog in the future.</p>
-</li>
-<li>
-<p>the version declared in a catalog <strong>is not</strong> necessarily the one which is going to be resolved: a catalog only talks about direct dependencies (not transitives) and the version that you use is the one used as an <em>input</em> to dependency resolution. With transitive dependencies, it&#8217;s typically possible that a version gets upgraded, for example.</p>
-</li>
-<li>
-<p>while it makes it possible for third-party tooling to "update automatically" versions, this wasn&#8217;t a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the <em>input</em> (what is written) to assume what is going to be resolved, you&#8217;re only <em>wishing</em> that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my <a href="https://melix.github.io/blog/2020/10/about-dependabot.html">blog post about Dependabot</a> for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup. I&#8217;m going to repeat myself, but <strong>don&#8217;t assume that the version you see in a config file is the one you will get</strong>.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Please take a look at the <a href="https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sub:central-declaration-of-dependencies">documentation</a> for further details, and give us your feedback!</p>
-</div>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2021/03/version-catalogs.html#disqus_thread">Comments</a></p>
 	
 	<hr />
         <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>

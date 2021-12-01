@@ -6,9 +6,369 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 4 Nov 2021 19:23:23 +0100</pubDate>
-    <lastBuildDate>Thu, 4 Nov 2021 19:23:23 +0100</lastBuildDate>
+    <pubDate>Wed, 1 Dec 2021 22:43:04 +0100</pubDate>
+    <lastBuildDate>Wed, 1 Dec 2021 22:43:04 +0100</lastBuildDate>
 
+    <item>
+      <title>Composition over inheritance: Gradle vs Maven</title>
+      <link>https://melix.github.io/blog/2021/12/composition-in-gradle.html</link>
+      <pubDate>Wed, 1 Dec 2021 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2021/12/composition-in-gradle.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introduction&quot;&gt;Introduction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In general, when I read comments about Maven vs Gradle, people focus on the cosmetics (XML vs Groovy/Kotlin) when it&amp;#8217;s from my point of view the least interesting aspect of the comparison.
+In this quickie, I want to focus on one particular aspect which differentiates the 2 build tools: the famous &lt;strong&gt;composition over inheritance&lt;/strong&gt; paradigm.
+In different aspects (POM files, lifecycle), Apache Maven is using &lt;em&gt;inheritance&lt;/em&gt;, while Gradle is using &lt;em&gt;composition&lt;/em&gt;.
+It is a particularly important difference which completely changes the way we think about building software.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_inheritance_in_maven_builds&quot;&gt;Inheritance in Maven builds&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A typical Maven project is built with a &lt;em&gt;pom.xml&lt;/em&gt; file, which declares everything the module needs to build:
+- the dependencies
+- the build plugins and their configuration&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Very quickly, it turns out that there are &lt;em&gt;common things&lt;/em&gt; that you want to share between modules:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;they would use the same compiler options&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;they would use the same plugins and configuration&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;they would apply a number of common dependencies&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;etc.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s imagine that we have a project which consists of 3 modules:
+- a &lt;code&gt;library&lt;/code&gt; module, pure Java
+- an &lt;code&gt;application&lt;/code&gt; module which uses the &lt;code&gt;library&lt;/code&gt; and the &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut Framework&lt;/a&gt;
+- and a &lt;code&gt;documentation&lt;/code&gt; module which provides a user manual for the application using &lt;a href=&quot;https://asciidoctor.org&quot;&gt;Asciidoctor&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The idiomatic way to solve the problem of sharing the configuration of the &lt;code&gt;library&lt;/code&gt; and &lt;code&gt;application&lt;/code&gt; modules (which are both Java) in Maven is to define a so-called &quot;parent POM&quot; which declares all of these common things, for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint xml language-xml&quot;&gt;&lt;code&gt;&amp;lt;project xmlns=&quot;https://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;https://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&amp;gt;
+    &amp;lt;modelVersion&amp;gt;4.0.0&amp;lt;/modelVersion&amp;gt;
+
+    &amp;lt;groupId&amp;gt;org.example&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;example-parent&amp;lt;/artifactId&amp;gt;
+    &amp;lt;version&amp;gt;1.0.0-SNAPSHOT&amp;lt;/version&amp;gt;
+    &amp;lt;packaging&amp;gt;pom&amp;lt;/packaging&amp;gt;
+
+    &amp;lt;name&amp;gt;Common Config&amp;lt;/name&amp;gt;
+
+    &amp;lt;properties&amp;gt;
+        &amp;lt;java.version&amp;gt;1.8&amp;lt;/java.version&amp;gt;
+        &amp;lt;project.build.sourceEncoding&amp;gt;UTF-8&amp;lt;/project.build.sourceEncoding&amp;gt;
+        &amp;lt;junit.jupiter.version&amp;gt;5.8.1&amp;lt;/junit.jupiter.version&amp;gt;
+    &amp;lt;/properties&amp;gt;
+
+    &amp;lt;dependencies&amp;gt;
+        &amp;lt;dependency&amp;gt;
+            &amp;lt;groupId&amp;gt;org.junit.jupiter&amp;lt;/groupId&amp;gt;
+            &amp;lt;artifactId&amp;gt;junit-jupiter&amp;lt;/artifactId&amp;gt;
+            &amp;lt;version&amp;gt;${junit.jupiter.version}&amp;lt;/version&amp;gt;
+            &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
+        &amp;lt;/dependency&amp;gt;
+    &amp;lt;/dependencies&amp;gt;
+
+    &amp;lt;build&amp;gt;
+        &amp;lt;plugins&amp;gt;
+            &amp;lt;plugin&amp;gt;
+                &amp;lt;groupId&amp;gt;org.apache.maven.plugins&amp;lt;/groupId&amp;gt;
+                &amp;lt;artifactId&amp;gt;maven-surefire-plugin&amp;lt;/artifactId&amp;gt;
+                &amp;lt;version&amp;gt;3.0.0-M5&amp;lt;/version&amp;gt;
+            &amp;lt;/plugin&amp;gt;
+
+            &amp;lt;plugin&amp;gt;
+                &amp;lt;groupId&amp;gt;org.apache.maven.plugins&amp;lt;/groupId&amp;gt;
+                &amp;lt;artifactId&amp;gt;maven-compiler-plugin&amp;lt;/artifactId&amp;gt;
+                &amp;lt;version&amp;gt;3.8.1&amp;lt;/version&amp;gt;
+                &amp;lt;configuration&amp;gt;
+                    &amp;lt;source&amp;gt;${java.version}&amp;lt;/source&amp;gt;
+                    &amp;lt;target&amp;gt;1.8&amp;lt;/target&amp;gt;
+                &amp;lt;/configuration&amp;gt;
+            &amp;lt;/plugin&amp;gt;
+        &amp;lt;/plugins&amp;gt;
+    &amp;lt;/build&amp;gt;
+&amp;lt;/project&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To simplify things, we could call this a &quot;convention&quot;: by convention, all modules which will use this parent POM will apply all those plugins and dependencies.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then a &quot;child POM&quot; only has to declare the parent to &quot;inherit&quot; from the parent:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint xml language-xml&quot;&gt;&lt;code&gt;&amp;lt;project xmlns=&quot;https://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;https://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&amp;gt;
+    &amp;lt;modelVersion&amp;gt;4.0.0&amp;lt;/modelVersion&amp;gt;
+
+    &amp;lt;parent&amp;gt;
+        &amp;lt;groupId&amp;gt;org.example&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;example-parent&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;1.0.0-SNAPSHOT&amp;lt;/version&amp;gt;
+    &amp;lt;/parent&amp;gt;
+
+    &amp;lt;artifactId&amp;gt;application&amp;lt;/artifactId&amp;gt;
+
+    &amp;lt;dependencies&amp;gt;
+        &amp;lt;dependency&amp;gt;
+            &amp;lt;groupId&amp;gt;org.example&amp;lt;/groupId&amp;gt;
+            &amp;lt;artifactId&amp;gt;library&amp;lt;/artifactId&amp;gt;
+            &amp;lt;version&amp;gt;1.0.0-SNAPSHOT&amp;lt;/version&amp;gt;
+        &amp;lt;/dependency&amp;gt;
+    &amp;lt;/dependencies&amp;gt;
+
+&amp;lt;/project&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This model works really well when all modules have a lot in common, for example if they are all libraries.
+The inheritance model also makes it simple to override things.
+In the example above, we don&amp;#8217;t have to specify the &lt;code&gt;groupId&lt;/code&gt; and &lt;code&gt;version&lt;/code&gt; of our module because it will be inherited from the parent.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, this model comes with a number of drawbacks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our &lt;code&gt;library&lt;/code&gt; and &lt;code&gt;application&lt;/code&gt; modules have something in common.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you can only have a &lt;em&gt;single&lt;/em&gt; parent, meaning that you cannot inherit from a framework parent POM &lt;em&gt;and&lt;/em&gt; from your own conventions.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;it&amp;#8217;s not great for performance, because you end up configuring a lot of things which will never be necessary for your particular &quot;child&quot; module.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is typically the case when you are using a framework like &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut&lt;/a&gt; or &lt;a href=&quot;https://spring.io/projects/spring-boot&quot;&gt;Spring Boot&lt;/a&gt;.
+Because those frameworks are built with developer productivity in mind, they come with their own &quot;parent POMs&quot; which makes the lives of developers easier by avoiding a lot of copy and paste of hundreds of lines of XML.
+They also need to provide this parent POM because they would come with their own Maven plugin which works around the limitations of the lifecycle model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But then, we have a problem: on one side, you have this &quot;parent POM&quot; which is provided by the framework, and on the other side, you have your own &quot;parent POM&quot; which is providing, say, company-specific conventions (like checkstyle configuration, coordinates of Maven repositories for publication, &amp;#8230;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to be able to use both conventions, you have to create a new parent POM, and you have no choice but making your company convention parent POM inherit from the framework POM: obviously you can&amp;#8217;t change the framework POM!
+This is problematic, because it means that for every release of the framework, you have to update your company convention parent POM.
+This is also problematic for another aspect: not all the modules of your multi-project build are &quot;Spring Boot&quot; or &quot;Micronaut&quot; applications.
+Some of them may be simple Java libraries which are used by your app, but do &lt;em&gt;not&lt;/em&gt; require the framework. As a consequence, you have to create &lt;em&gt;multiple&lt;/em&gt; parents, and duplicate the configuration in each of those POM files.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This inheritance problem surfaces in different places in Maven. Another one is, as I mentioned, the &quot;lifecycle&quot; which works in phases.
+Basically, in Maven everything is executed in linear phases: if you want to do &lt;em&gt;test&lt;/em&gt;, then you &lt;em&gt;have to&lt;/em&gt; execute everything which is &lt;em&gt;before&lt;/em&gt; that phase.
+This may sound reasonable, but this model completely breaks: this is no surprise that &lt;em&gt;every single plugin&lt;/em&gt; has to implement their own &lt;code&gt;-DskipTest&lt;/code&gt; variant, in order to avoid doing work which shouldn&amp;#8217;t be done.
+I had &lt;a href=&quot;https://lists.apache.org/list?&lt;a href=&quot;mailto:users@maven.apache.org&quot;&gt;users@maven.apache.org&lt;/a&gt;:2021-9&quot;&gt;an interesting use case when implementing the GraalVM native Maven plugin&lt;/a&gt;, which requires to configure the surefire plugin to pass extra arguments.
+Long story short: this isn&amp;#8217;t possible with Maven.
+Consequence: the only workaround is the multiplication of Maven profiles, which a user has to understand, maintain, and remember.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_composition_in_gradle_builds&quot;&gt;Composition in Gradle builds&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle builds use a very different model: &lt;strong&gt;composit&lt;/strong&gt;.
+In a nutshell, in a Gradle project you don&amp;#8217;t explain &lt;em&gt;how to build&lt;/em&gt;, but &lt;em&gt;what you build&lt;/em&gt;: that is, you would say &quot;this is a library&quot;, or &quot;this is a CLI application&quot; or &quot;this is a documentation module&quot;.
+Because a library exposes an API and an application doesn&amp;#8217;t, those are &lt;em&gt;different things&lt;/em&gt;, so their conventions, and capabilities, are different.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The way you &quot;say&quot; this is in a Gradle build is by &lt;em&gt;applying plugins&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A typical Java library would apply the &lt;code&gt;java-library&lt;/code&gt; plugin, while an application would apply the &lt;code&gt;application&lt;/code&gt; plugin and a documentation project would apply, say, the &lt;code&gt;asciidoctor&lt;/code&gt; plugin.
+What do a Java library project and a documentation project have in common? Barely nothing. A Java Library has Java sources, a number of dependencies, code quality plugins applied, etc. The documentation module, on its side, is a set of markdown or asciidoc files, and resources.
+The layout of the projects is different, the &lt;em&gt;conventions&lt;/em&gt; are different, and the set of plugins are different.
+Java projects may share the same conventions for source layout, but they are obviously different for the docs.
+Also, there&amp;#8217;s &lt;em&gt;no reason&lt;/em&gt; to let the user declare &quot;implementation&quot; dependencies on the documentation project: it doesn&amp;#8217;t make sense so it should be an error to do so.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On the other hand all those modules may share a number of things:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;they are all published to a Maven repository&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;they need to use the same Java toolchain&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;they need to comply to security policies of your company&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The way Gradle solves this problem is by &lt;em&gt;composing plugins&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a plugin can &quot;apply&quot; another plugin&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;each plugin is guaranteed to be applied only once, even if several plugins use it&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a plugin can &quot;react&quot; to the application of other plugins, allowing fine-grained customizations&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So in the example above, the &lt;code&gt;application&lt;/code&gt; use case can be easily solved:
+first, you&amp;#8217;d have your own &quot;convention plugin&quot; which defines your company conventions (e.g apply the &lt;code&gt;checkstyle&lt;/code&gt; plugin with a number of rules).
+Then, you&amp;#8217;d have the Micronaut application plugin.
+Finally, your application module would simply &lt;em&gt;apply both plugins&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+   id &apos;com.mycompany.conventions&apos; version &apos;1.0.0&apos;
+   id &apos;io.micronaut.application&apos; version &apos;3.0.0&apos;
+}
+
+micronaut {
+    version &apos;3.2.0&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What becomes &lt;em&gt;more interesting&lt;/em&gt; is that you can (and you actually &lt;em&gt;should&lt;/em&gt;)  create your own &quot;component types&quot; which apply a number of plugins.
+In the example above, we could replace the application of the 2 plugins with a single one:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+   id &apos;com.mycompany.micronaut-application&apos; version &apos;3.0.0&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;note that we moved the configuration of the &lt;code&gt;micronaut&lt;/code&gt; version to our convention plugin.
+I&amp;#8217;m not going to explain how to write a custom Gradle plugin in this blog post, but the &lt;em&gt;code&lt;/em&gt; of this plugin would very much look like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+    id &apos;com.mycompany.conventions&apos; version &apos;1.0.0&apos;
+    id &apos;io.micronaut.application&apos; version &apos;3.0.0&apos;
+}
+
+micronaut {
+    version &apos;3.2.0&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Does it look familiar? Yes it does, this is &lt;em&gt;exactly&lt;/em&gt; what we had in the beginning.
+I encourage you to take a look at &lt;a href=&quot;https://docs.gradle.org/current/userguide/structuring_software_products.html&quot;&gt;this documentation&lt;/a&gt; for further details about writing your own convention plugins.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Interestingly, as I said, in Gradle plugins are allowed to &lt;em&gt;react&lt;/em&gt; to the presence of other plugins.
+This makes it particularly interesting for defining dynamically more tasks depending on the context.
+For example, a plugin can do:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;pluginManager.withPlugin(&apos;io.micronaut.application&apos;) {
+    // configure the Micronaut application plugin
+}
+pluginManager.withPlugin(&apos;io.micronaut.library&apos;) {
+    // configure the Micronaut library plugin
+}
+pluginManager.withPlugin(&apos;io.spring.boot&apos;) {
+    // configure the Spring Boot plugin
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which is very resilient to the fact that the plugins may be applied in any order and that they can combine with each other to provide higher level constructs.
+It also makes it possible to &lt;em&gt;give choice&lt;/em&gt; to users regarding their preferences: you provide a single convention plugin which is aware of what to do if the user prefers to use Spring Boot over Micronaut.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the end, &lt;code&gt;com.mycompany.micronaut-application&lt;/code&gt; is defined as a combination of the &lt;code&gt;io.micronaut.application&lt;/code&gt;, &lt;code&gt;your.company.conventions&lt;/code&gt; plugins.
+Instead of declaring &lt;em&gt;how to build&lt;/em&gt; your company application, you simply described &lt;em&gt;what it is&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is only touching the surface of the Gradle world here, but when I read that Gradle is &quot;just Ant on steroids&quot;, nothing could be more wrong.
+Gradle in this case is much superior, because it focuses on &lt;em&gt;convention over configuration&lt;/em&gt;, while providing better constructs than Maven to do it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But let&amp;#8217;s come back to our multi-project example: each of the modules would apply a different plugin (which is also why it&amp;#8217;s important to drop the &lt;em&gt;allprojects&lt;/em&gt; pattern, which is not enforcing good design):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;library&lt;/code&gt; would apply the &lt;code&gt;com.mycompany.library&lt;/code&gt; plugin&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;application&lt;/code&gt; would apply the &lt;code&gt;com.mycompany.application&lt;/code&gt; plugin&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;docs&lt;/code&gt; would apply the &lt;code&gt;com.mycompany.docs&lt;/code&gt; plugin&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;code&gt;com.mycompany.library&lt;/code&gt; plugin would, for example, apply the &lt;code&gt;java-library&lt;/code&gt; and &lt;code&gt;com.mycompany.java-conventions&lt;/code&gt; plugin.
+The &lt;code&gt;com.mycompany.application&lt;/code&gt; plugin would, for example, apply the &lt;code&gt;io.micronaut.application&lt;/code&gt; and &lt;code&gt;com.mycompany.java-conventions&lt;/code&gt; plugin (knowing that the &lt;code&gt;io.micronaut.application&lt;/code&gt; plugin applied the &lt;code&gt;application&lt;/code&gt; plugin and more, such as the GraalVM plugin)
+The &lt;code&gt;com.mycompany.docs&lt;/code&gt; plugin would, for example, apply the &lt;code&gt;org.asciidoctor.jvm.convert&lt;/code&gt; plugin and the &lt;code&gt;com.mycompany.docs&lt;/code&gt; plugin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You&amp;#8217;ll notice how those actually combine together, making it easier to maintain and upgrade builds: should you change the company conventions, all you have to do is release a new version of the convention plugin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this quickie, I have explained a major difference in how Maven and Gradle envision build configuration.
+While both of them are designed with &lt;em&gt;convention over configuration&lt;/em&gt; in mind, the inheritance model of Maven makes it difficult to build conventions on top of each other without duplication.
+On the other hand, Gradle uses a &lt;em&gt;composition&lt;/em&gt; model which makes it possible to design your own conventions while being aware of other plugins being applied by the user: Gradle builds are more lenient and more maintainable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a complement, you might be interested in:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;reading the &lt;a href=&quot;https://docs.gradle.org/current/userguide/structuring_software_products.html&quot;&gt;structuring large projects&lt;/a&gt; documentation from the Gradle docs&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;watching my &lt;a href=&quot;https://www.youtube.com/watch?v=MaansFoPHKg&amp;amp;feature=youtu.be&quot;&gt;10 mins video&lt;/a&gt; about authoring Gradle builds&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;following my former team mate Jendrik who created &lt;a href=&quot;https://www.youtube.com/playlist?list=PLWQK2ZdV4Yl2k2OmC_gsjDpdIBTN0qqkE&quot;&gt;a series of videos about modern Gradle&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Multi-repository development made easy</title>
       <link>https://melix.github.io/blog/2021/11/multirepo-dev-made-easy.html</link>
@@ -1005,264 +1365,6 @@ Thanks to Gradle&amp;#8217;s advanced dependency resolution engine, it&amp;#8217
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Please take a look at the &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sub:central-declaration-of-dependencies&quot;&gt;documentation&lt;/a&gt; for further details, and give us your feedback!&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Using Java 16 with Gradle</title>
-      <link>https://melix.github.io/blog/2021/03/gradle-java16.html</link>
-      <pubDate>Wed, 17 Mar 2021 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2021/03/gradle-java16.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;a href=&quot;https://twitter.com/java/status/1371842658256228356&quot;&gt;Java 16 is out&lt;/a&gt; and I&amp;#8217;m seeing a number of folks trying to figure out how to use Java 16 with Gradle.
-Often they would try to run Gradle with JDK 16 and see it fail.
-There&amp;#8217;s a &lt;a href=&quot;https://github.com/gradle/gradle/issues/13481&quot;&gt;ticket about Java 16 support in Gradle&lt;/a&gt; but in most cases you can already work with JDK 16 without waiting for official support.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_the_happy_path&quot;&gt;The happy path&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle 7, which is due soon, will provide official support for Java 16.
-If you have an existing build that you want to try on Java 16, you can update the wrapper to use the latest Gradle 7.0 milestone release:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;gradle/wrapper/gradle-wrapper.properties&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-milestone-3-bin.zip
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If you are lucky this is all you need to do.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;However, Gradle 7 is a major release, and as such it brings a number of changes which &lt;em&gt;may&lt;/em&gt; break your build (deprecated methods being removed, or, in particular for the Java 16 support, upgrading to Groovy 3 internally).
-It may be a bit involved to migrate to Gradle 7 just to try Java 16.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_decouple_the_java_version_used_for_gradle_itself_from_the_version_you_need&quot;&gt;Decouple the Java version used for Gradle itself from the version you need!&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;It&amp;#8217;s actually better to &lt;em&gt;decouple the version of Java required to run Gradle&lt;/em&gt; from the &lt;em&gt;version of Java your application requires&lt;/em&gt;.
-In general, it&amp;#8217;s actually considered the &lt;strong&gt;best practice&lt;/strong&gt; to use whatever version of the JDK Gradle officially supports to run Gradle itself, and configure the build to &lt;strong&gt;use a different JDK&lt;/strong&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_configuring_java_toolchains&quot;&gt;Configuring Java toolchains&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In Gradle terminology, this is called activating &lt;a href=&quot;https://docs.gradle.org/6.8.3/userguide/toolchains.html&quot;&gt;Java Toolchains&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s get started with a sample project running on latest stable Gradle, which is 6.8.3.
-Make sure that you have Gradle 6.8.3 on your PATH to get started.
-I&amp;#8217;m personally recommending to use &lt;a href=&quot;https://sdkman.io/&quot;&gt;sdkman!&lt;/a&gt; to install Gradle:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ sdk install gradle 6.8.3&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At the same time, we want to make sure we run Gradle with a supported version, which is anything between Java 8 and 15:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ java -version
-java -version
-openjdk version &quot;11.0.9.1&quot; 2020-11-04
-OpenJDK Runtime Environment 18.9 (build 11.0.9.1+1)
-OpenJDK 64-Bit Server VM 18.9 (build 11.0.9.1+1, mixed mode)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If it outputs something else than 8 to 15, please make sure to update your PATH to point to such a JDK.
-Again you can do this with sdkman!:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ sdk install java 11.0.9.open&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_demo_application&quot;&gt;Demo application&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now, let&amp;#8217;s create a sample Gradle project:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ mkdir demo-app
-$ cd demo-app
-$ gradle init&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then select:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;Select type of project to generate:
-  1: basic
-  2: application
-  3: library
-  4: Gradle plugin
-Enter selection (default: basic) [1..4] 2
-
-Select implementation language:
-  1: C++
-  2: Groovy
-  3: Java
-  4: Kotlin
-  5: Scala
-  6: Swift
-Enter selection (default: Java) [1..6] 3
-
-Split functionality across multiple subprojects?:
-  1: no - only one application project
-  2: yes - application and library projects
-Enter selection (default: no - only one application project) [1..2] 1
-
-Select build script DSL:
-  1: Groovy
-  2: Kotlin
-Enter selection (default: Groovy) [1..2] 1
-
-Select test framework:
-  1: JUnit 4
-  2: TestNG
-  3: Spock
-  4: JUnit Jupiter
-Enter selection (default: JUnit 4) [1..4] 4
-
-Project name (default: demo-app):
-Source package (default: demo.app):&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;and confirm the default name and packages.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then let&amp;#8217;s run our app:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;$ ./gradlew run
-
-&amp;gt; Task :app:run
-Hello World!
-
-BUILD SUCCESSFUL in 4s
-2 actionable tasks: 2 executed&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_migrating_the_application_to_java_16&quot;&gt;Migrating the application to Java 16&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;All good! Now let&amp;#8217;s configure Gradle to use Java 16 to build and run our app instead.
-Let&amp;#8217;s open the build script, found under &lt;code&gt;app&lt;/code&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;app/build.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
-    id &apos;application&apos;
-}
-
-// Add this under the `plugins` section:
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The &lt;code&gt;java.toolchain&lt;/code&gt; block lets us configure the &lt;em&gt;toolchain&lt;/em&gt; that Gradle is going to use to build and run your application.
-We&amp;#8217;re setting 16, which means that we&amp;#8217;re going to compile the main and test sources as well as execute the with a Java 16 JDK.
-Gradle will automatically try to find if you have a Java 16 installation in a conventional location.
-If it cannot find one you will see something like this happening:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;quoteblock&quot;&gt;
-&lt;blockquote&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Provisioning toolchain adoptopenjdk-16-x64-linux.tar.gz &amp;gt; adoptopenjdk-16-x64-linux.tar.gz &amp;gt; 66 MiB/195.8 MiB&lt;/p&gt;
-&lt;/div&gt;
-&lt;/blockquote&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;which means that Gradle is downloading the JDK for you!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s check:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;./gradlew run&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;strong&gt;Dang!&lt;/strong&gt; The &lt;a href=&quot;https://scans.gradle.com/s/gogpwzdj5zf6q/console-log?anchor=14&quot;&gt;build fails!&lt;/a&gt;.
-To some extent, it&amp;#8217;s good news, it means that Gradle is really using Java 16, but why is it failing?&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_disabling_incremental_compilation&quot;&gt;Disabling incremental compilation&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Well, you&amp;#8217;re facing one of the bugs we fixed in 7, which is that our &lt;em&gt;incremental compiler&lt;/em&gt; isn&amp;#8217;t compatible with Java 16 because we&amp;#8217;re using classes which have been made &quot;hidden&quot; by the module system in Java 16.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There&amp;#8217;s an easy fix: let&amp;#8217;s disable incremental compilation!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Again, let&amp;#8217;s open our &lt;code&gt;app/build.gradle&lt;/code&gt; file and add this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.withType(JavaCompile).configureEach {
-	// disable incremental compilation
-    options.incremental = false
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And let&amp;#8217;s run the build again:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint bash language-bash&quot;&gt;&lt;code&gt;./gradlew run&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Yay! This time the &lt;a href=&quot;https://scans.gradle.com/s/czapxbvfqxt72/console-log?anchor=7&quot;&gt;build passed!&lt;/a&gt;
-Congrats, you have your first Java 16 app running!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Alternatively to disabling incremental compilation, you might just want to let Gradle access the JDK internals.
-This solution is better for performance, even if a bit &quot;hackish&quot;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;tasks.withType(JavaCompile).configureEach {
-    options.forkOptions.jvmArgs.addAll( [&apos;--add-opens&apos;, &apos;jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED&apos;] )
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In case you want to use one of the experimental features that Java 16 provides, the setup I&amp;#8217;ve described in a &lt;a href=&quot;https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html&quot;&gt;previous post about Java Feature Previews&lt;/a&gt; still hold and is a good follow-up to this post!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
