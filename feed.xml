@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 1 Dec 2021 22:43:34 +0100</pubDate>
-    <lastBuildDate>Wed, 1 Dec 2021 22:43:34 +0100</lastBuildDate>
+    <pubDate>Thu, 2 Dec 2021 00:15:05 +0100</pubDate>
+    <lastBuildDate>Thu, 2 Dec 2021 00:15:05 +0100</lastBuildDate>
 
     <item>
       <title>Composition over inheritance: Gradle vs Maven</title>
@@ -19,8 +19,8 @@
 &lt;h2 id=&quot;_introduction&quot;&gt;Introduction&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In general, when I read comments about Maven vs Gradle, people focus on the cosmetics (XML vs Groovy/Kotlin) when it&amp;#8217;s from my point of view the least interesting aspect of the comparison.
-In this quickie, I want to focus on one particular aspect which differentiates the 2 build tools: the famous &lt;strong&gt;composition over inheritance&lt;/strong&gt; paradigm.
+&lt;p&gt;In general, when I read comments about Maven vs Gradle, I realize that people focus on the cosmetics (XML vs Groovy/Kotlin) when it&amp;#8217;s from my point of view the least interesting aspect of the comparison.
+In this article, I want to focus on one particular aspect which differentiates the 2 build tools: the famous &lt;strong&gt;composition over inheritance&lt;/strong&gt; paradigm.
 In different aspects (POM files, lifecycle), Apache Maven is using &lt;em&gt;inheritance&lt;/em&gt;, while Gradle is using &lt;em&gt;composition&lt;/em&gt;.
 It is a particularly important difference which completely changes the way we think about building software.&lt;/p&gt;
 &lt;/div&gt;
@@ -30,7 +30,7 @@ It is a particularly important difference which completely changes the way we th
 &lt;h2 id=&quot;_inheritance_in_maven_builds&quot;&gt;Inheritance in Maven builds&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A typical Maven project is built with a &lt;em&gt;pom.xml&lt;/em&gt; file, which declares everything the module needs to build:
+&lt;p&gt;A typical Maven project is built with a &lt;em&gt;pom.xml&lt;/em&gt; file, which declares everything the module needs:
 - the dependencies
 - the build plugins and their configuration&lt;/p&gt;
 &lt;/div&gt;
@@ -113,10 +113,10 @@ It is a particularly important difference which completely changes the way we th
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To simplify things, we could call this a &quot;convention&quot;: by convention, all modules which will use this parent POM will apply all those plugins and dependencies.&lt;/p&gt;
+&lt;p&gt;To simplify things, we could call this a &quot;convention&quot;: by convention, all modules which will use this parent POM will apply all those plugins and dependencies (note, there are subtleties if you use &lt;code&gt;&amp;lt;pluginManagement&amp;gt;&lt;/code&gt; or &lt;code&gt;&amp;lt;dependencyManagement&amp;gt;&lt;/code&gt;).&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then a &quot;child POM&quot; only has to declare the parent to &quot;inherit&quot; from the parent:&lt;/p&gt;
+&lt;p&gt;A &quot;child POM&quot; like our application pom only has to declare the parent to &quot;inherit&quot; from it:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -144,8 +144,8 @@ It is a particularly important difference which completely changes the way we th
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This model works really well when all modules have a lot in common, for example if they are all libraries.
-The inheritance model also makes it simple to override things.
+&lt;p&gt;This model works really well when all modules have a lot in common.
+The inheritance model also makes it simple to override things (child values override parent values).
 In the example above, we don&amp;#8217;t have to specify the &lt;code&gt;groupId&lt;/code&gt; and &lt;code&gt;version&lt;/code&gt; of our module because it will be inherited from the parent.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -162,26 +162,30 @@ In the example above, we don&amp;#8217;t have to specify the &lt;code&gt;groupId
 &lt;li&gt;
 &lt;p&gt;it&amp;#8217;s not great for performance, because you end up configuring a lot of things which will never be necessary for your particular &quot;child&quot; module.&lt;/p&gt;
 &lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;overriding values is sometimes much more complicated and you have to start relying on obscure syntaxes like &lt;code&gt;combine.children=&quot;append&quot;&lt;/code&gt; (see &lt;a href=&quot;https://www.baeldung.com/maven-plugin-override-parent&quot;&gt;this excellent blog post&lt;/a&gt; for details).&lt;/p&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This is typically the case when you are using a framework like &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut&lt;/a&gt; or &lt;a href=&quot;https://spring.io/projects/spring-boot&quot;&gt;Spring Boot&lt;/a&gt;.
-Because those frameworks are built with developer productivity in mind, they come with their own &quot;parent POMs&quot; which makes the lives of developers easier by avoiding a lot of copy and paste of hundreds of lines of XML.
+&lt;p&gt;Those limitations are quickly reached when you are using a framework like &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut&lt;/a&gt; or &lt;a href=&quot;https://spring.io/projects/spring-boot&quot;&gt;Spring Boot&lt;/a&gt;.
+Because those frameworks are built with developer productivity in mind, they come with their own &quot;parent POMs&quot; which makes the lives of developers easier by avoiding copy and paste of hundreds of lines of XML.
 They also need to provide this parent POM because they would come with their own Maven plugin which works around the limitations of the lifecycle model.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But then, we have a problem: on one side, you have this &quot;parent POM&quot; which is provided by the framework, and on the other side, you have your own &quot;parent POM&quot; which is providing, say, company-specific conventions (like checkstyle configuration, coordinates of Maven repositories for publication, &amp;#8230;).&lt;/p&gt;
+&lt;p&gt;But then, we have a problem: on one side, you have this &quot;parent POM&quot; which is provided by the framework, and on the other side, you have your own &quot;parent POM&quot; which is providing, say, the company-specific conventions (like checkstyle configuration, coordinates of Maven repositories for publication, etc.).&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In order to be able to use both conventions, you have to create a new parent POM, and you have no choice but making your company convention parent POM inherit from the framework POM: obviously you can&amp;#8217;t change the framework POM!
-This is problematic, because it means that for every release of the framework, you have to update your company convention parent POM.
+&lt;p&gt;In order to be able to use both conventions, you have to create a new parent POM, and you have no choice but writing your company convention parent POM inheriting from the framework POM: obviously you can&amp;#8217;t change the framework POM itself!
+This is problematic, because it means that &lt;strong&gt;for every release of the framework, you have to update your company convention parent POM&lt;/strong&gt;.
 This is also problematic for another aspect: not all the modules of your multi-project build are &quot;Spring Boot&quot; or &quot;Micronaut&quot; applications.
 Some of them may be simple Java libraries which are used by your app, but do &lt;em&gt;not&lt;/em&gt; require the framework. As a consequence, you have to create &lt;em&gt;multiple&lt;/em&gt; parents, and duplicate the configuration in each of those POM files.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This inheritance problem surfaces in different places in Maven. Another one is, as I mentioned, the &quot;lifecycle&quot; which works in phases.
-Basically, in Maven everything is executed in linear phases: if you want to do &lt;em&gt;test&lt;/em&gt;, then you &lt;em&gt;have to&lt;/em&gt; execute everything which is &lt;em&gt;before&lt;/em&gt; that phase.
-This may sound reasonable, but this model completely breaks: this is no surprise that &lt;em&gt;every single plugin&lt;/em&gt; has to implement their own &lt;code&gt;-DskipTest&lt;/code&gt; variant, in order to avoid doing work which shouldn&amp;#8217;t be done.
+&lt;p&gt;This inheritance problem surfaces in different places in Maven.
+Another one is, as I mentioned, the &quot;lifecycle&quot; which works in phases.
+Basically, in Maven everything is executed linearly: if you want to do &lt;em&gt;install&lt;/em&gt;, then you &lt;em&gt;have to&lt;/em&gt; execute everything which is &lt;em&gt;before&lt;/em&gt; that phase, which includes, for example, &lt;em&gt;test&lt;/em&gt;.
+This may sound reasonable, but this model completely falls apart: this is no surprise that &lt;em&gt;every single plugin&lt;/em&gt; has to implement their own &lt;code&gt;-DskipTest&lt;/code&gt; variant, in order to avoid doing work which shouldn&amp;#8217;t be done.
 I had &lt;a href=&quot;https://lists.apache.org/list?&lt;a href=&quot;mailto:users@maven.apache.org&quot;&gt;users@maven.apache.org&lt;/a&gt;:2021-9&quot;&gt;an interesting use case when implementing the GraalVM native Maven plugin&lt;/a&gt;, which requires to configure the surefire plugin to pass extra arguments.
 Long story short: this isn&amp;#8217;t possible with Maven.
 Consequence: the only workaround is the multiplication of Maven profiles, which a user has to understand, maintain, and remember.&lt;/p&gt;
@@ -189,7 +193,7 @@ Consequence: the only workaround is the multiplication of Maven profiles, which 
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;_composition_in_gradle_builds&quot;&gt;Composition in Gradle builds&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle builds use a very different model: &lt;strong&gt;composit&lt;/strong&gt;.
+&lt;p&gt;Gradle builds use a very different model: &lt;strong&gt;composition&lt;/strong&gt;.
 In a nutshell, in a Gradle project you don&amp;#8217;t explain &lt;em&gt;how to build&lt;/em&gt;, but &lt;em&gt;what you build&lt;/em&gt;: that is, you would say &quot;this is a library&quot;, or &quot;this is a CLI application&quot; or &quot;this is a documentation module&quot;.
 Because a library exposes an API and an application doesn&amp;#8217;t, those are &lt;em&gt;different things&lt;/em&gt;, so their conventions, and capabilities, are different.&lt;/p&gt;
 &lt;/div&gt;
@@ -198,10 +202,12 @@ Because a library exposes an API and an application doesn&amp;#8217;t, those are
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;A typical Java library would apply the &lt;code&gt;java-library&lt;/code&gt; plugin, while an application would apply the &lt;code&gt;application&lt;/code&gt; plugin and a documentation project would apply, say, the &lt;code&gt;asciidoctor&lt;/code&gt; plugin.
-What do a Java library project and a documentation project have in common? Barely nothing. A Java Library has Java sources, a number of dependencies, code quality plugins applied, etc. The documentation module, on its side, is a set of markdown or asciidoc files, and resources.
+What do a Java library project and a documentation project have in common? Barely nothing.
+A Java Library has Java sources, a number of dependencies, code quality plugins applied, etc.
+The documentation module, on its side, is a set of markdown or asciidoc files, and resources.
 The layout of the projects is different, the &lt;em&gt;conventions&lt;/em&gt; are different, and the set of plugins are different.
 Java projects may share the same conventions for source layout, but they are obviously different for the docs.
-Also, there&amp;#8217;s &lt;em&gt;no reason&lt;/em&gt; to let the user declare &quot;implementation&quot; dependencies on the documentation project: it doesn&amp;#8217;t make sense so it should be an error to do so.&lt;/p&gt;
+In addition, there&amp;#8217;s &lt;em&gt;no reason&lt;/em&gt; to let the user declare &quot;implementation&quot; dependencies on the documentation project: it doesn&amp;#8217;t make sense so it should be an error to do so.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;On the other hand all those modules may share a number of things:&lt;/p&gt;
@@ -238,7 +244,7 @@ Also, there&amp;#8217;s &lt;em&gt;no reason&lt;/em&gt; to let the user declare &
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;So in the example above, the &lt;code&gt;application&lt;/code&gt; use case can be easily solved:
 first, you&amp;#8217;d have your own &quot;convention plugin&quot; which defines your company conventions (e.g apply the &lt;code&gt;checkstyle&lt;/code&gt; plugin with a number of rules).
-Then, you&amp;#8217;d have the Micronaut application plugin.
+Then, you&amp;#8217;d have the Micronaut application plugin which is already written for you.
 Finally, your application module would simply &lt;em&gt;apply both plugins&lt;/em&gt;:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
@@ -255,7 +261,7 @@ micronaut {
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;What becomes &lt;em&gt;more interesting&lt;/em&gt; is that you can (and you actually &lt;em&gt;should&lt;/em&gt;)  create your own &quot;component types&quot; which apply a number of plugins.
-In the example above, we could replace the application of the 2 plugins with a single one:&lt;/p&gt;
+In the example above, we could replace the use of the 2 plugins with a single one:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -265,7 +271,7 @@ In the example above, we could replace the application of the 2 plugins with a s
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;note that we moved the configuration of the &lt;code&gt;micronaut&lt;/code&gt; version to our convention plugin.
+&lt;p&gt;Note how we moved the configuration of the &lt;code&gt;micronaut&lt;/code&gt; version to our convention plugin.
 I&amp;#8217;m not going to explain how to write a custom Gradle plugin in this blog post, but the &lt;em&gt;code&lt;/em&gt; of this plugin would very much look like this:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
@@ -281,12 +287,12 @@ micronaut {
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Does it look familiar? Yes it does, this is &lt;em&gt;exactly&lt;/em&gt; what we had in the beginning.
+&lt;p&gt;Does it look familiar? Yes it does, this is &lt;em&gt;exactly&lt;/em&gt; what we had in the beginning: composition is slowly happening!
 I encourage you to take a look at &lt;a href=&quot;https://docs.gradle.org/current/userguide/structuring_software_products.html&quot;&gt;this documentation&lt;/a&gt; for further details about writing your own convention plugins.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Interestingly, as I said, in Gradle plugins are allowed to &lt;em&gt;react&lt;/em&gt; to the presence of other plugins.
-This makes it particularly interesting for defining dynamically more tasks depending on the context.
+&lt;p&gt;Interestingly, as I said, Gradle plugins are allowed to &lt;em&gt;react&lt;/em&gt; to the presence of other plugins.
+This makes it particularly neat for defining dynamically more tasks depending on the context.
 For example, a plugin can do:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
@@ -311,11 +317,11 @@ It also makes it possible to &lt;em&gt;give choice&lt;/em&gt; to users regarding
 Instead of declaring &lt;em&gt;how to build&lt;/em&gt; your company application, you simply described &lt;em&gt;what it is&lt;/em&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This is only touching the surface of the Gradle world here, but when I read that Gradle is &quot;just Ant on steroids&quot;, nothing could be more wrong.
-Gradle in this case is much superior, because it focuses on &lt;em&gt;convention over configuration&lt;/em&gt;, while providing better constructs than Maven to do it.&lt;/p&gt;
+&lt;p&gt;This is only touching the surface of the Gradle world here, but when I read that Gradle is &quot;just Ant on steroids&quot;, &lt;strong&gt;nothing could be more wrong&lt;/strong&gt;.
+Gradle in this case is much superior, because it focuses on &lt;em&gt;convention over configuration&lt;/em&gt;, while providing better constructs than Maven does for it.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But let&amp;#8217;s come back to our multi-project example: each of the modules would apply a different plugin (which is also why it&amp;#8217;s important to drop the &lt;em&gt;allprojects&lt;/em&gt; pattern, which is not enforcing good design):&lt;/p&gt;
+&lt;p&gt;But let&amp;#8217;s come back to our multi-project example: each of the modules would apply a different convention plugin (which is also why it&amp;#8217;s important that the &lt;em&gt;allprojects&lt;/em&gt; pattern dies):&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
