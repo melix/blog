@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 2 Dec 2021 00:15:05 +0100</pubDate>
-    <lastBuildDate>Thu, 2 Dec 2021 00:15:05 +0100</lastBuildDate>
+    <pubDate>Thu, 2 Dec 2021 08:42:05 +0100</pubDate>
+    <lastBuildDate>Thu, 2 Dec 2021 08:42:05 +0100</lastBuildDate>
 
     <item>
       <title>Composition over inheritance: Gradle vs Maven</title>
@@ -154,7 +154,7 @@ In the example above, we don&amp;#8217;t have to specify the &lt;code&gt;groupId
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our &lt;code&gt;library&lt;/code&gt; and &lt;code&gt;application&lt;/code&gt; modules have something in common.&lt;/p&gt;
+&lt;p&gt;as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our &lt;code&gt;library&lt;/code&gt; and &lt;code&gt;application&lt;/code&gt; modules have something in common. It won&amp;#8217;t be a surprise for many that you have to &lt;em&gt;exclude dependencies&lt;/em&gt; just because they came through parent poms&amp;#8230;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;you can only have a &lt;em&gt;single&lt;/em&gt; parent, meaning that you cannot inherit from a framework parent POM &lt;em&gt;and&lt;/em&gt; from your own conventions.&lt;/p&gt;

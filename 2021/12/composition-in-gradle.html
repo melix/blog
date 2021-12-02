@@ -219,7 +219,7 @@ In the example above, we don&#8217;t have to specify the <code>groupId</code> an
 <div class="ulist">
 <ul>
 <li>
-<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common.</p>
+<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common. It won&#8217;t be a surprise for many that you have to <em>exclude dependencies</em> just because they came through parent poms&#8230;</p>
 </li>
 <li>
 <p>you can only have a <em>single</em> parent, meaning that you cannot inherit from a framework parent POM <em>and</em> from your own conventions.</p>
