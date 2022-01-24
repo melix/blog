@@ -6,9 +6,736 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 2 Dec 2021 08:42:05 +0100</pubDate>
-    <lastBuildDate>Thu, 2 Dec 2021 08:42:05 +0100</lastBuildDate>
+    <pubDate>Mon, 24 Jan 2022 12:58:19 +0100</pubDate>
+    <lastBuildDate>Mon, 24 Jan 2022 12:58:19 +0100</lastBuildDate>
 
+    <item>
+      <title>Understanding Gradle plugins: the provider API</title>
+      <link>https://melix.github.io/blog/2022/01/understanding-provider-api.html</link>
+      <pubDate>Mon, 24 Jan 2022 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2022/01/understanding-provider-api.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introduction&quot;&gt;Introduction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last week, a colleague of mine pinged me about a problem he was facing in a new Micronaut module, with &lt;a href=&quot;https://github.com/JetBrains/gradle-grammar-kit-plugin&quot;&gt;Jetbrains&apos; Grammar-Kit plugin&lt;/a&gt;, a plugin which integrates with &lt;a href=&quot;https://jflex.de/manual.html&quot;&gt;JFlex&lt;/a&gt;.
+We discovered a couple of issues:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;the plugin is adding repositories transparently to the build, in particular Jitpack.io and an internal Jetbrains mirror, which is a very bad practice as it is introducing a security risk, and could also lead to build reproducibility problems&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the plugin isn&amp;#8217;t compatible with Gradle&amp;#8217;s lazy configuration API, making the build slower than it could be, by forcing the creation of tasks which do not necessarily need to be called&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last but not least, we also discovered that the JFlex API itself has problems: it&amp;#8217;s using shared mutable state (here &lt;em&gt;static state&lt;/em&gt;) for configuration, making it inherently not thread safe.
+Because what we had to do was pretty simple (take a jflex file and generate a lexer from it), we took advantage of this to write our own Gradle plugin to handle calls to JFlex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, the question I got from my colleague was legitimate:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;How do I link the task to run in the right phase, create a proper output dir, and add it to the java compile source set? Is there a good example plugin that does source generation that I could look at?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post we&amp;#8217;re going to answer those questions and show how Gradle elegantly solves all the above problems.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_anatomy_of_a_plugin&quot;&gt;Anatomy of a plugin&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Gradle, a plugin essentially consists in registering a number of tasks (things which execute actions, like compiling sources), or so-called extensions (exposed to the user in the form of a DSL for configuring the build).
+There isn&amp;#8217;t a difference between what a plugin can do and what you can do in a build script, however, as soon as you have things which go beyond &lt;em&gt;configuration&lt;/em&gt;, it&amp;#8217;s a good idea to move things into a plugin.
+The nice thing is that creating a plugin in Gradle is quite straightforward, and doesn&amp;#8217;t even require you to publish the plugin on Maven Central or the Gradle Plugin Repository: everything can be local to your project.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In our case, we want to create a task which is going to invoke the JFlex library to parse some &lt;code&gt;.jflex&lt;/code&gt; files and generate &lt;code&gt;.java&lt;/code&gt; files, so let&amp;#8217;s do it!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all, we&amp;#8217;re going to create a directory for our plugin, a &lt;code&gt;jflex-plugin&lt;/code&gt; directory at the root of our existing project.
+We&amp;#8217;re also going to create 2 files in that directory:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;flex-plugin/settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;rootProject.name = &apos;jflex-plugin&apos;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;flex-plugin/build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+    id &apos;java-gradle-plugin&apos;
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation &apos;de.jflex:jflex:1.8.2&apos;
+}
+
+gradlePlugin {
+    plugins {
+        jflex {
+            id = &apos;io.micronaut.internal.jflex&apos;
+            implementationClass = &apos;io.micronaut.internal.jflex.JFlexPlugin&apos;
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What does this already tell us?
+First of all, that our plugin is an independent Gradle project: it lives in the same repository as our main project, but it&amp;#8217;s really an independent build.
+Second, it defines a &lt;code&gt;java-gradle-plugin&lt;/code&gt;, which is the Gradle way of saying &quot;this is a plugin for Gradle, written in Java&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This plugin has an implementation dependency on &lt;code&gt;jflex&lt;/code&gt;, and it declares the &lt;code&gt;id&lt;/code&gt; of the plugin, as well as its implementation class.
+This is all the boilerplate you have to write to create a plugin, really.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because our main build is going to use this plugin, we also have to edit the main build &lt;code&gt;settings.gradle&lt;/code&gt; file to &lt;em&gt;include&lt;/em&gt; that plugin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;includeBuild &quot;jflex-plugin&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This makes it possible to apply our JFlex plugin in our project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+    id &apos;java-library&apos;
+    id &apos;io.micronaut.internal.jflex&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We use the plugin id that we have defined in our plugin descriptor.
+This is how Gradle knows how to wire things together: by using this plugin request, it will automatically trigger the &lt;code&gt;jflex-plugin&lt;/code&gt; build.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+It wouldn&amp;#8217;t bother building the plugin if it wasn&amp;#8217;t used at all, which would be the case, for example, if we had multiple subprojects and that only one of them uses the plugin: depending on what we build, we may need to build the plugin or not.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_provider_api&quot;&gt;The provider API&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For the sake of learning, we&amp;#8217;ll start our implementation with what is most &quot;natural&quot; to developers: if you are familiar with Maven, you&amp;#8217;ll think of a Mojo.
+If you are familiar with Ant, it&amp;#8217;s a task.
+Similarly, in Gradle, the unit which is responsible for executing an action is called a task.
+In our case, we want a task which is going to read JFlex files and generate sources.
+Here&amp;#8217;s its skeleton:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;@CacheableTask                                                  &lt;b&gt;(1)&lt;/b&gt;
+public abstract class JFlexTask extends DefaultTask {           &lt;b&gt;(2)&lt;/b&gt;
+
+    @InputDirectory                                             &lt;b&gt;(3)&lt;/b&gt;
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getSourceDirectory();
+
+    @OutputDirectory                                            &lt;b&gt;(4)&lt;/b&gt;
+    public abstract DirectoryProperty getOutputDirectory();
+
+    @TaskAction                                                 &lt;b&gt;(5)&lt;/b&gt;
+    public void generateSources() {
+      // call JFlex library
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;This annotation tells Gradle that the result of executing this task can be cached&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;every Gradle task needs to extend the &lt;code&gt;DefaultTask&lt;/code&gt; type&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the &lt;em&gt;input&lt;/em&gt; of our task is a directory containing JFlex files&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the &lt;em&gt;output&lt;/em&gt; of our task is going to be a directory containing generated Java files&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;this is the main task action, which is going to call JFlex&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s explore a bit how this task is defined.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, note how our task is defined &lt;em&gt;abstract&lt;/em&gt;: this is because we will let Gradle generate boilerplate code for us, in particular how to &lt;em&gt;inject&lt;/em&gt; the input and output properties.
+We&amp;#8217;ll see later more reasons why it&amp;#8217;s interesting to let Gradle to this for you, but for now the obvious reason is that it reduces the amount of code you have to write: you don&amp;#8217;t need to know how to create a &lt;code&gt;DirectoryProperty&lt;/code&gt;: Gradle will do it for you.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Second, note how we are using &lt;code&gt;DirectoryProperty&lt;/code&gt; as the type for our input and output properties.
+This is a very important Gradle type, which belongs to the so-called &quot;provider API&quot; or, as you can sometimes read, the &quot;lazy API&quot;.
+Most of the ordering problems that earlier versions of Gradle had are fixed by this API, so use it!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One thing we can notice is that it&amp;#8217;s &lt;em&gt;strongly typed&lt;/em&gt;: to declare an input directory, we don&amp;#8217;t define the property as a &lt;em&gt;File&lt;/em&gt; or &lt;em&gt;Path&lt;/em&gt;: it&amp;#8217;s a &lt;em&gt;directory&lt;/em&gt;, which helps both Gradle and users understand what you are supposed to give as an input: if the property is set to a regular file, then Gradle can provide a reasonable error message explaining that it expected a directory instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s time to introduce how you could use this type in a build script:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.register(&quot;generateLexer&quot;, JFlexTask) {
+    sourceDirectory.set(layout.projectDirectory.dir(&apos;src/main/jflex&apos;)) &lt;b&gt;(1)&lt;/b&gt;
+    outputDirectory.set(layout.buildDirectory.dir(&apos;generated/jflex&apos;))  &lt;b&gt;(2)&lt;/b&gt;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;set the input directory to &lt;code&gt;src/main/jflex&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;set the output directory to &lt;code&gt;build/generated/jflex&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It may sound a bit complicated to declare, especially if you were used to the following syntax:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.register(&quot;generateLexer&quot;, JFlexTask) {
+    sourceDirectory = file(&quot;src/main/jflex&quot;)
+    outputDirectory = file(&quot;build/generated/jflex&apos;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;code&gt;register&lt;/code&gt; is the new &lt;code&gt;create&lt;/code&gt;: you should never use &lt;em&gt;create&lt;/em&gt; anymore, as it eagerly creates tasks, which means configuring them &lt;em&gt;even if they won&amp;#8217;t participate in the task graph&lt;/em&gt;, while &lt;em&gt;register&lt;/em&gt; is lazy: if a task needs to be executed, and only if, it&amp;#8217;s going to be configured.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Interestingly, this syntax &lt;code&gt;outputDirectory = file(&quot;build/generated/jflex&apos;)&lt;/code&gt; is still valid with our properties and would lead to the same result if executed.
+It&amp;#8217;s simpler, so why should you bother with the more complex syntax?
+To understand this, let&amp;#8217;s focus on the output directory, which makes it more obvious what is going on: compare &lt;code&gt;build/generated/jflex&lt;/code&gt; with &lt;code&gt;layout.buildDirectory.dir(&apos;generated/jflex&apos;)&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the 1st case, the output directory is &lt;em&gt;hardcoded&lt;/em&gt; to the &lt;code&gt;build/generated/jflex&lt;/code&gt; directory.
+In the 2d case, the output directory is &lt;em&gt;derived from&lt;/em&gt; the location of the build directory.
+It means that if, for some reason, your build is configured to use a different output directory than the conventional &lt;code&gt;build&lt;/code&gt; directory, say &lt;code&gt;target&lt;/code&gt; (as in Maven).
+In the 1st case, the output directory of the task would be &lt;code&gt;build/generated/jflex&lt;/code&gt;, so it would be writing to the wrong directory.
+In the 2d case, the output would be correctly wired to &lt;code&gt;target/generated/jflex&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Some smart Gradle users might think they could workaround the problem by using &lt;code&gt;file(&quot;$buildDir/generated/jflex&quot;)&lt;/code&gt; instead.
+That&amp;#8217;s better, but not sufficient, because the result depends on &lt;em&gt;when&lt;/em&gt; this is called: if the build directory is changed &lt;em&gt;after&lt;/em&gt; the task is configured, then you&amp;#8217;d get the wrong result, which is why lots of users start to randomly add &lt;code&gt;afterEvaluate&lt;/code&gt; to workaround such problems.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Outcome #1&lt;/strong&gt;: The provider API solves ordering issues and avoids spurious calls to &lt;code&gt;afterEvaluate&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_convention_plugins&quot;&gt;Convention plugins&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the beginning of this blog post, I mentioned that what we want to avoid users to create tasks directly in their build scripts: this is a sign that the code should be moved to a &lt;em&gt;plugin&lt;/em&gt;.
+This is exactly what we&amp;#8217;re going to do, so instead of asking the user to declare the task, we&amp;#8217;re going to do it for them.
+It&amp;#8217;s time to create our plugin class:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexPlugin.java&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public class JFlexPlugin implements Plugin&amp;lt;Project&amp;gt; {                                  &lt;b&gt;(1)&lt;/b&gt;
+    @Override
+    public void apply(Project project) {
+        project.getPluginManager().apply(JavaPlugin.class);                            &lt;b&gt;(2)&lt;/b&gt;
+        JavaPluginExtension javaExt = project.getExtensions()
+           .getByType(JavaPluginExtension.class);                                      &lt;b&gt;(3)&lt;/b&gt;
+        TaskProvider&amp;lt;JFlexTask&amp;gt; generateLexer = project.getTasks()
+            .register(&quot;generateLexer&quot;, JFlexTask.class, task -&amp;gt; {                      &lt;b&gt;(4)&lt;/b&gt;
+               task.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+               task.setDescription(&quot;Generates lexer files from JFlex grammar files.&quot;);
+               task.getSourceDirectory().convention(
+                    project.getLayout().getProjectDirectory().dir(&quot;src/main/jflex&quot;)    &lt;b&gt;(5)&lt;/b&gt;
+               );
+               task.getOutputDirectory().convention(
+                    project.getLayout().getBuildDirectory().dir(&quot;generated/jflex&quot;)     &lt;b&gt;(6)&lt;/b&gt;
+               );
+        });
+        // Register the output of the JFlex task as generated sources
+        javaExt.getSourceSets()
+                .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                .getJava()
+                .srcDir(generateLexer);                                                &lt;b&gt;(7)&lt;/b&gt;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Declare a &lt;em&gt;project scoped&lt;/em&gt; plugin&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;This plugin will contribute Java sources, so it &lt;em&gt;depends on&lt;/em&gt; the Java plugin, let&amp;#8217;s apply it&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The Java plugin defines a Java extension that we&amp;#8217;re going to need&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Registers our &lt;code&gt;generateLexer&lt;/code&gt; task&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Defines the conventional (&lt;em&gt;default&lt;/em&gt;) location of JFlex source files&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Defines the conventional (&lt;em&gt;default&lt;/em&gt;) location of generated sources&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Defines that the output of the task are Java files which need to be compiled&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I recommend writing plugins in plain Java, but you could use Groovy or Kotlin.
+It makes things a bit more verbose, but they are clearer and &quot;DSL magic&quot; free.
+Let&amp;#8217;s explore what the plugin is doing.
+First of all, it&amp;#8217;s a &lt;em&gt;project plugin&lt;/em&gt;, which basically means it&amp;#8217;s a plugin which is supposed to be applied on a &lt;em&gt;project&lt;/em&gt; build file, so typically a &lt;code&gt;build.gradle&lt;/code&gt; file.
+There are other kinds of plugins in Gradle, which I won&amp;#8217;t cover in this post.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For the most part, the plugin does &lt;em&gt;exactly&lt;/em&gt; what we had in the build script: it registers a task, gives it a description, but more importantly, it sets the &lt;em&gt;conventional&lt;/em&gt; values of inputs and outputs.
+Note how I used the &lt;code&gt;convention&lt;/code&gt; method to set the input directory, instead of the &lt;code&gt;set&lt;/code&gt; method that we used in the build script: while using both would work, there&amp;#8217;s a semantic difference between the two: in a plugin, you most likely want to set the convention value, which is the value which is used by default, if the user says nothing.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Our plugin does one more thing, that we didn&amp;#8217;t cover yet: &lt;em&gt;wiring&lt;/em&gt; the task in the &quot;lifecycle&quot;, as my colleague asked.
+The notion of &quot;lifecyle&quot; doesn&amp;#8217;t really make sense in Gradle, and most likely comes from the Maven mindset, where things are defined via a &quot;lifecyle&quot;.
+I already covered this topic &lt;a href=&quot;http://melix.github.io/blog/2018/09/gradle-lifecycle.html&quot;&gt;in this blog post&lt;/a&gt;, but here&amp;#8217;s the major difference: in Gradle, &lt;em&gt;everything&lt;/em&gt; declares its inputs, and the tool is responsible for wiring things properly, so that you don&amp;#8217;t have to execute redundant work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here, the legitimate question is: my plugin generates some sources, but they need to be compiled, and therefore available to my production code, how can I do that?
+This is where the &lt;code&gt;JavaPluginExtension&lt;/code&gt; comes into play.
+In fact, our plugin doesn&amp;#8217;t work independently: it assumes that we&amp;#8217;re programming Java, and it assumes that we can compile Java sources.
+For this, we can actually make the assumption &lt;em&gt;explicit&lt;/em&gt;, by requiring that the &lt;code&gt;JavaPlugin&lt;/code&gt; is applied.
+When this plugin is applied, it defines a &lt;code&gt;JavaPluginExtension&lt;/code&gt;, which declares source sets.
+In particular, it defines the Java source sets (&lt;code&gt;main&lt;/code&gt; and &lt;code&gt;test&lt;/code&gt;), which are the sources which are compiled.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The shift in mindset is, therefore, not to wonder how to compile the generated sources and put them &quot;on the classpath&quot;, like &lt;a href=&quot;https://melix.github.io/blog/2021/10/gradle-quickie-dependson.html&quot;&gt;you&amp;#8217;d do in Maven&lt;/a&gt;, but simply explain that there&amp;#8217;s another directory of sources to consider.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is exactly what our plugin is doing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;javaExt.getSourceSets()
+    .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    .getJava()
+    .srcDir(generateLexer);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This says &quot;please add the output of the &lt;code&gt;generateLexer&lt;/code&gt; task as a source directory&quot;.
+Which is semantically much more powerful.
+The magic is that because the &lt;code&gt;generateLexer&lt;/code&gt; task defines an output directory, now we just said that this output directory contains Java classes.
+And &lt;em&gt;any&lt;/em&gt; task which requires Java sources will automatically trigger the execution of our &lt;code&gt;generateLexer&lt;/code&gt; task: we don&amp;#8217;t have to define the relationship explicitly!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Outcome #2&lt;/strong&gt;: Gradle models relationships using domain objects which are shared between plugins. It can &lt;em&gt;infer&lt;/em&gt; dependencies thanks to those objects.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In other words, &lt;em&gt;because&lt;/em&gt; the input of the Java compilation task is a &lt;em&gt;source set&lt;/em&gt;, and that source set defines that as an input, it has a directory which is generated by the &lt;code&gt;generateLexer&lt;/code&gt; task, Gradle knows that before compiling, it needs to call that &lt;code&gt;generateLexer&lt;/code&gt; task.
+Any other task using the source set as an input will do the same: it avoids duplication of code and hard wiring!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_using_the_worker_api&quot;&gt;Using the worker API&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this stage, we&amp;#8217;re pretty much done with the wiring, but we still miss the actual implementation of the task.
+This could be left as an exercise to the reader, but there&amp;#8217;s actually an interesting aspect of the Gradle APIs to cover.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you remember, I mentioned in the introduction of the blog post that the JFlex API uses a mix of static state and instance state to configure itself.
+This isn&amp;#8217;t nice, as it basically means that the API is not thread-safe: if, for some reason, we have multiple tasks generating sources (for example if we have multiple jflex directories, or different projects having jflex sources), then we can&amp;#8217;t safely generate sources in parallel!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is quite problematic, but Gradle provides a simple workaround for this: the &lt;a href=&quot;https://docs.gradle.org/current/userguide/worker_api.html&quot;&gt;worker API&lt;/a&gt;.
+The worker API allows a number of things, but in particular it permits executing code in a different process, or, more lightweight, in an isolated classloader.
+The second option is good for us, because &lt;em&gt;static state&lt;/em&gt; in Java is only as static as it is in a given classloader: if 2 &quot;identical&quot; classes are loaded in 2 different classloaders, then they both have their independent static state.
+We&amp;#8217;re going to use this to properly isolate execution of our code.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a consequence, executing JFlex will be slightly more complicated, but as usual in programming, it&amp;#8217;s only &lt;em&gt;one level of indirection&lt;/em&gt;.
+Instead of having our task directly invoke JFlex, we need to create a class which is going to invoke JFlex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To use the worker API, we need to inject the so-called &lt;code&gt;WorkerExecuter&lt;/code&gt; in our task:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;@CacheableTask
+public abstract class JFlexTask extends DefaultTask {
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getSourceDirectory();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDirectory();
+
+    @Inject
+    protected abstract WorkerExecutor getWorkerExecutor();
+
+    @TaskAction
+    public void generateSources() {
+        // We&apos;re using classloader isolation, because the JFlex API
+        // uses static state!
+        getWorkerExecutor()
+                .classLoaderIsolation()
+                .submit(JFlexAction.class, params -&amp;gt; {
+                    params.getSourceDirectory().set(getSourceDirectory());
+                    params.getSourceFiles().from(getSourceDirectory());
+                    params.getOutputDirectory().set(getOutputDirectory());
+                });
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note again how you don&amp;#8217;t need to care &lt;em&gt;how&lt;/em&gt; to get a &lt;code&gt;WorkerExecuter&lt;/code&gt;: just tell Gradle you need it and voilà!
+When using the worker API, the task action basically becomes an empty shell, which just configures how actual execution should happen.
+In this case, we declare &lt;em&gt;classloader isolation&lt;/em&gt;, as well as the inputs of the &lt;em&gt;action&lt;/em&gt;, which is going to be executed in isolation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The action class basically consists of calling the JFlex API:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexAction.java&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;public abstract class JFlexAction implements WorkAction&amp;lt;JFlexAction.Parameters&amp;gt; {
+    public interface Parameters extends WorkParameters {
+        DirectoryProperty getSourceDirectory();
+        ConfigurableFileCollection getSourceFiles();
+        DirectoryProperty getOutputDirectory();
+    }
+
+    @Override
+    public void execute() {
+        OptionUtils.setDefaultOptions();
+        Path sourcePath = getParameters().getSourceDirectory().getAsFile().get().toPath();
+        File outputDirectory = getParameters().getOutputDirectory().getAsFile().get();
+        OptionUtils.setDir(outputDirectory);
+        Options.dump = false;
+        Options.encoding = StandardCharsets.UTF_8;
+        Options.no_backup = true;
+        getParameters().getSourceFiles()
+                .getAsFileTree()
+                .getFiles()
+                .forEach(jflexFile -&amp;gt; generateSourceFileFor(jflexFile, outputDirectory, sourcePath));
+    }
+
+    private void generateSourceFileFor(File jflexFile, File outputDirectory, Path sourcePath) {
+        String relativePath = sourcePath.relativize(jflexFile.getParentFile().toPath()).toString();
+        OptionUtils.setDir(new File(outputDirectory, relativePath));
+        new LexGenerator(jflexFile).generate();
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The action declares its inputs with the &lt;code&gt;WorkParameters&lt;/code&gt; interface and the code which is going to be executed in an isolated classloader lives in the &lt;code&gt;execute&lt;/code&gt; method.
+You can see how it uses static state (&lt;code&gt;OptionsUtils.setDefaultOptions()&lt;/code&gt;, &lt;code&gt;Options.dump&lt;/code&gt;, &amp;#8230;).
+The worker API lets us workaround what should probably be considered as a &lt;em&gt;bug&lt;/em&gt; in JFlex!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Outcome #3&lt;/strong&gt;: The Gradle Worker API lets you isolate your task code in classloaders or even separate worker processes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_more_about_the_provider_api&quot;&gt;More about the provider API&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before closing this blog post, I want to give you a bit more insights about the provider API.
+I already mentioned that one of the main advantages is that it solves ordering issues, by being fully lazy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the most interesting aspects of this API is &lt;em&gt;value derivation&lt;/em&gt;.
+To understand this concept, let&amp;#8217;s imagine a &lt;em&gt;Greeter&lt;/em&gt; task which is responsible for saying hello:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;abstract class Greeter extends DefaultTask {
+    @Input
+    public abstract Property&amp;lt;String&amp;gt; getUser()
+
+    @Input
+    public abstract Property&amp;lt;String&amp;gt; getIntro()
+
+    @Input
+    public abstract Property&amp;lt;String&amp;gt; getOutro()
+
+    @TaskAction
+    public void sayHello() {
+        String user = getUser().get();
+        String intro = getIntro().get();
+        String outro = getOutro().get();
+        System.out.println(intro + user + outro);
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;we can register a task which says hello in English by doing this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.register(&quot;sayHello&quot;, Greeter) {
+   intro = &quot;Hello, &quot;
+   user = &quot;Cédric&quot;
+   outro = &quot;!&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And another one which says hello in French:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;tasks.register(&quot;direBonjour&quot;, Greeter) {
+   intro = &quot;Bonjour &quot;
+   user = &quot;Cédric&quot;
+   outro = &quot; !&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s a bit annoying that we have to repeat the user declaration in both tasks, and the rule &quot;in french, exclamation mark must be preceeded with a space&quot; doesn&amp;#8217;t need to be known to the user.
+To avoid this redundancy, we&amp;#8217;re going to write a plugin which makes all this more convenient.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, we&amp;#8217;re going to create an &lt;em&gt;extension&lt;/em&gt;, which is going to hold what is &lt;em&gt;relevant&lt;/em&gt; for user configuration: the name of the person to greet and what outro we want to use.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;interface GreetingExtension {
+    Property&amp;lt;String&amp;gt; getUser()
+    Property&amp;lt;String&amp;gt; getOutro()
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again we don&amp;#8217;t have to provide an implementation for this, Gradle knows how to create a &lt;code&gt;Property&amp;lt;String&amp;gt;&lt;/code&gt;. This extension simply needs to be created by our plugin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;GreetingExtension extension = project.getExtensions().create(&quot;greeting&quot;, GreetingExtension.class);
+extension.getOutro().convention(&quot;!&quot;);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s interesting to see that our DSL will only expose &quot;user&quot; and &quot;outro&quot;, but not the intro, which is actually dependent on the languag.
+We can also set a conventional value on the extension itself.
+The plugin can then register both tasks for us:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint java language-java&quot;&gt;&lt;code&gt;tasks.register(&quot;sayHello&quot;, Greeter.class, task -&amp;gt; {
+   task.getIntro().convention(&quot;Hello, &quot;);
+   task.getUser().convention(extension.getUser());
+   task.getOutro().convention(extension.getOutro());
+});
+tasks.register(&quot;direBonjour&quot;, Greeter.class, task -&amp;gt; {
+   task.getIntro().convention(&quot;Bonjour &quot;);
+   task.getUser().convention(extension.getUser());
+   task.getOutro().convention(extension.getOutro().map(o -&amp;gt; &quot; &quot; + o));
+});&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now you see the interest of using the provider API: for the english case, the task is going to use the outro value &lt;em&gt;directly&lt;/em&gt;, while for the french version, by default, it&amp;#8217;s going to compute a &lt;em&gt;derived&lt;/em&gt; value.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The user will configure the tasks via the extension:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;greeting {
+    user = &quot;Cédric&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Calling &lt;code&gt;sayHello&lt;/code&gt; will output:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;exampleblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hello, Cédric!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While calling &lt;code&gt;direBonjour&lt;/code&gt; will output:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;exampleblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bonjour Cédric !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Should the user configure a different outro, the outputs would be different:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;greeting {
+    user = &quot;Cédric&quot;
+    outro = &quot;!!!&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;results in this english version:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;exampleblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hello, Cédric!!!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While the french one is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;exampleblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bonjour Cédric !!!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;BUT, because we defined the &lt;em&gt;convention value&lt;/em&gt; of outro of the french task as a derived value, it is still possible for the user to override it completely:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;greeting {
+    user = &quot;Cédric&quot;
+    outro = &quot;!!!&quot;
+}
+tasks.named(&quot;direBonjour&quot;) {
+    outro = &quot; !&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then executing &lt;code&gt;direBonjour&lt;/code&gt; would print:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;exampleblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bonjour Cédric !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Outcome #4&lt;/strong&gt;: The provider API lets precisely define how to compute a value from another property, in a lazy manner, and provides an elegant way to supply default, or conventional values.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can read more about lazy configuration and the provider API in the &lt;a href=&quot;https://docs.gradle.org/current/userguide/lazy_configuration.html&quot;&gt;Gradle documentation&lt;/a&gt;, but in a nutshell, the derivation logic is &lt;em&gt;exactly&lt;/em&gt; what the &lt;code&gt;layout.buildDirectory.dir(&quot;...&quot;)&lt;/code&gt; is doing: it defines a directory which is &lt;em&gt;derived from&lt;/em&gt; the existing build directory value.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post, we&amp;#8217;ve leveraged a real world use case, integrating lexer generation via JFlex, to explain how to properly write a Gradle plugin which:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;uses the lazy provider API, making it immune to configuration ordering problems&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;explains how Gradle&amp;#8217;s &quot;task dependencies&quot; are &lt;em&gt;implicit&lt;/em&gt;, avoiding hardcoding relationships between tasks, and making it much more robust to arbitrary configuration changes&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;doesn&amp;#8217;t rely on arbitrary ordering (e.g, like in Maven, &quot;&lt;em&gt;all&lt;/em&gt; sources of &lt;em&gt;all&lt;/em&gt; generators must be generated before you can compile &lt;em&gt;anything&lt;/em&gt;&quot;) but instead knows that &lt;em&gt;only&lt;/em&gt; if you need to compile the main source set, &lt;em&gt;then&lt;/em&gt; you need to generate JFlex sources&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;uses the worker API, letting us working around a bug in the JFlex library regarding shared mutable state&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In addition, we&amp;#8217;ve seen the basics of the provider API, which allows plugins to define default values as well as computing derived values for inputs or outputs in a lazy manner.
+We&amp;#8217;ve also hinted at how plugins can expose configuration mechanisms which reduce the API surface, while making it convenient to refactor, therefore dramatically reducing the cost of maintenance of builds.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Eventually, the &lt;em&gt;user facing code&lt;/em&gt; of using our JFlex plugin is a &lt;em&gt;single line&lt;/em&gt; in a build script:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;plugins {
+    id &quot;io.micronaut.internal.jflex&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There is &lt;em&gt;no configuration&lt;/em&gt; (because we use the convention values) and &lt;em&gt;no imperative code&lt;/em&gt; (because the build logic of creating tasks is deferred to a &lt;em&gt;plugin&lt;/em&gt;).
+As a bonus, because we used a &lt;em&gt;separate build&lt;/em&gt; and &lt;a href=&quot;https://docs.gradle.org/current/userguide/composite_builds.html&quot;&gt;composite builds&lt;/a&gt;, if we want to publish this plugin to the Gradle plugin portal later, it would be just about adding some configuration to the &lt;code&gt;jflex-plugin&lt;/code&gt; module.
+There is effectively no need to publish a plugin, either to a local repository, or a remote one, to be able to use plugins in Gradle!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The full code is actually available in the upcoming &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-toml&quot;&gt;Micronaut TOML module&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Composition over inheritance: Gradle vs Maven</title>
       <link>https://melix.github.io/blog/2021/12/composition-in-gradle.html</link>
@@ -1063,314 +1790,6 @@ We want to encourage this model, rather than supporting &lt;em&gt;adhoc&lt;/em&g
 &lt;h3 id=&quot;_where_should_i_report_bugs_or_feature_requests&quot;&gt;Where should I report bugs or feature requests?&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;As usual, on our &lt;a href=&quot;https://github.com/gradle/gradle/issues&quot;&gt;issue tracker&lt;/a&gt;. There&amp;#8217;s also the dedicated &lt;a href=&quot;https://github.com/gradle/gradle/issues/15352&quot;&gt;epic&lt;/a&gt; where you will find the initial specification linked, which explains a lot of the design process.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-	</description>
-    </item>
-    <item>
-      <title>Simplified version management with Gradle 7</title>
-      <link>https://melix.github.io/blog/2021/03/version-catalogs.html</link>
-      <pubDate>Wed, 24 Mar 2021 00:00:00 +0100</pubDate>
-      <guid isPermaLink="false">2021/03/version-catalogs.html</guid>
-      	<description>
-	&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Gradle 7 introduces the concept of &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html&quot;&gt;version catalogs&lt;/a&gt;, which I&amp;#8217;ve been working on for several months already. Long story short, I&amp;#8217;m extremely excited by this new feature which should make dependency management easier with Gradle. Let&amp;#8217;s get started!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;&lt;em&gt;Please also read my &lt;a href=&quot;/blog/2021/03/version-catalogs-faq.html&quot;&gt;Version catalogs FAQ&lt;/a&gt; follow up post if you have more questions!&lt;/em&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_sharing_dependencies_between_projects&quot;&gt;Sharing dependencies between projects&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;One of the most frequent questions raised by Gradle users is how to properly share dependency versions between projects.
-For example, let&amp;#8217;s imagine that you have a multi-project build with this layout:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;root
- |---- client
- |---- server&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Because they live in the same &quot;multi-project&quot;, it is expected that both &lt;code&gt;client&lt;/code&gt; and &lt;code&gt;server&lt;/code&gt; would require the same dependencies.
-For example, both of them would need Guava as an implementation detail and JUnit 5 for testing:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
-    implementation(&quot;com.google.guava:guava:30.0-jre&quot;)
-    testImplementation(&quot;org.junit.jupiter:junit-jupiter-api:5.7.1&quot;)
-    testRuntimeOnly(&quot;org.junit.jupiter:junit-jupiter-engine&quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Without any sharing mechanism, both projects would replicate the dependency declarations, which is subject to a number of drawbacks:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;upgrading a library requires updating all build files which use it&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;you have to remember about the dependency coordinates (group, artifact, version) of all dependencies&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;you might accidentally use different versions in different projects&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;some dependencies are always used together but you have to duplicate entries in build files&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_existing_patterns&quot;&gt;Existing patterns&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For these reasons, users have invented over the years different patterns for dealing with dependency versions over time.
-For example:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Versions in properties files:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;gradle.properties&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;guavaVersion=30.0-jre&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;then in a build file:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
-    implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Or versions in &quot;extra properties&quot; in the root project:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;extra properties&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;ext {
-   guavaVersion = &apos;30.0-jre&apos;
-}
-
-// ...
-
-dependencies {
-    implementation(&quot;com.google.guava:guava:${guavaVersion}&quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Sometimes you even find full coordinates in &lt;code&gt;dependencies.gradle&lt;/code&gt; files.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;And since the rise of the Kotlin DSL, another pattern became extremely popular in the Android world: declaring libraries in &lt;code&gt;buildSrc&lt;/code&gt; then using type-safe accessors to declare dependencies in build scripts:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;buildSrc/src/main/kotlin/Libs.kt&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint kotlin language-kotlin&quot;&gt;&lt;code&gt;object Libs {
-   val guava = &quot;com.google.guava:guava:30.0-jre&quot;
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;and in a build script:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint&quot;&gt;&lt;code&gt;dependencies {
-    implementation(Libs.guava)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This last example is interesting because it goes into the direction of having more type-safety, more compile-time errors (as opposed to runtime errors).
-But it has a major drawback: any change to any dependency will trigger recompilation of build scripts and invalidate the build script classpath, causing up-to-date checkness to fail and in the end, rebuilding a lot more than what you should do for a single version change.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;_introducing_version_catalogs&quot;&gt;Introducing version catalogs&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A version catalog is basically a replacement for all the previous patterns, supported by Gradle, without the drawbacks of the previous approaches.
-To add support for version catalogs, you need to enable the experimental feature in your settings file:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;enableFeaturePreview(&quot;VERSION_CATALOGS&quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In its simplest form, a catalog is a file found in a conventional location and uses the &lt;a href=&quot;https://toml.io/en/&quot;&gt;TOML&lt;/a&gt; configuration format:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;gradle/libs.versions.toml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[libraries]
-guava = &quot;com.google.guava:guava:30.0-jre&quot;
-junit-jupiter = &quot;org.junit.jupiter:junit-jupiter-api:5.7.1&quot;
-junit-engine = { module=&quot;org.junit.jupiter:junit-jupiter-engine&quot; }
-
-[bundles]
-testDependencies = [&quot;junit-jupiter&quot;, &quot;junit-engine&quot;]&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This declares the &lt;em&gt;dependency coordinates&lt;/em&gt; which will be used in build scripts.
-You still have to declare your dependencies, but this now can be done using a &lt;em&gt;typesafe&lt;/em&gt; API:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
-    implementation(libs.guava)
-    testImplementation(libs.testDependencies)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The benefit of type-safe APIs is immediately visible in the IDE:&lt;/p&gt;
-&lt;/div&gt;
-&lt;video controls autoplay height=&quot;450&quot;&gt;
-    &lt;source src=&quot;/blog/video/ide-completion.webm&quot;
-            type=&quot;video/webm&quot;&gt;
-&lt;/video&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the catalog file above, we inlined dependency versions directly in the coordinates.
-However, it&amp;#8217;s possible to externalize them so that you can share a dependency version between dependencies.
-For example:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;gradle/libs.versions.toml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint toml language-toml&quot;&gt;&lt;code&gt;[versions]
-groovy = &quot;2.5.14&quot;
-guava = &quot;30.0-jre&quot;
-jupiter = &quot;5.7.1&quot;
-
-[libraries]
-guava = { module=&quot;com.google.guava:guava&quot;, version.ref=&quot;guava&quot; }
-junit-jupiter = { module=&quot;org.junit.jupiter:junit-jupiter-api&quot;, version.ref=&quot;jupiter&quot; }
-junit-engine = { module=&quot;org.junit.jupiter:junit-jupiter-engine&quot; }
-
-groovy-core = { module=&quot;org.codehaus.groovy:groovy&quot;, version.ref=&quot;groovy&quot; }
-groovy-json = { module=&quot;org.codehaus.groovy:groovy-json&quot;, version.ref=&quot;groovy&quot; }
-
-[bundles]
-testDependencies = [&quot;junit-jupiter&quot;, &quot;junit-engine&quot;]&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This new feature makes it trivial to update a dependency version: you have a single place where to look at.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This comes with other benenefits like the fact that updating the GAV coordinates (group, artifact or version) of a dependency doesn&amp;#8217;t trigger recompilation of build scripts.
-The TOML format also provides us with the ability to declare &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/rich_versions.html&quot;&gt;rich versions&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_under_the_hood&quot;&gt;Under the hood&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Under the hood, Gradle provides an API to declare catalogs. This API is found on the &lt;code&gt;Settings&lt;/code&gt;, which means that plugin authors can contribute catalogs, for example via convention plugins applied to the &lt;code&gt;settings.gradle(.kts)&lt;/code&gt; file.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This API is more verbose than when you use the TOML file, but is designed for type-safety. The equivalent of the catalog above would be this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencyResolutionManagement {
-   versionCatalogs {
-      libs {
-           alias(&quot;guava&quot;).to(&quot;com.google.guava&quot;, &quot;guava&quot;).versionRef(&quot;guava&quot;)
-           alias(&quot;junit-jupiter&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-api&quot;).versionRef(&quot;jupiter&quot;)
-           alias(&quot;junit-engine&quot;).to(&quot;org.junit.jupiter&quot;, &quot;junit-jupiter-engine&quot;).withoutVersion()
-           alias(&quot;groovy-core&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy&quot;).versionRef(&quot;groovy&quot;)
-           alias(&quot;groovy-json&quot;).to(&quot;org.codehaus.groovy&quot;, &quot;groovy-json&quot;).versionRef=&quot;groovy&quot;)
-
-           version(&quot;groovy&quot;, &quot;2.5.14&quot;)
-           version(&quot;guava&quot;, &quot;30.0-jre&quot;)
-           version(&quot;jupiter&quot;, &quot;5.7.1&quot;)
-      }
-   }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This API actually must be used if you are &lt;em&gt;consuming an external catalog&lt;/em&gt;.
-That&amp;#8217;s one of the big selling points of this feature: it allows teams (or framework authors) to &lt;em&gt;publish catalogs&lt;/em&gt;, so that users can get recommendations.
-For example, let&amp;#8217;s imagine that the Spring Boot team &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sec:version-catalog-plugin&quot;&gt;publishes a catalog of recommendations&lt;/a&gt; (they do something similar today with a BOM, but BOMs will have an impact on your transitive dependencies that you might not want).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Consuming this catalog it in a Gradle build would look like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencyResolutionManagement {
-   versionCatalogs {
-       spring {
-           from(&quot;org.springframework:spring-catalog:1.0&apos;)
-       }
-   }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This would make a catalog available under the &lt;code&gt;spring&lt;/code&gt; namespace in your build scripts.
-Therefore, you&amp;#8217;d be able to use whatever version of SLF4J the Spring team recommends by declaring this dependency:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;prettyprint groovy language-groovy&quot;&gt;&lt;code&gt;dependencies {
-    implementation(spring.slf4j)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Such a catalog would be published on a regular Maven repository, as a TOML file.
-Thanks to Gradle&amp;#8217;s advanced dependency resolution engine, it&amp;#8217;s totally transparent to the user that the actual dependency is a &lt;em&gt;catalog&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;_what_version_catalogs_are_not&quot;&gt;What version catalogs are not&lt;/h3&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At this stage, it becomes important to state what version catalogs are &lt;strong&gt;not&lt;/strong&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;they &lt;strong&gt;are not&lt;/strong&gt; the &quot;single source of truth&quot; for your dependencies: it&amp;#8217;s not because you have a catalog that you can&amp;#8217;t directly declare dependencies using the &quot;old&quot; notation in build scripts. Nor does it prevent plugins from adding dependencies. Long story short: the presence of a catalog makes discoverability and maintenance easier, but it doesn&amp;#8217;t remove any of the flexibility that Gradle offers. We&amp;#8217;re thinking about ways to &lt;em&gt;enforce&lt;/em&gt; that all direct dependencies are declared via a catalog in the future.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;the version declared in a catalog &lt;strong&gt;is not&lt;/strong&gt; necessarily the one which is going to be resolved: a catalog only talks about direct dependencies (not transitives) and the version that you use is the one used as an &lt;em&gt;input&lt;/em&gt; to dependency resolution. With transitive dependencies, it&amp;#8217;s typically possible that a version gets upgraded, for example.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;while it makes it possible for third-party tooling to &quot;update automatically&quot; versions, this wasn&amp;#8217;t a goal of this work. If you relate to the previous point, it all makes sense: as long as you rely on the &lt;em&gt;input&lt;/em&gt; (what is written) to assume what is going to be resolved, you&amp;#8217;re only &lt;em&gt;wishing&lt;/em&gt; that it is what is going to be resolved. It may be enough for some cases, though. Please refer to my &lt;a href=&quot;https://melix.github.io/blog/2020/10/about-dependabot.html&quot;&gt;blog post about Dependabot&lt;/a&gt; for more insights on this topic. Again, future work we have in mind is adding some linting to make sure that the first level dependencies you declare match whatever you resolved, because in general, having a difference there is a sign that something is wrong in the setup. I&amp;#8217;m going to repeat myself, but &lt;strong&gt;don&amp;#8217;t assume that the version you see in a config file is the one you will get&lt;/strong&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Please take a look at the &lt;a href=&quot;https://docs.gradle.org/7.0-rc-1/userguide/platforms.html#sub:central-declaration-of-dependencies&quot;&gt;documentation&lt;/a&gt; for further details, and give us your feedback!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Understanding Gradle plugins: the provider API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
+				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
+				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Understanding Gradle plugins: the provider API</h1>
+	</div>
+
+	<p><em>24 January 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/plugins.html"> plugins</a> 
+	</em>
+		<a href="/blog/tags/provider-api.html"> provider api</a> 
+	</p>
+	<p><div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last week, a colleague of mine pinged me about a problem he was facing in a new Micronaut module, with <a href="https://github.com/JetBrains/gradle-grammar-kit-plugin">Jetbrains' Grammar-Kit plugin</a>, a plugin which integrates with <a href="https://jflex.de/manual.html">JFlex</a>.
+We discovered a couple of issues:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the plugin is adding repositories transparently to the build, in particular Jitpack.io and an internal Jetbrains mirror, which is a very bad practice as it is introducing a security risk, and could also lead to build reproducibility problems</p>
+</li>
+<li>
+<p>the plugin isn&#8217;t compatible with Gradle&#8217;s lazy configuration API, making the build slower than it could be, by forcing the creation of tasks which do not necessarily need to be called</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Last but not least, we also discovered that the JFlex API itself has problems: it&#8217;s using shared mutable state (here <em>static state</em>) for configuration, making it inherently not thread safe.
+Because what we had to do was pretty simple (take a jflex file and generate a lexer from it), we took advantage of this to write our own Gradle plugin to handle calls to JFlex.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, the question I got from my colleague was legitimate:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>How do I link the task to run in the right phase, create a proper output dir, and add it to the java compile source set? Is there a good example plugin that does source generation that I could look at?</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>In this blog post we&#8217;re going to answer those questions and show how Gradle elegantly solves all the above problems.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_anatomy_of_a_plugin">Anatomy of a plugin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In Gradle, a plugin essentially consists in registering a number of tasks (things which execute actions, like compiling sources), or so-called extensions (exposed to the user in the form of a DSL for configuring the build).
+There isn&#8217;t a difference between what a plugin can do and what you can do in a build script, however, as soon as you have things which go beyond <em>configuration</em>, it&#8217;s a good idea to move things into a plugin.
+The nice thing is that creating a plugin in Gradle is quite straightforward, and doesn&#8217;t even require you to publish the plugin on Maven Central or the Gradle Plugin Repository: everything can be local to your project.</p>
+</div>
+<div class="paragraph">
+<p>In our case, we want to create a task which is going to invoke the JFlex library to parse some <code>.jflex</code> files and generate <code>.java</code> files, so let&#8217;s do it!</p>
+</div>
+<div class="paragraph">
+<p>First of all, we&#8217;re going to create a directory for our plugin, a <code>jflex-plugin</code> directory at the root of our existing project.
+We&#8217;re also going to create 2 files in that directory:</p>
+</div>
+<div class="listingblock">
+<div class="title">flex-plugin/settings.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>rootProject.name = 'jflex-plugin'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="title">flex-plugin/build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'de.jflex:jflex:1.8.2'
+}
+
+gradlePlugin {
+    plugins {
+        jflex {
+            id = 'io.micronaut.internal.jflex'
+            implementationClass = 'io.micronaut.internal.jflex.JFlexPlugin'
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What does this already tell us?
+First of all, that our plugin is an independent Gradle project: it lives in the same repository as our main project, but it&#8217;s really an independent build.
+Second, it defines a <code>java-gradle-plugin</code>, which is the Gradle way of saying "this is a plugin for Gradle, written in Java".</p>
+</div>
+<div class="paragraph">
+<p>This plugin has an implementation dependency on <code>jflex</code>, and it declares the <code>id</code> of the plugin, as well as its implementation class.
+This is all the boilerplate you have to write to create a plugin, really.</p>
+</div>
+<div class="paragraph">
+<p>Because our main build is going to use this plugin, we also have to edit the main build <code>settings.gradle</code> file to <em>include</em> that plugin:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>includeBuild "jflex-plugin"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This makes it possible to apply our JFlex plugin in our project:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+    id 'java-library'
+    id 'io.micronaut.internal.jflex'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We use the plugin id that we have defined in our plugin descriptor.
+This is how Gradle knows how to wire things together: by using this plugin request, it will automatically trigger the <code>jflex-plugin</code> build.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+It wouldn&#8217;t bother building the plugin if it wasn&#8217;t used at all, which would be the case, for example, if we had multiple subprojects and that only one of them uses the plugin: depending on what we build, we may need to build the plugin or not.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_the_provider_api">The provider API</h3>
+<div class="paragraph">
+<p>For the sake of learning, we&#8217;ll start our implementation with what is most "natural" to developers: if you are familiar with Maven, you&#8217;ll think of a Mojo.
+If you are familiar with Ant, it&#8217;s a task.
+Similarly, in Gradle, the unit which is responsible for executing an action is called a task.
+In our case, we want a task which is going to read JFlex files and generate sources.
+Here&#8217;s its skeleton:</p>
+</div>
+<div class="listingblock">
+<div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
+<div class="content">
+<pre class="prettyprint java language-java"><code>@CacheableTask                                                  <b>(1)</b>
+public abstract class JFlexTask extends DefaultTask {           <b>(2)</b>
+
+    @InputDirectory                                             <b>(3)</b>
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getSourceDirectory();
+
+    @OutputDirectory                                            <b>(4)</b>
+    public abstract DirectoryProperty getOutputDirectory();
+
+    @TaskAction                                                 <b>(5)</b>
+    public void generateSources() {
+      // call JFlex library
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>This annotation tells Gradle that the result of executing this task can be cached</p>
+</li>
+<li>
+<p>every Gradle task needs to extend the <code>DefaultTask</code> type</p>
+</li>
+<li>
+<p>the <em>input</em> of our task is a directory containing JFlex files</p>
+</li>
+<li>
+<p>the <em>output</em> of our task is going to be a directory containing generated Java files</p>
+</li>
+<li>
+<p>this is the main task action, which is going to call JFlex</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s explore a bit how this task is defined.</p>
+</div>
+<div class="paragraph">
+<p>First, note how our task is defined <em>abstract</em>: this is because we will let Gradle generate boilerplate code for us, in particular how to <em>inject</em> the input and output properties.
+We&#8217;ll see later more reasons why it&#8217;s interesting to let Gradle to this for you, but for now the obvious reason is that it reduces the amount of code you have to write: you don&#8217;t need to know how to create a <code>DirectoryProperty</code>: Gradle will do it for you.</p>
+</div>
+<div class="paragraph">
+<p>Second, note how we are using <code>DirectoryProperty</code> as the type for our input and output properties.
+This is a very important Gradle type, which belongs to the so-called "provider API" or, as you can sometimes read, the "lazy API".
+Most of the ordering problems that earlier versions of Gradle had are fixed by this API, so use it!</p>
+</div>
+<div class="paragraph">
+<p>One thing we can notice is that it&#8217;s <em>strongly typed</em>: to declare an input directory, we don&#8217;t define the property as a <em>File</em> or <em>Path</em>: it&#8217;s a <em>directory</em>, which helps both Gradle and users understand what you are supposed to give as an input: if the property is set to a regular file, then Gradle can provide a reasonable error message explaining that it expected a directory instead.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s time to introduce how you could use this type in a build script:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) <b>(1)</b>
+    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  <b>(2)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>set the input directory to <code>src/main/jflex</code></p>
+</li>
+<li>
+<p>set the output directory to <code>build/generated/jflex</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>It may sound a bit complicated to declare, especially if you were used to the following syntax:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory = file("src/main/jflex")
+    outputDirectory = file("build/generated/jflex')
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<code>register</code> is the new <code>create</code>: you should never use <em>create</em> anymore, as it eagerly creates tasks, which means configuring them <em>even if they won&#8217;t participate in the task graph</em>, while <em>register</em> is lazy: if a task needs to be executed, and only if, it&#8217;s going to be configured.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Interestingly, this syntax <code>outputDirectory = file("build/generated/jflex')</code> is still valid with our properties and would lead to the same result if executed.
+It&#8217;s simpler, so why should you bother with the more complex syntax?
+To understand this, let&#8217;s focus on the output directory, which makes it more obvious what is going on: compare <code>build/generated/jflex</code> with <code>layout.buildDirectory.dir('generated/jflex')</code>.</p>
+</div>
+<div class="paragraph">
+<p>In the 1st case, the output directory is <em>hardcoded</em> to the <code>build/generated/jflex</code> directory.
+In the 2d case, the output directory is <em>derived from</em> the location of the build directory.
+It means that if, for some reason, your build is configured to use a different output directory than the conventional <code>build</code> directory, say <code>target</code> (as in Maven).
+In the 1st case, the output directory of the task would be <code>build/generated/jflex</code>, so it would be writing to the wrong directory.
+In the 2d case, the output would be correctly wired to <code>target/generated/jflex</code>.</p>
+</div>
+<div class="paragraph">
+<p>Some smart Gradle users might think they could workaround the problem by using <code>file("$buildDir/generated/jflex")</code> instead.
+That&#8217;s better, but not sufficient, because the result depends on <em>when</em> this is called: if the build directory is changed <em>after</em> the task is configured, then you&#8217;d get the wrong result, which is why lots of users start to randomly add <code>afterEvaluate</code> to workaround such problems.</p>
+</div>
+<div class="paragraph">
+<p><strong>Outcome #1</strong>: The provider API solves ordering issues and avoids spurious calls to <code>afterEvaluate</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_convention_plugins">Convention plugins</h3>
+<div class="paragraph">
+<p>In the beginning of this blog post, I mentioned that what we want to avoid users to create tasks directly in their build scripts: this is a sign that the code should be moved to a <em>plugin</em>.
+This is exactly what we&#8217;re going to do, so instead of asking the user to declare the task, we&#8217;re going to do it for them.
+It&#8217;s time to create our plugin class:</p>
+</div>
+<div class="listingblock">
+<div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexPlugin.java</div>
+<div class="content">
+<pre class="prettyprint java language-java"><code>public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  <b>(1)</b>
+    @Override
+    public void apply(Project project) {
+        project.getPluginManager().apply(JavaPlugin.class);                            <b>(2)</b>
+        JavaPluginExtension javaExt = project.getExtensions()
+           .getByType(JavaPluginExtension.class);                                      <b>(3)</b>
+        TaskProvider&lt;JFlexTask&gt; generateLexer = project.getTasks()
+            .register("generateLexer", JFlexTask.class, task -&gt; {                      <b>(4)</b>
+               task.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+               task.setDescription("Generates lexer files from JFlex grammar files.");
+               task.getSourceDirectory().convention(
+                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    <b>(5)</b>
+               );
+               task.getOutputDirectory().convention(
+                    project.getLayout().getBuildDirectory().dir("generated/jflex")     <b>(6)</b>
+               );
+        });
+        // Register the output of the JFlex task as generated sources
+        javaExt.getSourceSets()
+                .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                .getJava()
+                .srcDir(generateLexer);                                                <b>(7)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Declare a <em>project scoped</em> plugin</p>
+</li>
+<li>
+<p>This plugin will contribute Java sources, so it <em>depends on</em> the Java plugin, let&#8217;s apply it</p>
+</li>
+<li>
+<p>The Java plugin defines a Java extension that we&#8217;re going to need</p>
+</li>
+<li>
+<p>Registers our <code>generateLexer</code> task</p>
+</li>
+<li>
+<p>Defines the conventional (<em>default</em>) location of JFlex source files</p>
+</li>
+<li>
+<p>Defines the conventional (<em>default</em>) location of generated sources</p>
+</li>
+<li>
+<p>Defines that the output of the task are Java files which need to be compiled</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>I recommend writing plugins in plain Java, but you could use Groovy or Kotlin.
+It makes things a bit more verbose, but they are clearer and "DSL magic" free.
+Let&#8217;s explore what the plugin is doing.
+First of all, it&#8217;s a <em>project plugin</em>, which basically means it&#8217;s a plugin which is supposed to be applied on a <em>project</em> build file, so typically a <code>build.gradle</code> file.
+There are other kinds of plugins in Gradle, which I won&#8217;t cover in this post.</p>
+</div>
+<div class="paragraph">
+<p>For the most part, the plugin does <em>exactly</em> what we had in the build script: it registers a task, gives it a description, but more importantly, it sets the <em>conventional</em> values of inputs and outputs.
+Note how I used the <code>convention</code> method to set the input directory, instead of the <code>set</code> method that we used in the build script: while using both would work, there&#8217;s a semantic difference between the two: in a plugin, you most likely want to set the convention value, which is the value which is used by default, if the user says nothing.</p>
+</div>
+<div class="paragraph">
+<p>Our plugin does one more thing, that we didn&#8217;t cover yet: <em>wiring</em> the task in the "lifecycle", as my colleague asked.
+The notion of "lifecyle" doesn&#8217;t really make sense in Gradle, and most likely comes from the Maven mindset, where things are defined via a "lifecyle".
+I already covered this topic <a href="http://melix.github.io/blog/2018/09/gradle-lifecycle.html">in this blog post</a>, but here&#8217;s the major difference: in Gradle, <em>everything</em> declares its inputs, and the tool is responsible for wiring things properly, so that you don&#8217;t have to execute redundant work.</p>
+</div>
+<div class="paragraph">
+<p>Here, the legitimate question is: my plugin generates some sources, but they need to be compiled, and therefore available to my production code, how can I do that?
+This is where the <code>JavaPluginExtension</code> comes into play.
+In fact, our plugin doesn&#8217;t work independently: it assumes that we&#8217;re programming Java, and it assumes that we can compile Java sources.
+For this, we can actually make the assumption <em>explicit</em>, by requiring that the <code>JavaPlugin</code> is applied.
+When this plugin is applied, it defines a <code>JavaPluginExtension</code>, which declares source sets.
+In particular, it defines the Java source sets (<code>main</code> and <code>test</code>), which are the sources which are compiled.</p>
+</div>
+<div class="paragraph">
+<p>The shift in mindset is, therefore, not to wonder how to compile the generated sources and put them "on the classpath", like <a href="https://melix.github.io/blog/2021/10/gradle-quickie-dependson.html">you&#8217;d do in Maven</a>, but simply explain that there&#8217;s another directory of sources to consider.</p>
+</div>
+<div class="paragraph">
+<p>This is exactly what our plugin is doing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>javaExt.getSourceSets()
+    .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    .getJava()
+    .srcDir(generateLexer);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This says "please add the output of the <code>generateLexer</code> task as a source directory".
+Which is semantically much more powerful.
+The magic is that because the <code>generateLexer</code> task defines an output directory, now we just said that this output directory contains Java classes.
+And <em>any</em> task which requires Java sources will automatically trigger the execution of our <code>generateLexer</code> task: we don&#8217;t have to define the relationship explicitly!</p>
+</div>
+<div class="paragraph">
+<p><strong>Outcome #2</strong>: Gradle models relationships using domain objects which are shared between plugins. It can <em>infer</em> dependencies thanks to those objects.</p>
+</div>
+<div class="paragraph">
+<p>In other words, <em>because</em> the input of the Java compilation task is a <em>source set</em>, and that source set defines that as an input, it has a directory which is generated by the <code>generateLexer</code> task, Gradle knows that before compiling, it needs to call that <code>generateLexer</code> task.
+Any other task using the source set as an input will do the same: it avoids duplication of code and hard wiring!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_the_worker_api">Using the worker API</h3>
+<div class="paragraph">
+<p>At this stage, we&#8217;re pretty much done with the wiring, but we still miss the actual implementation of the task.
+This could be left as an exercise to the reader, but there&#8217;s actually an interesting aspect of the Gradle APIs to cover.</p>
+</div>
+<div class="paragraph">
+<p>If you remember, I mentioned in the introduction of the blog post that the JFlex API uses a mix of static state and instance state to configure itself.
+This isn&#8217;t nice, as it basically means that the API is not thread-safe: if, for some reason, we have multiple tasks generating sources (for example if we have multiple jflex directories, or different projects having jflex sources), then we can&#8217;t safely generate sources in parallel!</p>
+</div>
+<div class="paragraph">
+<p>This is quite problematic, but Gradle provides a simple workaround for this: the <a href="https://docs.gradle.org/current/userguide/worker_api.html">worker API</a>.
+The worker API allows a number of things, but in particular it permits executing code in a different process, or, more lightweight, in an isolated classloader.
+The second option is good for us, because <em>static state</em> in Java is only as static as it is in a given classloader: if 2 "identical" classes are loaded in 2 different classloaders, then they both have their independent static state.
+We&#8217;re going to use this to properly isolate execution of our code.</p>
+</div>
+<div class="paragraph">
+<p>As a consequence, executing JFlex will be slightly more complicated, but as usual in programming, it&#8217;s only <em>one level of indirection</em>.
+Instead of having our task directly invoke JFlex, we need to create a class which is going to invoke JFlex.</p>
+</div>
+<div class="paragraph">
+<p>To use the worker API, we need to inject the so-called <code>WorkerExecuter</code> in our task:</p>
+</div>
+<div class="listingblock">
+<div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
+<div class="content">
+<pre class="prettyprint java language-java"><code>@CacheableTask
+public abstract class JFlexTask extends DefaultTask {
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getSourceDirectory();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDirectory();
+
+    @Inject
+    protected abstract WorkerExecutor getWorkerExecutor();
+
+    @TaskAction
+    public void generateSources() {
+        // We're using classloader isolation, because the JFlex API
+        // uses static state!
+        getWorkerExecutor()
+                .classLoaderIsolation()
+                .submit(JFlexAction.class, params -&gt; {
+                    params.getSourceDirectory().set(getSourceDirectory());
+                    params.getSourceFiles().from(getSourceDirectory());
+                    params.getOutputDirectory().set(getOutputDirectory());
+                });
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note again how you don&#8217;t need to care <em>how</em> to get a <code>WorkerExecuter</code>: just tell Gradle you need it and voilà!
+When using the worker API, the task action basically becomes an empty shell, which just configures how actual execution should happen.
+In this case, we declare <em>classloader isolation</em>, as well as the inputs of the <em>action</em>, which is going to be executed in isolation.</p>
+</div>
+<div class="paragraph">
+<p>The action class basically consists of calling the JFlex API:</p>
+</div>
+<div class="listingblock">
+<div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexAction.java</div>
+<div class="content">
+<pre class="prettyprint java language-java"><code>public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
+    public interface Parameters extends WorkParameters {
+        DirectoryProperty getSourceDirectory();
+        ConfigurableFileCollection getSourceFiles();
+        DirectoryProperty getOutputDirectory();
+    }
+
+    @Override
+    public void execute() {
+        OptionUtils.setDefaultOptions();
+        Path sourcePath = getParameters().getSourceDirectory().getAsFile().get().toPath();
+        File outputDirectory = getParameters().getOutputDirectory().getAsFile().get();
+        OptionUtils.setDir(outputDirectory);
+        Options.dump = false;
+        Options.encoding = StandardCharsets.UTF_8;
+        Options.no_backup = true;
+        getParameters().getSourceFiles()
+                .getAsFileTree()
+                .getFiles()
+                .forEach(jflexFile -&gt; generateSourceFileFor(jflexFile, outputDirectory, sourcePath));
+    }
+
+    private void generateSourceFileFor(File jflexFile, File outputDirectory, Path sourcePath) {
+        String relativePath = sourcePath.relativize(jflexFile.getParentFile().toPath()).toString();
+        OptionUtils.setDir(new File(outputDirectory, relativePath));
+        new LexGenerator(jflexFile).generate();
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The action declares its inputs with the <code>WorkParameters</code> interface and the code which is going to be executed in an isolated classloader lives in the <code>execute</code> method.
+You can see how it uses static state (<code>OptionsUtils.setDefaultOptions()</code>, <code>Options.dump</code>, &#8230;).
+The worker API lets us workaround what should probably be considered as a <em>bug</em> in JFlex!</p>
+</div>
+<div class="paragraph">
+<p><strong>Outcome #3</strong>: The Gradle Worker API lets you isolate your task code in classloaders or even separate worker processes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_more_about_the_provider_api">More about the provider API</h3>
+<div class="paragraph">
+<p>Before closing this blog post, I want to give you a bit more insights about the provider API.
+I already mentioned that one of the main advantages is that it solves ordering issues, by being fully lazy.</p>
+</div>
+<div class="paragraph">
+<p>One of the most interesting aspects of this API is <em>value derivation</em>.
+To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is responsible for saying hello:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>abstract class Greeter extends DefaultTask {
+    @Input
+    public abstract Property&lt;String&gt; getUser()
+
+    @Input
+    public abstract Property&lt;String&gt; getIntro()
+
+    @Input
+    public abstract Property&lt;String&gt; getOutro()
+
+    @TaskAction
+    public void sayHello() {
+        String user = getUser().get();
+        String intro = getIntro().get();
+        String outro = getOutro().get();
+        System.out.println(intro + user + outro);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>we can register a task which says hello in English by doing this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>tasks.register("sayHello", Greeter) {
+   intro = "Hello, "
+   user = "Cédric"
+   outro = "!"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And another one which says hello in French:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>tasks.register("direBonjour", Greeter) {
+   intro = "Bonjour "
+   user = "Cédric"
+   outro = " !"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s a bit annoying that we have to repeat the user declaration in both tasks, and the rule "in french, exclamation mark must be preceeded with a space" doesn&#8217;t need to be known to the user.
+To avoid this redundancy, we&#8217;re going to write a plugin which makes all this more convenient.</p>
+</div>
+<div class="paragraph">
+<p>First, we&#8217;re going to create an <em>extension</em>, which is going to hold what is <em>relevant</em> for user configuration: the name of the person to greet and what outro we want to use.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>interface GreetingExtension {
+    Property&lt;String&gt; getUser()
+    Property&lt;String&gt; getOutro()
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again we don&#8217;t have to provide an implementation for this, Gradle knows how to create a <code>Property&lt;String&gt;</code>. This extension simply needs to be created by our plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
+extension.getOutro().convention("!");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s interesting to see that our DSL will only expose "user" and "outro", but not the intro, which is actually dependent on the languag.
+We can also set a conventional value on the extension itself.
+The plugin can then register both tasks for us:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint java language-java"><code>tasks.register("sayHello", Greeter.class, task -&gt; {
+   task.getIntro().convention("Hello, ");
+   task.getUser().convention(extension.getUser());
+   task.getOutro().convention(extension.getOutro());
+});
+tasks.register("direBonjour", Greeter.class, task -&gt; {
+   task.getIntro().convention("Bonjour ");
+   task.getUser().convention(extension.getUser());
+   task.getOutro().convention(extension.getOutro().map(o -&gt; " " + o));
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you see the interest of using the provider API: for the english case, the task is going to use the outro value <em>directly</em>, while for the french version, by default, it&#8217;s going to compute a <em>derived</em> value.</p>
+</div>
+<div class="paragraph">
+<p>The user will configure the tasks via the extension:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>greeting {
+    user = "Cédric"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Calling <code>sayHello</code> will output:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Hello, Cédric!</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>While calling <code>direBonjour</code> will output:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Bonjour Cédric !</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Should the user configure a different outro, the outputs would be different:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>greeting {
+    user = "Cédric"
+    outro = "!!!"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>results in this english version:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Hello, Cédric!!!</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>While the french one is:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Bonjour Cédric !!!</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>BUT, because we defined the <em>convention value</em> of outro of the french task as a derived value, it is still possible for the user to override it completely:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>greeting {
+    user = "Cédric"
+    outro = "!!!"
+}
+tasks.named("direBonjour") {
+    outro = " !"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then executing <code>direBonjour</code> would print:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Bonjour Cédric !</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Outcome #4</strong>: The provider API lets precisely define how to compute a value from another property, in a lazy manner, and provides an elegant way to supply default, or conventional values.</p>
+</div>
+<div class="paragraph">
+<p>You can read more about lazy configuration and the provider API in the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">Gradle documentation</a>, but in a nutshell, the derivation logic is <em>exactly</em> what the <code>layout.buildDirectory.dir("...")</code> is doing: it defines a directory which is <em>derived from</em> the existing build directory value.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this blog post, we&#8217;ve leveraged a real world use case, integrating lexer generation via JFlex, to explain how to properly write a Gradle plugin which:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>uses the lazy provider API, making it immune to configuration ordering problems</p>
+</li>
+<li>
+<p>explains how Gradle&#8217;s "task dependencies" are <em>implicit</em>, avoiding hardcoding relationships between tasks, and making it much more robust to arbitrary configuration changes</p>
+</li>
+<li>
+<p>doesn&#8217;t rely on arbitrary ordering (e.g, like in Maven, "<em>all</em> sources of <em>all</em> generators must be generated before you can compile <em>anything</em>") but instead knows that <em>only</em> if you need to compile the main source set, <em>then</em> you need to generate JFlex sources</p>
+</li>
+<li>
+<p>uses the worker API, letting us working around a bug in the JFlex library regarding shared mutable state</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In addition, we&#8217;ve seen the basics of the provider API, which allows plugins to define default values as well as computing derived values for inputs or outputs in a lazy manner.
+We&#8217;ve also hinted at how plugins can expose configuration mechanisms which reduce the API surface, while making it convenient to refactor, therefore dramatically reducing the cost of maintenance of builds.</p>
+</div>
+<div class="paragraph">
+<p>Eventually, the <em>user facing code</em> of using our JFlex plugin is a <em>single line</em> in a build script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>plugins {
+    id "io.micronaut.internal.jflex"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There is <em>no configuration</em> (because we use the convention values) and <em>no imperative code</em> (because the build logic of creating tasks is deferred to a <em>plugin</em>).
+As a bonus, because we used a <em>separate build</em> and <a href="https://docs.gradle.org/current/userguide/composite_builds.html">composite builds</a>, if we want to publish this plugin to the Gradle plugin portal later, it would be just about adding some configuration to the <code>jflex-plugin</code> module.
+There is effectively no need to publish a plugin, either to a local repository, or a remote one, to be able to use plugins in Gradle!</p>
+</div>
+<div class="paragraph">
+<p>The full code is actually available in the upcoming <a href="https://github.com/micronaut-projects/micronaut-toml">Micronaut TOML module</a>.</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-plugins-provider-api';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
