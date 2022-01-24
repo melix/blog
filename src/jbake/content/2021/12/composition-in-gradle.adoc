@@ -120,7 +120,7 @@ In the example above, we don't have to specify the `groupId` and `version` of ou
 
 However, this model comes with a number of drawbacks:
 
-- as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our `library` and `application` modules have something in common.
+- as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our `library` and `application` modules have something in common. It won't be a surprise for many that you have to _exclude dependencies_ just because they came through parent poms...
 - you can only have a _single_ parent, meaning that you cannot inherit from a framework parent POM _and_ from your own conventions.
 - it's not great for performance, because you end up configuring a lot of things which will never be necessary for your particular "child" module.
 - overriding values is sometimes much more complicated and you have to start relying on obscure syntaxes like `combine.children="append"` (see https://www.baeldung.com/maven-plugin-override-parent[this excellent blog post] for details).
