@@ -1,0 +1,553 @@
+= Understanding Gradle plugins: the provider API
+Cédric Champeau
+2022-01-24
+:jbake-type: post
+:jbake-tags: gradle, plugins, provider api
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-plugins-provider-api
+:linkattrs:
+
+== Introduction
+
+Last week, a colleague of mine pinged me about a problem he was facing in a new Micronaut module, with https://github.com/JetBrains/gradle-grammar-kit-plugin[Jetbrains' Grammar-Kit plugin], a plugin which integrates with https://jflex.de/manual.html[JFlex].
+We discovered a couple of issues:
+
+- the plugin is adding repositories transparently to the build, in particular Jitpack.io and an internal Jetbrains mirror, which is a very bad practice as it is introducing a security risk, and could also lead to build reproducibility problems
+- the plugin isn't compatible with Gradle's lazy configuration API, making the build slower than it could be, by forcing the creation of tasks which do not necessarily need to be called
+
+Last but not least, we also discovered that the JFlex API itself has problems: it's using shared mutable state (here _static state_) for configuration, making it inherently not thread safe.
+Because what we had to do was pretty simple (take a jflex file and generate a lexer from it), we took advantage of this to write our own Gradle plugin to handle calls to JFlex.
+
+Therefore, the question I got from my colleague was legitimate:
+
+> How do I link the task to run in the right phase, create a proper output dir, and add it to the java compile source set? Is there a good example plugin that does source generation that I could look at?
+
+In this blog post we're going to answer those questions and show how Gradle elegantly solves all the above problems.
+
+== Anatomy of a plugin
+
+In Gradle, a plugin essentially consists in registering a number of tasks (things which execute actions, like compiling sources), or so-called extensions (exposed to the user in the form of a DSL for configuring the build).
+There isn't a difference between what a plugin can do and what you can do in a build script, however, as soon as you have things which go beyond _configuration_, it's a good idea to move things into a plugin.
+The nice thing is that creating a plugin in Gradle is quite straightforward, and doesn't even require you to publish the plugin on Maven Central or the Gradle Plugin Repository: everything can be local to your project.
+
+In our case, we want to create a task which is going to invoke the JFlex library to parse some `.jflex` files and generate `.java` files, so let's do it!
+
+First of all, we're going to create a directory for our plugin, a `jflex-plugin` directory at the root of our existing project.
+We're also going to create 2 files in that directory:
+
+.flex-plugin/settings.gradle
+[source,groovy]
+----
+rootProject.name = 'jflex-plugin'
+----
+
+and
+
+.flex-plugin/build.gradle
+[source,groovy]
+----
+plugins {
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'de.jflex:jflex:1.8.2'
+}
+
+gradlePlugin {
+    plugins {
+        jflex {
+            id = 'io.micronaut.internal.jflex'
+            implementationClass = 'io.micronaut.internal.jflex.JFlexPlugin'
+        }
+    }
+}
+----
+
+What does this already tell us? 
+First of all, that our plugin is an independent Gradle project: it lives in the same repository as our main project, but it's really an independent build.
+Second, it defines a `java-gradle-plugin`, which is the Gradle way of saying "this is a plugin for Gradle, written in Java".
+
+This plugin has an implementation dependency on `jflex`, and it declares the `id` of the plugin, as well as its implementation class.
+This is all the boilerplate you have to write to create a plugin, really.
+
+Because our main build is going to use this plugin, we also have to edit the main build `settings.gradle` file to _include_ that plugin:
+
+.settings.gradle
+[source,groovy]
+----
+includeBuild "jflex-plugin"
+----
+
+This makes it possible to apply our JFlex plugin in our project:
+
+.build.gradle
+[source,groovy]
+----
+plugins {
+    id 'java-library'
+    id 'io.micronaut.internal.jflex'
+}
+----
+
+We use the plugin id that we have defined in our plugin descriptor.
+This is how Gradle knows how to wire things together: by using this plugin request, it will automatically trigger the `jflex-plugin` build.
+
+NOTE: It wouldn't bother building the plugin if it wasn't used at all, which would be the case, for example, if we had multiple subprojects and that only one of them uses the plugin: depending on what we build, we may need to build the plugin or not.
+
+=== The provider API
+
+For the sake of learning, we'll start our implementation with what is most "natural" to developers: if you are familiar with Maven, you'll think of a Mojo.
+If you are familiar with Ant, it's a task.
+Similarly, in Gradle, the unit which is responsible for executing an action is called a task.
+In our case, we want a task which is going to read JFlex files and generate sources.
+Here's its skeleton:
+
+.jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java
+[source,java]
+----
+@CacheableTask                                                  // <1>
+public abstract class JFlexTask extends DefaultTask {           // <2>
+
+    @InputDirectory                                             // <3>
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getSourceDirectory();
+
+    @OutputDirectory                                            // <4>
+    public abstract DirectoryProperty getOutputDirectory();
+
+    @TaskAction                                                 // <5>
+    public void generateSources() {
+      // call JFlex library
+    }
+}
+----
+<1> This annotation tells Gradle that the result of executing this task can be cached
+<2> every Gradle task needs to extend the `DefaultTask` type
+<3> the _input_ of our task is a directory containing JFlex files
+<4> the _output_ of our task is going to be a directory containing generated Java files
+<5> this is the main task action, which is going to call JFlex
+
+Let's explore a bit how this task is defined.
+
+First, note how our task is defined _abstract_: this is because we will let Gradle generate boilerplate code for us, in particular how to _inject_ the input and output properties.
+We'll see later more reasons why it's interesting to let Gradle to this for you, but for now the obvious reason is that it reduces the amount of code you have to write: you don't need to know how to create a `DirectoryProperty`: Gradle will do it for you.
+
+Second, note how we are using `DirectoryProperty` as the type for our input and output properties.
+This is a very important Gradle type, which belongs to the so-called "provider API" or, as you can sometimes read, the "lazy API".
+Most of the ordering problems that earlier versions of Gradle had are fixed by this API, so use it!
+
+One thing we can notice is that it's _strongly typed_: to declare an input directory, we don't define the property as a _File_ or _Path_: it's a _directory_, which helps both Gradle and users understand what you are supposed to give as an input: if the property is set to a regular file, then Gradle can provide a reasonable error message explaining that it expected a directory instead.
+
+It's time to introduce how you could use this type in a build script:
+
+.build.gradle
+[source,groovy]
+----
+tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) // <1>
+    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  // <2>
+}
+----
+<1> set the input directory to `src/main/jflex`
+<2> set the output directory to `build/generated/jflex`
+
+
+It may sound a bit complicated to declare, especially if you were used to the following syntax:
+
+.build.gradle
+[source,groovy]
+----
+tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory = file("src/main/jflex")
+    outputDirectory = file("build/generated/jflex')
+}
+----
+
+NOTE: `register` is the new `create`: you should never use _create_ anymore, as it eagerly creates tasks, which means configuring them _even if they won't participate in the task graph_, while _register_ is lazy: if a task needs to be executed, and only if, it's going to be configured.
+
+Interestingly, this syntax `outputDirectory = file("build/generated/jflex')` is still valid with our properties and would lead to the same result if executed.
+It's simpler, so why should you bother with the more complex syntax?
+To understand this, let's focus on the output directory, which makes it more obvious what is going on: compare `build/generated/jflex` with `layout.buildDirectory.dir('generated/jflex')`.
+
+In the 1st case, the output directory is _hardcoded_ to the `build/generated/jflex` directory.
+In the 2d case, the output directory is _derived from_ the location of the build directory.
+It means that if, for some reason, your build is configured to use a different output directory than the conventional `build` directory, say `target` (as in Maven).
+In the 1st case, the output directory of the task would be `build/generated/jflex`, so it would be writing to the wrong directory.
+In the 2d case, the output would be correctly wired to `target/generated/jflex`.
+
+Some smart Gradle users might think they could workaround the problem by using `file("$buildDir/generated/jflex")` instead.
+That's better, but not sufficient, because the result depends on _when_ this is called: if the build directory is changed _after_ the task is configured, then you'd get the wrong result, which is why lots of users start to randomly add `afterEvaluate` to workaround such problems.
+
+**Outcome #1**: The provider API solves ordering issues and avoids spurious calls to `afterEvaluate`.
+
+=== Convention plugins
+
+In the beginning of this blog post, I mentioned that what we want to avoid users to create tasks directly in their build scripts: this is a sign that the code should be moved to a _plugin_.
+This is exactly what we're going to do, so instead of asking the user to declare the task, we're going to do it for them.
+It's time to create our plugin class:
+
+.jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexPlugin.java
+[source,java]
+----
+public class JFlexPlugin implements Plugin<Project> {                                  // <1>
+    @Override
+    public void apply(Project project) {
+        project.getPluginManager().apply(JavaPlugin.class);                            // <2>
+        JavaPluginExtension javaExt = project.getExtensions()
+           .getByType(JavaPluginExtension.class);                                      // <3>
+        TaskProvider<JFlexTask> generateLexer = project.getTasks()
+            .register("generateLexer", JFlexTask.class, task -> {                      // <4>
+               task.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+               task.setDescription("Generates lexer files from JFlex grammar files.");
+               task.getSourceDirectory().convention(
+                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    // <5>
+               );
+               task.getOutputDirectory().convention(
+                    project.getLayout().getBuildDirectory().dir("generated/jflex")     // <6>
+               );
+        });
+        // Register the output of the JFlex task as generated sources
+        javaExt.getSourceSets()
+                .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                .getJava()
+                .srcDir(generateLexer);                                                // <7>
+    }
+}
+----
+<1> Declare a _project scoped_ plugin
+<2> This plugin will contribute Java sources, so it _depends on_ the Java plugin, let's apply it
+<3> The Java plugin defines a Java extension that we're going to need
+<4> Registers our `generateLexer` task
+<5> Defines the conventional (_default_) location of JFlex source files
+<6> Defines the conventional (_default_) location of generated sources
+<7> Defines that the output of the task are Java files which need to be compiled
+
+I recommend writing plugins in plain Java, but you could use Groovy or Kotlin.
+It makes things a bit more verbose, but they are clearer and "DSL magic" free.
+Let's explore what the plugin is doing.
+First of all, it's a _project plugin_, which basically means it's a plugin which is supposed to be applied on a _project_ build file, so typically a `build.gradle` file.
+There are other kinds of plugins in Gradle, which I won't cover in this post.
+
+For the most part, the plugin does _exactly_ what we had in the build script: it registers a task, gives it a description, but more importantly, it sets the _conventional_ values of inputs and outputs.
+Note how I used the `convention` method to set the input directory, instead of the `set` method that we used in the build script: while using both would work, there's a semantic difference between the two: in a plugin, you most likely want to set the convention value, which is the value which is used by default, if the user says nothing.
+
+Our plugin does one more thing, that we didn't cover yet: _wiring_ the task in the "lifecycle", as my colleague asked.
+The notion of "lifecyle" doesn't really make sense in Gradle, and most likely comes from the Maven mindset, where things are defined via a "lifecyle".
+I already covered this topic http://melix.github.io/blog/2018/09/gradle-lifecycle.html[in this blog post], but here's the major difference: in Gradle, _everything_ declares its inputs, and the tool is responsible for wiring things properly, so that you don't have to execute redundant work.
+
+Here, the legitimate question is: my plugin generates some sources, but they need to be compiled, and therefore available to my production code, how can I do that?
+This is where the `JavaPluginExtension` comes into play.
+In fact, our plugin doesn't work independently: it assumes that we're programming Java, and it assumes that we can compile Java sources.
+For this, we can actually make the assumption _explicit_, by requiring that the `JavaPlugin` is applied.
+When this plugin is applied, it defines a `JavaPluginExtension`, which declares source sets.
+In particular, it defines the Java source sets (`main` and `test`), which are the sources which are compiled.
+
+The shift in mindset is, therefore, not to wonder how to compile the generated sources and put them "on the classpath", like https://melix.github.io/blog/2021/10/gradle-quickie-dependson.html[you'd do in Maven], but simply explain that there's another directory of sources to consider.
+
+This is exactly what our plugin is doing:
+
+[source,java]
+----
+javaExt.getSourceSets()
+    .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    .getJava()
+    .srcDir(generateLexer);  
+----
+
+This says "please add the output of the `generateLexer` task as a source directory".
+Which is semantically much more powerful.
+The magic is that because the `generateLexer` task defines an output directory, now we just said that this output directory contains Java classes.
+And _any_ task which requires Java sources will automatically trigger the execution of our `generateLexer` task: we don't have to define the relationship explicitly!
+
+**Outcome #2**: Gradle models relationships using domain objects which are shared between plugins. It can _infer_ dependencies thanks to those objects.
+
+In other words, _because_ the input of the Java compilation task is a _source set_, and that source set defines that as an input, it has a directory which is generated by the `generateLexer` task, Gradle knows that before compiling, it needs to call that `generateLexer` task.
+Any other task using the source set as an input will do the same: it avoids duplication of code and hard wiring!
+
+=== Using the worker API
+
+At this stage, we're pretty much done with the wiring, but we still miss the actual implementation of the task.
+This could be left as an exercise to the reader, but there's actually an interesting aspect of the Gradle APIs to cover.
+
+If you remember, I mentioned in the introduction of the blog post that the JFlex API uses a mix of static state and instance state to configure itself.
+This isn't nice, as it basically means that the API is not thread-safe: if, for some reason, we have multiple tasks generating sources (for example if we have multiple jflex directories, or different projects having jflex sources), then we can't safely generate sources in parallel!
+
+This is quite problematic, but Gradle provides a simple workaround for this: the https://docs.gradle.org/current/userguide/worker_api.html[worker API].
+The worker API allows a number of things, but in particular it permits executing code in a different process, or, more lightweight, in an isolated classloader.
+The second option is good for us, because _static state_ in Java is only as static as it is in a given classloader: if 2 "identical" classes are loaded in 2 different classloaders, then they both have their independent static state.
+We're going to use this to properly isolate execution of our code.
+
+As a consequence, executing JFlex will be slightly more complicated, but as usual in programming, it's only _one level of indirection_.
+Instead of having our task directly invoke JFlex, we need to create a class which is going to invoke JFlex.
+
+To use the worker API, we need to inject the so-called `WorkerExecuter` in our task:
+
+.jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java
+[source,java]
+----
+@CacheableTask
+public abstract class JFlexTask extends DefaultTask {
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getSourceDirectory();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDirectory();
+
+    @Inject
+    protected abstract WorkerExecutor getWorkerExecutor();
+
+    @TaskAction
+    public void generateSources() {
+        // We're using classloader isolation, because the JFlex API
+        // uses static state!
+        getWorkerExecutor()
+                .classLoaderIsolation()
+                .submit(JFlexAction.class, params -> {
+                    params.getSourceDirectory().set(getSourceDirectory());
+                    params.getSourceFiles().from(getSourceDirectory());
+                    params.getOutputDirectory().set(getOutputDirectory());
+                });
+    }
+}
+----
+
+Note again how you don't need to care _how_ to get a `WorkerExecuter`: just tell Gradle you need it and voilà!
+When using the worker API, the task action basically becomes an empty shell, which just configures how actual execution should happen.
+In this case, we declare _classloader isolation_, as well as the inputs of the _action_, which is going to be executed in isolation.
+
+The action class basically consists of calling the JFlex API:
+
+.jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexAction.java
+[source,java]
+----
+public abstract class JFlexAction implements WorkAction<JFlexAction.Parameters> {
+    public interface Parameters extends WorkParameters {
+        DirectoryProperty getSourceDirectory();
+        ConfigurableFileCollection getSourceFiles();
+        DirectoryProperty getOutputDirectory();
+    }
+
+    @Override
+    public void execute() {
+        OptionUtils.setDefaultOptions();
+        Path sourcePath = getParameters().getSourceDirectory().getAsFile().get().toPath();
+        File outputDirectory = getParameters().getOutputDirectory().getAsFile().get();
+        OptionUtils.setDir(outputDirectory);
+        Options.dump = false;
+        Options.encoding = StandardCharsets.UTF_8;
+        Options.no_backup = true;
+        getParameters().getSourceFiles()
+                .getAsFileTree()
+                .getFiles()
+                .forEach(jflexFile -> generateSourceFileFor(jflexFile, outputDirectory, sourcePath));
+    }
+
+    private void generateSourceFileFor(File jflexFile, File outputDirectory, Path sourcePath) {
+        String relativePath = sourcePath.relativize(jflexFile.getParentFile().toPath()).toString();
+        OptionUtils.setDir(new File(outputDirectory, relativePath));
+        new LexGenerator(jflexFile).generate();
+    }
+}
+----
+
+
+The action declares its inputs with the `WorkParameters` interface and the code which is going to be executed in an isolated classloader lives in the `execute` method.
+You can see how it uses static state (`OptionsUtils.setDefaultOptions()`, `Options.dump`, ...).
+The worker API lets us workaround what should probably be considered as a _bug_ in JFlex!
+
+**Outcome #3**: The Gradle Worker API lets you isolate your task code in classloaders or even separate worker processes.
+
+=== More about the provider API
+
+Before closing this blog post, I want to give you a bit more insights about the provider API.
+I already mentioned that one of the main advantages is that it solves ordering issues, by being fully lazy.
+
+One of the most interesting aspects of this API is _value derivation_.
+To understand this concept, let's imagine a _Greeter_ task which is responsible for saying hello:
+
+[source,java]
+----
+abstract class Greeter extends DefaultTask {
+    @Input
+    public abstract Property<String> getUser()
+
+    @Input 
+    public abstract Property<String> getIntro()
+
+    @Input 
+    public abstract Property<String> getOutro()
+
+    @TaskAction
+    public void sayHello() {
+        String user = getUser().get();
+        String intro = getIntro().get();
+        String outro = getOutro().get();
+        System.out.println(intro + user + outro);
+    }
+}
+----
+
+we can register a task which says hello in English by doing this:
+
+[source,groovy]
+----
+tasks.register("sayHello", Greeter) {
+   intro = "Hello, "
+   user = "Cédric"
+   outro = "!"
+}
+----
+
+And another one which says hello in French:
+
+[source,groovy]
+----
+tasks.register("direBonjour", Greeter) {
+   intro = "Bonjour "
+   user = "Cédric"
+   outro = " !"
+}
+----
+
+It's a bit annoying that we have to repeat the user declaration in both tasks, and the rule "in french, exclamation mark must be preceeded with a space" doesn't need to be known to the user.
+To avoid this redundancy, we're going to write a plugin which makes all this more convenient.
+
+First, we're going to create an _extension_, which is going to hold what is _relevant_ for user configuration: the name of the person to greet and what outro we want to use.
+
+[source,java]
+----
+interface GreetingExtension {
+    Property<String> getUser()
+    Property<String> getOutro()
+}
+----
+
+Again we don't have to provide an implementation for this, Gradle knows how to create a `Property<String>`. This extension simply needs to be created by our plugin:
+
+[source,java]
+----
+GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
+extension.getOutro().convention("!");
+----
+
+It's interesting to see that our DSL will only expose "user" and "outro", but not the intro, which is actually dependent on the languag. 
+We can also set a conventional value on the extension itself.
+The plugin can then register both tasks for us:
+
+[source,java]
+----
+tasks.register("sayHello", Greeter.class, task -> {
+   task.getIntro().convention("Hello, ");
+   task.getUser().convention(extension.getUser());
+   task.getOutro().convention(extension.getOutro());
+});
+tasks.register("direBonjour", Greeter.class, task -> {
+   task.getIntro().convention("Bonjour ");
+   task.getUser().convention(extension.getUser());
+   task.getOutro().convention(extension.getOutro().map(o -> " " + o));
+});
+----
+
+Now you see the interest of using the provider API: for the english case, the task is going to use the outro value _directly_, while for the french version, by default, it's going to compute a _derived_ value.
+
+The user will configure the tasks via the extension:
+
+[source,groovy]
+----
+greeting {
+    user = "Cédric"
+}
+----
+
+Calling `sayHello` will output:
+
+====
+Hello, Cédric!
+====
+
+While calling `direBonjour` will output:
+
+====
+Bonjour Cédric !
+====
+
+Should the user configure a different outro, the outputs would be different:
+
+[source,groovy]
+----
+greeting {
+    user = "Cédric"
+    outro = "!!!"
+}
+----
+
+results in this english version:
+
+====
+Hello, Cédric!!!
+====
+
+While the french one is:
+
+====
+Bonjour Cédric !!!
+====
+
+BUT, because we defined the _convention value_ of outro of the french task as a derived value, it is still possible for the user to override it completely:
+
+[source,groovy]
+----
+greeting {
+    user = "Cédric"
+    outro = "!!!"
+}
+tasks.named("direBonjour") {
+    outro = " !"
+}
+----
+
+Then executing `direBonjour` would print:
+
+====
+Bonjour Cédric !
+====
+
+**Outcome #4**: The provider API lets precisely define how to compute a value from another property, in a lazy manner, and provides an elegant way to supply default, or conventional values.
+
+You can read more about lazy configuration and the provider API in the https://docs.gradle.org/current/userguide/lazy_configuration.html[Gradle documentation], but in a nutshell, the derivation logic is _exactly_ what the `layout.buildDirectory.dir("...")` is doing: it defines a directory which is _derived from_ the existing build directory value.
+
+== Conclusion
+
+In this blog post, we've leveraged a real world use case, integrating lexer generation via JFlex, to explain how to properly write a Gradle plugin which:
+
+- uses the lazy provider API, making it immune to configuration ordering problems
+- explains how Gradle's "task dependencies" are _implicit_, avoiding hardcoding relationships between tasks, and making it much more robust to arbitrary configuration changes
+- doesn't rely on arbitrary ordering (e.g, like in Maven, "_all_ sources of _all_ generators must be generated before you can compile _anything_") but instead knows that _only_ if you need to compile the main source set, _then_ you need to generate JFlex sources
+- uses the worker API, letting us working around a bug in the JFlex library regarding shared mutable state
+
+In addition, we've seen the basics of the provider API, which allows plugins to define default values as well as computing derived values for inputs or outputs in a lazy manner. 
+We've also hinted at how plugins can expose configuration mechanisms which reduce the API surface, while making it convenient to refactor, therefore dramatically reducing the cost of maintenance of builds.
+
+Eventually, the _user facing code_ of using our JFlex plugin is a _single line_ in a build script:
+
+[source,groovy]
+----
+plugins {
+    id "io.micronaut.internal.jflex"
+}
+----
+
+There is _no configuration_ (because we use the convention values) and _no imperative code_ (because the build logic of creating tasks is deferred to a _plugin_).
+As a bonus, because we used a _separate build_ and https://docs.gradle.org/current/userguide/composite_builds.html[composite builds], if we want to publish this plugin to the Gradle plugin portal later, it would be just about adding some configuration to the `jflex-plugin` module.
+There is effectively no need to publish a plugin, either to a local repository, or a remote one, to be able to use plugins in Gradle!
+
+The full code is actually available in the upcoming https://github.com/micronaut-projects/micronaut-toml[Micronaut TOML module].
+
