@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,14 @@
 		<h1>Dynamic database models with Groovy and Hibernate</h1>
 	</div>
 
-	<p><em>26 juillet 2007</em></p>
-	<p><em>Tags: </em>groovy </em> hibernate </em> java </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2007/07/26/dynamic_database_models_with_groovy.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2007/07/26/dynamic_database_models_with_groovy.html"></div>
-
+	<p><em>26 July 2007</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/hibernate.html">hibernate</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_the_problem">The problem </h2>
 <div class="sectionbody">
@@ -78,10 +94,8 @@
 <pre> Document(title, abstract, subject, body)</pre>
 </div>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre> While some of those fields fit for every customer, working on specific documents require more fields. For example :</pre>
-</div>
+<div class="paragraph">
+<p> While some of those fields fit for every customer, working on specific documents require more fields. For example :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -95,12 +109,11 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code> public class Document {
+<pre class="prettyprint highlight"><code> public class Document {
     private int theID;
     private Map theCustomFields;
     /* ...  here comes the getters/setters */
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="literalblock">
@@ -112,20 +125,16 @@ There are two problems with this model :</pre>
 <div class="ulist">
 <ul>
 <li>
-<p>types of properties are defined at compile time, and cannot be changed (property name type is String, but the property value is also. What if you want to store a boolean ?) <br></p>
-</li>
-<li>
-<p>Hibernate will generate two tables : one for the document, and the other one for the custom fields values.</p>
-<div class="literalblock">
-<div class="content">
-<pre> This is surely not what we want : the existing model just consists of a simple _document_ table for which all columns refer to a document property (aka custom field). This is both much simpler to read and does not require any join in order to read all the fields of a single document.  +</pre>
-</div>
-</div>
+<p>types of properties are defined at compile time, and cannot be changed (property name type is String, but the property value is also. What if you want to store a boolean ?) <br>
+ - Hibernate will generate two tables : one for the document, and the other one for the custom fields values.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>This &#8220;limitation&#8221; of Hibernate just meant that I would not be able to migrate the database without changing its schema. In my case, this was just problematic as I could not upgrade the database schema, too many different components, written in several languages (Java, Perl, …) could write or read this database.</p>
+<p> This is surely not what we want : the existing model just consists of a simple <em>document</em> table for which all columns refer to a document property (aka custom field). This is both much simpler to read and does not require any join in order to read all the fields of a single document. <br></p>
+</div>
+<div class="paragraph">
+<p>This ``limitation'' of Hibernate just meant that I would not be able to migrate the database without changing its schema. In my case, this was just problematic as I could not upgrade the database schema, too many different components, written in several languages (Java, Perl, …) could write or read this database.</p>
 </div>
 </div>
 </div>
@@ -136,7 +145,7 @@ There are two problems with this model :</pre>
 <p>Therefore, I’ve been searching for a solution, and thought about dynamic bean generation. I’ve had read about the dynamic language Groovy, and decided to take a look. As it produces 100% Java compatible bytecode, I thought it would just fit for Hibernate. It took not very long to find out that I would be able to do what I wanted : <strong>achieving maximum database flexibility thanks to Groovy and Hibernate</strong>. This means runtime modification of the model, and optimum performance (no joins whatsoever for just bean properties). <br></p>
 </div>
 <div class="sect2">
-<h3 id="__how_does_it_work"> How does it work ?</h3>
+<h3 id="_how_does_it_work"> How does it work ?</h3>
 <div class="paragraph">
 <p>From Groovy 1.1 (still in beta stages), you may use annotations. That sounded good for me as I’ve always been using Hibernate Annotations in my projects. The idea was just to dynamically create an Annotated Java Bean from a description file, then make Hibernate aware of this class and <em>voilà</em> !</p>
 </div>
@@ -145,7 +154,7 @@ There are two problems with this model :</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="__why_not_pure_groovy"> Why not pure Groovy ?</h3>
+<h3 id="_why_not_pure_groovy"> Why not pure Groovy ?</h3>
 <div class="paragraph">
 <p>One could say that if I’ve managed to do this with Java and Groovy code mixed up, then I could’ve done it in pure Groovy. True. But I still remember that Groovy is a dynamic language loosely typed, which, therefore, does not offer the same compile-time security one could have with pure Java. I’m using IntelliJ IDEA every day for developpement, and not beeing able to say if your code is valid statically with Groovy is just a source of bunches of bugs, especially when you are using plents of third party libs. The following POC has been made with IntelliJ IDEA and the latest Groovy 1.1 beta 2, which allows compiling both Java and Groovy code at once, mixing up both languages without caring about cyclic dependencies. To be honest, my first trial was made with the beta 1 which did not offer this, and it was just more complicated : you had to separate 3 trees of source code : one for pure Groovy, one for pure Java, and the latest one is an interoperability set of Java interfaces and enumerations that allows the other two to communicate. Hopefully the Jetbrain guys went off this and provided us a new version of the compiler, and you should not have to do those (dirty but necessary) tricks. Note that using IntelliJ IDEA is not necessary. However, as the latest EAP offers an outstanding Groovy support, I strongly suggest that you take a look ;)</p>
 </div>
@@ -163,13 +172,12 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class MetaClass {
+<pre class="prettyprint highlight"><code>public class MetaClass {
  private boolean isEntity = true;
  private String theParentClass;
  private String theName;
  private String theTableName;
- private Map
-</code></pre>
+ private Map</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -177,7 +185,7 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class MetaField {
+<pre class="prettyprint highlight"><code>public class MetaField {
  private String theName;
  private boolean isPK;
  private MetaType theType;
@@ -216,8 +224,7 @@ There are two problems with this model :</pre>
   theType = aType;
  }
 
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -225,7 +232,7 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public enum MetaType {
+<pre class="prettyprint highlight"><code>public enum MetaType {
  STRING("String"),
  INT("Integer"),
  LONG("Long"),
@@ -243,8 +250,7 @@ There are two problems with this model :</pre>
  public String getHibernateConversion() {
   return theHibernateConversion;
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -252,11 +258,10 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>MetaClass meta = new MetaClass(cl);
+<pre class="prettyprint highlight"><code>MetaClass meta = new MetaClass(cl);
 meta.setName('test');
 meta.addField(new MetaField("title", false, MetaType.STRING));
-meta.addField(new MetaField("date", false, MetaType.DATE));
-</code></pre>
+meta.addField(new MetaField("date", false, MetaType.DATE));</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -271,7 +276,7 @@ meta.addField(new MetaField("date", false, MetaType.DATE));
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import MetaClass
+<pre class="prettyprint highlight"><code>import MetaClass
 import groovy.text.Template
 import groovy.text.SimpleTemplateEngine
 class GroovyBeanGenerator {
@@ -295,8 +300,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
      def template = engine.createTemplate(tpl_src).make(binding)
      return template.toString();
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -310,7 +314,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class GroovybernateUtil {
+<pre class="prettyprint highlight"><code>public class GroovybernateUtil {
  private String theApplicationName;
  private AnnotationConfiguration theConfiguration;
  private boolean isModelUpdated;
@@ -366,8 +370,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
  public Statistics getStats() {
   return theSessionFactory.getStatistics();
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -384,7 +387,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class Groovybernate {
+<pre class="prettyprint highlight"><code>public class Groovybernate {
  public static void main(String[] args) throws IllegalAccessException, InstantiationException {
 
   GroovyClassLoader cl = new GroovyClassLoader(Groovybernate.class.getClassLoader());
@@ -466,15 +469,14 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
 //  Statistics stats = util.getStats();
 
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_conclusion">Conclusion</h3>
 <div class="paragraph">
-<p>To conclude, we’ve been able to perform what we wanted to do : to dynamically generate a bean from a meta description, which could be easily read from a configuration file, in order to achieve maximum flexibility in database schema customization. This allows customizing some objects of an application for customer needs, without needing to update an existing database schema (our need), with human readable database objects (one table per bean, instead of two tables, one for instances, the other for its properties) and very good performance. I hope this has given you some ideas about how you can go beyond the &#8220;limitations&#8221; of a static Hibernate object model without breaking the logic behind. I mean that with this solution, what should be pure configuration (database customization for customer needs) remains configuration without breaking the rules of ORM. If I had wanted to perform such without Groovy, I would have been obliged to compile a dedicated application for each customer, which is both unnecessary and completely illogic. Moreover, any change in the model would require building a new application…</p>
+<p>To conclude, we’ve been able to perform what we wanted to do : to dynamically generate a bean from a meta description, which could be easily read from a configuration file, in order to achieve maximum flexibility in database schema customization. This allows customizing some objects of an application for customer needs, without needing to update an existing database schema (our need), with human readable database objects (one table per bean, instead of two tables, one for instances, the other for its properties) and very good performance. I hope this has given you some ideas about how you can go beyond the ``limitations'' of a static Hibernate object model without breaking the logic behind. I mean that with this solution, what should be pure configuration (database customization for customer needs) remains configuration without breaking the rules of ORM. If I had wanted to perform such without Groovy, I would have been obliged to compile a dedicated application for each customer, which is both unnecessary and completely illogic. Moreover, any change in the model would require building a new application…</p>
 </div>
 <div class="paragraph">
 <p>Comments welcome ;) <br></p>
@@ -482,6 +484,8 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -506,7 +510,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -547,6 +551,5 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

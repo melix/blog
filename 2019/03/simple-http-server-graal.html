@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: A simple native HTTP server with GraalVM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>A simple native HTTP server with GraalVM</h1>
+	</div>
+
+	<p><em>19 March 2019</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/graal.html">graal</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/kotlin.html">kotlin</a> 
+	</p>
+	<p><div class="sect1">
+<h2 id="_writing_a_simple_http_server_with_graalvm">Writing a simple HTTP server with GraalVM</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In my daily work, I often need to start a simple HTTP server to serve local files.
+For example, this week I&#8217;m going to give a talk at <a href="https://www.breizhcamp.org">Breizcamp</a>, and because my presentation uses a <a href="https://revealjs.com">Reveal.js slide deck</a> and that it loads resources dynamically, I need a "real" web server to serve the files.
+So far, I&#8217;ve been quite happy using the Python simple http server.
+Using it is as easy as running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>python -m SimpleHTTPServer 8000</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But knowing that the JDK has an embedded HTTP server, and that there&#8217;s a lot of hype around Graal those days, I wanted to see if we could achieve the same thing, with a fast startup, with GraalVM.
+The answer is <strong>yes</strong>, but the road wasn&#8217;t so easy, at least for Groovy.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_show_me_the_code">Show me the code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The code for this experiment can be found on <a href="https://github.com/melix/graal-simple-httpserver">GitHub</a>.
+We&#8217;re going to use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://gradle.org/">Gradle</a> to build</p>
+</li>
+<li>
+<p>the <a href="https://github.com/palantir/gradle-graal">Gradle Graal plugin</a> from Palantir</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And because I like the <a href="http://www.groovy-lang.org/">Groovy</a>, and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
+Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
+Knowing that Kotlin is a statically compiled language from the ground up and that it doesn&#8217;t have the whole dynamic history of Groovy, I did expect it to be simpler.</p>
+</div>
+<div class="paragraph">
+<p>So, in the end, here&#8217;s what the Kotlin server looks like:</p>
+</div>
+<div class="listingblock">
+<div class="title">HttpServer.kt</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="ruby">fun main(args: Array&lt;String&gt;) {
+    val port = if (args.size &gt; 0) args[0].toInt() else 8080
+    val baseDir = if (args.size &gt; 1) File(args[1]).canonicalFile else File(".").canonicalFile
+
+    create(InetSocketAddress(port), 0).run {
+        createContext("/") { exchange -&gt;
+            exchange.run {
+                val file = File(baseDir, requestURI.path).canonicalFile
+                if (!file.path.startsWith(baseDir.path)) {
+                    sendResponse(403, "403 (Forbidden)\n")
+                } else if (file.isDirectory) {
+                    val base = if (file == baseDir) "" else requestURI.path
+                    sendResponse(200, "&lt;html&gt;&lt;body&gt;" +
+                            file.list()
+                                .map { "&lt;ul&gt;&lt;a href=\"$base/${it}\"&gt;${it}&lt;/a&gt;&lt;/ul&gt;" }
+                                .joinToString("\n") + "&lt;/body&gt;&lt;/html&gt;")
+
+                } else if (!file.isFile) {
+                    sendResponse(404, "404 (Not Found)\n")
+                } else {
+                    sendResponse(200) {
+                        FileInputStream(file).use {
+                            it.copyTo(this)
+                        }
+                    }
+                }
+            }
+        }
+        executor = null
+        println("Listening at http://localhost:$port/")
+        start()
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s quite simple indeed, and making this work as a GraalVM native image is extremely easy too. This is the <em>whole build file</em>, this is all you need:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle.kts</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
+   kotlin("jvm") version "1.3.21"
+   id("com.palantir.graal") version "0.3.0-6-g0b828af"
+}
+
+repositories {
+   jcenter()
+}
+
+dependencies {
+   implementation(kotlin("stdlib"))
+}
+
+graal {
+   graalVersion("1.0.0-rc14")
+   mainClass("HttpServerKt")
+   outputName("httpserv-kt")
+   option("--enable-http")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see, we just apply the Kotlin plugin to build our code, then the GraalVM plugin and configure the basics of the GraalVM plugin (version, main class, &#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Building the image can be done by calling:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>./gradlew http-kotlin:nativeImage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As <a href="https://scans.gradle.com/s/nzkvn2gwkguf6">you can see</a>, building the whole thing takes around 15s on my laptop.
+That is to say, compiling the server <strong>and</strong> generating the native image.
+Then you can try to serve files running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see that the server starts immediately: there&#8217;s absolutely no wait time, it&#8217;s there and ready to answer.
+The whole process took me less than 30 minutes, the native image is only 11MB. Success!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_making_it_work_with_groovy">Making it work with Groovy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that I had a proof-of-concept with Kotlin, I went back to Groovy.
+And, I can say, despite the fact I love this language, that it was a nightmare to make it work.
+At some point, I even thought of abandoning, however, using perseverance, I managed to work around all problems I faced.</p>
+</div>
+<div class="paragraph">
+<p>Before I explain the problems, let&#8217;s took a look at the final Groovy server:</p>
+</div>
+<div class="listingblock">
+<div class="title">HttpServerGroovy.groovy</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@CompileStatic
+abstract class HttpServerGroovy {
+
+    // VERY dirty trick to avoid the creation of a groovy.lang.Reference
+    static File baseDir
+
+    static void main(String[] args) {
+        def port = args.length &gt; 0 ? args[0].toInteger() : 8080
+        baseDir = args.length &gt; 1 ? new File(args[1]).canonicalFile : new File(".").canonicalFile
+
+        def server = HttpServer.create(new InetSocketAddress(port), 0)
+        server.createContext("/", new HttpHandler() {
+            @Override
+            void handle(HttpExchange exchange) throws IOException {
+                def uri = exchange.requestURI
+                def file = new File(baseDir, uri.path).canonicalFile
+                if (!file.path.startsWith(baseDir.path)) {
+                    sendResponse(exchange, 403, "403 (Forbidden)\n")
+                } else if (file.directory) {
+                    String base = file == baseDir ? '': uri.path
+                    String listing = linkify(base, file.list()).join("\n")
+                    sendResponse(exchange, 200, String.format("&lt;html&gt;&lt;body&gt;%s&lt;/body&gt;&lt;/html&gt;", listing))
+
+                } else if (!file.file) {
+                    sendResponse(exchange, 404, "404 (Not Found)\n")
+                } else {
+                    sendResponse(exchange, 200, new FileInputStream(file))
+                }
+            }
+        })
+        server.executor = null
+        System.out.println(String.format("Listening at http://localhost:%s/", port))
+        server.start()
+    }
+
+    private static List&lt;String&gt; linkify(String base, String[] files) {
+        def out = new ArrayList&lt;String&gt;(files.length)
+        for (int i = 0; i &lt; files.length; i++) {
+            String file = files[i]
+            out &lt;&lt; String.format("&lt;ul&gt;&lt;a href=\"%s/%s\"&gt;%s&lt;/a&gt;&lt;/ul&gt;", base, file, file)
+        }
+        out
+    }
+    ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first thing you will notice is that it&#8217;s far from being idiomatic Groovy.
+Of course I used <code>@CompileStatic</code>, because the static nature of GraalVM would have made this an even greater challenge to make it work with dynamic Groovy.
+However, I didn&#8217;t expect that it would be <em>so hard</em> to make it work.
+The resulting file is both a consequence of limitations of GraalVM, and historical background of Groovy.</p>
+</div>
+<div class="sect2">
+<h3 id="_where_are_my_closures">Where are my closures?</h3>
+<div class="paragraph">
+<p>The first code I wrote was using idiomatic Groovy, with closures. However, as soon as I started to build my native image, I noticed this obscure error:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s funny to see this <code>MethodHandle</code> error when you know that the code is <em>fully statically compiled</em>, and that it doesn&#8217;t contain a single method handle.
+However, the Groovy runtime does, and this is where the fun began.
+First of all, GraalVM tells you what method is problematic. This was <code>org.codehaus.groovy.vmplugin.v7.IndyInterface.invalidateSwitchPoints</code>.
+Things are getting a little clearer: for some reason, the Groovy runtime is initialized, and we load the dynamic <code>IndyInterface</code>, that I won&#8217;t ever need.</p>
+</div>
+<div class="paragraph">
+<p>The "some reason" needs a bit of explanation. Despite the fact that we use statically compiled Groovy, we&#8217;re still implementing <em>Groovy specific interfaces</em>. For example, the <code>GroovyObject</code> interface.
+Similarly, we honor class initialization the same way as a dynamic class, meaning that when a statically compiled Groovy class is instantiated, even if it doesn&#8217;t contain any dynamic reference, we will initialize its metaclass, and as a consequence try to initialize the Groovy runtime.</p>
+</div>
+<div class="paragraph">
+<p>However something was <em>wrong</em>: looking at my code I could not figure out what would cause initialization, because my entry point was static.
+In fact, the answer was easy: it came through the closures.</p>
+</div>
+<div class="paragraph">
+<p>Well, that&#8217;s what I thought, because even after eliminating closures, I still got the damn error.
+In fact, it turns out the situation is far more complex.
+For example, I had this innocent looking code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">def baseDir = args[0]
+server.createContext("/", new HttpHandler() {
+    @Override
+    void handle(HttpExchange exchange) throws IOException {
+        ...
+        someCodeUses(baseDir)
+    })</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The fact that we use <code>baseDir</code> <em>within</em> an anonymous inner class, and that Groovy uses the same code generation under the hood for both closures and anonymous inner classes, that the <code>baseDir</code> variable is allowed to be mutated in the inner class. Of course here I&#8217;m not doing it, but because the compiler doesn&#8217;t eliminate that possibility, what it does is generating a <code>groovy.lang.Reference</code> for my local variable, that is used in the inner class.
+And, initializing the <code>Reference</code> class would cause an additional path to this <code>IndyInterface</code> method call&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>In the end, the problem is not that much that there&#8217;s a <code>MethodHandle</code>, it&#8217;s that there are potentially different code paths that lead to this, and that GraalVM can&#8217;t figure out in the end a single method to be called: we&#8217;re just defeating the system!</p>
+</div>
+<div class="paragraph">
+<p>For example, even creating an anonymous inner class would still trigger the creation of a metaclass for it: this means that even if we replace the closure with an inner class, in the end, we would still trigger the initialization of the Groovy runtime.</p>
+</div>
+<div class="paragraph">
+<p>I tried to be smart and remove the <code>IndyInterface</code> from the code that GraalVM is using to generate the native image, knowing that in the end, this code would <em>never</em> be called if I didn&#8217;t register the Java 7 plugin (that I wouldn&#8217;t use in any case). However, it turns out that GraalVM doesn&#8217;t like this, as it has special handling for Groovy, and that if you <em>remove</em> that class, it fails with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So instead I spent hours eliminating those paths, which involved:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>turning that shared variable into a field in order to workaround the reference initialization</p>
+</li>
+<li>
+<p>removing all closures</p>
+</li>
+<li>
+<p>removing usages of <code>GString</code> (interpolated strings, which is why you see <code>String.format</code> instead)</p>
+</li>
+<li>
+<p>replacing the short-hand syntax for creating lists (<code>def foo=[]</code>) with an explicit call</p>
+</li>
+<li>
+<p>removing calls to <code>+</code> with strings (first attempt to remove GString&#8230;&#8203;)</p>
+</li>
+<li>
+<p>eliminating some classes from the Groovy runtime</p>
+</li>
+<li>
+<p>replacing some classes of the Groovy runtime with stubs, preventing static initialization</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the end, I have <a href="https://github.com/melix/graal-simple-httpserver/blob/master/http-groovy/build.gradle.kts">something which works</a>, but you can see that the build file is far more complex.</p>
+</div>
+<div class="paragraph">
+<p>In particular, it makes use of a little known Gradle feature called <em>artifact transforms</em>. Basically, I&#8217;m asking Gradle to transform the Groovy jar <em>before</em> GraalVM uses it. This transformation involves filtering out classes, so that GraalVM doesn&#8217;t try to be too smart about them.</p>
+</div>
+<div class="paragraph">
+<p>Once this is done, we can finally generate a native image for Groovy too:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>./gradlew http-groovy:nativeImage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It takes about <a href="https://scans.gradle.com/s/p4ctmi5pzune4">the same amount of time as with Kotlin</a> to generate a similar 11MB native image.
+Running it is as easy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And again it&#8217;s super snappy!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At this stage, you might consider that it&#8217;s a success: we got both Kotlin and Groovy code compiled into a native image that is very snappy and starts even faster than the Python server.
+However, getting the Groovy version to work was <em>hours of pain</em>. Each time I managed to fix a problem, another one arose.
+Basically, every method call, every extension method you call is likely to trigger initialization of some Groovy subsystem, or trigger additional paths to this <code>IndyInterface</code> code.
+In the end it would be nice if GraalVM could completely eliminate the need for having this class, but until then I just cannot recommend anyone to use Groovy to build native images: it&#8217;s just <em>too frustrating</em>.
+And remember that even if you manage to make it work, it takes both a significant amount of time to do so, but also forces you to write non idiomatic code.
+Last but not least, <em>any</em> addition to your code is likely to force you to update your GraalVM configuration to make it work.
+In the end, it&#8217;s just way easier to write plain old Java code, or go Kotlin.</p>
+</div>
+<div class="paragraph">
+<p>Note that I&#8217;m not saying that it&#8217;s not possible with Groovy, but <a href="https://e.printstacktrace.blog/graalvm-and-groovy-how-to-start/">folks usually face different problems than I did</a>, in particular when it&#8217;s just about configuring classes accessed by reflection: this is a simple problem.
+I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;s not suited for this use case. I still use Groovy everyday, in particular in tests or for simple scripts (in replacement to bash scripts). However, more worrisome is that if an application transitively depends on Groovy, it&#8217;s unlikely to be "GraalVM compatible".</p>
+</div>
+<div class="paragraph">
+<p>Eventually, if you look at the Kotlin version and the companion Gradle build, it&#8217;s extremely simple, thanks to the great work done by the Palantir team!</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+After this blog post was published, I received a <a href="https://github.com/melix/graal-simple-httpserver/pull/1">pull request from Szymon Stepniak</a> improving the Groovy code a lot. The resulting file is, however, twice as big (23MB!). It does <em>not</em> change my vision on this either, because it took 2 men to reach this point, in a significant amount of time.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-simple-http';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

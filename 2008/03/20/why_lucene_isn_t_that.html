@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,22 @@
 		<h1>Moving Lucene a step forward</h1>
 	</div>
 
-	<p><em>20 mars 2008</em></p>
-	<p><em>Tags: </em>engines </em> knowledge </em> lingway </em> lucene </em> management </em> search </em> semantics </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2008/03/20/why_lucene_isn_t_that.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2008/03/20/why_lucene_isn_t_that.html"></div>
-
+	<p><em>20 March 2008</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/engines.html">engines</a> 
+	</em>
+		<a href="/blog/tags/knowledge.html">knowledge</a> 
+	</em>
+		<a href="/blog/tags/lingway.html">lingway</a> 
+	</em>
+		<a href="/blog/tags/lucene.html">lucene</a> 
+	</em>
+		<a href="/blog/tags/management.html">management</a> 
+	</em>
+		<a href="/blog/tags/search.html">search</a> 
+	</em>
+		<a href="/blog/tags/semantics.html">semantics</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
@@ -94,7 +118,7 @@
 <p>\6. <strong>No built-in support for clustering</strong>. If you want to create clusters, either write your own implementation of a <em>Directory</em>, or use <a href="http://lucene.apache.org/solr/">Solr</a>, or <a href="http://lucene.apache.org/nutch/">Nutch</a>+http://hadoop.apache.org/[Hadoop]. Both Solr and Nutch leverage Lucene, but are not straight replacements. Lucene is embeddable, while you must leverage on Solr or Nutch. Well, I think it is not very surprising that Hadoop idea emerged from the Lucene team : Lucene doesn’t scale out. It’s internals makes it (very) fast for most common situations, but for large document sets, you <strong>have to</strong> scale out, and as Lucene does not implement clustering at the core level, you must switch from Lucene to another search engine layer, which is not straightforward. The problem with switching to Solr or Nutch is that you carry things you probably won’t need : integrated crawling for Nutch and indexing server for Solr.</p>
 </div>
 <div class="paragraph">
-<p>\5. <strong>Span queries are slow</strong>. This may be interpreted as a problem specific to Lingway where we make intensive use of span queries (NEAR operator : &#8220;red NEAR car&#8221;), but the Lucene index structure has been updated to add this feature, which was not thought at first. The underlying implementation leads to complex algorithms that are very slow, especially when some term is repeated many times in a single large document. That’s why I tend to say that Lucene is a <em>high-performance text search engine</em> <strong>only if you use basic boolean queries</strong>.</p>
+<p>\5. <strong>Span queries are slow</strong>. This may be interpreted as a problem specific to Lingway where we make intensive use of span queries (NEAR operator : ``red NEAR car''), but the Lucene index structure has been updated to add this feature, which was not thought at first. The underlying implementation leads to complex algorithms that are very slow, especially when some term is repeated many times in a single large document. That’s why I tend to say that Lucene is a <em>high-performance text search engine</em> <strong>only if you use basic boolean queries</strong>.</p>
 </div>
 <div class="paragraph">
 <p>\4. <strong>Scoring is not really pluggable</strong>. Lucene has its own implementation of a scoring algorithm, where terms may be boosted, and makes use of a <em>Similarity</em> class, but soon shows limitations when you want to perform complex scoring, for example based on actual matches and meta data about the query. If you want to do so, you’ll have to extend the Lucene query classes. The facts is that Lucene has been thought in terms of tf/idf like scoring algorithms, while in our situation, for linguistic based scoring, the structure of Lucene scoring facilities don’t fit. We’ve been obliged to override every Lucene query class in order to add support for our custom scoring. And that was a problem :</p>
@@ -139,6 +163,8 @@
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -163,7 +189,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -204,6 +230,5 @@
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

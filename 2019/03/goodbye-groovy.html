@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Goodbye, Groovy!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Goodbye, Groovy!</h1>
+	</div>
+
+	<p><em>21 March 2019</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/kotlin.html">kotlin</a> 
+	</p>
+	<p><div class="sect1">
+<h2 id="_im_stepping_down_from_the_apache_groovy_project">I&#8217;m stepping down from the Apache Groovy project</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Today is a very sad day. I&#8217;ve decided to resign from the Apache Groovy PMC, as well as a committer.</p>
+</div>
+<div class="paragraph">
+<p>The trigger was that I <a href="https://github.com/apache/groovy/commit/56c219eca0c028c95713a3abd74f14fa40cb0e6c">dared pushing a Gradle Kotlin DSL</a> and this had to be reverted.
+Lots of people in the Groovy community see Kotlin as a threat. I don&#8217;t. I use both languages everyday, for different purposes.
+I wrote most of the static compiler for Groovy, and I have no problem saying that I believe Kotlin is better as a static language: the experience is more consistent, and very pleasant.
+But nothing in Kotlin reaches the simplicity that Groovy offers. Running a single line script, the awesome Spock framework for testing, &#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>The fact I work for Gradle Inc was also mentioned as a reason why I did push this file.
+To me, this is questioning my integrity, which is something I cannot accept.</p>
+</div>
+<div class="paragraph">
+<p>In practice, since Gradle announced a couple of years back that they would start using Kotlin as a language for its DSL, I&#8217;ve been in a very complicated position.
+Privately, I always get pinged whenever I say something good about Kotlin. Like, you should not do this, this is not good for us, or, Gradle is not nice with Groovy, what are you doing.
+People always make jokes about Kotlin when they talk to me. I was at Gr8Conf Europe a few days after the announcement and man, that wasn&#8217;t a pleasant experience.</p>
+</div>
+<div class="paragraph">
+<p>I am Cédric. I am not Gradle Inc.</p>
+</div>
+<div class="paragraph">
+<p>I am Cédric. I am not Kotlin.</p>
+</div>
+<div class="paragraph">
+<p>I am Cédric. I am not Groovy.</p>
+</div>
+<div class="paragraph">
+<p>Technologies live and die, I&#8217;m not interested in being married with a technology, I&#8217;m interested in working with something that excites me.
+The reality is that I&#8217;ve been more excited with Kotlin than Groovy lately, and the attacks, conscious or not, public or private, that I get everytime I mention this language are tiring.</p>
+</div>
+<div class="paragraph">
+<p>Now, when I&#8217;m going to say something good about Groovy, I hope folks will believe me.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_special_thanks">Special thanks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I want to thank Guillaume Laforge for this adventure. Man, you gave me the opportunity to join the project, its awesome community. You gave me a job, I was lucky enough to be paid to work on open-source software, and that&#8217;s all because of you. For that I owe you everything, thank you!</p>
+</div>
+<div class="paragraph">
+<p>Second, thanks to Paul King. You are the one that the Groovy community should never loose. People have mentioned that I would be a great loss, but that&#8217;s not true: the reality is that I contributed almost nothing recently, and you did all the hard work. You are also an amazing person always trying to get the best of us. I will miss it.</p>
+</div>
+<div class="paragraph">
+<p>Then Jochen Theodorou: thanks to you for all the hard work you&#8217;ve done with the compiler. I would not have been able to write the static compiler without your help and insights on the internals of Groovy.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;d also would like to personally thank folks that make the community vibrant: Søren Berg Glasius, Graeme Rocher, Jeff Scott Brown, Iván López, Álvaro Sánchez and all the others I miss, don&#8217;t take it personally, this is not easy for me.</p>
+</div>
+<div class="paragraph">
+<p>Last but not least, thank you to the Groovy community. You&#8217;ve been awesome, and I wouldn&#8217;t be where I am without you. I may have been a bit sharp saying that the Groovy community as a whole sees me as a Trojan horse, that&#8217;s not true, but the truth is that I don&#8217;t want to fight anymore. Do not assume that because I quit the community is toxic: it&#8217;s not. There&#8217;s just a lot of understandable fear for the future, in my opinion. My advice is, embrace the change, don&#8217;t look back, and take inspiration.</p>
+</div>
+<div class="paragraph">
+<p>I want to say good luck to the team, in particular to its newer members, like Daniel Sun, who are the future of this language: they have the energy, the skills to make it better.</p>
+</div>
+<div class="paragraph">
+<p>Last but not least, I&#8217;m still a <a href="https://opencollective.com/friends-of-groovy">friend of Apache Groovy</a>, you should be too!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'goodbye-groovy';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

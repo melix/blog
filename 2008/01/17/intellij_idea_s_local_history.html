@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,31 +69,31 @@
 		<h1>IntelliJ IDEA&#8217;s local history saved my life !</h1>
 	</div>
 
-	<p><em>17 janvier 2008</em></p>
-	<p><em>Tags: </em>idea </em> intellij </em> java </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2008/01/17/intellij_idea_s_local_history.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2008/01/17/intellij_idea_s_local_history.html"></div>
-
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>One of my coworkers came to me quite stressed after having &#8220;accidently&#8221; deleted source files from his project. The problem was that he had not done it from our editor, IntelliJ IDEA, but rather directly via windows explorer. Furthermore, he had also pressed &#8220;shift+delete&#8221;, which, for those who are not aware of that combination, means &#8220;delete without possibility to recover&#8221;.</p>
+	<p><em>17 January 2008</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/idea.html">idea</a> 
+	</em>
+		<a href="/blog/tags/intellij.html">intellij</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</p>
+	<p><div class="paragraph">
+<p>One of my coworkers came to me quite stressed after having <code>accidently'' deleted source files from his project. The problem was that he had not done it from our editor, IntelliJ IDEA, but rather directly via windows explorer. Furthermore, he had also pressed </code>shift+delete'', which, for those who are not aware of that combination, means ``delete without possibility to recover''.</p>
 </div>
 <div class="paragraph">
 <p>Damned. Not commit for the late two days (!), Windows XP, NTFS, shift+delete. My first thought was that he was screwed. Then we thought about the local history feature of Jetbrain’s editor. If there was a place where he could recover his files, there it was.</p>
 </div>
 <div class="paragraph">
-<p>So we went to the &#8220;View &#8594; Recent changes&#8221; menu, and IDEA showed us a popup showing &#8220;external changes&#8221;. We clicked and thanks Jetbrains, the files were marked as deleted. We just had to select them, click on &#8220;revert&#8221; and voilà !</p>
+<p>So we went to the <code>View &#8594; Recent changes'' menu, and IDEA showed us a popup showing </code>external changes''. We clicked and thanks Jetbrains, the files were marked as deleted. We just had to select them, click on ``revert'' and voilà !</p>
 </div>
 <div class="paragraph">
 <p>Ok, Jetbrains did not saved my life. They saved his life ;)</p>
 </div>
 <div class="paragraph">
 <p>P.S : I’m using Ubuntu Linux every day, and I have to admit the problem would have been the same : that’s not a windows related problem :)</p>
-</div>
-</div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -104,7 +118,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -145,6 +159,5 @@
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

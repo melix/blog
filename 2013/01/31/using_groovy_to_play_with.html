@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,16 @@
 		<h1>Using Groovy to play with invokedynamic</h1>
 	</div>
 
-	<p><em>31 janvier 2013</em></p>
-	<p><em>Tags: </em>asm </em> bytecode </em> groovy </em> invokedynamic </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2013/01/31/using_groovy_to_play_with.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2013/01/31/using_groovy_to_play_with.html"></div>
-
+	<p><em>31 January 2013</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/asm.html">asm</a> 
+	</em>
+		<a href="/blog/tags/bytecode.html">bytecode</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/invokedynamic.html">invokedynamic</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_invokedynamic_and_groovy_2">InvokeDynamic and Groovy 2</h2>
 <div class="sectionbody">
@@ -84,7 +102,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>If you try to compile Groovy classes with -indy and the &#8220;normal&#8221; jar, you would have an error saying that indy is not supported, but if you compile a Groovy class using the indy jar <em>without</em> activating the -indy flag, then classes would be compiled with call site caching instead of invokedynamic. While this might be suprising, there are good reasons for that:</p>
+<p>If you try to compile Groovy classes with -indy and the ``normal'' jar, you would have an error saying that indy is not supported, but if you compile a Groovy class using the indy jar <em>without</em> activating the -indy flag, then classes would be compiled with call site caching instead of invokedynamic. While this might be suprising, there are good reasons for that:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -92,7 +110,7 @@
 <p>invokedynamic support classes are only available in JDK 1.7+. That alone wouldn’t be a big deal as we could have worked around using stubs</p>
 </li>
 <li>
-<p>the Groovy core classes are, sometimes, written in Groovy, so we use a &#8220;bootstrap&#8221; compiler to compile Groovy classes. In the -indy jar, core Groovy classes written in Groovy are compiled with invokedynamic, not call site caching. Therefore, we produce JDK 1.7+ bytecode only. Since Groovy is compatible with JDK 1.5, if we activated indy for all, you would have had incompatible classes for older JVMs.</p>
+<p>the Groovy core classes are, sometimes, written in Groovy, so we use a ``bootstrap'' compiler to compile Groovy classes. In the -indy jar, core Groovy classes written in Groovy are compiled with invokedynamic, not call site caching. Therefore, we produce JDK 1.7+ bytecode only. Since Groovy is compatible with JDK 1.5, if we activated indy for all, you would have had incompatible classes for older JVMs.</p>
 </li>
 </ul>
 </div>
@@ -120,10 +138,9 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ git clone https://github.com/melix/groovy-bytecode-ast.git
+<pre class="prettyprint highlight"><code>$ git clone https://github.com/melix/groovy-bytecode-ast.git
 $ cd groovy-bytecode-ast
-$ ./gradlew jar
-</code></pre>
+$ ./gradlew jar</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -134,10 +151,9 @@ $ ./gradlew jar
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ cd ..
+<pre class="prettyprint highlight"><code>$ cd ..
 $ mkdir bytecodetest; cd bytecodetest
-$ cp -Rp ../groovy-bytecode-ast/gradle* .
-</code></pre>
+$ cp -Rp ../groovy-bytecode-ast/gradle* .</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -145,7 +161,7 @@ $ cp -Rp ../groovy-bytecode-ast/gradle* .
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>apply plugin: 'groovy'
+<pre class="prettyprint highlight"><code>apply plugin: 'groovy'
 apply plugin:'application'
 
 repositories {
@@ -167,22 +183,20 @@ targetCompatibility = 1.7
     encoding = 'UTF-8'
 }
 
-mainClassName = 'Main'
-</code></pre>
+mainClassName = 'Main'</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>What does this build file do? Basically, we’re using the Groovy plugin to compile Groovy files, including the &#8220;indy&#8221; version of Groovy 2.1.0 (note the &#8216;indy&#8217; classifier in the dependency and the fact we’re using the -all version of Groovy as it’s the only one compatible with @Bytecode) and configuring compilation so that it makes use of invokedynamic. The &#8220;application&#8221; plugin will allow us to run our script directly from Gradle once it’s compiled. For that, we’re just using a &#8220;Main&#8221; class.</p>
+<p>What does this build file do? Basically, we’re using the Groovy plugin to compile Groovy files, including the <code>indy'' version of Groovy 2.1.0 (note the `indy' classifier in the dependency and the fact we’re using the -all version of Groovy as it’s the only one compatible with @Bytecode) and configuring compilation so that it makes use of invokedynamic. The </code>application'' plugin will allow us to run our script directly from Gradle once it’s compiled. For that, we’re just using a ``Main'' class.</p>
 </div>
 <div class="paragraph">
-<p>Last step is to copy the @Bytecode jar into the &#8220;lib&#8221; directory of your project:</p>
+<p>Last step is to copy the @Bytecode jar into the ``lib'' directory of your project:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ mkdir -p src/main/groovy
+<pre class="prettyprint highlight"><code>$ mkdir -p src/main/groovy
 $ mkdir lib
-$ cp ../groovy-bytecode-ast/build/libs/*.jar lib
-</code></pre>
+$ cp ../groovy-bytecode-ast/build/libs/*.jar lib</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -190,8 +204,7 @@ $ cp ../groovy-bytecode-ast/build/libs/*.jar lib
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>println 'Hello, indy Groovy!'
-</code></pre>
+<pre class="prettyprint highlight"><code>println 'Hello, indy Groovy!'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -199,7 +212,7 @@ $ cp ../groovy-bytecode-ast/build/libs/*.jar lib
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ gradlew run
+<pre class="prettyprint highlight"><code>$ gradlew run
 :compileJava UP-TO-DATE
 :compileGroovy
 :processResources UP-TO-DATE
@@ -209,8 +222,7 @@ Hello, indy Groovy!
 
 BUILD SUCCESSFUL
 
-Total time: 5.291 secs
-</code></pre>
+Total time: 5.291 secs</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -218,7 +230,7 @@ Total time: 5.291 secs
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ javap -v build/classes/main/Main.class
+<pre class="prettyprint highlight"><code>$ javap -v build/classes/main/Main.class
 public java.lang.Object run();
     flags: ACC_PUBLIC
     Code:
@@ -228,8 +240,7 @@ public java.lang.Object run();
          3: invokedynamic #61,  0             // InvokeDynamic #1:invoke:(LMain;Ljava/lang/String;)Ljava/lang/Object;
          8: areturn
 
-[...]
-</code></pre>
+[...]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -237,56 +248,53 @@ public java.lang.Object run();
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>int bar() { 666 }
+<pre class="prettyprint highlight"><code>int bar() { 666 }
 
 int foo() { bar() }
 
 10.times {
    println foo()
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>the foo() just delegates to &#8220;bar&#8221;. Now, instead of letting Groovy generate the bytecode for us, we want to generate the invokedynamic instruction by ourselves, then write the bootstrap method that will hardwire the link between bar() and foo().</p>
+<p>the foo() just delegates to ``bar''. Now, instead of letting Groovy generate the bytecode for us, we want to generate the invokedynamic instruction by ourselves, then write the bootstrap method that will hardwire the link between bar() and foo().</p>
 </div>
 <div class="paragraph">
 <p>First, we need a bootstrap method. The role of this method is, when an invokedynamic instruction is found, to setup the <em>callsite</em>, that is to say create a link between a method call in bytecode and an actual target method being executed. That is to say that with invokedynamic, the relation between a call site and the method that will effectively be called is done at <em>runtime</em>, not compile time.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
+<pre class="prettyprint highlight"><code>public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
     new ConstantCallSite(lookup.findVirtual(Main, 'bar', MethodType.methodType(int)))
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Here, we’re creating a <em>constant call site</em>, which means that once a target method is chosen, it will <strong>never</strong> change for this call site. We’re linking our call site to a virtual method on the Main class, called &#8216;bar&#8217; and returning an &#8216;int&#8217;.</p>
+<p>Here, we’re creating a <em>constant call site</em>, which means that once a target method is chosen, it will <strong>never</strong> change for this call site. We’re linking our call site to a virtual method on the Main class, called `bar' and returning an `int'.</p>
 </div>
 <div class="paragraph">
 <p>Now, instead of letting Groovy do the job, let’s generate the method body by ourselves, so replace the foo() method with the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@Bytecode
+<pre class="prettyprint highlight"><code>@Bytecode
 int foo() {
     aload 0
     invokedynamic 'experiment', '(LMain;)I', [H_INVOKESTATIC, 'Main', 'bootstrap', [CallSite, Lookup, String, MethodType]]
     ireturn
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Uh! That’s bytecode! Yes, and actually, it also hides all the complexity of the ASM library thanks to a nice Groovy DSL. The first instruction, <em>aload 0</em> just loads the receiver on stack, that is to say <em>`&#8216;this&#8217;'</em>. The second instruction is our method call, the one we want to be linked to bar() and eventually, <em>ireturn</em> takes the result of the call and returns it as an int.</p>
+<p>Uh! That’s bytecode! Yes, and actually, it also hides all the complexity of the ASM library thanks to a nice Groovy DSL. The first instruction, <em>aload 0</em> just loads the receiver on stack, that is to say <em>``this''</em>. The second instruction is our method call, the one we want to be linked to bar() and eventually, <em>ireturn</em> takes the result of the call and returns it as an int.</p>
 </div>
 <div class="paragraph">
-<p>Let’s explain a bit what are the arguments of the invokedynamic method call. The first one is a label. You can put whatever you want in this, as long as it helps you. It’s often interesting if you have to debug your code, but it can also contain information that you want to have at hand when you will select the target method. The second one is the signature of the method you will call. Here, we say it’s a method on Main that returns an int. The last argument is a method handle to the bootstrap method. We’re saying that it’s a static method (INVOKESTATIC) found on the &#8216;Main&#8217; class, named &#8216;bootstrap&#8217; and accepting the arguments of types [CallSite, Lookup, String, MethodType]. Invoke dynamic supports more arguments for the bootstrap method, but it’s not discussed here. Putting it altogether:</p>
+<p>Let’s explain a bit what are the arguments of the invokedynamic method call. The first one is a label. You can put whatever you want in this, as long as it helps you. It’s often interesting if you have to debug your code, but it can also contain information that you want to have at hand when you will select the target method. The second one is the signature of the method you will call. Here, we say it’s a method on Main that returns an int. The last argument is a method handle to the bootstrap method. We’re saying that it’s a static method (INVOKESTATIC) found on the `Main' class, named `bootstrap' and accepting the arguments of types [CallSite, Lookup, String, MethodType]. Invoke dynamic supports more arguments for the bootstrap method, but it’s not discussed here. Putting it altogether:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovyx.ast.bytecode.Bytecode
+<pre class="prettyprint highlight"><code>import groovyx.ast.bytecode.Bytecode
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 import static groovyjarjarasm.asm.Opcodes.*
@@ -307,8 +315,7 @@ int foo() {
 
 10.times {
     println foo() // prints 666
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -316,7 +323,7 @@ int foo() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ ./gradlew run
+<pre class="prettyprint highlight"><code>$ ./gradlew run
 :run
 666
 666
@@ -331,8 +338,7 @@ int foo() {
 
 BUILD SUCCESSFUL
 
-Total time: 5.762 secs
-</code></pre>
+Total time: 5.762 secs</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -340,16 +346,15 @@ Total time: 5.762 secs
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>int baz() { 123 }
-</code></pre>
+<pre class="prettyprint highlight"><code>int baz() { 123 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>And now, replace, in the boostrap method, &#8216;bar&#8217; with &#8216;baz&#8217;. Run the build again, and see what happens:</p>
+<p>And now, replace, in the boostrap method, `bar' with `baz'. Run the build again, and see what happens:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>$ ./gradlew run
+<pre class="prettyprint highlight"><code>$ ./gradlew run
 :run
 123
 123
@@ -364,8 +369,7 @@ Total time: 5.762 secs
 
 BUILD SUCCESSFUL
 
-Total time: 5.693 secs
-</code></pre>
+Total time: 5.693 secs</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -373,7 +377,7 @@ Total time: 5.693 secs
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.transform.CompileStatic
+<pre class="prettyprint highlight"><code>import groovy.transform.CompileStatic
 import groovyx.ast.bytecode.Bytecode
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -415,8 +419,7 @@ int foo() {
 
 10.times {
     println foo() // prints 666 and 123 alternatively
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -424,7 +427,7 @@ int foo() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>./gradlew run
+<pre class="prettyprint highlight"><code>./gradlew run
 :run
 666
 123
@@ -439,8 +442,7 @@ int foo() {
 
 BUILD SUCCESSFUL
 
-Total time: 6.002 secs
-</code></pre>
+Total time: 6.002 secs</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -453,10 +455,12 @@ Total time: 6.002 secs
 <h2 id="_conclusion">Conclusion</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this post, we’ve explained to you how you can leverage Groovy to test the invokedynamic API by yourself. I spent several months working on static type checking and static compilation for Groovy, without finding too much time to work with invoke dynamic. The next major version of Groovy should come with a new MOP (meta-object protocol) that heavily relies on the invokedynamic API, so this &#8220;tool&#8221; is also a good way for me to learn the API and play with it very easily. I hope this will be useful for you too!</p>
+<p>In this post, we’ve explained to you how you can leverage Groovy to test the invokedynamic API by yourself. I spent several months working on static type checking and static compilation for Groovy, without finding too much time to work with invoke dynamic. The next major version of Groovy should come with a new MOP (meta-object protocol) that heavily relies on the invokedynamic API, so this ``tool'' is also a good way for me to learn the API and play with it very easily. I hope this will be useful for you too!</p>
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -481,7 +485,7 @@ Total time: 6.002 secs
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -522,6 +526,5 @@ Total time: 6.002 secs
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

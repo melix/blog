@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,18 @@
 		<h1>Static builders inception</h1>
 	</div>
 
-	<p><em>13 février 2013</em></p>
-	<p><em>Tags: </em>builder </em> compilation </em> groovy </em> programming </em> static </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2013/02/13/static_builders_inception.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2013/02/13/static_builders_inception.html"></div>
-
+	<p><em>13 February 2013</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/builder.html">builder</a> 
+	</em>
+		<a href="/blog/tags/compilation.html">compilation</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</em>
+		<a href="/blog/tags/static.html">static</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_documentation_is_good_for_everybody">Documentation is good for everybody</h2>
 <div class="sectionbody">
@@ -83,7 +103,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@groovy.transform.CompileStatic
+<pre class="prettyprint highlight"><code>@groovy.transform.CompileStatic
 String build() {
     def builder = new HTMLBuilder()
     builder.html {
@@ -94,8 +114,7 @@ String build() {
             }
         }
     }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -135,8 +154,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    $ ./gradlew test
-</code></pre>
+<pre class="prettyprint highlight"><code>    $ ./gradlew test</code></pre>
 </div>
 </div>
 </div>
@@ -147,7 +165,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    import groovyx.transform.StaticMarkupBuilder
+<pre class="prettyprint highlight"><code>    import groovyx.transform.StaticMarkupBuilder
 
     @StaticMarkupBuilder
     class HTMLBuilder {
@@ -160,8 +178,7 @@ String build() {
                 }
             }
         }
-    }
-</code></pre>
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -191,7 +208,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    @CompileStatic
+<pre class="prettyprint highlight"><code>    @CompileStatic
     void test() { // using a method to ensure that the builder will be statically compiled!
         def out = new ByteArrayOutputStream()
         def builder = new Builder3(out)
@@ -201,8 +218,7 @@ String build() {
             }
         }
         println out.toString()
-    }
-</code></pre>
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -210,8 +226,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    Hello, Groovy!
-</code></pre>
+<pre class="prettyprint highlight"><code>    Hello, Groovy!</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -219,7 +234,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    @CompileStatic
+<pre class="prettyprint highlight"><code>    @CompileStatic
     void test() { // using a method to ensure that the builder will be statically compiled!
         def out = new ByteArrayOutputStream()
         def builder = new Builder3(out)
@@ -229,8 +244,7 @@ String build() {
             }
         }
         println out.toString()
-    }
-</code></pre>
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -265,10 +279,9 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    static schema = {
+<pre class="prettyprint highlight"><code>    static schema = {
         html {}
-    }
-</code></pre>
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -276,8 +289,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }
-</code></pre>
+<pre class="prettyprint highlight"><code>    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -334,8 +346,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }
-</code></pre>
+<pre class="prettyprint highlight"><code>    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -396,6 +407,8 @@ String build() {
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -420,7 +433,7 @@ String build() {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -461,6 +474,5 @@ String build() {
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

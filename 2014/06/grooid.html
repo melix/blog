@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Groovy on Android</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Groovy on Android</h1>
+	</div>
+
+	<p><em>05 June 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/android.html">android</a> 
+	</em>
+		<a href="/blog/tags/swift.html">swift</a> 
+	</em>
+		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yesterday ended <a href="http://gr8conf.eu">GR8Conf Europe</a>, a <a href="http://groovy.codehaus.org">Groovy language</a> conference in Copenhagen that was once again a successful event.
+I want to thank the crew again for this, and of course the <a href="http://groovy.codehaus.org">Groovy language</a> community which is so friendly and always helpful. This year
+turned out to be very special for me, because just two days after the announcement by Apple of the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a>, I was talking about
+running Groovy on Android! As Guillaume Laforge <a href="http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy">noticed</a>, there
+are a lot of similarities between the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a> and <a href="http://groovy.codehaus.org">Groovy language</a>.</p>
+</div>
+<div class="paragraph">
+<p>The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
+better candidate than <a href="http://groovy.codehaus.org">Groovy language</a> here.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_presentation">The presentation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Should you be interested in the slides, you can find them below. Since it was presented at <a href="http://gr8conf.eu">GR8Conf Europe</a>, it gives a bit of history of the changes needed to
+have the runtime working on Android too:</p>
+</div>
+<script async class="speakerdeck-embed" data-id="e8e58fc0cdee0131f20616308848c4b8" data-ratio="1.6" src="//speakerdeck.com/assets/embed.js"></script>
+<div class="paragraph">
+<p>For those of you who are new to Groovy, you have to know that this language is derived from Java, meaning that the learning curve is almost 0, but it also
+removes a lot of its verbosity and adds a lot of features to it, such as closures (similar to lambdas in Java 8, but Java 8 is not available for Android
+developers), builders, runtime and compile-time metaprogramming.</p>
+</div>
+<div class="paragraph">
+<p>As an example of how Groovylang can be used to reduce the verbosity of Java on Android, I will take a simple example: asynchronous tasks. Asynchronous tasks
+are required as soon as a task takes too much time to be executed on the UI thread. That is the case, by default, for any network based operations, in order
+to guarantee that the UI remains snappy even if network is slow or unavailable. The problem is that those asynchronous tasks are incredibly verbose. You have
+to write a lot of code, that I would tend to name "inner class hell", just for this. Let&#8217;s imagine that you need to parse a JSON feed, then update the UI
+accordingly. Then you would have to write something like this (no kidding):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">public class FeedActivity {
+    TextView mTextView;
+
+    ...
+
+    void updateFeed() {
+    	new FeedTask().execute("http://path/to/feed");
+    }
+
+    class FeedTask extends AsyncTask&lt;String, Void, String&gt; {
+        protected String doInBackground(String... params) {
+            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
+            HttpPost httppost = new HttpPost(params[0]);
+
+            InputStream inputStream = null;
+            String result = null;
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+
+                inputStream = entity.getContent();
+                // json is UTF-8 by default
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
+
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                result = sb.toString();
+            } catch (Exception e) {
+                // Oops
+            } finally {
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (Exception squish) {
+                }
+            }
+            StringBuilder speakers = null;
+            try {
+                JSONObject jObject = new JSONObject(result);
+                JSONArray jArray = jObject.getJSONArray("speakers");
+                speakers = new StringBuilder();
+                for (int i = 0; i &lt; jArray.length(); i++) {
+                    speakers.append(jArray.getString(i));
+                    speakers.append(" ");
+                }
+            } catch (JSONException e) {
+                // do something?
+            }
+            return speakers.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            mTextView.setText(s);
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So now, let&#8217;s see the equivalent in Groovy (no kidding either):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">public class FeedActivity {
+    TextView mTextView
+
+    ...
+
+    void updateFeed() {
+    	Fluent.async {
+            def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
+            json.speakers.join(' ')
+        } then {
+	    mTextView.text = it
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I think you can start to see the advantage of using Groovy in your own Android projects. Of course, the <code>Fluent</code> class that I&#8217;m using here
+is a support class which I implemented in my <a href="https://github.com/melix/gr8confagenda">first Android project</a> (which is open sourced btw), but it&#8217;s
+really simple and gives an example of how Android users could benefit from Groovification of their APIs.</p>
+</div>
+<div class="sect2">
+<h3 id="_feeling_the_pain">Feeling the pain</h3>
+<div class="paragraph">
+<p>This is actually a key point of my talk: I hadn&#8217;t written any Android application before this talk, and I definitely wanted to be able to write
+an application in Groovy on Android. Why? Because it&#8217;s been some time already that I use Groovy everyday, and there&#8217;s no turning back. I wanted
+to feel the pain of the Java developers on Android, so that I can write better tools for them. And that&#8217;s actually where you, as a user, come
+in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn&#8217;t be complicated a breeze.
+This is exactly the point. My example with <code>Fluent</code> is <strong>one</strong> example of simplification of usages of Android APIs, but you have many more to invent,
+especially because <strong>you</strong> must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_beginning_of_a_new_era">The beginning of a new era</h3>
+<div class="paragraph">
+<p>In upcoming posts, I will try to demonstrate that we&#8217;re just at the beginning. Some people are already asking for a {swift} alternative for Android.
+It&#8217;s there guys, you have it, so spread the word and let&#8217;s make it happen! I am convinced that it is the beginning of a new era for Android and Groovy.
+Google already switched their main build system to Gradle, which is, by the way, using Groovy, so I think it&#8217;s time to move over and show your love!</p>
+</div>
+<div class="paragraph">
+<p>All you need to get started is explained in the slide deck above, and you can find the source code of the sample android application on GitHub:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/melix/gr8confagenda" class="bare">https://github.com/melix/gr8confagenda</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_3_its_even_simpler_now">Update 3: it&#8217;s even simpler now</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Groovy 2.4.0 has been released now and building an Android application in Groovy is even simpler. All you have to do is to apply a Gradle plugin. Instructions can be found <a href="https://github.com/groovy/groovy-android-gradle-plugin">here</a>. You absolutely don&#8217;t have to build Groovy from sources or add tasks to your Gradle build as described originally in this post! Just <a href="https://github.com/groovy/groovy-android-gradle-plugin">use the plugin</a>!
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Information below is outdated. Please use the <a href="https://github.com/groovy/groovy-android-gradle-plugin">Gradle plugin !</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><em>Update 2: build instructions with the Gradle plugin</em></p>
+</div>
+<div class="paragraph">
+<p>You can now use a Gradle plugin to integrate Groovy with Android. The plugin can be found here: <a href="https://github.com/melix/groovy-android-gradle-plugin">groovy-android-gradle-plugin</a>. As of version 0.2, the plugin supports the Android plugin 0.10+.</p>
+</div>
+<div class="paragraph">
+<p><em>Update: build instructions</em></p>
+</div>
+<div class="paragraph">
+<p>If you want to try it by yourself, here&#8217;s how you can do it. First of all, official support for Android will be in Groovy 2.4. Before the first beta,
+you&#8217;ll have to build it from sources, and here is the quickest way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/melix/groovy-core.git --branch master
+cd groovy-core
+./gradlew -PskipIndy=true install</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you can clone the sample application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cd ..
+git clone https://github.com/melix/gr8confagenda.git</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This contains a project that you can open using <a href="http://developer.android.com/sdk/installing/studio.html">Android Studio</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you want to use the <a href="http://groovy.codehaus.org">Groovy language</a> in your own Android project, a requirement is that it is using Gradle. If so, you can update your <code>build.gradle</code> file
+as is:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">android {
+   ...
+   packagingOptions {
+        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/groovy-release-info.properties'
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy:2.4.0-SNAPSHOT:grooid'
+    // the following dependency is necessary if you want JSON support
+    compile ('org.codehaus.groovy:groovy-json:2.4.0-SNAPSHOT') {
+        transitive = false
+    }
+}
+
+// add support for Groovy to existing configurations
+android.applicationVariants.all {
+    task "groovy${name}Compile"(type: GroovyCompile) {
+        source = javaCompile.source + fileTree('src/main/java').include('**/*.groovy')
+        destinationDir = javaCompile.destinationDir
+        classpath = javaCompile.classpath
+        groovyClasspath = classpath
+        sourceCompatibility = '1.6'
+        targetCompatibility = '1.6'
+        doFirst {
+            def runtimeJars = plugins.findPlugin(com.android.build.gradle.AppPlugin).runtimeJars
+            classpath = files(runtimeJars) + classpath
+        }
+    }
+    javaCompile.dependsOn("groovy${name}Compile")
+    javaCompile.enabled = false
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And that&#8217;s all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!</p>
+</div>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'groovy_on_android';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

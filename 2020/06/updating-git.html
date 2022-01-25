@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Configuring git to use main instead of master</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Configuring git to use main instead of master</h1>
+	</div>
+
+	<p><em>17 June 2020</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/git.html">git</a> 
+	</em>
+		<a href="/blog/tags/github.html">github</a> 
+	</em>
+		<a href="/blog/tags/blacklivesmatter.html">blacklivesmatter</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I don&#8217;t need to explain the backstory, and I am not interested in a discussion whether this change makes sense or not, nor am I interested in the technical problems it could cause if someone changes the name: technical issues shouldn&#8217;t be a reason to stop us from improving.</p>
+</div>
+<div class="paragraph">
+<p>Actually, if you are reading this, there are good chances you&#8217;re already in the mindset of removing potentially offensive language from your project, thank you!</p>
+</div>
+<div class="paragraph">
+<p>The fact is, we have better, more descriptive technical names than "master" and "slave" and we don&#8217;t have to use terms which refer to dark ages of our history, so let&#8217;s get rid of them in tech.</p>
+</div>
+<div class="paragraph">
+<p>In this blog post, you will learn:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>how to make <code>git init</code> create your project with a <code>main</code> branch instead of <code>master</code></p>
+</li>
+<li>
+<p>how to rename your <code>master</code> branch to <code>main</code></p>
+</li>
+<li>
+<p>how to make the change on GitHub</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Be aware that renaming branches may break your existing integrations (typically with CI or Slack notifications) so only do it when you&#8217;re ready.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_git_init">Configuring git init</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default, when you create a new project, <code>git init</code> will create a <code>master</code> branch.
+There&#8217;s no option in <code>git init</code> to change this, but it&#8217;s actually quite easy to set it up differently.</p>
+</div>
+<div class="paragraph">
+<p>First, in your <code>~/.gitconfig</code> file, add the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.gitconfig</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>[init]
+    templateDir = ~/.config/git/template/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then create, if it doesn&#8217;t exist, the following directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>mkdir ~/.config/git/template</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>next create this file:</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.config/git/template/HEAD</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>ref: refs/heads/main</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(don&#8217;t forget to add a new line at the end of the first line)</p>
+</div>
+<div class="paragraph">
+<p>Starting from now, calling <code>git init</code> will create a <code>main</code> branch instead of <code>master</code>!</p>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s deal with existing projects.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_renaming_your_master_branch">Renaming your master branch</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For your current projects, you may want to rename the <code>master</code> branch to <code>main</code>.
+This is also single command in <code>git</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>git checkout master
+git branch -m main</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you can push the branch to your remote&#8230;&#8203; but be careful, it will create a <em>new branch</em> on the remote:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>git push origin main</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_github_to_use_main_instead_of_master">Configuring GitHub to use <code>main</code> instead of <code>master</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once you&#8217;ve pushed your new branch, you need to tell GitHub that this is your new "default branch".
+To do this, go to <code>Settings</code> &#8594; <code>Branches</code> and select your new branch as the default one:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/github-branch.png" alt="github branch">
+</div>
+</div>
+<div class="paragraph">
+<p>Last but not least, you need to delete the old branch from GitHub, which can be done by calling this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>git push origin :master</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Done!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'git-main';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

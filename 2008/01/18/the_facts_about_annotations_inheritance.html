@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,15 +69,15 @@
 		<h1>The facts about annotations inheritance</h1>
 	</div>
 
-	<p><em>18 janvier 2008</em></p>
-	<p><em>Tags: </em>annotations </em> inheritance </em> java </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2008/01/18/the_facts_about_annotations_inheritance.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2008/01/18/the_facts_about_annotations_inheritance.html"></div>
-
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><em>18 January 2008</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/annotations.html">annotations</a> 
+	</em>
+		<a href="/blog/tags/inheritance.html">inheritance</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</p>
+	<p><div class="paragraph">
 <p>Following my post about <a href="http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance">the behaviour of annotations in an inheritance model</a>, <a href="http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance#comments">Mike Kaufman made a very interesting comment</a>. The <strong>truth</strong>, as I said, is that annotations are <strong>technically</strong> inherited only if the annotation definition itself is annotated with <em>@Inherited</em>.</p>
 </div>
 <div class="paragraph">
@@ -71,12 +85,11 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@WebService(serviceName="myService")
+<pre class="prettyprint highlight"><code>@WebService(serviceName="myService")
 public class MyService {
     @WebMethod
     public int sum(int x, int y) { return x+y; }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -84,7 +97,7 @@ public class MyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public interface IMyService {
+<pre class="prettyprint highlight"><code>public interface IMyService {
    void sum(int x, int y);
 }
 
@@ -93,8 +106,7 @@ public class MyService {
 @WebService(serviceName="myService")
 public class MyService implements IMyService {
 ...
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -102,11 +114,10 @@ public class MyService implements IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@WebService
+<pre class="prettyprint highlight"><code>@WebService
 public interface IMyService {
   @WebMethod void sum(@WebParam(name="x") int x, @WebParam(name="y") int y);
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -114,11 +125,10 @@ public interface IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@WebService(serviceName="myService")
+<pre class="prettyprint highlight"><code>@WebService(serviceName="myService")
 public class MyService implements IMyService {
    public int sum(int x, int y) { return x+y; }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -135,11 +145,11 @@ public class MyService implements IMyService {
 </ul>
 </div>
 <div class="paragraph">
-<p>Note that I must copy down the @WebService annotation just to specify the service name (as multiple services may implement the same interface). There, you should already see a problem, but let’s continue : Metro does not allow this. You cannot annotate interfaces and hope subclasses will be &#8220;annotated&#8221;. Bas point, but it’s rather logic :</p>
+<p>Note that I must copy down the @WebService annotation just to specify the service name (as multiple services may implement the same interface). There, you should already see a problem, but let’s continue : Metro does not allow this. You cannot annotate interfaces and hope subclasses will be ``annotated''. Bas point, but it’s rather logic :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package javax.jws;
+<pre class="prettyprint highlight"><code>package javax.jws;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -161,8 +171,7 @@ public @interface WebService
     String endpointInterface() default "";
 
     String portName() default "";
-};
-</code></pre>
+};</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -176,9 +185,9 @@ public @interface WebService
 </div>
 <div class="paragraph">
 <p>With this second example, here you see the problem : although the <strong>technical truth</strong> is that annotations are not inherited by default, the <strong>facts</strong> are that frameworks define their own rules… Thanks Mike for giving me a great transition ;)</p>
-</div>
-</div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -203,7 +212,7 @@ public @interface WebService
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -244,6 +253,5 @@ public @interface WebService
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

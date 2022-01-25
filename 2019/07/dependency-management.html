@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Dependency Management at Gradle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Dependency Management at Gradle</h1>
+	</div>
+
+	<p><em>11 July 2019</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/dependency-management.html">dependency management</a> 
+	</p>
+	<p><div class="paragraph">
+<p><em>Opinions are my own, not those of my employer</em></p>
+</div>
+<div class="paragraph">
+<p>I joined Gradle 4 years ago, and I spent the last 2 years almost exclusively working on <em>dependency management</em>.
+The more I work on this topic, the more I am frustrated by the state of our industry.
+In this blog post I will mostly illustrate my points with Java, which I&#8217;m mostly familiar with, but a lot of them stand true whatever the ecosystem (Javascript, Python, Go, &#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Soon, we should release Gradle 6 (fall 2019, no promise, as always, this is software).
+This version will be the first one to turn the spotlights on <em>dependency management</em>.
+This will be for me the achievement of 2 hard years of work (not alone, of course) but this is <em>just</em> the beginning.
+Gradle probably has the most advanced dependency engine of the market (forgive me if I&#8217;m wrong, let me know).
+But what makes it so different is not that it has powerful features like dependency substitution, customizable resolution, dependency locking, alignment, etc&#8230;&#8203;
+No, what makes it different it&#8217;s that we put a lot of emphasis on <em>semantics</em>: model software correctly so that you, as a developer, have less to handle.</p>
+</div>
+<div class="paragraph">
+<p>Often, folks "from the outside" are considering us <em>arrogant</em>, because we don&#8217;t immediately support things that other engines do (eg. "you don&#8217;t want to implement optional dependencies, look, Maven has it for years you s***").
+While I understand the frustration, it doesn&#8217;t mean that we don&#8217;t hear.
+In fact, we hear you loud, but the time it takes to land is just the consequence of willing to implement the correct solution to a problem.</p>
+</div>
+<div class="paragraph">
+<p>For example, what does an <em>optional dependency</em> mean?
+A few months ago, I read this from the Yarn documentation which got me scared, and, to be honest, a bit despaired too:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/optional-deps-yarn.png" alt="optional deps yarn">
+</div>
+</div>
+<div class="paragraph">
+<p>This looks like total non-sense to me.
+Because we needed the infrastructure, it took some time but we implemented what we think is a <em>better</em> solution.
+In a nutshell, optional dependencies are <em>not optional</em>.
+They are things that you need <em>if you use a particular feature of a library</em>.
+So it means that if you depend on something, and that this something has <em>optional features</em>, you can say what features you need and Gradle would give you the correct dependencies for this.
+We called that <a href="https://docs.gradle.org/current/userguide/feature_variants.html">feature variants</a>. Granted, the name isn&#8217;t cool, but it&#8217;s a matter of time until we refactor the documentation to make it easier to discover.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, we implemented back in Gradle 3.4 the separation of API and implementation dependencies for the Java world.
+In fact, that&#8217;s one of the reasons the <code>compile</code> configuration has been "soft deprecated" for years now, and that we&#8217;re going to nag you starting from Gradle 6.
+I still hear people claiming they don&#8217;t need this and that it&#8217;s hard to understand but I stand by the fact they <em>deperately</em> need them.</p>
+</div>
+<div class="paragraph">
+<p>Why is it important? Because if you are a library author, you know that there are things that are "your internal sauce": things which are implementation details, not part of the public API, and that should never be exposed to consumers.
+This is the very reason Java 9 shipped with the module system: strong encapsulation.
+However, how does it work for dependencies? There are also dependencies which are <em>part of your API</em> and others which are not.
+Say you use Guave internally. None of the Guava classes are visible on your public API, and it would be an error to do so.
+Then it means that Guava <em>is an implementation dependency of your library</em>.
+When you do this, you should be allowed to replace Guava with something else at any time, without breaking any of your consumers.
+The horrible reality is that if you use the Maven <code>&lt;compile&gt;</code> scope, those dependencies are going to <em>leak</em> to the consumers, and they could accidentally start using Guava just because it&#8217;s available on the classpath (yeah, IDEs love this, the class is available for completion you know!).</p>
+</div>
+<div class="paragraph">
+<p>This is a problem with Maven because the POM file is used for 2 distinct purposes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>representing the point of view of the producer, where <code>&lt;compile&gt;</code> means "I need this on my compile classpath"</p>
+</li>
+<li>
+<p>representing the point of view of the consumer, where <code>&lt;compile&gt;</code> semantics are there broken: it means "add this to your compile classpath", but it means you leak dependencies which should have been on the <code>&lt;runtime&gt;</code> scope!</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With the Gradle <a href="https://docs.gradle.org/current/userguide/java_library_plugin.html">Java Library plugin</a>, those issues <em>go away</em>: we model those correctly, and when we generate a POM file, it has dependency declarations which <em>make sense for the consumer</em>.
+I&#8217;ve been battling to explain this in conferences for years, yet, lots of people don&#8217;t get how harmful to the whole ecosystem that design decision from Maven was: it just prevents smooth dependency upgrades, and contributes to the "classpath explosion".</p>
+</div>
+<div class="paragraph">
+<p>In other words, you, as a developer, should <em>always know what you directly use</em> (your first level dependencies).</p>
+</div>
+<div class="paragraph">
+<p>As another example, we&#8217;ve been yelling for years how bad exclusions are, but we did a really bad job at explaining <em>why</em>.
+The problem is also that we didn&#8217;t have all the tools we needed to workaround them, so we said "yeah it&#8217;s bad" but didn&#8217;t really say that you can still use them in some cases.</p>
+</div>
+<div class="paragraph">
+<p>In a nutshell, an <em>exclusion</em> is bad because the dependency resolution engine doesn&#8217;t know <em>why</em> you excluded a dependency:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>is it because the producer had bad metadata, that the dependency should have been "optional", or just absent altogether?</p>
+</li>
+<li>
+<p>is it because you don&#8217;t use a specific <em>code path</em> of a dependency and you just want to slim down the size of your distribution?</p>
+</li>
+<li>
+<p>is it because <em>something breaks</em> if you use this dependency?</p>
+</li>
+<li>
+<p>is it because it&#8217;s yet another logger on the classpath and this is not the one you use?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Well, again, for all those use cases, the solutions are <em>different</em>.
+The logging use case is an illustration of this: how many of you have faced this infamous problem of having multiple SLF4J bindings on the classpath?
+How do you fix that with Maven? Exclude of course!</p>
+</div>
+<div class="paragraph">
+<p>But wouldn&#8217;t it better if you could express that "between all those logger bindings, this is the one I choose".
+Wouldn&#8217;t it better if, as a <em>producer</em> of a logger binding, you could say "I implement this logger API, and it doesn&#8217;t make sense to have multiple logger bindings on the classpath at the same time".
+Well, this is what Gradle offers you, as a producer and as a consumer.</p>
+</div>
+<div class="paragraph">
+<p>Modeling software is important, because it makes the industry better <em>as a whole</em>.
+By explaining <em>why</em> instead of <em>how</em>, <strong>the dependency management engine can take better decisions</strong>.
+It can fail if things are incompatible, it can ask you to choose between different implementations.</p>
+</div>
+<div class="paragraph">
+<p>Do you need another example? Look at all those "Maven classifiers". How many times did you got multiple conflicting implementations of the same thing <em>just because they had different classifiers</em> (looking at you, Guava!).</p>
+</div>
+<div class="paragraph">
+<p>The reality is that a classifier is a workaround for a bad model, incapable of expressing that you have different <em>things</em> published at the same coordinates.
+Sometimes I read comments like "Gradle is just Maven with a Groovy DSL".
+This is wrong at so many levels: Gradle empathizes on <em>strong modelling</em> of software.
+We need to think in terms of components ("this is a library", "this is a Boot application", "this is a Gradle plugin"), not in terms of <em>conventions</em>.
+Models are orthogonal to conventions: conventions are just a tool to make modelling easier to implement, but what matters is the model.
+The DSL also doesn&#8217;t matter: Groovy, Kotlin, whatever. What makes Gradle powerful is that it <em>understands what you build</em>.</p>
+</div>
+<div class="paragraph">
+<p>This is one of the reasons we came with <a href="https://blog.gradle.org/gradle-metadata-1.0">Gradle Module Metadata</a>, which is going to be enabled by default in Gradle 6.</p>
+</div>
+<div class="paragraph">
+<p>We, at Gradle, think that we can save a lot of developer time by simply putting more sense in those things we publish.
+It&#8217;s a waste of time and energy that we all have to fix, constantly, those conflicts between libraries.</p>
+</div>
+<div class="paragraph">
+<p>And can we talk about ethics?
+It&#8217;s beyond me we can tolerate, as developers/engineers, repeated approximations, errors, just <em>because Maven does it this way</em>?
+I don&#8217;t really care that we&#8217;re <em>not compatible with Maven</em>, as long as we <em>solve the problem</em> and that we move towards well designed, better solutions.
+Sometimes we have to make tradeoffs, but we can&#8217;t compromise on reproducibility, correctness and performance.
+Of course, we do our best to provide Maven compatibility, and again, sometimes make it even better in some situations (the Java Library plugin).</p>
+</div>
+<div class="paragraph">
+<p>My goal is that we, as a whole, move towards a better software delivery world.</p>
+</div>
+<div class="paragraph">
+<p>The good thing is that what we&#8217;re not alone.
+This, is the result of years of experience from the team with very large builds, from customers of small to very large organizations, and discussions with talented open-source developers (special thanks from me to <a href="https://twitter.com/ankinson">Andy Wilkinson</a> from the Spring team).</p>
+</div>
+<div class="paragraph">
+<p>I posted this earlier this month on Twitter, this is a <em>real</em> dependency graph, from an organization I have the opportunity to work with:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/real-dependency-graph.png" alt="real dependency graph">
+</div>
+</div>
+<div class="paragraph">
+<p>This is not uncommon, this is the reality we live in.</p>
+</div>
+<div class="paragraph">
+<p>And when you have such a dependency graph, you desperately need more modelling.
+Does it mean that Gradle is perfect? Hell, no. We&#8217;re going to make mistakes, we already have and we will continue, but what matters is that we&#8217;re moving towards our goal.</p>
+</div>
+<div class="paragraph">
+<p>There are lots of good things coming in Gradle 6, stay tuned. In the meantime, a lot of what I discussed here has been presented in a couple of webinars:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://gradle.com/blog/dependency-management-fundamentals/">Dependency Management fundamentals with Gradle</a></p>
+</li>
+<li>
+<p><a href="https://gradle.com/blog/dependency-management-part-2-handling-conflicts/">Handling Conflicts and Customizing Resolution</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Another webinar is planned after summer, around multi-repository development.</p>
+</div>
+<div class="paragraph">
+<p>Hope you&#8217;ll enjoy!</p>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-dm-perspective';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

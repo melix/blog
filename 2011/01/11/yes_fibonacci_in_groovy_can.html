@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,20 @@
 		<h1>Yes, Fibonacci in Groovy can be as fast as Java !</h1>
 	</div>
 
-	<p><em>11 janvier 2011</em></p>
-	<p><em>Tags: </em>asm </em> bytecode </em> fibonacci </em> groovy </em> java </em> programming </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2011/01/11/yes_fibonacci_in_groovy_can.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2011/01/11/yes_fibonacci_in_groovy_can.html"></div>
-
+	<p><em>11 January 2011</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/asm.html">asm</a> 
+	</em>
+		<a href="/blog/tags/bytecode.html">bytecode</a> 
+	</em>
+		<a href="/blog/tags/fibonacci.html">fibonacci</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
@@ -93,10 +115,9 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public int fib(int i) {
+<pre class="prettyprint highlight"><code>public int fib(int i) {
    return i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -104,10 +125,9 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>int fib(int i) {
+<pre class="prettyprint highlight"><code>int fib(int i) {
    i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -116,7 +136,7 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_groovy_s_revenge_part_1_asm">Groovy’s revenge, part 1 : ASM</h2>
+<h2 id="_groovys_revenge_part_1_asm">Groovy’s revenge, part 1 : ASM</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The first episode for Groovy’s revenge consists of writing an <a href="http://www.jroller.com/melix/entry/asm_bytecode_outline_for_intellij">ASM plugin for IntelliJ IDEA</a>, because, you know, it was such a pain to work with Eclipse. That’s done.</p>
@@ -124,14 +144,14 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_groovy_s_revenge_part_2_ast_transformations">Groovy’s revenge, part 2 : AST Transformations</h2>
+<h2 id="_groovys_revenge_part_2_ast_transformations">Groovy’s revenge, part 2 : AST Transformations</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The second episode, and most interesting, consists of writing an AST Transformation that will allow you to write bytecode right into Groovy. I did that, and here’s what my final script looks like :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@ast.Bytecode
+<pre class="prettyprint highlight"><code>@ast.Bytecode
 int fib(int i) {
  l0
     iload 1
@@ -166,8 +186,7 @@ println "Computed in ${(System.currentTimeMillis()-sd)}ms"
 println "Bytecode Groovy"
 sd = System.currentTimeMillis()
 println fib(40)
-println "Computed in ${(System.currentTimeMillis()-sd)}ms"
-</code></pre>
+println "Computed in ${(System.currentTimeMillis()-sd)}ms"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -175,13 +194,12 @@ println "Computed in ${(System.currentTimeMillis()-sd)}ms"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>Pure Groovy
+<pre class="prettyprint highlight"><code>Pure Groovy
 165580141
 Computed in 18465ms
 Bytecode Groovy
 165580141
-Computed in 576ms
-</code></pre>
+Computed in 576ms</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -195,7 +213,7 @@ Computed in 576ms
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package ast
+<pre class="prettyprint highlight"><code>package ast
 
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention
@@ -208,8 +226,7 @@ import org.codehaus.groovy.transform.GroovyASTTransformationClass
 @GroovyASTTransformationClass(["ast.BytecodeASTTransformation"])
 public @interface Bytecode {
 
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -217,7 +234,7 @@ public @interface Bytecode {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package ast
+<pre class="prettyprint highlight"><code>package ast
 
 import groovyjarjarasm.asm.Label
 import groovyjarjarasm.asm.MethodVisitor
@@ -318,8 +335,7 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
   })
  }
 
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -347,10 +363,12 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
 <p>My conclusion is rather simple : Groovy is amazing. Even when you think it’s beaten by another JVM language, you’ll always find room for improvement. This one looks like the most absolute solution : the DIY way, which reminds me when I was young and that I wrote assembler code on an Amstrad CPC 6128 for demos. This was fun, and I’m having fun again ! For you, if you find this code useful, then it’s a world of verify errors that opens to you. Good luck !</p>
 </div>
 <div class="paragraph">
-<p><em>Footnote : for those who don’t get the irony, this is obvioulsy not a solution for making Groovy faster. It’s a nonsense to take a benchmark like this and say &#8220;Groovy is slow&#8221;. I’ve blogged many times about Groovy performance and showed this is rarely an issue. No, this point is about AST transformations, and how you could use bytecode to extend the language and implement missing features at the lower level.</em></p>
+<p><em>Footnote : for those who don’t get the irony, this is obvioulsy not a solution for making Groovy faster. It’s a nonsense to take a benchmark like this and say ``Groovy is slow''. I’ve blogged many times about Groovy performance and showed this is rarely an issue. No, this point is about AST transformations, and how you could use bytecode to extend the language and implement missing features at the lower level.</em></p>
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -375,7 +393,7 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -416,6 +434,5 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

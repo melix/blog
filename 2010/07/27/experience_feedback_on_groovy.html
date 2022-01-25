@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,18 @@
 		<h1>Experience feedback on Groovy</h1>
 	</div>
 
-	<p><em>27 juillet 2010</em></p>
-	<p><em>Tags: </em>grails </em> groovy </em> intellij </em> java </em> scala </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2010/07/27/experience_feedback_on_groovy.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2010/07/27/experience_feedback_on_groovy.html"></div>
-
+	<p><em>27 July 2010</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/grails.html">grails</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/intellij.html">intellij</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</em>
+		<a href="/blog/tags/scala.html">scala</a> 
+	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
@@ -140,18 +160,17 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>Let’s come back on the last point : I have already said that I planned to use Groovy in edge cases where &#8220;users&#8221; were not &#8220;computer aware&#8221;. While this term is quite unfair, it does hide what I consider now as a great success in the introduction of Groovy. The challenge was dared, but it worked : at Lingway, we have three profile types in our technical team : first, developers - like me -, coming from software engineering. Second, consultants, who are trained for programming, but have lower pure technical skills : their main abilities are transforming customer needs into parametrization. Those are the people who write our workflows. Last but not least, linguists, who for most only know about computers as tools : they don’t know anything about programming languages and software engineering. However, thanks to Groovy, all those three profiles are able to collaborate on a single platform, a single language. The ability for Groovy to simplify at most syntax and the ability to create DSLs is amazing.</p>
+<p>Let’s come back on the last point : I have already said that I planned to use Groovy in edge cases where <code>users'' were not </code>computer aware''. While this term is quite unfair, it does hide what I consider now as a great success in the introduction of Groovy. The challenge was dared, but it worked : at Lingway, we have three profile types in our technical team : first, developers - like me -, coming from software engineering. Second, consultants, who are trained for programming, but have lower pure technical skills : their main abilities are transforming customer needs into parametrization. Those are the people who write our workflows. Last but not least, linguists, who for most only know about computers as tools : they don’t know anything about programming languages and software engineering. However, thanks to Groovy, all those three profiles are able to collaborate on a single platform, a single language. The ability for Groovy to simplify at most syntax and the ability to create DSLs is amazing.</p>
 </div>
 <div class="paragraph">
 <p>Let’s take a real example, in the context of acquisition workflows A java programmer would have written (correctly) the following :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>Map inputMap = new HashMap()
+<pre class="prettyprint highlight"><code>Map inputMap = new HashMap()
 inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Title, "Hello, World !");
 inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Body,"Groovy is cool !");
-inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,com.lingway.lkm.db.corpus.bean.languages.LanguageKind.ENGLISH);
-</code></pre>
+inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,com.lingway.lkm.db.corpus.bean.languages.LanguageKind.ENGLISH);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -159,20 +178,19 @@ inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>inputMap = [
+<pre class="prettyprint highlight"><code>inputMap = [
    title: "Hello, World !"
    body: "Groovy is cool !"
    language: "en"
-]
-</code></pre>
+]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This way of doing allows the workflow &#8220;code&#8221; to be much more readable. It allows us to focus on what to do, not on how to do. This is extremely important and allows us to save time : it is easier to read and maintain. Moreover, it is not required to be an expert to understand what it does : no need to know what a HashMap is. No need to even know that you actually need to instanciate one. Let’s see another example where we would like to sum up the numbers contained in a flat file (one number per line). Our Java developper would have written the following :</p>
+<p>This way of doing allows the workflow ``code'' to be much more readable. It allows us to focus on what to do, not on how to do. This is extremely important and allows us to save time : it is easier to read and maintain. Moreover, it is not required to be an expert to understand what it does : no need to know what a HashMap is. No need to even know that you actually need to instanciate one. Let’s see another example where we would like to sum up the numbers contained in a flat file (one number per line). Our Java developper would have written the following :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>File file = new File("/tmp/data.txt");
+<pre class="prettyprint highlight"><code>File file = new File("/tmp/data.txt");
 int total = 0;
 try {
  BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
@@ -184,8 +202,7 @@ try {
 } catch (IOException e) {
  // this must never happen, and if it does, I don't know what to do
 }
-System.out.println("total = " + total);
-</code></pre>
+System.out.println("total = " + total);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -193,12 +210,11 @@ System.out.println("total = " + total);
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def total = 0
+<pre class="prettyprint highlight"><code>def total = 0
 new File("/tmp/data.txt").eachLine("utf-8") { line -&gt;
    if (line) total += line as int
 }
-println "Total : $total"
-</code></pre>
+println "Total : $total"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -206,16 +222,15 @@ println "Total : $total"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>mail.send sender: "app-admin-email-AT-gmail-DOT-com",
+<pre class="prettyprint highlight"><code>mail.send sender: "app-admin-email-AT-gmail-DOT-com",
    to: "recipient-AT-somecompany-DOT-com",
    subject: "Hello",
    textBody: "Hello, how are you doing? -- MrG",
-   attachment: [data: "Chapter 1, Chapter 2".bytes, fileName: "outline.txt"]
-</code></pre>
+   attachment: [data: "Chapter 1, Chapter 2".bytes, fileName: "outline.txt"]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Here’s an example of a &#8220;mini-DSL&#8221;, dedicated to sending e-mails. How could one imagine something simpler ? When you actually know about the verbosity of the Javamail API, it’s no match…</p>
+<p>Here’s an example of a ``mini-DSL'', dedicated to sending e-mails. How could one imagine something simpler ? When you actually know about the verbosity of the Javamail API, it’s no match…</p>
 </div>
 <div class="paragraph">
 <p>So, thanks to Groovy’s adaptability, we were able to :</p>
@@ -260,7 +275,7 @@ println "Total : $total"
 <p>With Groovy, you just skip those steps, and you just earn an extra : it’s just code. Even if linguists actually write rules, there’s nothing that prevents us from writing regular code inside. The whole language is usable…</p>
 </div>
 <div class="paragraph">
-<p>A funny thing is that as time passes by, linguists show an increasing curiosity towards the &#8220;code&#8221; part of rules. They naturally aim at factorizing rules : the language becomes structuring and leads to better code quality !</p>
+<p>A funny thing is that as time passes by, linguists show an increasing curiosity towards the ``code'' part of rules. They naturally aim at factorizing rules : the language becomes structuring and leads to better code quality !</p>
 </div>
 </div>
 </div>
@@ -280,8 +295,7 @@ println "Total : $total"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def num = 1.1
-</code></pre>
+<pre class="prettyprint highlight"><code>def num = 1.1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -300,13 +314,13 @@ println "Total : $total"
 <p>Curiously, the main barriers encountered during the adoption of Groovy were not technical but humain. And more curiously, the ones I faced did not come from people I expected. I expected linguists to rebel, it were developers !</p>
 </div>
 <div class="paragraph">
-<p>To understand properly, you must understand that developers are Lingway all have nearly 10 years of experience. I can modestly say that they are good (if not very) developers. As good developers, they use good tools : I cannot understand when people use <em>vi</em> or <em>Emacs</em> to code : the main strength of Java has never been the language, but rather its tools. At Lingway, we use <em>IntelliJ IDEA</em>. This IDE is for me the best IDE available on the market for Java development. We’ve used it for long, and getting back to Eclipse would be worse than a curse for us. With a strongly types language like Java, and even more with the addition of generics, code is understandable (but rather noisy) : you actually know, reading the code, that this collection actually contains that type of objects. The compiler will complain if you try to use different content, and if you use an intelligent IDE, without having to compile, it will indicate to you what are the possible choices for what method, depending on the context. As time goes, the programmer develops what I call the &#8220;completion frenzy&#8221; : you actually pass most of your time pressing the CTRL+space or CTRL+Q key combinations. It’s no use to read javadoc, since my IDE will gently indicate me what the method expects at what position. When you intensively practice that, you may reach an incredible productivity.</p>
+<p>To understand properly, you must understand that developers are Lingway all have nearly 10 years of experience. I can modestly say that they are good (if not very) developers. As good developers, they use good tools : I cannot understand when people use <em>vi</em> or <em>Emacs</em> to code : the main strength of Java has never been the language, but rather its tools. At Lingway, we use <em>IntelliJ IDEA</em>. This IDE is for me the best IDE available on the market for Java development. We’ve used it for long, and getting back to Eclipse would be worse than a curse for us. With a strongly types language like Java, and even more with the addition of generics, code is understandable (but rather noisy) : you actually know, reading the code, that this collection actually contains that type of objects. The compiler will complain if you try to use different content, and if you use an intelligent IDE, without having to compile, it will indicate to you what are the possible choices for what method, depending on the context. As time goes, the programmer develops what I call the ``completion frenzy'' : you actually pass most of your time pressing the CTRL+space or CTRL+Q key combinations. It’s no use to read javadoc, since my IDE will gently indicate me what the method expects at what position. When you intensively practice that, you may reach an incredible productivity.</p>
 </div>
 <div class="paragraph">
 <p>In that context, the transition to Groovy looks like a regression : being widely sub-typed (and I’m fighting to make understand that weakly typed doesn’t mean untyped), it’s most of time impossible to know what a method/closure/map expects as a parameter without reading the documentation. However, when we come to documentation, we can find the best, like the worse. Even your IDE is useless : it doesn’t have enough hints to help you. Most of CTRL+space calls are headed for failure : it leads to an incredible frustration.</p>
 </div>
 <div class="paragraph">
-<p>Therefore, developers just tend to come back the natural way : Java developers &#8220;Java-ize&#8221; their code, instead of Groovyfying it. We loose readability for ease of development. It’s quite paradoxical and I try to fight against this, but it’s difficult to challenge : I just think that unless you are a very curious and open developer, you’ll find it frustrating to fly visually. It’s just like getting 10 years back.</p>
+<p>Therefore, developers just tend to come back the natural way : Java developers ``Java-ize'' their code, instead of Groovyfying it. We loose readability for ease of development. It’s quite paradoxical and I try to fight against this, but it’s difficult to challenge : I just think that unless you are a very curious and open developer, you’ll find it frustrating to fly visually. It’s just like getting 10 years back.</p>
 </div>
 <div class="paragraph">
 <p>I must admit I have not succeeded to perfectly initiate the Groovy spirit to the team. Some make resist while others make efforts but it’s a question of feeling first : it’s very hard to fight against natural tendencies.</p>
@@ -328,6 +342,8 @@ println "Total : $total"
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -352,7 +368,7 @@ println "Total : $total"
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -393,6 +409,5 @@ println "Total : $total"
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

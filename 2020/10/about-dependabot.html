@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Dependabot and automated dependency upgrades</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Dependabot and automated dependency upgrades</h1>
+	</div>
+
+	<p><em>11 October 2020</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/dependabot.html">dependabot</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://dependabot.com/">Dependabot</a> starts with a great idea: the state of our industry, in terms of dependency management, is sad.
+In particular, maintaining dependencies up-to-date is difficult and while some solutions exist, the vast majority of projects are out of date.
+This isn&#8217;t a big deal for bugfixes and feature updates, but it is clearly a problem for security issues.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, any kind of automation to make the situation better is a good idea.
+I am in deep empathy with people working in this area: this is a difficult problem and there are no perfect solutions: as an example, in order to improve security of builds and reduce the risks of attacks via the toolchain, <a href="https://docs.gradle.org/current/userguide/dependency_verification.html">Gradle introduced dependency verification</a> as a first-class citizen.
+We deeply care about security and definitely support any attempt to make things better in this area.</p>
+</div>
+<div class="paragraph">
+<p>The genius idea about <a href="https://dependabot.com/">Dependabot</a> is that it does it at scale <strong>and submits pull requests</strong> that you just have to review and merge if everything goes ok.</p>
+</div>
+<div class="paragraph">
+<p>The best example in the Java ecosystem happened yesterday: the JUnit team fixed a <a href="https://github.com/junit-team/junit4/security/advisories/GHSA-269g-pwp5-87pp">security vulnerability in JUnit 4.13</a>.
+At first, you might wonder what kind of security problems you can have with a testing framework, which, by definition, just like a build tool, runs any arbitrary code on your machine.
+The reality is that most people are unaffected by this problem: it would only be the case if your tests write sensitive data (like credentials) in a shared environment, or that you somehow expose whatever is written in the test directory to the outside world.</p>
+</div>
+<div class="paragraph">
+<p>Nevertheless, because it&#8217;s a CVE, Dependabot submitted automated pull-requests to all projects using JUnit 4 and <a href="https://github.com/search?o=desc&amp;q=Bump+junit+from+to+4.13.1+GHSA-269g-pwp5-87pp&amp;s=&amp;type=Issues">Dependarmaggedon happened</a>: tens of thousands of pull requests.
+This might sound cool, a security fix needs to be fixed, but I find this noisy, and in the end dangerous.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s why.</p>
+</div>
+</div>
+</div>
+<h1 id="_automatic_detection" class="sect0">Automatic detection</h1>
+<div class="paragraph">
+<p><a href="https://dependabot.com/">Dependabot</a> is as good as an automated tool can be.
+I mean that its <em>implementation</em>, at least in the Java and JVM ecosystem in general, is too simplistic and that it&#8217;s inherently <strong>wrong</strong>.
+I don&#8217;t have the expertise to tell if it&#8217;s different in the other supported ecosystems (Go) but I suspect a lot of the problems I&#8217;m going to describe here exist also in those ecosystems.</p>
+</div>
+<div class="paragraph">
+<p>In practice, Dependabot is nothing more than a search and replace engine: it looks into some particular files that it knows about (think <code>pom.xml</code>), looks for some patterns, then tries to identify dependency coordinates and eventually replaces them. I&#8217;m simplifying a bit, because it does some interpretation of the versions it finds, for example to match version ranges, but that&#8217;s roughtly how it works.</p>
+</div>
+<div class="paragraph">
+<p>For example, it will identify this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+   &lt;group&gt;junit&lt;/group&gt;
+   &lt;name&gt;junit&lt;/version&gt;
+   &lt;version&gt;4.13&lt;/version&gt;
+   &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and it will replace the <code>4.13</code> with <code>4.13.1</code>, then submit a PR for you to review. WIN!</p>
+</div>
+<div class="paragraph">
+<p>Yes, and no. Because this is extremely easy to defeat.</p>
+</div>
+<div class="paragraph">
+<p>First, as I said, it only looks for known files. For Maven, it&#8217;s pretty simple, there&#8217;s only one place to look for: <code>pom.xml</code> files, but for other build tools, like Gradle, Ivy, Ant, Bazel, Pants, &#8230;&#8203; that&#8217;s not the case: dependencies can be declared in different files, not all named the same. Dependency versions can be separate (in properties files) or inherited from context (parent POMs, platforms, &#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>A more complete strategy is to look for patterns too, like <code><strong>.gradle</code>, but then, they also miss the <code></strong>.gradle.kts</code> files (they do), or the plugins which can contribute dependencies.
+In short: it&#8217;s a whack-a-mole game.</p>
+</div>
+<div class="paragraph">
+<p>One must think that it&#8217;s not a big deal, because catching <em>some cases</em> is better than not catching at all, and I agree, but that&#8217;s not the expectation when you read what the tool promises.</p>
+</div>
+<div class="paragraph">
+<p>In the end, any tool which tries to parse build files and tries to interpret its model based on string evaluations is doomed to fail.</p>
+</div>
+<div class="paragraph">
+<p>Even if it manages to catch some problems, things can go wrong. As an example, here&#8217;s what we got at Gradle for this JUnit upgrade:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/dependabomb.jpg" alt="dependabomb">
+</div>
+</div>
+<div class="paragraph">
+<p>For a <strong>single repository</strong>, it created <strong>dozens</strong> of individual pull requests to ask us to upgrade.
+That&#8217;s nice of you, Dependabot, but it&#8217;s totally missing the point: this repository contains generated code, used in performance testing.
+The way the code is layout, the repetition of dependency declarations, etc, everything is intentional.</p>
+</div>
+<div class="paragraph">
+<p>If you put apart the fact that Dependabot could have created a single pull request for all dependencies, instead of creating hundreds, it highlights a general problem with those automated detection tools:</p>
+</div>
+<h1 id="_context_matters" class="sect0">Context matters!</h1>
+<div class="paragraph">
+<p>At Gradle, we often receive emails from security teams telling us things like: "The Gradle distribution contains a dependency on this X library which has vulnerability Y".
+However, in almost all cases we&#8217;ve investigated, this was a no issue for us.
+Because of the nature of Gradle, the fact that by definition it runs arbitrary code on a machine, most vulnerabilities are not a problem in this environment: context matters.
+What&#8217;s more, even if your tool uses a library that has a critical vulnerability (we use Jackson for example, which had a number of thems recently), it doesn&#8217;t mean that your code <strong>exercises the path which is vulnerable</strong>: context matters!</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s not harmful to upgrade, but it creates a lot of noise.</p>
+</div>
+<h1 id="_wrong_impression_of_security" class="sect0">Wrong impression of security</h1>
+<div class="paragraph">
+<p>But the biggest problem with such tools, and again I&#8217;m using Dependabot as an example, is that they <strong>give a wrong impression of security</strong>.</p>
+</div>
+<div class="paragraph">
+<p>As I explained, Dependabot will basically read your POM files, or Gradle files, or whatever build tool files you use, and <em>assume that the version it reads is the version which is going to be used</em>.
+We, as developers, and even more as build tool authors, know that this is wrong: the dependencies you declare are rarely the ones you resolve.</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s the reason why tools like NPM (Javascript), Gradle (multi-language) or Cargo (Rust) make use of <a href="https://docs.gradle.org/current/userguide/dependency_locking.html">dependency locking</a>.
+Dependency locking is a concept which helps with build reproducibility.
+Say, for example, that you write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
+   implementation 'org.mylib:awesome:[1.0, 2['
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This means that Gradle can pick whatever version of <code>awesome</code> as long as it&#8217;s in the range.
+This is a typical declaration for semantic versioning, when you expect a library to be upgradable up to the next major.
+In Gradle you can even improve this by explaining what version you prefer in the range, if nobody else cares:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
+   implementation('org.mylib:awesome') {
+      version {
+          require '[1.0, 2['
+          prefer '1.3'
+      }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, ranges come at a price: if a new dependency version is released, your build would suddenly start using this new version, which breaks reproducibility in case you checkout old code, for example, for a bugfix.
+Therefore, as soon as you use ranges (and by extension any <em>dynamic dependency version</em>), you should use it with <em>dependency locking</em>.
+Dependency locking will make sure that whatever version of a library resolved at time T is used at time T+N even if a new version is out.
+It does so by writing the result of the dependency resolution process in a lock file.</p>
+</div>
+<div class="paragraph">
+<p>Upgrading dependencies becomes an intentional process that you do from time to time by generating a new lock file.</p>
+</div>
+<div class="paragraph">
+<p>What is the relationship with tools like Dependabot?</p>
+</div>
+<div class="paragraph">
+<p>By using the versions you <em>declare</em>, they have absolutely no guarantee that the versions you resolve are <em>not vulnerable</em>.</p>
+</div>
+<div class="paragraph">
+<p>In the example above, imagine that I use range <code>[1.0, 2[</code> and that I&#8217;m resolving 1.3.
+At some point in time, version 2.1 is released and is vulnerable.
+You could imagine that because you used a range and that 2.1 is out of the range, you are safe.
+That&#8217;s what those tools would assume, but they would be wrong: the reality is that despite this declaration, by the play of conflict resolution (Ivy, Gradle, &#8230;&#8203;) or ordering (Maven), a totally different version can be selected, even 2.1!</p>
+</div>
+<div class="paragraph">
+<p>Again there are <a href="https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html">tools to mitigate this problem</a>, but the reality is that by just reading the declaration, you&#8217;re not safe.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s even worse than that: what about transitive dependencies?</p>
+</div>
+<div class="paragraph">
+<p>Imagine that you have:</p>
+</div>
+<div class="paragraph">
+<p><code>Foo &#8594; Bar &#8594; Baz</code></p>
+</div>
+<div class="paragraph">
+<p>And that you depend on <code>Foo</code>. What if a vulnerability is discovered on <code>Baz</code>? Will you be notified? What kind of automated pull request can such a tool make to make sure that you upgrade <code>Baz</code>?</p>
+</div>
+<h1 id="_can_we_do_better" class="sect0">Can we do better?</h1>
+<div class="paragraph">
+<p>I have some good and bad news for you.</p>
+</div>
+<div class="paragraph">
+<p>The good news is that we can do better.
+The bad news is that it&#8217;s not easy.</p>
+</div>
+<div class="paragraph">
+<p>First, instead of relying on the declaration, those tools should really rely on the result of dependency resolution.
+If, for example, they used the lock files instead of the build files, they would know exactly what a build resolves.
+This, however, is only possible if the build uses dependency locking, and only for dependency graphs which are actually locked.
+It&#8217;s a reasonable assumption to say that what is locked is the most relevant information, though.</p>
+</div>
+<div class="paragraph">
+<p>Of course, I said there were bad news.
+As soon as you use the resolution result, you almost have to give up on automated remediation (pull requests).
+One thing they <em>could</em> do is patching the lock file.
+However, this is in general not a good idea, because, as I explained, lock files are generated: they present to you the result of resolution.
+Partially upgrading a lock file, manually, is possible but then you cannot make any guarantee that the app is going to work, because introducing a different dependency version may introduce different transitive dependencies!</p>
+</div>
+<div class="paragraph">
+<p>An alternate solution is to gather the information about resolved dependencies during the build: this is what <a href="https://scans.gradle.com/">build scans</a> do for Gradle and Maven, for example.
+This information can be extracted during the build and Dependabot would know precisely, reliably, what is resolved by a project.
+We even offer a Tooling API to do this kind of work.</p>
+</div>
+<div class="paragraph">
+<p>Then there&#8217;s remediation.
+This is the hardest problem.
+Because what most people like about Dependabot is actually the automated remediation: pull requests are nice, we all love that.</p>
+</div>
+<div class="paragraph">
+<p>But say, that to fix the transitive dependency issue above, Dependabot suggested to add a first level dependency with a different version.
+For Maven, this would work, since it&#8217;s order and depth sensitive.
+But it would break your model: the application doesn&#8217;t depend on <code>Baz</code>: it depends on <code>Foo</code>, which, by the transitive game, depends on <code>Baz</code>.
+You don&#8217;t want to introduce a first level dependency on <code>Baz</code> because it doesn&#8217;t make sense.</p>
+</div>
+<div class="paragraph">
+<p>For Gradle, you could use dependency constraints instead: constraints are meant for this use case.
+A <a href="https://docs.gradle.org/current/userguide/dependency_constraints.html#sec:adding-constraints-transitive-deps">constraint</a> adds, as it name implies, a constraint to the equation of the resolution of the graph (a bit like in constraint programming).
+They would participate in the dependency graph resolution if, and only if, the dependency they talk about appears in the graph.
+In that sense, they don&#8217;t break the application model, by introducing arbitrary first-level dependencies.</p>
+</div>
+<div class="paragraph">
+<p>Our Java ecosystem is polluted by hundreds of accidental first level dependencies and exclusions because of this lack of modeling: it is important to get things right.</p>
+</div>
+<div class="paragraph">
+<p>Last but not least, how you declare dependencies matters.
+In Gradle, using <a href="https://docs.gradle.org/current/userguide/rich_versions.html#header">rich version constraints</a>, you can explicitly reject bad versions, and you can explain why.</p>
+</div>
+<h1 id="_conclusion" class="sect0">Conclusion</h1>
+<div class="paragraph">
+<p>In conclusion, I think that Dependabot&#8217;s intent is legitimate and that today it&#8217;s better than nothing. Let&#8217;s detect projects using vulnerable dependencies and propose automated remediation.</p>
+</div>
+<div class="paragraph">
+<p>We, as build tool authors, also need to consider the wider context, which is dependency resolution in general, which isn&#8217;t as simple as it seems.
+In particular we consider that <em>detection</em> is an easy problem if you use the right tools, while <em>remediation</em> is a hard one.</p>
+</div>
+<div class="paragraph">
+<p>I think the current implementation of Dependabot is mostly wrong (at least in the Java ecosystem) as it relies on the declaration. This raises a number of issues:
+- it is dependent to the patterns it recognizes
+- it assumes that what you see is what you get
+- it cannot recognize transitive dependencies actually resolved by your project, so it misses real vulnerabilities
+- it doesn&#8217;t matter about the context of use of your dependencies</p>
+</div>
+<div class="paragraph">
+<p>The context thing is difficult to solve, but it&#8217;s actually painful because of the noise it creates, in case the "vulnerable dependency" is actually not in your case.
+However, I think there are improvements which can me made by actually using the actual resolution results instead.
+Then it raises some interesting technical challenges, like how to sandbox execution of builds (GitHub actions already do this) but more importantly how to create an automated pull request from the result of the analysis.</p>
+</div>
+<div class="paragraph">
+<p>Note that I also understand that from a Dependabot creator point of view, having to implement build-tool specific logic, like calling the Tooling API, to gather information about resolved dependencies might sound scary.
+I still think this is the right thing to do to be correct and, if our goal is really to make the industry safer, that&#8217;s what we should do.
+However, we have alternate solutions. For example a few weeks ago I experimented with a <a href="https://github.com/melix/gradle-command-action/tree/dump-dependencies">fork of my friend and colleague Paul Merlin&#8217;s Gradle Command GitHub Action</a> which automatically generates a JSON file of resolved dependencies during the build.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://twitter.com/ysb33r/">Schalk Cronjé</a> also mentioned to me the <a href="https://github.com/jeremylong/dependency-check-gradle">OWASP plugin</a>, which I forgot to mention when I originally wrote this blog post, but I think it a great answer and currently better answer because it does exactly what I describe: rely on what you actually resolve, not what you declare, and lets you carefully review the results via a generated report.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;m not sure this is the best answer, but it shows that we can attack the problem from different angles.</p>
+</div>
+<div class="paragraph">
+<p>Eventually, the key takeaway of this blog post should be: don&#8217;t assume that you are safe because you use Dependabot. You&#8217;re not.</p>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-dependabot';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

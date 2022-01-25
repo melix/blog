@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cédric Champeau's blog: My conferences</title>
+    <title>Cédric Champeau's blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,63 +25,57 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
 	<div class="page-header">
-		<h1>My conferences</h1>
+		<h1>Tag: web</h1>
 	</div>
-
-	<p><em>22 novembre 2013</em></p>
-
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>I am giving talks to JUGs and conferences, mainly about the <a href="http://groovy.codehaus.org">Groovy language</a> (and related topics like <a href="http://gradle.org">Gradle</a>, <a href="http://docs.spockframework.org/en/latest/">Spock</a>, DSLs, &#8230;).</p>
-</div>
-<div class="paragraph">
-<p>Here you can find a detailed page on conferences I gave and upcoming events.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_next_events">Next events</h2>
-<div class="sectionbody">
-<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-template-detailed lanyrd-type-all lanyrd-context-future lanyrd-number-20" rel="me">See my conferences on Lanyrd</a></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_past_events">Past events</h2>
-<div class="sectionbody">
-<div class="lanyrd-target-splat"><a href="http://lanyrd.com/profile/cedricchampeau/" class="lanyrd-splat lanyrd-template-detailed lanyrd-type-all lanyrd-context-past lanyrd-number-20" rel="me">See my conferences on Lanyrd</a></div>
-</div>
-</div></p>
-
-	<hr>
-
+	
+	<!--<ul>-->
+			<h4>December 2007</h4>
+			<ul>
+		
+		<li>26 - <a href="../2007/12/26/separating_configuration_from_deployment_in.html">Separating configuration from deployment in web applications</a></li>
+	</ul>
+	
 		</div>
 		<div id="push"></div>
     </div>
@@ -89,7 +83,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -130,6 +124,5 @@
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

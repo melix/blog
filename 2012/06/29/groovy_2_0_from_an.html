@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,14 @@
 		<h1>Groovy 2.0 from an insider</h1>
 	</div>
 
-	<p><em>29 juin 2012</em></p>
-	<p><em>Tags: </em>groovy </em> java </em> programming </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2012/06/29/groovy_2_0_from_an.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2012/06/29/groovy_2_0_from_an.html"></div>
-
+	<p><em>29 June 2012</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_groovy_2_0_is_has_landed">Groovy 2.0 is has landed!</h2>
 <div class="sectionbody">
@@ -117,7 +133,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>write a <em>Category</em> class, then <em>use</em> it: while this is quite easy to do, it has major drawbacks. First, it is lexically scoped <strong>and</strong> thread bound. This means that it is a dynamic feature, and that opening a <em>use</em> block influences all Groovy code being executed until the block is closed, including method calls. In other words, category usage &#8220;leaks&#8221; into the current thread (which can have its own advantages but I don’t like side effects). Moreover, it cannot be statically checked (which is one of the major additions of Groovy 2). Additionally, categories are performance killers, as they imply disabling a lot of possible optimizations. I think you understand, now, that I really don’t like categories!</p>
+<p>write a <em>Category</em> class, then <em>use</em> it: while this is quite easy to do, it has major drawbacks. First, it is lexically scoped <strong>and</strong> thread bound. This means that it is a dynamic feature, and that opening a <em>use</em> block influences all Groovy code being executed until the block is closed, including method calls. In other words, category usage ``leaks'' into the current thread (which can have its own advantages but I don’t like side effects). Moreover, it cannot be statically checked (which is one of the major additions of Groovy 2). Additionally, categories are performance killers, as they imply disabling a lot of possible optimizations. I think you understand, now, that I really don’t like categories!</p>
 </li>
 <li>
 <p>use a <em>metaclass</em>: it is very easy to do, but once again, it’s a pure dynamic feature, so it cannot be statically checked. It also has the disadvantage of not being easily reusable, and eventually, you may still be in conflict with another part of the code replacing the metaclass (which would remove your changes). Unlike categories, metaclass changes are visible to every thread and have immediate effect on every Groovy class. This is why this feature is the perfect candidate for <em>monkey patching</em>.</p>
@@ -128,7 +144,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>With Groovy 2, we provide a new way to write such extension methods, in a very friendly way: basically, you just need to write a support class that &#8220;looks like&#8221; DefaultGroovyMethods or Groovy categories. I will not repeat here how you can write such extension methods, but documentation can be found <a href="http://docs.codehaus.org/display/GROOVY/Creating+an+extension+module">here</a>. This technique has many advantages:</p>
+<p>With Groovy 2, we provide a new way to write such extension methods, in a very friendly way: basically, you just need to write a support class that ``looks like'' DefaultGroovyMethods or Groovy categories. I will not repeat here how you can write such extension methods, but documentation can be found <a href="http://docs.codehaus.org/display/GROOVY/Creating+an+extension+module">here</a>. This technique has many advantages:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -161,7 +177,7 @@
 <p>There are various reasons why we wanted to add static type checking to the Groovy language. They are discussed in <a href="http://bit.ly/LV5N25">Guillaume Laforge’s article on InfoQ</a> but the main reason is definitely that <strong>we want Groovy to be even easier to use by Java developers</strong>. There has been a lot of FUD about Groovy performance and the fact that it is dynamically typed, but in the end, Groovy is among the fastest dynamic languages (if not the fastest) and performance problems are more often coming from I/O operations than from the language itself! Also, we must think about all developers: not everyone builds a Twitter… But for people coming from Java, the lack of static type checking was often a barrier preventing them from using Groovy. There are many things to say about dynamic vs static languages, but for people who are interested in evaluating productivity or ease of debugging, there are some interesting results in <a href="http://www.cs.washington.edu/education/courses/cse590n/10au/hanenberg-oopsla2010.pdf">this study from Stefan Hanenberg.</a></p>
 </div>
 <div class="paragraph">
-<p>Speaking of that, we often see (and we are really irritated by this) the quote from James Strachan, founder of the <em>Groovy</em> language, promoted as a very good reason why not to choose Groovy (and its corrolate, prefer Scala over it): &#8220;I can honestly say if someone had shown me the Programming Scala book by Martin Odersky, Lex Spoon &amp; Bill Venners back in 2003 I’d probably have never created Groovy.&#8221; I don’t know James personaly and I really respect his work and opinion and I joined the project well after but:</p>
+<p>Speaking of that, we often see (and we are really irritated by this) the quote from James Strachan, founder of the <em>Groovy</em> language, promoted as a very good reason why not to choose Groovy (and its corrolate, prefer Scala over it): ``I can honestly say if someone had shown me the Programming Scala book by Martin Odersky, Lex Spoon &amp; Bill Venners back in 2003 I’d probably have never created Groovy.'' I don’t know James personaly and I really respect his work and opinion and I joined the project well after but:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -190,7 +206,7 @@
 </div>
 </div>
 <div class="sect2">
-<h3 id="_it_s_optional">It’s optional!</h3>
+<h3 id="_its_optional">It’s optional!</h3>
 <div class="paragraph">
 <p>With Groovy 2, we want people to have <strong>choice</strong>. Groovy is a very elegant language that removes most of the boilerplate of Java while staying very close to it, grammar-wise, hence very easy to learn. But it was definitely a problem for us to see people choosing other languages because of the lack of a type checker, although we think Groovy is much more readable than a lot of its competitors. Now, you will have the choice. You will have the choice to type check your code, and explicitely choose not to use the dynamic features of the language, and you will even have the choice to statically compile your code (with its own semantics). This adresses the two main issues we’ve talked about here: failing early in the development process thanks to static type checking, and adressing episodic performance issues by statically compiling your code.</p>
 </div>
@@ -235,6 +251,8 @@
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -259,7 +277,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -300,6 +318,5 @@
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

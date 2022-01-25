@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: The problem with Gradle: really?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>The problem with Gradle: really?</h1>
+	</div>
+
+	<p><em>06 January 2021</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/misconceptions.html">misconceptions</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Disclaimer: I&#8217;m a former Groovy committer and a Gradle Inc. employee.
+However, I started using Gradle long before I joined Gradle, and I have quite some experience with Java build tools: I started with Ant, but I also used Maven quite a lot, then fell in love with Gradle, for many reasons.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://www.bruceeckel.com/2021/01/02/the-problem-with-gradle/">A blog post from Bruce Eckel</a> made quite some noise on Reddit (no wonder, Bruce is a guru!).
+It&#8217;s not the first time I read comments about Gradle, this article in itself is balanced and not that negative.
+Most of the criticism is on the title itself, which is misleading and looks like a clickbait.
+One can easily be retweeted without actually reading the details, and most importantly the conclusion.
+Also, it doesn&#8217;t compare with what you&#8217;d have to do with <em>other</em> build tools, which is important to draw good conclusions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_makes_gradle_different">What makes Gradle different?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At the core of this blog post is the thing that the "big picture" of Gradle is unclear.
+There are several things to say here.
+First of all, Gradle is not a new, shiny toy to play with: it was born more than 10 years ago, and saw its v1.0 release on Jun 12, 2012.
+Second, there&#8217;s not a "single" problem with Gradle: there are different problems, some more important than the others, but there are also many, many benefits.
+As such, one should draw a complete picture, which is sometimes hard for build tools, something that developers tend to underestimate, in particular in terms of impact on developer productivity.</p>
+</div>
+<div class="paragraph">
+<p>Gradle is designed to improve developer productivity which is achieved via incremental builds, incremental tasks, parallel execution, reproducibility and many other features.
+Let&#8217;s put it this way: if you look at Gradle from the DSL point of view, that is, the look and feel, instead of its capabilities, the engine, you will miss the most interesting parts.
+The beauty of Gradle is not in its "flexibility" offered because it uses configuration as code: it&#8217;s the engine which is designed to model software properly and optimizes building software.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_do_you_have_to_know_everything">Do you have to know everything?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bruce states that with Gradle, "To do anything you have to know everything".</p>
+</div>
+<div class="paragraph">
+<p>While the formula is elegant, this is a bold statement: this simply doesn&#8217;t align with the reality of the Gradle ecosystem, our community and larger user base.</p>
+</div>
+<div class="paragraph">
+<p>What is true, however, is that the learning curve of Gradle is higher than with other build tools (say, Maven for example).
+I always said that the learning curve of Gradle is difficult, but once you get it, the benefit is just amazing: we have customers who tell stories about dramatic productivity boosts after migrating to Gradle, simplified maintenance and coordination of large development teams via corporate plugins.</p>
+</div>
+<div class="paragraph">
+<p>One of the reasons is that Gradle is fundamentally different from other build tools: it focuses on modeling software components and their relationships, and as such it can be considered as a language for building <em>any</em> kind of application. It raises the concept of convention over configuration to another level.</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s no surprise that Gradle has been successfully used to build software in various ecosystems: the JVM, where it&#8217;s born (with Java, Groovy, Scala in particular), but also native development (take a look at <a href="https://nokee.dev/">Nokee</a> if you are interested), Go (<a href="https://github.com/gogradle/gogradle">Go Gradle</a>), &#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Some ecosystems actually build on top of unique features of Gradle, in particular in terms of dependency management: Android (with multiple flavors of libraries and applications) or Kotlin in particular (with Kotlin Multiplatform).</p>
+</div>
+<div class="paragraph">
+<p>Why is that? Gradle is an execution engine optimized for build workflows, with intelligence about how to build things incrementally.</p>
+</div>
+<div class="paragraph">
+<p>Nonetheless, improving the experience of first time users is something the Gradle team focuses on, as we will see below.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tasks_vs_dependencies_a_simplistic_view">Tasks vs dependencies: a simplistic view</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bruce says that any build system is basically the combination of two essential ingredients: <em>tasks</em> and <em>dependencies</em>, where dependencies are seen as artifacts.</p>
+</div>
+<div class="paragraph">
+<p>That is not quite correct in case for Gradle: Gradle is responsible for wiring units of work together, either through explicit or implicit dependencies.
+It&#8217;s important to understand that "dependency" here has a wider meaning: it&#8217;s something which is required to be able to execute a unit of work.
+There is, technically speaking, no difference between an external and an internal dependency. What matters is that we have units of work, which have inputs and outputs.
+The role of Gradle is to wire things so that everything is ordered properly and optimized for execution (parallelism, caching, &#8230;&#8203;).
+It&#8217;s a mistake to think that there are only tasks and dependencies (files, mostly): there are work units, inputs and outputs.
+A task (say, <code>JavaCompile</code>) is just <em>one kind</em> of work unit, but that&#8217;s not the only one. Here are some other kind of work units: transforming artifacts (for example, transform a <em>jar</em> into something else before it is consumed), downloading a toolchain, uploading an artifact to the build cache, &#8230;&#8203; A task itself can be splitted into several work units in order to maximize incrementality and parallelism.</p>
+</div>
+<div class="paragraph">
+<p>A lot of the criticism we see on Gradle is because there&#8217;s a mismatch between the mental model of what Gradle is, and the surface, which is the language(s) it uses to configure the actual model.</p>
+</div>
+<div class="paragraph">
+<p>A lot of the confusion comes from the fact that while Gradle has a vision, it should be better shared and explained.
+It&#8217;s also victim of its age which means success: the road towards fine grained execution, safe parallelism, configuration, &#8230;&#8203; is hard and there are some APIs which are sub-optimal for this, and <a href="https://docs.google.com/forms/d/e/1FAIpQLSc9aQrjjsxVqXDkYR35ExeiI1yEIksRXVtN6asuaem084l3aA/viewform">maintaining backwards compatibility is a day-to-day challenge</a>.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s explain a bit what Gradle has to do, when you say that you want to execute a <em>task</em>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configure the task (execute its <em>configuration phase</em>), which means executing plugins which configure the default values, use your configuration, etc.</p>
+</li>
+<li>
+<p>compute the <em>dependencies</em> of the task, which can either be explicit (typically the <code>dependsOn</code> clause) or <em>implicit</em> (because you configured a task input as the output of another task, typically): this is basically a directed graph resolution engine, which is very fine grained and where each node is a unit of work.</p>
+</li>
+<li>
+<p>and finally executes the nodes of the graph in an optimized way</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Historically, Gradle has separated the <em>configuration phase</em> from the <em>execution phase</em>, but it doesn&#8217;t have to be that way: as soon as the inputs of a task are ready, we should be able to execute it, and we shouldn&#8217;t have to wait for the configuration of other tasks to be ready to do it.
+Also Gradle made it easy, in the beginning, to <em>inline</em> the definition of tasks, including their execution phase, in a build script, but it is, for quite some time, considered a bad design principle: don&#8217;t write <em>build logic</em> in build scripts. The whole blog post from Bruce never mentions this term a single time: <a href="https://docs.gradle.org/current/userguide/custom_plugins.html">write plugins</a>!</p>
+</div>
+<div class="paragraph">
+<p>Despite our efforts, lots of resources on the web still focus on how to declare tasks, how flexible Gradle is, without taking time to leverage good engineering practices. In Java nobody writes a giant single class with all the logic <em>and</em> the data as code, right? So don&#8217;t do it in your build, that&#8217;s as simple as that.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s be honest: it&#8217;s partly our fault, and for that I agree with Bruce: the documentation of Gradle is huge and things can be made better, especially for beginners.
+It&#8217;s also true that the docs contain <em>outdated patterns</em> and it&#8217;s often very difficult to realize that you have outdated info in thousands of pages of docs.</p>
+</div>
+<div class="paragraph">
+<p>There is, however, a good amount of resources for beginners:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>samples: <a href="https://docs.gradle.org/current/samples/index.html" class="bare">https://docs.gradle.org/current/samples/index.html</a></p>
+</li>
+<li>
+<p>guides (slowly replaced with the samples above): <a href="https://gradle.org/guides/" class="bare">https://gradle.org/guides/</a></p>
+</li>
+<li>
+<p>free trainings: <a href="https://gradle.com/training/" class="bare">https://gradle.com/training/</a></p>
+</li>
+<li>
+<p>webcasts: <a href="https://gradle.com/blog/tag/webcast/" class="bare">https://gradle.com/blog/tag/webcast/</a></p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_deconstructing_the_myth">Deconstructing the myth</h3>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>We are still in the early days of the “adding a build system atop an existing language” paradigm. Gradle is an experiment in this paradigm, so we expect some sub-optimal choices. However, by understanding its issues you might have less frustration learning Gradle than I did.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Bruce Eckel<br>
+<cite>The Problem With Gradle</cite>
+</div>
+</div>
+<div class="paragraph">
+<p>This is incorrect. Thinking that Gradle is just about calling methods is the wrong mental model. Thinking that Gradle is "programming a build" is wrong. Gradle uses a programming language as a foundation for "configuration as code", but it is <em>really</em> about configuration, not <em>programming</em>. Surely a programming language is interesting to use in the "configuration as code" paradigm, but focusing on that aspect and assuming that it works as a general purpose language is wrong and will inevitably lead to confusion.</p>
+</div>
+<div class="paragraph">
+<p>Gradle is also <em>not</em> an experiment: it&#8217;s the most advanced tool you can find in this area, and it works <em>because</em> the language builds on top of an engine which is made to execute workflows.
+A number of build tools, including modern ones, are only fast because they put the maintenance and optimization burden on the build author: declare everything, re-generate build scripts, etc.
+We, in the Gradle team, think that we can be more correct, more performant <em>without</em> having to compromise on user experience.</p>
+</div>
+<div class="paragraph">
+<p>We even had teams challenging us on performance with modern tools like Bazel, and we proved that with unique features like <a href="https://docs.gradle.org/current/userguide/configuration_cache.html#header">configuration caching</a>, Gradle was able to outperform it in almost all scenarios: you get the benefit of terse, maintainable scripts, with performance. win-win.</p>
+</div>
+<div class="paragraph">
+<p>At this stage, it&#8217;s time to deconstruct some misconceptions of the blog post, because as long as this message is propagated, we will not achieve what should be the focus of our industry: safer, faster, reproducible builds for everyone.</p>
+</div>
+<div class="sect3">
+<h4 id="_1_youre_not_configuring_youre_programming">1. You&#8217;re not Configuring, You’re Programming</h4>
+<div class="paragraph">
+<p>You should see <em>Gradle build scripts</em> as <em>configuration scripts</em>, which actually configure a <em>model</em>.
+The surface is a DSL, a language, but what you do, what you <em>should do</em>, is to declaratively model your software.</p>
+</div>
+<div class="paragraph">
+<p>For example, this Groovy script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
+   id 'java-library'
+}
+
+dependencies {
+    api 'org.springframework:spring-core:2.5.6'
+    implementation 'org.apache.commons:commons-lang3:3.3.10'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Is a build script which configures a library written in Java, while this build script, written in Kotlin, configures a different kind of software component:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="kotlin">plugins {
+    id("org.gradle.presentation.asciidoctor")
+}
+
+presentation {
+    githubUserName.set("melix")
+    githubRepoName.set("gradle-6-whats-new")
+    useAsciidoctorDiagram()
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>which is actually a <code>reveal.js</code> slide deck, built with Gradle! This is the <em>full</em> build script for this, and it&#8217;s extremely important to realize that: the "code" that you get shouldn&#8217;t have any custom tasks, in particular: all of the complexity, which is nothing more than the "model", is hidden in a <em>plugin</em>.</p>
+</div>
+<div class="paragraph">
+<p>I strongly encourage you to read my <a href="https://melix.github.io/blog/2019/11/gradle-scripting.html">Gradle myth busting: scripting</a> blog post which describes exactly that.</p>
+</div>
+<div class="paragraph">
+<p>In addition, you can watch this 10 minute video I made about writing idiomatic build scripts:</p>
+</div>
+<div class="paragraph">
+<p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/MaansFoPHKg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+</div>
+<div class="paragraph">
+<p>What it means is that while Gradle build scripts are <em>executed</em>, this is code which <em>configures the model</em>, so you&#8217;re "programming the configuration", if you will.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_2_groovy_is_not_java">2. Groovy is Not Java</h4>
+<div class="paragraph">
+<p>There&#8217;s not much to say here, because it barely has anything to do with Gradle.</p>
+</div>
+<div class="paragraph">
+<p>You will notice that when I showed build scripts above, I showed a <em>Groovy</em> build script and a <em>Kotlin</em> one. It&#8217;s important to notice that Gradle allows both, because under the hood, it&#8217;s an API.
+As I said, Gradle provides a foundation for building software components, a dependency resolution engine, an execution engine.
+<em>Plugins</em> are at the core of the system and are responsible for building <em>models</em> of software we build: a Java library is different from an Android application, so there&#8217;s <em>no reason</em> to have the same source layout, for example.
+The fact that Gradle uses Groovy as a language to do its configuration is an <em>implementation detail</em>.
+I think it&#8217;s a mistake to consider that you need a programming language to do what Gradle does: it helps, and lots of people actually appreciate Gradle&#8217;s flexibility in that regard, but it&#8217;s not what you should focus on.</p>
+</div>
+<div class="paragraph">
+<p>Both Groovy and Kotlin have pros and cons. If you use Intellij IDEA, for example, the Kotlin DSL has very good arguments and makes this model completely visible: completion is available, you don&#8217;t have to "guess" what to type: depending on the plugins you apply, you get the configuration blocks you need, and nothing more!</p>
+</div>
+<div class="paragraph">
+<p>To come back to this section, a common misconception is that Gradle is written in Groovy. It&#8217;s not. Gradle is written in Java, mostly. There&#8217;s a lot of Groovy code in Gradle for testing (we use Spock, in particular), but we also have Kotlin code. The build scripts, however, use Groovy or Kotlin.</p>
+</div>
+<div class="paragraph">
+<p>The DSL design definitely was influenced by Groovy, though, that&#8217;s very true.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_3_gradle_uses_a_domain_specific_language">3. Gradle Uses a Domain-Specific Language</h4>
+<div class="paragraph">
+<p>Yes it does. I should say it&#8217;s an "extensible" DSL. But when I&#8217;m reading this:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>How helpful is this DSL syntax, really? I have to translate it into function calls in my head when I read it. So for me it’s additional cognitive overhead which is ultimately a hindrance. The DSL operations can all be done with function calls, and programmers already understand function calls.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>I&#8217;m thinking that this is again seeing the problem from the wrong angle. You should <em>not</em> see this as function calls, or code being executed. You should see this as a model being configured. You can&#8217;t, actually, assume <em>when</em> this code is going to be called (because, we have configuration avoidance, for example). So a DSL is really what it means: it&#8217;s a language meant to configure the model, nothing more. By trying to interpret <em>how</em> Gradle does this, you&#8217;re actually distracted from what matters: what are you trying to build?</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_4_there_are_many_ways_to_do_the_same_thing">4. There are Many Ways to do the Same Thing</h4>
+<div class="paragraph">
+<p>This one is one of my favourites. I always read "there are too many ways to do the same thing". Sure there are. Just like in Java, can you tell me how many ways you can write a loop? Let&#8217;s see&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="title">indexed loop</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>for (int i=0; i&lt;items.length(); i++) {
+   ...
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">foreach loop</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>for (String item: items) {
+...
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">while loop</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>Iterator&lt;String&gt; it = items.iterator();
+while (it.hasNext()) {
+  ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(not mentioning the <code>do&#8230;&#8203;while</code> variant)</p>
+</div>
+<div class="listingblock">
+<div class="title">streams</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>items.stream()
+   .map(...)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">streams again</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>items.forEach(...)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Does anyone complain that Java has too many ways to do the same thing? Certainly not, because there are different reasons: historical (good old loops came first), performance (sometimes streams are not that fast), semantic (iterator lets you delete things while iterating), &#8230;&#8203; Even Python has many ways to do the same thing. Isn&#8217;t it the case when you&#8217;re free to write code? Some consider it&#8217;s a reason alone <em>not to use Gradle</em>. It would be a mistake, because you don&#8217;t stop programming Java because it has too many ways to write a loop.</p>
+</div>
+<div class="paragraph">
+<p>The thing is "use the right tool for the right job". Gradle is no different. Except that there are not so many ways to do things 😉 Some are legacy patterns, and there we need to do better at documenting, some are just because people are trying to write code in their build scripts when <em>they shouldn&#8217;t</em> (write plugins!).</p>
+</div>
+<div class="paragraph">
+<p>I should mention that we started something called the <strong>idiomatic Gradle</strong> project for these excellent reasons.
+The goal is to encourage best practices, document the most idiomatic way to do something, covering multiple use cases and their differences.
+There will be a blog post from the team about this project, in the meantime you can already read some results:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a sample showing how to build <a href="https://docs.gradle.org/current/samples/sample_building_java_applications_multi_project.html">multi-project Java applications</a></p>
+</li>
+<li>
+<p>documentation about <a href="https://docs.gradle.org/6.8-rc-5/userguide/structuring_software_products.html">structuring larger builds</a></p>
+</li>
+<li>
+<p>a <a href="https://jjohannes.github.io/joker-conf-2020/#/">presentation</a> from my colleague Jendrik Johannes about idiomatic Gradle at JokerConf</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Last but not least, we have ongoing conversations about a "strict mode" in Gradle to actually enforce some language constructs, or even a different DSL, to limit what you can actually do in a build script.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_5_magic">5. Magic</h4>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Any sufficiently advanced technology is indistinguishable from magic.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Arthur C. Clarke<br>
+<cite>Profiles of the Future: An Inquiry Into the Limits of the Possible</cite>
+</div>
+</div>
+<div class="paragraph">
+<p>This whole section is basically about understanding the separation between <em>configuration</em> and <em>execution</em> phases, but really what bothers me most is that it&#8217;s much easier to grasp if you just <em>don&#8217;t write inline tasks into build scripts</em>.</p>
+</div>
+<div class="paragraph">
+<p>For example, if I write, in a plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">public abstract class ProcessTemplates extends DefaultTask {
+
+    @Input
+    public abstract Property&lt;TemplateEngineType&gt; getTemplateEngine();
+
+    @InputFiles
+    public abstract ConfigurableFileCollection getSourceFiles();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
+
+    @TaskAction
+    void execute() { ... }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then the separation between <em>inputs</em> (properties annotated with <code>@InputXXX</code>), outputs <code>@OutputDirectory</code> and the actual task execution <code>@TaskAction</code> is obvious.
+More importantly, if you do this Gradle helps you by providing you guidance on what annotations to use, how to make it compatible with caching, etc for free (via embedded linting).</p>
+</div>
+<div class="paragraph">
+<p>I repeat, nobody should every inline <em>build logic</em> in a build script. Nobody.</p>
+</div>
+<div class="paragraph">
+<p>Accidentally, the scripts Bruce shows in this section are using Groovy, which, for backwards compatibility reasons, uses <em>eager configuration APIs</em>.
+If you use Kotlin scripts, all the task creation, registration, is done lazily, avoiding unnecessary configuration. You can do this in Groovy too, if you use the <a href="https://docs.gradle.org/current/userguide/task_configuration_avoidance.html">configuration avoidance APIs</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_5bis_the_lifecyle">5bis, the lifecyle</h4>
+<div class="paragraph">
+<p>This section again discusses <em>configuration</em> vs <em>execution</em>. Just a terminology comment here: a <em>lifecyle</em> in Gradle and other build tools is a different thing. See my other <a href="https://melix.github.io/blog/2018/09/gradle-lifecycle.html">Gradle myth busting: lifecyle</a> blog post for reference.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_other_issues">Other Issues</h4>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>The Gradle documentation assumes you already know a lot.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Yes, and no. The Gradle documentation is large and as I said in the intro, we do have sections for beginners. What is true, and I&#8217;m quite mad about this, is that our docs layout is terrible, and that good documentation is very difficult to find out.</p>
+</div>
+<div class="paragraph">
+<p>We also started to rewrite sections so that they are <em>use case centered</em>, see the <a href="https://docs.gradle.org/current/userguide/dependency_management.html">dependency management</a> docs for example.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Slow startup times</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>In most cases, "slow startup times" actually refer to "slow configuration times". This is in general because of too much code being executed at configuration time. That&#8217;s why we have <a href="https://docs.gradle.org/current/userguide/task_configuration_avoidance.html">configuration avoidance APIs</a> and that you can possibly use <a href="https://scans.gradle.com">build scans</a> which tell you that you are doing too much at configuration time.
+However, with the experimental <a href="https://docs.gradle.org/current/userguide/configuration_cache.html">configuration cache</a>, those configuration time issues should soon be a thing of the past.</p>
+</div>
+<div class="paragraph">
+<p>Be careful with some (very) popular plugins: some plugin authors just don&#8217;t realize that the way they configure builds, reach to other projects or perform cross-configuration has a significant impact on build performance, and therefore user experience.</p>
+</div>
+<div class="paragraph">
+<p>All that said, we&#8217;re doing even more: I mentioned the <a href="https://docs.gradle.org/current/userguide/configuration_cache.html">configuration cache</a> earlier. This is still work in progress, but we have amazing results with this. Very large multi-project builds are configured very quickly. We&#8217;re working with customers and the Android team on this.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>It’s not that easy to discover Gradle’s abilities, and there are so many abilities that you often don’t know what’s possible</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Oh yes. Oh, yes. Gradle is probably the most advanced build tool of the market. It has dozens of features, including unique features you don&#8217;t find in any other build tool. They are hardly discoverable. We need more advocacy on those, and make them more visible. I am not sure how we can do this, honestly.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_now_that_i_get_it">Now That I Get It</h4>
+<div class="paragraph">
+<p>The conclusion of the blog post is quite positive. However it mentions IDE support. I should say, despite being a Groovy developer, I use it everyday, that if you use IntelliJ IDEA in particular, discovering Gradle using the Kotlin DSL is <em>much</em> easier. You get smart, contextual, IDE completion, which really helps in understanding how Gradle works. There are drawbacks in using Kotlin build scripts, in particular because Kotlin compilation is painfully slow (Scala developers would understand). Independently of the JetBrains team, which is working on performance of the compiler, <a href="https://docs.gradle.org/6.8-rc-5/release-notes.html#kotlin-dsl-performance">Gradle 6.8 will also provide some nice Kotlin DSL performance improvements</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>In this blog post I have commented on some remaining misconceptions about Gradle, which are still visible in Bruce&#8217;s blog post. However, there&#8217;s no blocker there. I would however really encourage you to go the idiomatic Gradle route and try to follow modern Gradle design principles. If you have time, here&#8217;s a talk I gave recently at the Madrid Groovy User Group about modernizing the Groovy build, I think it summarizes quite a lot why a number of the patterns described in Bruce&#8217;s blog post are outdated and shouldn&#8217;t be promoted:</p>
+</div>
+<div class="paragraph">
+<p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/HXAV9pL5Rf8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+</div>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-problem';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,16 @@
 		<h1>Customizing Groovy compilation process</h1>
 	</div>
 
-	<p><em>12 mai 2011</em></p>
-	<p><em>Tags: </em>1.8 </em> compilation </em> groovy </em> programming </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2011/05/12/customizing_groovy_compilation_process.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2011/05/12/customizing_groovy_compilation_process.html"></div>
-
+	<p><em>12 May 2011</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/1.8.html">1.8</a> 
+	</em>
+		<a href="/blog/tags/compilation.html">compilation</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_groovy_compilation_customizers">Groovy compilation customizers</h2>
 <div class="sectionbody">
@@ -80,7 +98,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import org.codehaus.groovy.control.customizers.ImportCustomizer
+<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 ...
 
@@ -90,8 +108,7 @@ importCustomizer.addImports('java.util.concurrent.atomic.AtomicInteger', 'java.u
 // star imports
 importCustomizer.addStarImports('java.util.concurrent')
 // static star imports
-importCustomizer.addStaticStar('java.lang.Math')
-</code></pre>
+importCustomizer.addStaticStar('java.lang.Math')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -99,13 +116,12 @@ importCustomizer.addStaticStar('java.lang.Math')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(importCustomizer)
 def shell = new GroovyShell(configuration)
 shell.evaluate """
   new AtomicInteger(0) // won't throw ClassNotFoundException
-"""
-</code></pre>
+"""</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -124,7 +140,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
+<pre class="prettyprint highlight"><code>final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
 final SecureASTCustomizer secure = new SecureASTCustomizer()
 secure.with {
     closuresAllowed = false
@@ -177,8 +193,7 @@ secure.with {
 
 CompilerConfiguration config = new CompilerConfiguration()
 config.addCompilationCustomizers(imports, secure)
-GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
-</code></pre>
+GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -214,7 +229,7 @@ GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>1+1
+<pre class="prettyprint highlight"><code>1+1
 ---
 
 will run perfectly, while this one :
@@ -256,8 +271,7 @@ def shell = new GroovyShell(config)
 shell.evaluate """
    def allowed = 1+1
    def Disallowed = 1+1
-"""
-</pre>
+"""</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -265,7 +279,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.SecureASTCustomizer
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
@@ -292,8 +306,7 @@ config.addCompilationCustomizers(secure)
 def shell = new GroovyShell(config)
 shell.evaluate """
    System.exit(0)
-"""
-</code></pre>
+"""</code></pre>
 </div>
 </div>
 </div>
@@ -306,10 +319,9 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(Log))
-def shell = new GroovyShell(configuration)
-</code></pre>
+def shell = new GroovyShell(configuration)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -333,10 +345,9 @@ def shell = new GroovyShell(configuration)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(MyASTTransformationClass))
-def shell = new GroovyShell(configuration)
-</code></pre>
+def shell = new GroovyShell(configuration)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -352,6 +363,8 @@ def shell = new GroovyShell(configuration)
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -376,7 +389,7 @@ def shell = new GroovyShell(configuration)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -417,6 +430,5 @@ def shell = new GroovyShell(configuration)
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

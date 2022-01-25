@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,14 @@
 		<h1>Null-safe invocation and primitive types</h1>
 	</div>
 
-	<p><em>17 avril 2013</em></p>
-	<p><em>Tags: </em>groovy </em> null </em> programming </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2013/04/17/null_safe_invocation_and_primitive.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2013/04/17/null_safe_invocation_and_primitive.html"></div>
-
+	<p><em>17 April 2013</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/null.html">null</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</p>
 	<p><div class="sect2">
 <h3 id="_null_safe_method_invocation">Null-safe method invocation</h3>
 <div class="paragraph">
@@ -68,7 +84,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class Person {
+<pre class="prettyprint highlight"><code>class Person {
    String name
    int age
 }
@@ -77,8 +93,7 @@ Person getPerson() { null }
 
 Person p = getPerson()
 
-def result = p?.age
-</code></pre>
+def result = p?.age</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -86,18 +101,17 @@ def result = p?.age
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>int result = p?.age
-</code></pre>
+<pre class="prettyprint highlight"><code>int result = p?.age</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>By explicitely setting the type to <em>int</em>, executing this would throw an error, stating that you cannot convert <em>null</em> to <em>int</em>. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if <em>p</em> is not null, the assignment is perfectly valid since <em>getAge()</em> is expected to return a primitive type… This means that unlike the &#8220;normal&#8221; invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.</p>
+<p>By explicitely setting the type to <em>int</em>, executing this would throw an error, stating that you cannot convert <em>null</em> to <em>int</em>. It makes sense knowing that the null-safe invoker is supposed to return null if the receiver is null, but it starts getting strange as if <em>p</em> is not null, the assignment is perfectly valid since <em>getAge()</em> is expected to return a primitive type… This means that unlike the ``normal'' invoker which is guaranteed to keep the method return type untouched, the null-safe invoker does not honor the method signature.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_the_dynamic_world">The dynamic world</h3>
 <div class="paragraph">
-<p>What if the null-safe invoker was aware of the return type? In &#8220;null-safe&#8221;, you must think about what the &#8220;safe&#8221; part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the <strong>receiver</strong> is null, then return null. This means that because <em>p</em> is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was <em>getAge()</em>, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a <em>default value</em> compatible with the primitive type. This means that here, I would expect the null-safe invoker to return <em>0</em>. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when <em>p?.age</em> is executed, the target method hasn’t been chosen, because you need to know the runtime type of <em>p</em> to determine what method will eventually be called. As <em>p</em> is null, the dynamic runtime doesn’t know the type of <em>p</em>, so has no idea that calling <em>age</em> would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…</p>
+<p>What if the null-safe invoker was aware of the return type? In <code>null-safe'', you must think about what the </code>safe'' part stands for. It’s definitely the receiver, because you want the invocation to be safe (not failing) if the receiver is null. If the <strong>receiver</strong> is null, then return null. This means that because <em>p</em> is null, it chooses to return null, independently of the method that was supposed to be called. Here, the method was <em>getAge()</em>, which is supposed to return a primitive type. As null is not a primitive, I would expect the null-safe invoker to return a <em>default value</em> compatible with the primitive type. This means that here, I would expect the null-safe invoker to return <em>0</em>. Now, what is the problem with returning a default value? First of all, we’re in a dynamic world. This means that when <em>p?.age</em> is executed, the target method hasn’t been chosen, because you need to know the runtime type of <em>p</em> to determine what method will eventually be called. As <em>p</em> is null, the dynamic runtime doesn’t know the type of <em>p</em>, so has no idea that calling <em>age</em> would return a primitive type. Conclusion, in a dynamic world, the null-safe invoker must always return null, even if the expected method would return a primitive…</p>
 </div>
 </div>
 <div class="sect2">
@@ -112,6 +126,8 @@ def result = p?.age
 <p>Anyway, even if it’s possible for the static compiler to return a default value, the fix I pushed doesn’t do that. It will always return null. The main reason for doing that is not that it was easier to fix (it’s quite the opposite), but that it keeps the semantics of statically compiled Groovy equal to those of dynamic Groovy. As it’s not possible for the runtime to know what the method would return, always returning null is fine, even if some situations (static compilation), you know a bit more what would happen :)</p>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -136,7 +152,7 @@ def result = p?.age
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -177,6 +193,5 @@ def result = p?.age
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

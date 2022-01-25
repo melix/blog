@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Using Java 16 with Gradle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Using Java 16 with Gradle</h1>
+	</div>
+
+	<p><em>17 March 2021</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/java16.html">java16</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://twitter.com/java/status/1371842658256228356">Java 16 is out</a> and I&#8217;m seeing a number of folks trying to figure out how to use Java 16 with Gradle.
+Often they would try to run Gradle with JDK 16 and see it fail.
+There&#8217;s a <a href="https://github.com/gradle/gradle/issues/13481">ticket about Java 16 support in Gradle</a> but in most cases you can already work with JDK 16 without waiting for official support.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_happy_path">The happy path</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gradle 7, which is due soon, will provide official support for Java 16.
+If you have an existing build that you want to try on Java 16, you can update the wrapper to use the latest Gradle 7.0 milestone release:</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle/wrapper/gradle-wrapper.properties</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-milestone-3-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you are lucky this is all you need to do.</p>
+</div>
+<div class="paragraph">
+<p>However, Gradle 7 is a major release, and as such it brings a number of changes which <em>may</em> break your build (deprecated methods being removed, or, in particular for the Java 16 support, upgrading to Groovy 3 internally).
+It may be a bit involved to migrate to Gradle 7 just to try Java 16.</p>
+</div>
+<div class="sect2">
+<h3 id="_decouple_the_java_version_used_for_gradle_itself_from_the_version_you_need">Decouple the Java version used for Gradle itself from the version you need!</h3>
+<div class="paragraph">
+<p>It&#8217;s actually better to <em>decouple the version of Java required to run Gradle</em> from the <em>version of Java your application requires</em>.
+In general, it&#8217;s actually considered the <strong>best practice</strong> to use whatever version of the JDK Gradle officially supports to run Gradle itself, and configure the build to <strong>use a different JDK</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_java_toolchains">Configuring Java toolchains</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In Gradle terminology, this is called activating <a href="https://docs.gradle.org/6.8.3/userguide/toolchains.html">Java Toolchains</a>.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s get started with a sample project running on latest stable Gradle, which is 6.8.3.
+Make sure that you have Gradle 6.8.3 on your PATH to get started.
+I&#8217;m personally recommending to use <a href="https://sdkman.io/">sdkman!</a> to install Gradle:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ sdk install gradle 6.8.3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At the same time, we want to make sure we run Gradle with a supported version, which is anything between Java 8 and 15:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ java -version
+java -version
+openjdk version "11.0.9.1" 2020-11-04
+OpenJDK Runtime Environment 18.9 (build 11.0.9.1+1)
+OpenJDK 64-Bit Server VM 18.9 (build 11.0.9.1+1, mixed mode)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If it outputs something else than 8 to 15, please make sure to update your PATH to point to such a JDK.
+Again you can do this with sdkman!:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ sdk install java 11.0.9.open</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_demo_application">Demo application</h3>
+<div class="paragraph">
+<p>Now, let&#8217;s create a sample Gradle project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ mkdir demo-app
+$ cd demo-app
+$ gradle init</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then select:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>Select type of project to generate:
+  1: basic
+  2: application
+  3: library
+  4: Gradle plugin
+Enter selection (default: basic) [1..4] 2
+
+Select implementation language:
+  1: C++
+  2: Groovy
+  3: Java
+  4: Kotlin
+  5: Scala
+  6: Swift
+Enter selection (default: Java) [1..6] 3
+
+Split functionality across multiple subprojects?:
+  1: no - only one application project
+  2: yes - application and library projects
+Enter selection (default: no - only one application project) [1..2] 1
+
+Select build script DSL:
+  1: Groovy
+  2: Kotlin
+Enter selection (default: Groovy) [1..2] 1
+
+Select test framework:
+  1: JUnit 4
+  2: TestNG
+  3: Spock
+  4: JUnit Jupiter
+Enter selection (default: JUnit 4) [1..4] 4
+
+Project name (default: demo-app):
+Source package (default: demo.app):</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and confirm the default name and packages.</p>
+</div>
+<div class="paragraph">
+<p>Then let&#8217;s run our app:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ ./gradlew run
+
+&gt; Task :app:run
+Hello World!
+
+BUILD SUCCESSFUL in 4s
+2 actionable tasks: 2 executed</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_migrating_the_application_to_java_16">Migrating the application to Java 16</h3>
+<div class="paragraph">
+<p>All good! Now let&#8217;s configure Gradle to use Java 16 to build and run our app instead.
+Let&#8217;s open the build script, found under <code>app</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">app/build.gradle</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
+    // Apply the application plugin to add support for building a CLI application in Java.
+    id 'application'
+}
+
+// Add this under the `plugins` section:
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>java.toolchain</code> block lets us configure the <em>toolchain</em> that Gradle is going to use to build and run your application.
+We&#8217;re setting 16, which means that we&#8217;re going to compile the main and test sources as well as execute the with a Java 16 JDK.
+Gradle will automatically try to find if you have a Java 16 installation in a conventional location.
+If it cannot find one you will see something like this happening:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Provisioning toolchain adoptopenjdk-16-x64-linux.tar.gz &gt; adoptopenjdk-16-x64-linux.tar.gz &gt; 66 MiB/195.8 MiB</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>which means that Gradle is downloading the JDK for you!</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s check:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">./gradlew run</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Dang!</strong> The <a href="https://scans.gradle.com/s/gogpwzdj5zf6q/console-log?anchor=14">build fails!</a>.
+To some extent, it&#8217;s good news, it means that Gradle is really using Java 16, but why is it failing?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disabling_incremental_compilation">Disabling incremental compilation</h3>
+<div class="paragraph">
+<p>Well, you&#8217;re facing one of the bugs we fixed in 7, which is that our <em>incremental compiler</em> isn&#8217;t compatible with Java 16 because we&#8217;re using classes which have been made "hidden" by the module system in Java 16.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s an easy fix: let&#8217;s disable incremental compilation!</p>
+</div>
+<div class="paragraph">
+<p>Again, let&#8217;s open our <code>app/build.gradle</code> file and add this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.withType(JavaCompile).configureEach {
+	// disable incremental compilation
+    options.incremental = false
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And let&#8217;s run the build again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">./gradlew run</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Yay! This time the <a href="https://scans.gradle.com/s/czapxbvfqxt72/console-log?anchor=7">build passed!</a>
+Congrats, you have your first Java 16 app running!</p>
+</div>
+<div class="paragraph">
+<p>Alternatively to disabling incremental compilation, you might just want to let Gradle access the JDK internals.
+This solution is better for performance, even if a bit "hackish":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>tasks.withType(JavaCompile).configureEach {
+    options.forkOptions.jvmArgs.addAll( ['--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'] )
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In case you want to use one of the experimental features that Java 16 provides, the setup I&#8217;ve described in a <a href="https://melix.github.io/blog/2020/06/java-feature-previews-gradle.html">previous post about Java Feature Previews</a> still hold and is a good follow-up to this post!</p>
+</div>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-java16';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Projects</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Projects</h1>
+	</div>
+
+	<p><em>06 March 2014</em></p>
+
+	<p><div class="paragraph">
+<p>My daily job is working on the <a href="https://gradle.org">Gradle build tool</a>. However, I also published several projects on <a href="https://github.com/melix?tab=repositories">GitHub</a> you might be interested in.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/melix/deck2pdf">deck2pdf</a> is a tool aimed at converting HTML5 slide decks to PDF. Some conference organizers or slide publication sites like <a href="http://www.parleys.com/">Parleys</a> only support PDF. Does it mean that you are condemned to use <em>OpenOffice</em>, <em>LibreOffice</em> or <em>PowerPoint</em>? Certainly not. Install <a href="https://github.com/melix/deck2pdf">deck2pdf</a> and you should be happy. It supports multiple HTML5 slideware, such as <a href="http://imakewebthings.com/deck.js/">deck.js</a>, <a href="http://lab.hakim.se/reveal-js">reveal.js</a>, <a href="http://bartaz.github.io/impress.js">impress.js</a>, <a href="https://github.com/paulrouget/dzslides">DZSlides</a>, <a href="http://flowtime-js.marcolago.com/">Flowtime.js</a>, <a href="http://code.google.com/p/html5slides/">Google html5slides</a> and <a href="https://github.com/briancavalier/slides">Slide Presentation Framework</a>.</p>
+</li>
+<li>
+<p><a href="https://github.com/melix/teamcity-groovy-buildstep">Groovy for TeamCity</a> is a plugin for <a href="http://www.jetbrains.com/teamcity/">TeamCity</a> which will let you write build steps in Groovy. We used it for the official <a href="http://ci.groovy-lang.org?guest=1">Groovy continuous integration server</a>.</p>
+</li>
+<li>
+<p><a href="https://github.com/melix/jlangdetect">JLangDetect</a> is a library for the JVM, aimed at language recognition. It includes a learner and pre-configured recognition profiles.</p>
+</li>
+<li>
+<p><a href="https://github.com/jbake-org/jbake-gradle-plugin">JBake plugin for Gradle</a> is a Gradle plugin which makes it very easy to render <a href="http://jbake.org">JBake</a> site directly from <a href="http://www.gradle.org">Gradle</a>. A full description of the process can be found in <a href="/blog/2014/02/hosting-jbake-github.html">this post</a>.</p>
+</li>
+<li>
+<p><a href="https://github.com/melix/groovy-bytecode-ast">A @Bytecode AST transformation for Groovy</a>. This one is an experiment I made, which allows writing bytecode directly in a Groovy method body. Not safe for work :-)</p>
+</li>
+<li>
+<p><a href="https://github.com/melix/asm-bytecode-intellij">An ASM bytecode plugin for IntelliJ</a>. This plugin adds a bytecode tool window to IntelliJ, with various options for viewing the bytecode of a Java class, including ASMified and Groovified.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And a lot more&#8230;&#8203; just take a look at my <a href="https://github.com/melix">GitHub profile</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you like my work, best reward is to tell me. Easiest way is to follow me on <a href="https://twitter.com/CedricChampeau">Twitter</a>.</p>
+</div></p>
+
+	<hr>
+
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

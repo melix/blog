@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,12 @@
 		<h1>FreeMarker for Groovy</h1>
 	</div>
 
-	<p><em>03 août 2007</em></p>
-	<p><em>Tags: </em>freemarker </em> groovy </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2007/08/03/freemarker_for_groovy.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2007/08/03/freemarker_for_groovy.html"></div>
-
+	<p><em>03 August 2007</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/freemarker.html">freemarker</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
@@ -72,7 +86,7 @@
 <h2 id="_freemarker_for_groovy">FreeMarker for Groovy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add &#8220;tags&#8221; or &#8220;plugins&#8221; to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a <a href="http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html">transform</a> for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :</p>
+<p>Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add <code>tags'' or </code>plugins'' to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a <a href="http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html">transform</a> for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :</p>
 </div>
 <div class="ulist">
 <ul>
@@ -107,8 +121,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form
-</code></pre>
+<pre class="prettyprint highlight"><code>&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -116,8 +129,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form
-</code></pre>
+<pre class="prettyprint highlight"><code>&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -125,14 +137,13 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.text.freemarker.IGroovyFreeMarkerPlugin
+<pre class="prettyprint highlight"><code>import groovy.text.freemarker.IGroovyFreeMarkerPlugin
 
 class urlencoder implements IGroovyFreeMarkerPlugin {
  String transform(Map params, String content) {
   URLEncoder.encode(content);
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -140,15 +151,14 @@ class urlencoder implements IGroovyFreeMarkerPlugin {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.text.freemarker.FreeMarkerTemplateEngine
+<pre class="prettyprint highlight"><code>import groovy.text.freemarker.FreeMarkerTemplateEngine
 
 def tpl = '''
 Hello, ${user.name}
 &lt;@groovy plugin="urlencoder" mode=user&gt;this is a test ${user.name}'''
 def engine = new FreeMarkerTemplateEngine("plugins")
 def binding = ["user" : ["name":"cedric"]]
-println engine.createTemplate(tpl).make(binding)
-</code></pre>
+println engine.createTemplate(tpl).make(binding)</code></pre>
 </div>
 </div>
 </div>
@@ -168,7 +178,7 @@ println engine.createTemplate(tpl).make(binding)
 <p>Plugin loader: there’s a default implementation which reads plugins from a directory. Feel free to implement the <em>IGroovyFreeMarkerPluginLoader</em> if you want more complex loaders</p>
 </li>
 <li>
-<p>Plugin parameters: if the &lt;@groovy&gt; tag content is not sufficient, you may add parameters to the transform, and use them in the plugin thanks to the params map. For example : &lt;@groovy plugin=&#8220;temperatureconvertor&#8221; source=&#8220;celcius&#8221; dest=&#8220;kelvin&#8221;&gt;112</p>
+<p>Plugin parameters: if the &lt;@groovy&gt; tag content is not sufficient, you may add parameters to the transform, and use them in the plugin thanks to the params map. For example : &lt;@groovy plugin=<code>temperatureconvertor'' source=</code>celcius'' dest=``kelvin''&gt;112</p>
 </li>
 </ul>
 </div>
@@ -195,6 +205,8 @@ println engine.createTemplate(tpl).make(binding)
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -219,7 +231,7 @@ println engine.createTemplate(tpl).make(binding)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -260,6 +272,5 @@ println engine.createTemplate(tpl).make(binding)
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

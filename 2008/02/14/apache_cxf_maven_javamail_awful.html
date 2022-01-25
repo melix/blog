@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,15 +69,21 @@
 		<h1>Apache CXF + Maven + Javamail + Log4J (update)</h1>
 	</div>
 
-	<p><em>14 février 2008</em></p>
-	<p><em>Tags: </em>apache </em> commons </em> cxf </em> email </em> javamail </em> maven </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2008/02/14/apache_cxf_maven_javamail_awful.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2008/02/14/apache_cxf_maven_javamail_awful.html"></div>
-
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><em>14 February 2008</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/apache.html">apache</a> 
+	</em>
+		<a href="/blog/tags/commons.html">commons</a> 
+	</em>
+		<a href="/blog/tags/cxf.html">cxf</a> 
+	</em>
+		<a href="/blog/tags/email.html">email</a> 
+	</em>
+		<a href="/blog/tags/javamail.html">javamail</a> 
+	</em>
+		<a href="/blog/tags/maven.html">maven</a> 
+	</p>
+	<p><div class="paragraph">
 <p>I had much trouble trying to figure out why a project we moved to Apache CXF (for managing web services) suddenly started to send malformed emails. Basically, we use Commons email for sending emails to the administrator whenever a monitored service goes wrong.</p>
 </div>
 <div class="paragraph">
@@ -74,9 +94,8 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>DATA
-From: "I am the sender"
-</code></pre>
+<pre class="prettyprint highlight"><code>DATA
+From: "I am the sender"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -84,9 +103,8 @@ From: "I am the sender"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>DATA
-the content of my mail
-</code></pre>
+<pre class="prettyprint highlight"><code>DATA
+the content of my mail</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -97,8 +115,7 @@ the content of my mail
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>
-   org.apache.cxf
+<pre class="prettyprint highlight"><code>   org.apache.cxf
    cxf-rt-core
    ${cxf.version}
 
@@ -128,11 +145,7 @@ the content of my mail
 
 
      org.apache.geronimo.specs
-     geronimo-activation_1.1_spec
-
-
-
-</code></pre>
+     geronimo-activation_1.1_spec</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -140,12 +153,9 @@ the content of my mail
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>
-   javax.mail
+<pre class="prettyprint highlight"><code>   javax.mail
    mail
-   1.4
-
-</code></pre>
+   1.4</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -155,10 +165,10 @@ the content of my mail
 <p>To the Maven team : <strong>please add the global exclude feature so that we won’t have to specify excludes on each dependency !</strong></p>
 </div>
 <div class="paragraph">
-<p><strong>Update:</strong> After filing a bug report on Geronimo, I’ve made further investigations. The problem is more complex than I first thought : if there were only the Geronimo dependencies, I would not have had the same error. Instead, I would have got a message telling me that it could not find the &#8220;SMTP transport&#8221;. I figured out that the problem was our log4j dependency, which depends on javax.mail. The Geronimo Spec mail API does not implement the SMTP transport : it is implemented in a separated artifact. So the SMTP transport that was used in my case what the one in the Javamail transitive dependency from log4j. The problem that seems to arise is that Geronimo is not compatible with the transport layer from Javamail : if you just order the classpath differently, all goes fine. It all depends on the library which is first loaded…</p>
-</div>
-</div>
+<p><strong>Update:</strong> After filing a bug report on Geronimo, I’ve made further investigations. The problem is more complex than I first thought : if there were only the Geronimo dependencies, I would not have had the same error. Instead, I would have got a message telling me that it could not find the ``SMTP transport''. I figured out that the problem was our log4j dependency, which depends on javax.mail. The Geronimo Spec mail API does not implement the SMTP transport : it is implemented in a separated artifact. So the SMTP transport that was used in my case what the one in the Javamail transitive dependency from log4j. The problem that seems to arise is that Geronimo is not compatible with the transport layer from Javamail : if you just order the classpath differently, all goes fine. It all depends on the library which is first loaded…</p>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -183,7 +193,7 @@ the content of my mail
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -224,6 +234,5 @@ the content of my mail
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

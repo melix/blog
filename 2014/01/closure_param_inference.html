@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,16 @@
 		<h1>Closure parameter type inference for Groovy</h1>
 	</div>
 
-	<p><em>07 janvier 2014</em></p>
-	<p><em>Tags: </em>groovy </em> closure </em> type checking </em> inference </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2014/01/closure_param_inference.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2014/01/closure_param_inference.html"></div>
-
+	<p><em>07 January 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/closure.html">closure</a> 
+	</em>
+		<a href="/blog/tags/type-checking.html">type checking</a> 
+	</em>
+		<a href="/blog/tags/inference.html">inference</a> 
+	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
@@ -77,7 +95,7 @@ Before we start, let me wish you a happy new year and a lot of open source contr
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>void test() {
+<pre class="prettyprint highlight"><code data-lang="groovy">void test() {
     assert ['foo','bar','baz'].collect { it.toUpperCase() } == ['FOO','BAR','BAZ']
 }
 test()</code></pre>
@@ -88,7 +106,7 @@ test()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.transform.TypeChecked
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.TypeChecked
 
 @TypeChecked
 void test() {
@@ -111,7 +129,7 @@ test()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.transform.TypeChecked
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.TypeChecked
 
 @TypeChecked
 void test() {
@@ -128,7 +146,7 @@ this, let&#8217;s compare the signatures of <em>collect</em> (in Groovy) and <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -140,7 +158,7 @@ this, let&#8217;s compare the signatures of <em>collect</em> (in Groovy) and <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T, ? extends R&gt; mapper); <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T, ? extends R&gt; mapper); <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -155,7 +173,7 @@ this, let&#8217;s compare the signatures of <em>collect</em> (in Groovy) and <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>list.stream().map((it)-&gt;it.toUpperCase()).collect(Collectors.toList()); <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">list.stream().map((it)-&gt;it.toUpperCase()).collect(Collectors.toList()); <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -177,19 +195,19 @@ we don&#8217;t do the same as in Java, and there are several reasons:</p>
 <p>historical reason first, <code>Closure</code> was one of the key features of the language, 10 years ago!</p>
 </li>
 <li>
-<p>a single class, <code>Closure</code>, is enough for <strong>all</strong> usages of an open block. We don&#8217;t need Function, Consumer, BiFunction, &#8230; So we can dramatically
+<p>a single class, <code>Closure</code>, is enough for <strong>all</strong> usages of an open block. We don&#8217;t need Function, Consumer, BiFunction, &#8230;&#8203; So we can dramatically
 reduce the amount of "design interfaces"</p>
 </li>
 <li>
 <p>last but not least, <em>Closures</em> support various delegation strategies. This is something Java (or even Scala) is totally unable to do. <code>Closure</code> can
-be <em>cloned</em>, <em>curried</em>, <em>trampolined</em>, &#8230; and it always returns an instance of another <code>Closure</code>. This closure can change the delegate, which is the
+be <em>cloned</em>, <em>curried</em>, <em>trampolined</em>, &#8230;&#8203; and it always returns an instance of another <code>Closure</code>. This closure can change the delegate, which is the
 key for nice builder like DSLs. The delegate is used whenever a method call in a closure doesn&#8217;t have an explicit receiver. For example:</p>
 </li>
 </ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>mail {
+<pre class="prettyprint highlight"><code data-lang="groovy">mail {
    from 'austin.powers@groovy.baby'
    to 'mini.me@evil.com'
    subject 'Attention please!'
@@ -203,7 +221,7 @@ key for nice builder like DSLs. The delegate is used whenever a method call in a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class EmailSpecification {
+<pre class="prettyprint highlight"><code data-lang="groovy">class EmailSpecification {
     void from(String sender) { ... }
     void to(String to) { ... }
     void subject(String subject) { ... }
@@ -222,7 +240,7 @@ system (which is the same), isn&#8217;t expressive enough to let you define them
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -237,7 +255,7 @@ system (which is the same), isn&#8217;t expressive enough to let you define them
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure1&lt;T,U&gt; closure) <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure1&lt;T,U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -270,10 +288,10 @@ system (which is the same), isn&#8217;t expressive enough to let you define them
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def map = [key1: 'value 1', key2: 'value2']
-map.each { k,v -&gt; println "Key is $k, value is $v" } <b>(1)</b>
-map.each { e -&gt; println "Key is ${e.key], value is ${e.value}" } <b>(2)</b>
-map.each { println "Key is ${it.key], value is ${it.value}" } <b>(3)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def map = [key1: 'value 1', key2: 'value2']
+map.each { k,v -&gt; println "Key is $k, value is $v" } <b class="conum">(1)</b>
+map.each { e -&gt; println "Key is ${e.key], value is ${e.value}" } <b class="conum">(2)</b>
+map.each { println "Key is ${it.key], value is ${it.value}" } <b class="conum">(3)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -294,7 +312,7 @@ map.each { println "Key is ${it.key], value is ${it.value}" } <b>(3)</b></code><
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;K,V&gt; each(Map&lt;K,V&gt; self, Closure&lt;?&gt; onEachEntry)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;K,V&gt; each(Map&lt;K,V&gt; self, Closure&lt;?&gt; onEachEntry)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -307,7 +325,7 @@ exactly why the compiler fails, and also why so many people think it&#8217;s <a 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;Dead,Pool&gt; magneto(Map&lt;Dead,Pool&gt; self, Closure&lt;?&gt; professorX)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;Dead,Pool&gt; magneto(Map&lt;Dead,Pool&gt; self, Closure&lt;?&gt; professorX)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -333,7 +351,7 @@ accepting a closure, a simple annotation could do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -341,7 +359,7 @@ accepting a closure, a simple annotation could do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>doSomething {
+<pre class="prettyprint highlight"><code data-lang="groovy">doSomething {
    it.toUpperCase()
 }</code></pre>
 </div>
@@ -365,14 +383,14 @@ additional lookup on the <em>doSomething</em> signature can be done, and we can 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_introducing_generics">Introducing&#8230; generics!</h3>
+<h3 id="_introducing_generics">Introducing&#8230;&#8203; generics!</h3>
 <div class="paragraph">
 <p>To make things a bit more complicated, we have generics. Don&#8217;t get me wrong. From a user perspective, generics are very good because they make the code more readable
-and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5&#8230;). The typical case is the <em>collect</em> example that we used initially:</p>
+and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5&#8230;&#8203;). The typical case is the <em>collect</em> example that we used initially:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -389,11 +407,11 @@ and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5
 </ul>
 </div>
 <div class="paragraph">
-<p>and the problem is&#8230; how to express this? One might think that you could write:</p>
+<p>and the problem is&#8230;&#8203; how to express this? One might think that you could write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, @ClosureParams(T) Closure&lt;U&gt; closure) <b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, @ClosureParams(T) Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -411,7 +429,7 @@ which is used as a hint to compute the types <strong>at compile time</strong>. I
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static &lt;T,E&gt; List&lt;T&gt; collect(List&lt;E&gt; self, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T,E&gt; List&lt;T&gt; collect(List&lt;E&gt; self, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -433,7 +451,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -447,7 +465,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static &lt;T,E&gt; Collection&lt;T&gt; collect(Collection&lt;E&gt; self, Collection&lt;T&gt; collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T,E&gt; Collection&lt;T&gt; collect(Collection&lt;E&gt; self, Collection&lt;T&gt; collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -455,7 +473,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class PersonList extends LinkedList&lt;Person&gt; {}</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">class PersonList extends LinkedList&lt;Person&gt; {}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -463,7 +481,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>list.collect { it.name }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">list.collect { it.name }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -480,7 +498,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static &lt;K, V&gt; Map&lt;K, V&gt; each(Map&lt;K, V&gt; self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;K, V&gt; Map&lt;K, V&gt; each(Map&lt;K, V&gt; self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -494,7 +512,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options="byte") Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options="byte") Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -502,7 +520,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options="java.lang.String") Closure predicate)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options="java.lang.String") Closure predicate)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -510,7 +528,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static &lt;T&gt; T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={"java.io.ObjectInputStream","java.io.ObjectOutputStream"}) Closure&lt;T&gt; closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T&gt; T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={"java.io.ObjectInputStream","java.io.ObjectOutputStream"}) Closure&lt;T&gt; closure)</code></pre>
 </div>
 </div>
 </div>
@@ -522,7 +540,7 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, @ClosureParams(value=FromString.class, options={"T","T,T"} Closure c)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, @ClosureParams(value=FromString.class, options={"T","T,T"} Closure c)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -540,7 +558,7 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, Closure&lt;T or T,T -&gt; ?&gt; c)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, Closure&lt;T or T,T -&gt; ?&gt; c)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -567,6 +585,8 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -591,7 +611,7 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -632,6 +652,5 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

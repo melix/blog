@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,20 +69,24 @@
 		<h1>Groovy Xmas gift : converting a number to its french writing</h1>
 	</div>
 
-	<p><em>23 décembre 2010</em></p>
-	<p><em>Tags: </em>french </em> fun </em> groovy </em> numbers </em> programming </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2010/12/23/groovy_xmas_gift_converting_a.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2010/12/23/groovy_xmas_gift_converting_a.html"></div>
-
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><em>23 December 2010</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/french.html">french</a> 
+	</em>
+		<a href="/blog/tags/fun.html">fun</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/numbers.html">numbers</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</p>
+	<p><div class="paragraph">
 <p>If you ever studied French, you must have struggled with its writing of numbers. There are various exceptions which even for natives are not easy to deal with. Fortunately, here’s a Groovy script that will help you. Okay, I did this because I remembered about a similar exercise I had several years ago in Caml I solved using pattern matching. I was thinking about a solution in Groovy. Here’s the result :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>/**
+<pre class="prettyprint highlight"><code>/**
  * Convertit un nombre en lettres.
  * Les règles d'écriture sont celles décrites sur http://www.miakinen.net/vrac/nombres
  *
@@ -102,12 +120,11 @@ asLetters = { number -&gt;
 1001,1011,2000,2011,-2100,2101,2222,2999,12000,12101,54122,
 80000,122000,999999,154322,1154322,13154399,177412666451
 ,100000000,10000000001,200001,80000000,80000001,80000000000,80000000001,300000,
-82015, 200000,200000000].each { println "$it : ${asLetters(it)}"}
-</code></pre>
+82015, 200000,200000000].each { println "$it : ${asLetters(it)}"}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><em>Edit: Fixed &#8220;80&#8221; written &#8220;quatre-vingt&#8221;. Sorry about the inline indenter, but copy/paste it and you’ll have a better rendering or <a href="http://groovyconsole.appspot.com/script/362001">check this</a></em></p>
+<p><em>Edit: Fixed <code>80'' written </code>quatre-vingt''. Sorry about the inline indenter, but copy/paste it and you’ll have a better rendering or <a href="http://groovyconsole.appspot.com/script/362001">check this</a></em></p>
 </div>
 <div class="paragraph">
 <p>The next step would be to make it even more groovy. But it showed me Groovy misses some interesting features of Caml : pattern matching is interesting as it deals with multiple left hand side patterns, where closures only allow one signature with a single parameter. Here, I used indenting and over-used the ternary operator to emulate this behaviour.</p>
@@ -117,18 +134,17 @@ asLetters = { number -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def asLetters = { (..&lt;0) -&gt; "moins ${asLetters(-it}"
+<pre class="prettyprint highlight"><code>def asLetters = { (..&lt;0) -&gt; "moins ${asLetters(-it}"
  | (0..10) -&gt; digits[it]
  | it&lt;17 -&gt; specials[number-10]
- | ...
-</code></pre>
+ | ...</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>What do you think ? Would it be more readable ?</p>
-</div>
-</div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -153,7 +169,7 @@ asLetters = { number -&gt;
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -194,6 +210,5 @@ asLetters = { number -&gt;
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

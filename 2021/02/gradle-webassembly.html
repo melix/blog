@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Gradle + WebAssembly</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Gradle + WebAssembly</h1>
+	</div>
+
+	<p><em>21 February 2021</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/webassembly.html">webassembly</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A couple weeks ago, I listened to an <a href="https://medium.com/electro-monkeys/64-la-face-cach%C3%A9e-de-webassembly-avec-geoffroy-couprie-et-ivan-enderline-bd20e5482893">interview (in French)</a> of <a href="https://twitter.com/gcouprie">Geoffroy Couprie</a> and <a href="https://twitter.com/mnt_io">Ivan Enderlin</a> who gave a very nice overview of what WebAssembly is and what it&#8217;s good for.
+To be honest it wasn&#8217;t clear to me what the advantages of WebAssembly were, compared to a good old JVM: all in all, both are virtual machines, and both promise the same thing, that is to say write once run everywhere.
+Also, in my mind, WebAssembly was some kind of restricted version of JavaScript like <a href="https://en.wikipedia.org/wiki/Asm.js">asm.js</a>.
+I was wrong: it&#8217;s more than that.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_webassembly">Why WebAssembly?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the aspects which were discussed during this interview was basically sandboxing: with WebAssembly, it&#8217;s the responsibility of the embedder to give access, for example, to I/O to the wasm program. In practice, it means that wasm binaries are by default very restricted.
+In fact, by design, they are restricted to pure computations, which makes them very suitable for isolation of work.
+Extensions from embedders are responsible for giving access to the host resources (for example the GPU, or the file system).</p>
+</div>
+<div class="paragraph">
+<p>Another promise of WebAssembly is running at close-to-native speeds.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, a crazy idea came to me: what if I could use a wasm binary as a task implemention in Gradle?
+This, for example, would let us use whatever language compiling to WASM as an implementation language for Gradle tasks. <em>mmmmmmm</em></p>
+</div>
+<div class="paragraph">
+<p>The result of this experience is available at <a href="https://github.com/melix/gradle-wasm-plugin">this repository</a>.
+The results are quite promising.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_isolating_task_inputs_from_the_task_execution">Isolating task inputs from the task execution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a nutshell, a Gradle task can be seen as a function which takes a number of inputs and returns a value.
+Cacheability is derived from the "pureness" of the function: for the same inputs, the output should be the same.</p>
+</div>
+<div class="paragraph">
+<p>This makes it very suitable to the WebAssembly model where functions are exported to an embedder.</p>
+</div>
+<div class="paragraph">
+<p>In reality, it&#8217;s more complicated: Gradle tasks most likely use files as inputs, and also produce files.
+This means that the WebAssembly runtime would need to provide I/O access for this to be really useful.</p>
+</div>
+<div class="paragraph">
+<p>After some support from <a href="https://twitter.com/mnt_io">Ivan Enderlin</a>, I quickly figured out that it would be difficult to make file access work, so I simplified the problem.
+In the prototype, my WASM tasks are not able to produce a file output and are limited to simply display the execution result on the console.</p>
+</div>
+<div class="paragraph">
+<p>For tasks which actually have files as inputs, I&#8217;m reading the file contents from Java code into byte arrays which are "propagated" to the WASM runtime memory.
+This means, effectively, that the WASM functions I played with don&#8217;t have any kind of access to the file system and remain pure functions.</p>
+</div>
+<div class="paragraph">
+<p>With those limitations in mind, here&#8217;s what I came up with.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_declaring_the_task_io_protocol">Declaring the task I/O protocol</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gradle is evolving fast and nowadays the idiomatic way to declare inputs and outputs of a task is to use the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">lazy configuration API</a>.
+However, this isn&#8217;t enforced and nobody prevents you from writing tasks which do not use this API.
+As an implementor of a new integration mechanism, I can set the rules and actually restrict the scope to tasks which use this API, which has a number of advantages.</p>
+</div>
+<div class="paragraph">
+<p>Say that we want to write a task which computes the sum of two integers.
+With the lazy configuration API, you need two "properties" corresponding to the input numbers:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">abstract class MyTask extends DefaultTask {
+   abstract Property&lt;Integer&gt; getX(); // implementation is generated by Gradle
+   abstract Property&lt;Integer&gt; getY();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The actual value is "lazy" in the sense that it can be set via a plugin, overriden in a build script, mapped from another property, etc.
+For example, that the value of the <code>x</code> property can be computed from the output of another task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">x.set(myOtherTask.outputFile.map { ... }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The advantage of this is that Gradle can track the inputs and outputs of tasks for you and that you don&#8217;t have to declare any explicit dependency between tasks, making the build less brittle.</p>
+</div>
+<div class="paragraph">
+<p>However, once you&#8217;re about to <em>execute</em> a task, you don&#8217;t really care about the <code>Property&lt;&#8230;&#8203;&gt;</code> wrappers anymore: what matters are the actual values, that you can <code>get()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>int x = getX().get();
+int y = getY().get();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This often leads to some boilerplate code in task implementations.
+In our case, the <code>x</code> and <code>y</code> integers are actually the only thing we care about to call our WASM function: we don&#8217;t need to pass the richer <code>Provider</code> type to the functions.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s imagine that we have this function written in Rust:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="rust">#[no_mangle]
+pub extern fn sum(x: i32, y: i32) -&gt; i32 {
+    x + y
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can see that the inputs of this function are integers and that it returns another integer: it&#8217;s that simple.</p>
+</div>
+<div class="paragraph">
+<p>So, what if we could actually simplify the implementation of the Gradle task itself?
+With all this in mind, I decided to prototype an annotation processor which would generate the boilerplate code for me.</p>
+</div>
+<div class="paragraph">
+<p>To transform the Rust function above into a full Gradle task, <a href="https://github.com/melix/gradle-wasm-plugin/blob/main/plugin/src/main/java/me/champeau/gradle/wasm/auto/SumIO.java">all I have to write</a> is a declaration of what I call its I/O protocol:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">@WasmProtocol(
+        taskName = "Sum",
+        classpathBinary = "demo_lib",
+        functionName = "sum"
+)
+public interface SumIO {
+    @Input
+    Property&lt;Integer&gt; getX();
+
+    @Input
+    Property&lt;Integer&gt; getY();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will generate a task of type <code>Sum</code>, which will use a wasm binary found on classpath named <code>demo_lib</code>, and use the function <code>sum</code> from that binary as the task implementation.
+That&#8217;s it!</p>
+</div>
+<div class="paragraph">
+<p>Note that this protocol isn&#8217;t declaring any output: that&#8217;s a limitation of the prototype right now, which is inherently caused by this whole "Gradle tasks are mostly generating files" problem.
+But we don&#8217;t really care for now.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_more_realistic_example">A more realistic example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For my tests, I used 3 different functions: this <code>sum</code> function, a <code>fib</code> function (the Fibonacci suite function) and I wanted to try something more complicated like computing an md5 hash.</p>
+</div>
+<div class="paragraph">
+<p>This, for example, is how I would define the protocol for the MD5 hashing function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">public interface HasherIO {
+    @InputFile
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    RegularFileProperty getInputFile();
+
+    @OutputFile
+    RegularFileProperty getOutputFile();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Except that in this case, because the input is a file, I couldn&#8217;t use my code annotation processor code generator yet (but it&#8217;s planned).
+Instead I wrote code to read the file manually, allocate WebAssembly memory buffers, in order to call the function which is implemented in Rust:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="rust">#[no_mangle]
+pub extern fn process(bytes: *const u8, len: usize) -&gt; *const c_void {
+    let data: &amp;[u8] = unsafe { std::slice::from_raw_parts(bytes, len) };
+    let mut hasher = Md5::new();
+    hasher.update(data);
+    let result = hasher.finalize_fixed();
+    let pointer = result
+        .to_vec()
+        .as_ptr();
+    mem::forget(pointer);
+
+    pointer as *const c_void
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then all I need is to use this task in a build script. Let&#8217;s see how it performs&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_webassembly_runtimes">The WebAssembly runtimes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I wrote 2 different implementations of the WASM integration runtime: the first one was pretty straightforward to write and makes use of <a href="https://github.com/wasmerio/wasmer-java">wasmer-java</a>.
+The second one took me significantly more time to implement and is using <a href="https://www.graalvm.org/">GraalVM</a>.</p>
+</div>
+<div class="paragraph">
+<p>Integrating <a href="https://github.com/wasmerio/wasmer-java">Wasmer</a> was easy for different reasons:
+1. it&#8217;s just a library which you have to add to your classpath
+2. it&#8217;s relatively well documented</p>
+</div>
+<div class="paragraph">
+<p>GraalVM was more complicated because:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>you actually need to run your program <em>on</em> GraalVM</p>
+</li>
+<li>
+<p>you need to install the WASM support separately (it&#8217;s not downloadable as a regular Maven dependency, for example)</p>
+</li>
+<li>
+<p>you still need to add the GraalVM polyglot API on classpath</p>
+</li>
+<li>
+<p>it&#8217;s poorly documented at this stage (in particular, there&#8217;s no documentation whatsoever on how to share memory between the Java host and the WASM guest)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Anyway, I think (but I haven&#8217;t done it yet) that the GraalVM runtime will be easier to support I/O since it already offers the configuration options to let the WASM host access the host file system.
+Wasmer doesn&#8217;t support I/O yet.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s talk about performance, now.
+Disclaimer: this isn&#8217;t proper benchmarking. The results you will see were obtained via functional testing of a plugin. There&#8217;s a lot of variance, but they were reproducible.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_measuring_the_wasmer_runtime">Measuring the wasmer runtime</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In short, the wasmer runtime is very promising: it&#8217;s easy to setup and actually performs extremely well.
+The API is not very Java friendly, but the <a href="https://github.com/melix/gradle-wasm-plugin/tree/main/wasm-invoker">abstraction layer I wrote (which supports both wasmer and GraalVM)</a> makes it significanly easier.</p>
+</div>
+<div class="paragraph">
+<p>Here are some results for a memoized Fibonacci, which compares a version I wrote in Java vs the one I wrote in Rust:</p>
+</div>
+<div class="listingblock">
+<div class="title">Memoized Fibonacci on wasmer</div>
+<div class="content">
+<pre>Java fib(90) = 2880067194370816120
+Took 3ms
+Precompiled Rust fib(90) = 2880067194370816120
+Took 366μs</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The WASM version compiled from Rust is already faster than the Java version!</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see how it performs when hashing a MD5 file (remember that for this use case, I&#8217;m actually passing a <em>byte array</em> to the WASM program, not a file):</p>
+</div>
+<div class="listingblock">
+<div class="title">Hashing a 4MB file on wasmer</div>
+<div class="content">
+<pre>hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
+Took 64ms
+hash from Rust is 49DFDCEF6751973A236D35401B6CBFC8
+Took 58ms</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again, the WASM version is still faster!</p>
+</div>
+<div class="paragraph">
+<p>On both operations, the WASM binary performs better than the pure Java version. However, there&#8217;s a catch: in order to reach that level of performance, the WASM binary has to be precompiled to a native binary by wasmer.
+This, already takes time. If you include this in the whole picture, the numbers are different: 36ms for Fibonacci (compared to 3ms in Java, 10x slower).
+However, this is in practice not a big deal since those binaries can actually be cached, meaning that if we have to call them multiple times, or from different builds, we can actually fetch them from the cache.</p>
+</div>
+<div class="paragraph">
+<p>All in all, it means that the wasmer runtime is very fast and integrates quite well with Java.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_measuring_the_graalvm_runtime">Measuring the GraalVM runtime</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://docs.oracle.com/en/graalvm/enterprise/20/docs/reference-manual/wasm/">WebAssembly support for GraalVM</a> is still experimental.
+However, it has the advantage of taking advantage of the Truffle API, which promises better integration between languages and, eventually, better performance.</p>
+</div>
+<div class="paragraph">
+<p>In my case, that wasn&#8217;t quite true. Again as usual don&#8217;t trust benchmarks, but here are the numbers:</p>
+</div>
+<div class="listingblock">
+<div class="title">Memoized Fibonacci on wasmer</div>
+<div class="content">
+<pre>Java fib(90) = 2880067194370816120
+Took 3ms
+Precompiled Rust fib(90) = 2880067194370816120
+Took 21ms</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This time, the WASM code is significantly slower. The explanation is probably that contrary to the wasmer runtime, the WASM binary has to be parsed and transformed into a model that the Truffle API can understand, and as far as I could tell, this is not cacheable. However, this isn&#8217;t the only explanation, as we can see with the hash example:</p>
+</div>
+<div class="listingblock">
+<div class="title">Hashing a 4MB file on GraalVM</div>
+<div class="content">
+<pre>hash from Java is 49DFDCEF6751973A236D35401B6CBFC8
+Took 57ms
+hash from Rust is 49DFDCEF6751973A236D35401B6CBFC8
+Took 407ms</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again we can see that the performance is significantly worse with GraalVM.
+I must again say that maybe I&#8217;m not using the API properly.
+In particular, I have found no better way to pass the <code>byte[]</code> to the WASM memory model other than <a href="https://github.com/melix/gradle-wasm-plugin/blob/main/wasm-invoker/src/main/java/me/champeau/wasm/invocation/internal/GraalVMInvoker.java#L99-L103">byte by byte!</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_weve_learnt">What we&#8217;ve learnt</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this blog post, we&#8217;ve seen that we can use a wasm binary in Gradle as the implementation of a task.
+This binary can be written in any language which supports compiling to WebAssembly.
+In my [test project], I have written tasks in 2 different languages: <a href="https://www.rust-lang.org/">Rust</a> and <a href="https://github.com/AssemblyScript/assemblyscript">AssemblyScript</a>.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve seen that we can integrate WASM binaries using 2 different "runtimes":</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/wasmerio/wasmer-java">Wasmer</a>, which is using JNI and compiles, as far as I understand, WebAssembly binaries to native code</p>
+</li>
+<li>
+<p><a href="https://www.graalvm.org/">GraalVM</a>, which is a different Java Virtual Machine, which usually performs extremely well with Java, and provides a <a href="https://www.graalvm.org/reference-manual/polyglot-programming/">Polyglot runtime</a> leveraging the <a href="https://www.graalvm.org/graalvm-as-a-platform/language-implementation-framework/">Truffle API</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As of today, the Wasmer version performs significantly better and WASM functions can be executed even faster than Java code!
+The GraalVM version is still experimental and performs quite poorly compared to using native Java code. It&#8217;s also more painful to test because it&#8217;s not enough to install GraalVM: you also have to install components separately, which is not build friendly, nor CI friendly.</p>
+</div>
+<div class="paragraph">
+<p>The next step for me is to try to integrate more directly with the file system: at the current stage, none of the approaches is suitable for Gradle as we need to read and write files.</p>
+</div>
+<div class="paragraph">
+<p>Also, one has to keep in mind that it&#8217;s pretty rare that you&#8217;d like to integrate in a build arbitrary code like this: in general, you want to call external tools (<code>javac</code>, <code>gcc</code>, &#8230;&#8203;).
+Nevertheless, this experiment is quite fun and I&#8217;m going to experiment more with this annotation processing API, which, I think, would be valuable in any case.</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-webassembly';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

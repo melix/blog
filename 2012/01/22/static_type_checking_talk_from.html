@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,12 +69,18 @@
 		<h1>Static type checking talk from Paris Groovy/Grails User Group</h1>
 	</div>
 
-	<p><em>22 janvier 2012</em></p>
-	<p><em>Tags: </em>checking </em> groovy </em> programming </em> static </em> type </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2012/01/22/static_type_checking_talk_from.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2012/01/22/static_type_checking_talk_from.html"></div>
-
+	<p><em>22 January 2012</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/checking.html">checking</a> 
+	</em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/programming.html">programming</a> 
+	</em>
+		<a href="/blog/tags/static.html">static</a> 
+	</em>
+		<a href="/blog/tags/type.html">type</a> 
+	</p>
 	<p><div class="sect1">
 <h2 id="_static_type_checking_and_compilation_in_groovy_2_0">Static type checking and compilation in Groovy 2.0</h2>
 <div class="sectionbody">
@@ -84,10 +104,10 @@
 <p>Java-like method dispatch, which has the main interest of being known of most people (at least, people who faced the problem once). This solution however has major drawbacks. In particular, it removes most of the interest of the flow typing mode, and requires extra verbosity which is the opposite of the Groovy philosophy.</p>
 </li>
 <li>
-<p>Dynamic-Groovy like method dispatch. Typically, this is wanted to avoid a &#8220;third language&#8221; (not Java, nor Groovy), and this is were you want a statically compiled Groovy program to behave at runtime like dynamic Groovy does. While this sounds interesting, it also has major problems. The first one is performance, which would be awful because we would have to introduce tons of &#8220;instanceof&#8221; checks at compile time to correctly dispatch methods. More complicated, this &#8220;instanceof cascade&#8221; would generate unreadable bytecode (think of parameter combinations) which would also be a major performance issue for CPUs (which, as Rémi said during the session, really do not like branching). Even worse, this wouldn’t work anymore if you subclass the statically compiled class because the new overloaded methods wouldn’t be known from the compiler. This is why I consider this solution the worse of all, though I understand people who want it. Last but not least, Groovy 2.0 will introduce <strong>InvokeDynamic</strong> support which should greatly improve performance of dynamic Groovy without loosing its semantics.</p>
+<p>Dynamic-Groovy like method dispatch. Typically, this is wanted to avoid a <code>third language'' (not Java, nor Groovy), and this is were you want a statically compiled Groovy program to behave at runtime like dynamic Groovy does. While this sounds interesting, it also has major problems. The first one is performance, which would be awful because we would have to introduce tons of </code>instanceof'' checks at compile time to correctly dispatch methods. More complicated, this ``instanceof cascade'' would generate unreadable bytecode (think of parameter combinations) which would also be a major performance issue for CPUs (which, as Rémi said during the session, really do not like branching). Even worse, this wouldn’t work anymore if you subclass the statically compiled class because the new overloaded methods wouldn’t be known from the compiler. This is why I consider this solution the worse of all, though I understand people who want it. Last but not least, Groovy 2.0 will introduce <strong>InvokeDynamic</strong> support which should greatly improve performance of dynamic Groovy without loosing its semantics.</p>
 </li>
 <li>
-<p>The third solution I presented is the one currently implemented in the experimental compiler: inference based method dispatch. This definitely creates a third language in terms of dispatch semantics, but as the developer explicitly adds an annotation, he should be aware of the differences (which only occur when you have overloaded methods). Inference based dispatch also has the advantage of being &#8220;flow typing&#8221; compatible, and removes a lot of verbosity. It has my preference, which explains why this is what is implemented right now.</p>
+<p>The third solution I presented is the one currently implemented in the experimental compiler: inference based method dispatch. This definitely creates a third language in terms of dispatch semantics, but as the developer explicitly adds an annotation, he should be aware of the differences (which only occur when you have overloaded methods). Inference based dispatch also has the advantage of being ``flow typing'' compatible, and removes a lot of verbosity. It has my preference, which explains why this is what is implemented right now.</p>
 </li>
 </ul>
 </div>
@@ -118,6 +138,8 @@
 </div>
 </div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -142,7 +164,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -183,6 +205,5 @@
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

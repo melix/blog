@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: A fast markup template engine for Groovy (part 2 of 2)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>A fast markup template engine for Groovy (part 2 of 2)</h1>
+	</div>
+
+	<p><em>18 February 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/template.html">template</a> 
+	</em>
+		<a href="/blog/tags/freemarker.html">freemarker</a> 
+	</em>
+		<a href="/blog/tags/markupbuilder.html">markupbuilder</a> 
+	</em>
+		<a href="/blog/tags/html.html">html</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this post, I will discuss the implementations details for the markup template engine I have described in a <a href="/blog/2014/02/markuptemplateengine.html">previous post</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_compiling_templates">Compiling templates</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_the_markuptemplateengine_class">The MarkupTemplateEngine class</h3>
+<div class="paragraph">
+<p>Even if my first implementation of the markup template engine was relying on <code>StreamingMarkupBuilder</code>, the technique used to compile templates into bytecode is actually the same after all optimizations. It relies on:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a <a href="http://groovy.codehaus.org/api/groovy/lang/GroovyClassLoader.html">GroovyClassLoader</a> to create and cache template classes</p>
+</li>
+<li>
+<p>a <a href="http://groovy.codehaus.org/api/org/codehaus/groovy/control/CompilerConfiguration.html">CompilerConfiguration</a> to customize compilation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The various template engines that Groovy provide extend the <a href="http://groovy.codehaus.org/api/groovy/text/TemplateEngine.html">TemplateEngine</a> class. All template engines must implement the <code>createTemplate</code> method which returns an instance of <a href="http://groovy.codehaus.org/api/groovy/text/Template.html">Template</a>. My first idea, here, was therefore to have a template engine which holds a <code>GroovyClassLoader</code>, and compiles scripts as <code>Template</code> instances. For thread safety reasons and to avoid compiling the same template again and again, I instead chose a slightly different approach, which is to compile the scripts, and cache the resulting class into a field of the <code>StreamingMarkupBuilderTemplate</code> class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    private class StreamingMarkupBuilderTemplate implements Template {
+        final Class&lt;BaseTemplate&gt; templateClass;							<i class="conum" data-value="1"></i><b>(1)</b>
+
+        public StreamingMarkupBuilderTemplate(final Reader reader) {
+            templateClass = groovyClassLoader.parseClass(
+		new GroovyCodeSource(reader, "GeneratedMarkupTemplate" + counter.getAndIncrement(), ""));
+        }
+
+        public StreamingMarkupBuilderTemplate(final URL resource) throws IOException {
+            templateClass = groovyClassLoader.parseClass(new GroovyCodeSource(resource));
+        }
+
+        public Writable make() {
+            return make(Collections.emptyMap());							<i class="conum" data-value="2"></i><b>(2)</b>
+        }
+
+        public Writable make(final Map binding) {
+            return DefaultGroovyMethods.newInstance(templateClass,
+		new Object[]{MarkupTemplateEngine.this, binding, templateConfiguration});		<i class="conum" data-value="3"></i><b>(3)</b>
+        }
+    }</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>templateClass</code> corresponds to the user script, compiled as a template class</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>make</code> binds a model to the template</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>make</code> instantiates a new template and binds the model to it</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>bind</code> method is very important. It returns a <code>Writable</code> which will trigger template rendering when <code>writeTo</code> is called. Therefore, nothing is rendered until the <code>Writable#writeTo</code> method is called. The only thing that <code>bind</code> does is instantiating a new template. As we are using a cached class, there&#8217;s no compilation involved anymore, so the template is compiled once for all.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_basetemplate_class">The BaseTemplate class</h3>
+<div class="paragraph">
+<p>As you can see, the user script is compiled into a class which extends <code>BaseTemplate</code>. This means that the following script:</p>
+</div>
+<div class="listingblock">
+<div class="title">page.tpl</div>
+<div class="content">
+<pre>html {
+   body {
+      p("I'm a template")
+   }
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>compiles to a class extending <code>BaseTemplate</code>. If you are familiar with <code>GroovyClassLoader</code> or <code>GroovyShell</code>, you should actually know that normally, a script compiles to a class extending <a href="http://groovy.codehaus.org/api/groovy/lang/Script.html">Script</a>. In our case, we don&#8217;t want to extend <code>Script</code>, because it does things that we don&#8217;t want, such as overriding <code>getProperty</code> or using a <code>Binding</code> class, or even having the semantics of a Groovy script. Furthermore, it doesn&#8217;t allow us to have a custom constructor to have private final fields. So the first step of our compilation process is actually to change the super class of the compiled script. The next step is to create a constructor that takes our model and the template configuration as parameters, as seen in the <code>make</code> method. Last but not least, since the script being compiled defines a <code>run</code> method (which is abstract in <code>Script</code>) corresponding to the script body, we will perform additional code transformations on this specific method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@Override
+    public void call(final SourceUnit source, final GeneratorContext context, final ClassNode classNode) throws CompilationFailedException {
+        if (classNode.isScriptBody()) {							<i class="conum" data-value="1"></i><b>(1)</b>
+            classNode.setSuperClass(MarkupTemplateEngine.BASETEMPLATE_CLASSNODE);	<i class="conum" data-value="2"></i><b>(2)</b>
+            createConstructor(classNode);						<i class="conum" data-value="3"></i><b>(3)</b>
+            transformRunMethod(classNode, source);					<i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>a Groovy script may contain multiple class, so we need to check if the current class is actually the script body</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>we change the super class from <code>Script</code> to <code>BaseTemplate</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>we create a new constructor</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>we perform code modifications on the script body</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_implementing_the_builder">Implementing the builder</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>transformRunMethod</code> method is actually an example of how to implement a Groovy DSL using AST transformations. The goal of this method is to alter the AST (abstract syntax tree), so that some method calls in source code, for example, are actually rewritten. It is also the starting point of performance optimizations. This is actually very important. For example, one of the transformations will change:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>into:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">p(getModel().get("text"))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Technically speaking, there is no need to do such a change: we could rely on <code>BaseTemplate</code> implementing <code>propertyMissing</code> to resolve missing variables (here, <code>text</code>) and delegate the call to its internal <code>model</code> field. However, this can be particularily slow, especially in builders where there are lots of nested closures, which involve a very long call chain. By doing this change, we transform a so-called <code>DynamicVariable</code> (<code>text</code>) into something that can be resolved statically (<code>getModel</code> is declared in <code>BaseTemplate</code> and is of type <code>Map</code>). Slowly, we&#8217;re making a switch towards <strong>statically compilable</strong> code&#8230;&#8203; but we&#8217;re not there yet.</p>
+</div>
+<div class="paragraph">
+<p>In classic builder code, compiling this would work and eventually, when the <code>p</code> method is called, the meta-object protocol goes into action and eventually calls the <code>methodMissing</code> method on the <code>BaseTemplate</code> class if it is defined. So to make our code work, all we have to do is to write that method:</p>
+</div>
+<div class="listingblock">
+<div class="title">BaseTemplate.java</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">    public Object methodMissing(String tagName, Object args) throws IOException {
+        Object o = model.get(tagName);
+        if (args instanceof Object[]) {
+            final Writer wrt = out;
+            TagData tagData = new TagData(args).invoke();
+            Object body = tagData.getBody();
+            writeIndent();
+            wrt.write('&lt;');
+            wrt.write(tagName);
+            writeAttributes(tagData.getAttributes());
+            if (body != null) {
+                wrt.write('&gt;');
+                writeBody(body);
+                writeIndent();
+                wrt.write("&lt;/");
+                wrt.write(tagName);
+                wrt.write('&gt;');
+            } else {
+                if (configuration.isExpandEmptyElements()) {
+                    wrt.write("&gt;&lt;/");
+                    wrt.write(tagName);
+                    wrt.write('&gt;');
+                } else {
+                    wrt.write("/&gt;");
+                }
+            }
+        }
+        return this;
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can test that this code works by rendering a simple template:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTemplate '''
+html {
+    body {
+	p(text)
+    }
+}
+'''
+def model = [text:'It works!']
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What is nice is that we can also rely on the template configuration to perform different transformations. For example, there&#8217;s an optional <code>autoEscape</code> flag which tells if variables read from the model should be automatically escaped. If the flag is set to false, the following code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">text</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is transformed into:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">getModel().get("text")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>but if the flag is set to true, the generated code is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">yield(getModel().get("text"))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>yield</code> is the method which will escape contents&#8230;&#8203; So it&#8217;s a very flexible way to perform parametrized transformations of templates! The same technique is used to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>transform <code>include (template|escaped|unescaped):'path/to/template'</code> into `include(Groovy|Escaped|Unescaped)('/path/to/template')</p>
+</li>
+<li>
+<p>transform <code>unescaped.foo</code> into <code>getModel().get("foo")</code></p>
+</li>
+<li>
+<p>transform <code>':XXX'()</code> method calls into <code>methodMissing('XXX', &#8230;&#8203;)</code>. This gives a way to render tags which have the same name as helper methods like <code>yield</code>. In that case, the user can write <code>':yield'()</code> to create a tag <code>&lt;yield&gt;</code> instead of calling the <code>yield</code> method for example.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_statically_compiling_templates">Statically compiling templates</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_oops_i_did_it_again">Oops, I did it again!</h3>
+<div class="paragraph">
+<p>Going further towards statically compilable code requires additional trickery. In the previous example, we still have a call (<code>p(&#8230;&#8203;)</code>) which is <em>unresolved</em>, goes through the MOP and eventually calls <code>methodMissing</code>. The same way we converted the <code>text</code> variable into a dynamic call, we can make it statically compilable. Since the method which would eventually be called would be <code>methodMissing</code>, instead of going through the MOP, since we know that this particular method will always be called in our case, we can directly make the change, and hardwire it. The resulting code would look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">methodMissing("p", new Object[]{getModel().get("text")})</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This change can be made in our transformer, like we did the <code>getModel</code> change. However, we will see that we have a serious problem with that. Meanwhile, let&#8217;s show how we can trigger static compilation of templates. This can be done easily by injecting the <code>@CompileStatic</code> annotation through <code>CompilerConfiguration</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">compilerConfiguration.addCompilationCustomizers(new TemplateASTTransformer(tplConfig)); 		<i class="conum" data-value="1"></i><b>(1)</b>
+compilerConfiguration.addCompilationCustomizers(
+                new ASTTransformationCustomizer(CompileStatic.class));					<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>apply the AST transformations to rewrite unresolved variables and method missing</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>apply <code>@CompileStatic</code> to the template</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We can try the template engine using the same code as before:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTemplate '''
+html {
+    body {
+    p(text)
+    }
+}
+'''
+def model = [text:'It works!']
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And it works! So what is the problem? Actually, there are multiple issues. The first one is that you can&#8217;t call existing methods anymore! For example, we can&#8217;t call the <code>yield</code> method because it has been converted too:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">yield 'Some text'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>gets converted into:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">methodMissing("yield", new Object[] {"Some &lt;text to escape&gt;"})</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and eventually generates this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;yield&gt;Some &lt;text to escape&gt;&lt;/yield&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Is it the end of the story? Can&#8217;t we really statically compile our templates and make them super fast? Well, no, of course!</p>
+</div>
+<div class="paragraph">
+<p>This is where all the magic begins. Solving this problem requires being able to make a difference between calls to methods which <strong>exist</strong> (like <code>yield</code>) and calls to methods which are not defined (like <code>html</code>). And guess what, Groovy has a very nice tool whose responsability is <strong>exactly</strong> this: static type checking and by extension, static compilation.</p>
+</div>
+<div class="paragraph">
+<p>So let&#8217;s start by removing the code which transforms the method calls into <code>methodMissing</code> calls, and try to compile the following template:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTemplate '''
+html {
+    body {
+        yield text
+    }
+}
+'''
+def model = [text:'Text &lt;to be escaped&gt;']
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since we kept static compilation, it will fail, but it will give us interesting information:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[Static type checking] - Cannot find matching method GeneratedMarkupTemplate6#html(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
+ at line: 2, column: 1
+
+[Static type checking] - Cannot find matching method GeneratedMarkupTemplate6#body(groovy.lang.Closure). Please check if the declared type is right and if the method exists.
+ at line: 3, column: 5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What we see is that the two errors are precisely the methods that we want to directly wire to <code>methodMissing</code>. The <code>yield</code> method has been recognized, so the type checker did the job for us. It is telling us: "ok guys, there are two method calls I know nothing about. Those are <code>html</code> and <code>body</code>. Please do something or I can&#8217;t compile it.".</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s nice, but how can I help the compiler?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_type_checking_extensions">Type checking extensions</h3>
+<div class="paragraph">
+<p>Well, this is precisely why type checking extensions were added in Groovy 2.1. They allow the programmer to help the compiler when he knows about a method call that the type checker isn&#8217;t able to resolve. You can give hints and tell "ok, this method exists, and it returns an object of type Foo". In Groovy 2.2, this mechanism was extended to static compilation, which opens another chapter in the incredible extensibility that Groovy has to offer.</p>
+</div>
+<div class="paragraph">
+<p>Writing type checking extensions require a bit of knowledge of the Groovy AST (abstract syntax tree), so anyone who ever wrote an AST transformation in Groovy should be capable of writing a type checking extension. Actually, it is even easier, and the process is described <a href="http://docs.codehaus.org/display/GROOVY/Type+checking+extensions">here</a>. In our case, we will start leveraging a feature of Groovy 2.2 will allows us to mix dynamic code with statically compiled code. That is to say that the only thing that our extension is going to do is saying "when you don&#8217;t know what a method call does, perform a dynamic invocation".</p>
+</div>
+<div class="paragraph">
+<p>When we added this to Groovy 2.2, we really didn&#8217;t want to make "mixed" mode a first class citizen in static compilation, because it defeats the idea of catching typos, which is one of the things people expect most from a type checking system. So this "mixed" mode is actually activated by type checking extensions. This means that the only method calls which will be made dynamic will be those that the programmer knows about, and really wants to convert to dynamic calls. It is an important difference, because we want the developper to be <strong>aware</strong> of what he is doing.</p>
+</div>
+<div class="paragraph">
+<p>That said, how can we implement that? It&#8217;s actually pretty easy. The first thing to do is to write the code which will help the compiler:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;	<i class="conum" data-value="1"></i><b>(1)</b>
+    if (call.lineNumber &gt; 0) {					<i class="conum" data-value="2"></i><b>(2)</b>
+        if (call.implicitThis) {				<i class="conum" data-value="3"></i><b>(3)</b>
+            return makeDynamic(call, OBJECT_TYPE)		<i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>react to the <code>methodNotFound</code> event, thrown by the type checker</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>make sure the event is called on user code, that is to say code for which there&#8217;s an associated line number</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>make sure that only calls which are on an "implicit this" are made dynamic (see below)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>instruct the compiler to perform a dynamic call here</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Point 3 is actually important. We said that we wanted the developper to be aware of which calls he want to make dynamic. This is the kind of guards that you might want to add. In builder-style code, only method calls for which there&#8217;s no explicit receiver should be considered as method creating tags. For example, if you write <code>this.foo</code>, there is an <strong>explicit</strong> <code>this</code> receiver, and we don&#8217;t want to convert that call. Instead, we want to let the compiler report an error.</p>
+</div>
+<div class="paragraph">
+<p>Now that the extension is written, we still have to load it. There are two ways of loading type checking extensions: using scripts (Groovy 2.1) or precompiled type checking extensions (Groovy 2.2+). In my case, I wanted to use precompiled type checking extensions, to avoid paying the cost of compiling the type checking extension at runtime. This can be done by wrapping the extension script into a class extending <code>GroovyTypeCheckingExtensionSupport.TypeCheckingDSL</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">class MarkupTemplateTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
+
+    @Override
+    Object run() {
+	methodNotFound { receiver, name, argList, argTypes, call -&gt;
+		...
+	}
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the extension can be loaded by slightly changing the way we activate <code>@CompileStatic</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">compilerConfiguration.addCompilationCustomizers(
+        new ASTTransformationCustomizer(
+            Collections.singletonMap("extensions","groovy.text.markup.MarkupTemplateTypeCheckingExtension"), <i class="conum" data-value="1"></i><b>(1)</b>
+            CompileStatic.class));									     <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>create the map of arguments for the <code>@CompileStatic</code> AST transformation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>apply <code>@CompileStatic</code></td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_improving_performance">Improving performance</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With the type checking extension, we&#8217;ve now instructed the compiler to perform <strong>dynamic</strong> calls when it finds tag methods. All other calls, which were resolved statically, are made static. This is nice, but we are still paying the price of the meta-object protocol here, and there&#8217;s no reason to go through a dynamic path were we want the target method to be <code>methodMissing</code> in any case. So, how can we solve that?</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Before going further, you have to be warned. What I am going to show you is things that I wouldn&#8217;t recommand for beginners in AST transformations. We&#8217;re going to update the AST <strong>just before it is going to generate bytecode</strong>. This is very late in the compilation process, meaning that you are walking along a thin rope without net! Traditional AST transformations run much earlier in the compilation process, and the compiler will do a lot of things for you (like resolving methods, variables, &#8230;&#8203;). Here, it is so late that all those things have already been done, so you have to do it all yourself!
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now let the fun begin! The idea is quite simple actually. Instead of relying on <code>makeDynamic</code>, we will transform the calls into direct calls to <code>methodMissing</code>. The type checking extension API doesn&#8217;t let you do this (it&#8217;s not meant to transform the AST), so you have to do it yourself. This involves multiple steps:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>when we start visiting a method, create an empty list of method calls that will need to be transformed</p>
+</li>
+<li>
+<p>when an unresolved call is found and that it matches our criteria, put that call into the list</p>
+</li>
+<li>
+<p>after the method has been visited, trigger a transformer which will transform all calls in the list</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The first step requires an extra block:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">beforeVisitMethod {		<i class="conum" data-value="1"></i><b>(1)</b>
+   newScope {			<i class="conum" data-value="2"></i><b>(2)</b>
+      builderCalls = []		<i class="conum" data-value="3"></i><b>(3)</b>
+   }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>we&#8217;re entering a new method body</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>newScope</code> pushes a "type checking scope" on stack, where you can put user data</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>add the <code>builderCalls</code> method to this scope</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Then you can add the method calls to be transformed this way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;
+    if (call.lineNumber &gt; 0) {
+        if (call.implicitThis) {
+            currentScope.builderCalls &lt;&lt; call
+            return makeDynamic(call, OBJECT_TYPE)
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And triggering the AST transformation can be done in an <code>afterVisitMethod</code> block:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">afterVisitMethod { mn -&gt;							<i class="conum" data-value="1"></i><b>(1)</b>
+   scopeExit {									<i class="conum" data-value="2"></i><b>(2)</b>
+      new BuilderMethodReplacer(context.source, builderCalls).visitMethod(mn)	<i class="conum" data-value="3"></i><b>(3)</b>
+   }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>when we exit a method body</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>pop the current scope from stack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>trigger an AST transformation which will visit this method knowing which calls need to be transformed</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Of course, we still miss the transformation code. For that, we need a class which extends <a href="http://groovy.codehaus.org/api/org/codehaus/groovy/ast/ClassCodeExpressionTransformer.html">ClassCodeExpressionTransformer</a> :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">    private static class BuilderMethodReplacer extends ClassCodeExpressionTransformer {
+
+        private static final MethodNode METHOD_MISSING = ClassHelper.make(BaseTemplate).getMethods('methodMissing')[0]		<i class="conum" data-value="1"></i><b>(1)</b>
+
+        private final SourceUnit unit;
+        private final Set&lt;MethodCallExpression&gt; callsToBeReplaced;
+
+        BuilderMethodReplacer(SourceUnit unit, Collection&lt;MethodCallExpression&gt; calls) {
+            this.unit = unit
+            this.callsToBeReplaced = calls as Set;
+        }
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            unit
+        }
+
+        @Override
+        void visitClosureExpression(final ClosureExpression expression) {
+            super.visitClosureExpression(expression)
+        }
+
+        @Override
+        public Expression transform(final Expression exp) {
+            if (callsToBeReplaced.contains(exp)) {									<i class="conum" data-value="2"></i><b>(2)</b>
+                def args = exp.arguments instanceof TupleExpression ? exp.arguments.expressions : [exp.arguments]
+                args*.visit(this)
+                // replace with direct call to methodMissing
+                def call = new MethodCallExpression(									<i class="conum" data-value="3"></i><b>(3)</b>
+                        new VariableExpression("this"),
+                        "methodMissing",
+                        new ArgumentListExpression(
+                                new ConstantExpression(exp.getMethodAsString()),
+                                new ArrayExpression(
+                                        OBJECT_TYPE,
+                                        [* args]
+                                )
+                        )
+                )
+                call.implicitThis = true
+                call.safe = exp.safe
+                call.spreadSafe = exp.spreadSafe
+                call.methodTarget = METHOD_MISSING									<i class="conum" data-value="4"></i><b>(4)</b>
+                call													<i class="conum" data-value="5"></i><b>(5)</b>
+            } else if (exp instanceof ClosureExpression) {
+                exp.code.visit(this)
+                super.transform(exp)
+            } else {
+                super.transform(exp)
+            }
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>find the method which will eventually be called, <code>methodMissing</code> and keep a handle on it</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>when an expression is visited, we check if it is a method call which should be replaced</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>create a new method call</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>link the call to its target method (very important if you don&#8217;t want to crash the compiler!)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>return the new method call</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And we&#8217;re done! Of course, I didn&#8217;t say it was trivial nor easy, yet, it is possible, and now, all methods supposed to create a tag are directly wired to <code>methodMissing</code>, meaning that they are now statically compiled!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_more_things_to_fix">More things to fix&#8230;&#8203;</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You may think that all problems are solved, but in fact, there are still issues with this code. Imagine the following template:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text.toUpperCase())</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you compile it, it will fail with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The reason is that we compile the template statically. While we instructed the compiler that <code>text</code> is in fact <code>getModel().get("text")</code>, it is still unable to know what is the return type of this call. Then, it assumes that it returns an <code>Object</code>, and if you try to call <code>toUpperCase</code> on an <code>Object</code>, the method doesn&#8217;t exist&#8230;&#8203; This can easily be solved, by making all unresolved method calls dynamic. This means that the template compilation will never throw such errors anymore, but it will instead make a dynamic call. Problem solved.</p>
+</div>
+<div class="paragraph">
+<p>Well, almost.</p>
+</div>
+<div class="paragraph">
+<p>What if I do this?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">p(((String)text).toUpperCase())</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then, by adding a cast, the static compiler is able to resolve the method call. Instead of doing a dynamic call, like it would with our extension, it will perform a direct method call, which will be faster! This means that if you add types, by casting, to your template, rendering can be made faster.</p>
+</div>
+<div class="paragraph">
+<p>This is an interesting idea, but it is not really user friendly. So the last thing I added to the type checking extension is actually an optional, "type checked" mode. If this mode is activated, then the programmer is supposed to tell which are the types of the elements found into the binding. Here, the developper would have to declare that <code>text</code> is of type String:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+import groovy.text.markup.TemplateConfiguration
+
+def tplConf = new TemplateConfiguration()
+MarkupTemplateEngine engine = new MarkupTemplateEngine(this.class.classLoader, tplConf)
+
+def mkpTemplate = engine.createTypeCheckedModelTemplate '''				<i class="conum" data-value="1"></i><b>(1)</b>
+p {
+   yield text.toUpperCase()								<i class="conum" data-value="2"></i><b>(2)</b>
+}
+''', [text:'String']
+def model = [text:'Text &lt;to be escaped&gt;']						<i class="conum" data-value="3"></i><b>(3)</b>
+mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>use <code>createTypeCheckedModelTemplate</code> instead of <code>createTemplate</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>you can use <code>text.toUpperCase()</code> without an explicit cast</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>because the model was declared using a simple map</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This mode is actually very interesting if you want to report template errors at <em>template compilation</em> time. Instead of having an error when the template is rendered, the error will occur at compile time. So, for example, if we change the model declaration from:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">[text:'String']</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">[text:'Integer']</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>template compilation will now fail with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[Static type checking] - Cannot find matching method java.lang.Integer#toUpperCase(). Please check if the declared type is right and if the method exists.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What is really interesting is that you can declare "complex" models, like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">[persons:'List&lt;Person&gt;', posts:[List&lt;Post&gt;]]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and have the template statically compiled! The implementation details of that mode are a bit complex, but you can take a look at the <a href="https://github.com/melix/groovy-core/commit/30096837f8494d64d249a3341efca7ea66bb816f">commit</a> if you want to have some hint (don&#8217;t hesitate to ask me if you want me to explain how it works).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_and_more_features">And more features!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last but not least, the template engine implements automatic indent and automatic new lines. The first one is quite easy to implement, as it only requires wrapping the supplied <code>Writer</code> into an <code>IndentWriter</code>. But adding automatic new lines is a bit trickier, because we want to rely on the layout of the source code to actually add behavior! Let me explain that again with examples. If you have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">div {
+  p('text')
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>we want to render:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="html">&lt;div&gt;
+    &lt;p&gt;Text&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But if we have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">div {  p('text') }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We want to render:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="html">&lt;div&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The problem is that our templates are actually Groovy code&#8230;&#8203; And new lines are not significant. They are not even visible in the AST, so how can we implement such a feature?! The answer relies in each AST node&#8230;&#8203; They all carry line and column number information. So, by comparing, in a <code>ClosureExpression</code>, the line number of the closure itself with the line number of its first code statement, we can determine if there was a new line in source code! The same way, we can check if the last line number of the closure is greater than the line number of the last statement, and if so, introduce a new line&#8230;&#8203; So, in the first example, the code is actually transformed into:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">div {
+  newLine()
+  p('text')
+  newLine()
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And that&#8217;s it!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this (long) blog post, I have demonstrated various techniques that allowed me to transform a slow, dynamic builder based template engine into a fast, statically compiled, template engine with optional user model type checking and unique features like automatic new line insertions. It goes far beyond what the <code>StreamingMarkupBuilder</code> has to offer and demonstrates that compile time metaprogramming can be used in Groovy to provide advanced features. Of course, no one would expect you to create such code from the beginning. If you <a href="https://github.com/melix/groovy-core/commits/markup-template-engine">take a look at the branch commits</a>, you will definitely see that I went step by step. And eventually, I will issue a pull request when I think that the code is ready for prime time. I am not sure yet this should make into core groovy, or instead if it should go into an external project. Ideas are welcome!</p>
+</div>
+<div class="paragraph">
+<p>I still have to make some changes, like not reporting errors if the type checking mode is not active (and always going through dynamic mode in that case) and probably write more benchmarks, but I&#8217;m really looking forward to read what you think. Oh yes, one last thing: congratulations if you read that post throughfully!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'markup_template_engine_part_2';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

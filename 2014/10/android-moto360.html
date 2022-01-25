@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Fixing Bluetooth debugging on Android Wear</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Fixing Bluetooth debugging on Android Wear</h1>
+	</div>
+
+	<p><em>20 October 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/groovy.html">groovy</a> 
+	</em>
+		<a href="/blog/tags/android.html">android</a> 
+	</em>
+		<a href="/blog/tags/moto-360.html">moto 360</a> 
+	</em>
+		<a href="/blog/tags/wear.html">wear</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I have been working on making <a href="http://beta.groovy-lang.org">Groovy</a> work on Android for several months now. In the last weeks, I even
+showed at SpringOne2GX an example of an application written in Groovy that worked on Android Wear. However, that code
+worked in an emulator. Recently, I got a real device, a Moto 360, so I wanted to see that application running on a
+real device. For some very obscure (understand buggy Android SDK) reason, it was far from being that easy&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>I litteraly spent <strong>hours</strong> trying to figure out what was wrong, so I thought it would be interesting for those of you
+who face the same problem to have a blog post that explains how to deal with it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_problem">The problem</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you follow the instructions on the <a href="https://developer.android.com/training/wearables/apps/bt-debugging.html">Android documentation</a>
+about how to enable bluetooth debugging, it&#8217;s in the end pretty simple. Basically, it&#8217;s about enabling USB debugging on your physical
+handheld, then enable bluetooth debugging on your wearable, and in the end enable bluetooth debugging in the Android Wear companion app.</p>
+</div>
+<div class="paragraph">
+<p>The guide says:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>In the Android Wear companion app, you should see the status change to:</p>
+</div>
+<div class="paragraph">
+<p>Host: connected
+Target: connected</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>However, whatever I did, the <code>Target: connected</code> line never appeared for me. It was <strong>always</strong> <code>Target: disconnected</code>, so if I continued
+with the instructions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Doing</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>adb devices</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Only showed my wearable as <code>offline</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>List of devices attached
+
+dcfbbafd	device
+localhost:4444	offline</pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/rage-offline.jpg" alt="Why so evil?">
+</div>
+</div>
+<div class="paragraph">
+<p>I have searched for an answer in a lot of pages, including <a href="http://stackoverflow.com/questions/25938998/debugging-on-moto-360">Stackoverflow</a> where
+I tried very unlikely answers like in <a href="http://stackoverflow.com/questions/25938998/debugging-on-moto-360">this page</a>: execute both commands separately instead
+of doing them in the same line. I thought that maybe there was a timing issue and that the fact of separating both commands would give the toolkit a chance,
+but no, wasn&#8217;t that easy.</p>
+</div>
+<div class="paragraph">
+<p>In the end, I was totally convinced that the problem was because I had previously associated my handheld with an emulator. I was convinced of it because even if I had now associated it with a real device (the Moto 360), in the Android Wear companion app, the device was recognized as an "emulator"&#8230;&#8203; mmm&#8230;&#8203; So I tried uninstalling the Android Wear app, clear its cache, but no matter what I did, after reinstalling, the settings were kept, and the Moto recognized as an emulator. So sad&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_solution">The solution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So you were looking at a solution, and here it is. Basically, the problem is that the Android companion app doesn&#8217;t store its settings under its cache. They are stored in the <code>Google Play Services</code> space, so here is the procedure that worked for me, and I sincerely hope it will do for you. On your handheld:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>open the applications settings, search for the <code>Android Wear</code> application, then <strong>force stop it</strong></p>
+</li>
+<li>
+<p>clear its <strong>data and cache</strong></p>
+</li>
+<li>
+<p>now search for <code>Google Play Services</code> (depending on your language settings, it can appear with a different name, on m y device it is "Services Google Play".</p>
+</li>
+<li>
+<p>click on <code>Manage space</code>. You will see that there&#8217;s a section for connected devices. I tried to clear data here, but it didn&#8217;t help, so you have to click on <strong>delete all data</strong>.</p>
+</li>
+<li>
+<p>reboot your phone</p>
+</li>
+<li>
+<p>reboot your Moto 360</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>I am unsure that the two last steps are really necessary, but I did it because I wanted to make sure that force stopping and clearing data did not introduce some weird behavior after that. When you reopen the Android Wear companion app, it should now be as if it was the first time you opened it and ask you to associate it with your watch. Do it, and now, you should be able to follow the normal procedure described in the Android documentation and&#8230;&#8203;</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/yes-baby.jpg" alt="yes baby">
+</div>
+</div>
+<div class="paragraph">
+<p>Success, now you can debug your application on a real device (which includes deploying it&#8230;&#8203;).</p>
+</div>
+<blockquote class="twitter-tweet" lang="fr"><p>Hey, finally got it working! I need to blog about how I arrived the insane emulator issue... <a href="https://twitter.com/hashtag/groovylang?src=hash">#groovylang</a> <a href="http://t.co/XINccF3V7k">pic.twitter.com/XINccF3V7k</a></p>&mdash; Cédric Champeau (@CedricChampeau) <a href="https://twitter.com/CedricChampeau/status/523934124898521090">19 Octobre 2014</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'bluetooth_debug_android';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

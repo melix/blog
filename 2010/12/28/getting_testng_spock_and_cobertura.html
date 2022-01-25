@@ -12,7 +12,7 @@
     <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
-    <link href="/blog/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -25,29 +25,43 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     </head>
   <body>
     <div id="wrap">
 	
 	<!-- Fixed navbar -->
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
           <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/blog">Cédric Champeau's blog</a>
-            <div class="nav-collapse collapse">
-              <ul class="nav">                
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/conferences.html">Conferences</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
               </ul>
-            </div><!--/.nav-collapse -->
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
           </div>
-        </div>
       </div>
       <div class="container">
 	
@@ -55,15 +69,17 @@
 		<h1>Getting TestNG, Spock and Cobertura to work together with Maven</h1>
 	</div>
 
-	<p><em>28 décembre 2010</em></p>
-	<p><em>Tags: </em>cobertura </em> maven </em> spock </em> testng </p>
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://melix.github.io/blog/2010/12/28/getting_testng_spock_and_cobertura.html" data-via="CedricChampeau" data-lang="fr">Tweeter</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-	<div class="g-plusone" data-size="medium" data-href="http://melix.github.io/blog/2010/12/28/getting_testng_spock_and_cobertura.html"></div>
-
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><em>28 December 2010</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/cobertura.html">cobertura</a> 
+	</em>
+		<a href="/blog/tags/maven.html">maven</a> 
+	</em>
+		<a href="/blog/tags/spock.html">spock</a> 
+	</em>
+		<a href="/blog/tags/testng.html">testng</a> 
+	</p>
+	<p><div class="paragraph">
 <p>Cobertura, TestNG and Maven play well together. However, I had problems when I started migrating some tests to <a href="http://code.google.com/p/spock/">the Spock framework</a>. Long story short, Spock uses JUnit internally, not TestNG, and the surefire plugin only triggers tests for one of those frameworks at a time. Therefore, if you mix TestNG with Spock, you’ll run with problems where your Spock tests won’t be started automatically by Maven, and eventually, Cobertura will never generate test coverage for the corresponding classes.</p>
 </div>
 <div class="paragraph">
@@ -71,8 +87,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>
-...
+<pre class="prettyprint highlight"><code>...
 
                 1.7.6
   0.5-groovy-1.7
@@ -213,21 +228,14 @@
       cobertura-clean
       clean
 
-       clean
-
-
-
-
-
-
-</code></pre>
+       clean</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The trick is to add two executions of the surefire plugin, as <a href="http://bit.ly/ePc0oG">indicated here</a>, but forcing the plugin version to 2.7.1. Also, adding two dependencies to the surefire plugin, as suggested by <a href="http://twitter.com/#!/krosenvold/status/19442054924861441">Kristian Rosenvold</a> didn’t work for me. My pom.xml file also includes the necessary configuration for GMaven to work with Groovy 1.7 instead of 1.6 by default.</p>
-</div>
-</div>
 </div></p>
+   
+
 
 <div id="disqus_thread"></div>
     <script type="text/javascript">
@@ -252,7 +260,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v2.3.1</a> | Baked with <a href="http://jbake.org">JBake v2.2.1-SNAPSHOT</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
@@ -293,6 +301,5 @@
   ga('send', 'pageview');
 
 </script>
-<script src="http://cdn.lanyrd.net/badges/person-v1.min.js"></script>
   </body>
 </html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Authoring your blog on GitHub with JBake and Gradle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    </head>
+  <body>
+    <div id="wrap">
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Authoring your blog on GitHub with JBake and Gradle</h1>
+	</div>
+
+	<p><em>03 February 2014</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/github.html">github</a> 
+	</em>
+		<a href="/blog/tags/jbake.html">jbake</a> 
+	</em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/asciidoctor.html">asciidoctor</a> 
+	</em>
+		<a href="/blog/tags/blog.html">blog</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A few weeks ago, I started this new blog and decided to host it on GitHub. I already explained
+<a href="/blog/2013/11/21/a_new_home.html">how I migrated contents from JRoller</a>, but I didn&#8217;t really
+the tool behind publishing. In this post, I will show you how easy it is, now that I have
+improved my toolchain with <a href="http://www.gradle.org">Gradle</a>!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jbake">JBake</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="http://www.jbake.org">JBake</a> is a static site generator. When I chose this tool for my blog,
+what attracted me is actually that it runs on the JVM, so I already had the idea of automating
+stuff with <a href="http://www.gradle.org">Gradle</a>.</p>
+</div>
+<div class="paragraph">
+<p>Since then, I have submitted several pull requests to the project, and we&#8217;re actually thinking
+of using it to build the next Groovy website. <a href="http://www.jbake.org">JBake</a> has good chances to
+become the "Jekyll of the JVM" and already supports multiple markup languages (markdown, asciidoc)
+as well as multiple template engines (<a href="http://freemarker.org/">FreeMarker</a> in 2.2.1, <a href="http://groovy.codehaus.org">Groovy</a>
+and <a href="http://www.thymeleaf.org/">Thymeleaf</a> in 2.3.0).</p>
+</div>
+<div class="paragraph">
+<p>The idea behind <a href="http://www.jbake.org">JBake</a> is very simple: contents is written using a markup language and "baked"
+with template engines into actual HTML. Everything is generated statically and you can upload the generated site
+wherever you want.</p>
+</div>
+<div class="paragraph">
+<p>On the other side, GitHub offers a nice tool to publish pages: <a href="http://pages.github.com/">GitHub Pages</a>, so we can
+have both the sources of our blog and the output of bakery in the same repository. So the initial process looked
+like this:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>create a new page in <code>content</code> directory</p>
+</li>
+<li>
+<p>run <code>jbake</code> command, check the result, eventually make changes</p>
+</li>
+<li>
+<p><code>git add page.adoc</code> to add the new page to the sources</p>
+</li>
+<li>
+<p><code>git commit -a</code> to commit the page to the <code>master</code> branch, corresponding to the sources of the blog</p>
+</li>
+<li>
+<p><code>git checkout gh-pages</code> to switch to the GitHub pages branch</p>
+</li>
+<li>
+<p><code>cp -R output/* .</code> to copy the contents of the output directory at the root of the GitHub pages</p>
+</li>
+<li>
+<p><code>git add page.html</code> to add the new page to the GitHub pages branch</p>
+</li>
+<li>
+<p><code>git commit -a</code> to commit the contents to GitHub pages</p>
+</li>
+<li>
+<p><code>git push origin master</code> to push the sources to GitHub</p>
+</li>
+<li>
+<p><code>git push origin gh-pages</code> to push the generated pages to GitHub pages</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>I published my first blog posts like this, and it&#8217;s not that complicated, but it involves a lot of manual steps, so I
+came up with a Gradle plugin to make this much easier, that is, focusing on contents, period!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gradle_to_the_rescue">Gradle to the rescue!</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_prerequisites">Prerequisites</h3>
+<div class="paragraph">
+<p>We&#8217;re going to setup a project that will allow you to publish to GitHub pages in one step, using <a href="http://www.gradle.org">Gradle</a>. For that,
+we will need:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>an empty <em>blog</em> repository that you created on GitHub</p>
+</li>
+<li>
+<p><a href="http://www.jbake.org">JBake</a> to setup the initial JBake project structure</p>
+</li>
+<li>
+<p><a href="http://www.gradle.org">Gradle</a> 1.10 (previous versions should work too)</p>
+</li>
+<li>
+<p>The <a href="https://github.com/jbake-org/jbake-gradle-plugin">JBake plugin for Gradle</a>, will be downloaded automatically</p>
+</li>
+<li>
+<p>The <a href="https://github.com/ajoberstar/gradle-git">Git plugin for Gradle</a>, will be downloaded automatically</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_jbake">Building JBake</h3>
+<div class="paragraph">
+<p>This step will become optional when JBake 2.3.0 will be out (or a snapshot of <a href="http://www.jbake.org">JBake</a> will be published). Meanwhile, you
+need to install a local version of <a href="http://www.jbake.org">JBake</a> into your local Maven repository. Don&#8217;t worry, this will be easy, you will
+only need Maven (hey, too bad <a href="http://www.jbake.org">JBake</a> doesn&#8217;t use Gradle ;)):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/jbake-org/jbake.git
+cd jbake
+mvn install</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s all!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setting_up_a_project">Setting up a project</h3>
+<div class="paragraph">
+<p>First step consists in creating the initial project layout:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git init                                                            <i class="conum" data-value="1"></i><b>(1)</b>
+git remote add origin &lt;your github remote url&gt;                      <i class="conum" data-value="2"></i><b>(2)</b>
+mkdir -p src/jbake                                                  <i class="conum" data-value="3"></i><b>(3)</b>
+gradle init                                                         <i class="conum" data-value="4"></i><b>(4)</b>
+git add build.gradle gradle gradlew gradlew.bat settings.gradle src <i class="conum" data-value="5"></i><b>(5)</b>
+cd src/jbake
+jbake -i                                                            <i class="conum" data-value="6"></i><b>(6)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>initializes the git repository</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>add your remote</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>we will put JBake sources into that directory</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>installs the Gradle wrapper into the repository</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>adds Gradle wrapper and initial structure into Git</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>initializes the default JBake directory layout</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_gradle_to_render_pages">Using Gradle to render pages</h3>
+<div class="paragraph">
+<p>At this point, your <code>src/jbake</code> directory contains the classic <a href="http://www.jbake.org">JBake</a> folder contents:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>src
+ |-- jbake
+       |-- assets    : static assets (images, css, ...)
+       |-- content   : blog posts, ...
+       |-- templates : HTML templates (by default, uses FreeMarker)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace the contents of <code>build.gradle</code> with the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">buildscript {
+  repositories {
+      mavenLocal() // needed to use the local JBake 2.3.0 build
+      jcenter()
+  }
+
+  dependencies {
+    classpath 'me.champeau.gradle:jbake-gradle-plugin:0.1-SNAPSHOT' <i class="conum" data-value="1"></i><b>(1)</b>
+    classpath 'org.asciidoctor:asciidoctor-java-integration:0.1.4'  <i class="conum" data-value="2"></i><b>(2)</b>
+    classpath 'org.freemarker:freemarker:2.3.19'                    <i class="conum" data-value="3"></i><b>(3)</b>
+  }
+}
+
+apply plugin: 'jbake'                                               <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>import the JBake plugin</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>if you write pages using the Asciidoctor format, this is necessary</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>if you use the Freemarker template engine, this is necessary</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>then apply the plugin</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default, the plugin will look for JBake sources in <code>src/jbake</code> and generate the site into <code>build/jbake</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generating_the_output">Generating the output</h3>
+<div class="paragraph">
+<p>Now that this is applied, you can generate the site by running the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>./gradlew -i jbake</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>after the rendering step, you should now have a new directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>build
+  |-- jbake</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>into which you will find the generated HTML contents. At this point, you could choose to upload those files
+to an FTP server, for example, but since we want to host our pages on GitHub, we need to add some configuration
+to our build.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_publishing_to_github_pages">Publishing to GitHub Pages</h3>
+<div class="paragraph">
+<p>Create a new file named <code>publish.gradle</code> with the following contents:</p>
+</div>
+<div class="listingblock">
+<div class="title">publish.gradle</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">buildscript {
+  repositories {
+      jcenter()
+  }
+
+  dependencies {
+    classpath 'org.ajoberstar:gradle-git:0.6.3'     <i class="conum" data-value="1"></i><b>(1)</b>
+  }
+}
+
+apply plugin: 'github-pages'                        <i class="conum" data-value="2"></i><b>(2)</b>
+
+githubPages {
+  repoUri = 'git@github.com:youtname/blog.git'      <i class="conum" data-value="3"></i><b>(3)</b>
+  pages {
+     from(file('build/jbake')) {
+     	into '.'                                    <i class="conum" data-value="4"></i><b>(4)</b>
+     }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>use the gradle-git plugin</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>apply the plugin</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>configure your GitHub repository URL</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>tells the plugin to upload the contents of the <code>build/jbake</code> directory</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Then modify the main <code>build.gradle</code> file by adding the following task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">task publish(type: GradleBuild) {           <i class="conum" data-value="1"></i><b>(1)</b>
+    buildFile = 'publish.gradle'
+    tasks = ['publishGhPages']
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>we&#8217;re using a separate, sub-build to avoid a classpath issue with JNA</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now if you do:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>./gradlew publish</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Gradle will pick the contents of the <code>output/jbake</code> directory, add it to the <code>gh-pages</code> branch and push it to GitHub,
+all in one step! A few seconds later, you should see the result on github.io!</p>
+</div>
+<div class="paragraph">
+<p>One last thing: this configuration does <strong>not</strong> add the sources to your git repository. It only deals with the output,
+so you still need to add the source files, commit them and push them to GitHub. This is of course optional if you
+don&#8217;t want to publish the sources&#8230;&#8203; If you decide to make them public, then you can also use the git plugin to do it
+automatically!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this post, we&#8217;ve shown you how you can leverage <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a> to publish a blog on GitHub. The setup is really
+easy, so I hope more people will follow that way and contribute to Open Source too!</p>
+</div>
+<div class="paragraph">
+<p>Of course, this post has been published using the procedure described on this page, so I used <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a> to blog
+about how to publish a blog on <a href="https://github.com/melix/blog">GitHub</a> using <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a>! Like my friend Andres Almiray
+would say, that&#8217;s a <a href="https://twitter.com/aalmiray/status/429236158321950720">toolception</a>!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'jbake_github_blog_toolception';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script src="/blog/js/run_prettify.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
