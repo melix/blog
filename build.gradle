@@ -1,5 +1,6 @@
 plugins {
    id 'org.jbake.site' version '5.5.0'
+   id 'org.ajoberstar.git-publish' version '3.0.0'
 }
 
 
@@ -9,8 +10,13 @@ jbake {
    clearCache = true
 }
 
-tasks.register("publish", GradleBuild) {
-    buildFile = 'publish.gradle'
-    tasks = ['publishGhPages']
+gitPublish {
+  repoUri = 'git@github.com:melix/blog.git'
+  branch = 'gh-pages'
+  sign = false
+  contents {
+      from(tasks.named('bake'))
+  }
 }
+
 
