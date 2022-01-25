@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -96,7 +97,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
     body {
         yield message			<i class="conum" data-value="1"></i><b>(1)</b>
     }
@@ -116,7 +117,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;&lt;body&gt;It works!&lt;/body&gt;&lt;/html&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;html&gt;&lt;body&gt;It works!&lt;/body&gt;&lt;/html&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -124,7 +125,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
 @Grab('org.freemarker:freemarker:2.3.9')
 import groovy.text.markup.MarkupTemplateEngine
 import freemarker.template.*
@@ -206,7 +207,7 @@ Freemarker (simple toUpper)                 1161       0   1161   1171</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Page title&lt;/title&gt;&lt;/head&gt;&lt;/body&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Page title&lt;/title&gt;&lt;/head&gt;&lt;/body&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -214,7 +215,7 @@ Freemarker (simple toUpper)                 1161       0   1161   1171</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -239,7 +240,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h3 id="_groovy_goodness">Groovy goodness</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">ul {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">ul {
    persons.each { p -&gt;
    	li(p.name)
    }
@@ -251,7 +252,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">def model = [persons: [new Person(name:'Bob'), new Person(name:'Alice')]]</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def model = [persons: [new Person(name:'Bob'), new Person(name:'Alice')]]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -259,7 +260,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="html">&lt;ul&gt;&lt;li&gt;Bob&lt;/li&gt;&lt;li&gt;Alice&lt;/li&gt;&lt;/ul&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;ul&gt;&lt;li&gt;Bob&lt;/li&gt;&lt;li&gt;Alice&lt;/li&gt;&lt;/ul&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -269,7 +270,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h4 id="_inclusion_of_another_template">inclusion of another template</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
    include template: 'includes/header.tpl'
    include template: 'includes/body.tpl'
 }</code></pre>
@@ -280,7 +281,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h4 id="_inclusion_of_escaped_text">inclusion of escaped text</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
    div(class:'post') {
    	include escaped: 'content/text.txt'
    }
@@ -292,7 +293,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h4 id="_inclusion_of_unescaped_text">inclusion of unescaped text</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
    div(class:'post') {
    	include unescaped: 'content/raw.txt'
    }
@@ -307,7 +308,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">def model = [text:'&lt;html&gt;']</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def model = [text:'&lt;html&gt;']</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -315,7 +316,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">p(text)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">p(text)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -323,7 +324,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">&lt;p&gt;&amp;lt;html&amp;gt;&lt;/p&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">&lt;p&gt;&amp;lt;html&amp;gt;&lt;/p&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -331,7 +332,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">p(unescaped.text)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">p(unescaped.text)</code></pre>
 </div>
 </div>
 </div>
@@ -342,7 +343,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
    newLine()
    body {
 newLine()
@@ -358,7 +359,7 @@ newLine()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;html&gt;
 &lt;body&gt;
 &lt;p&gt;Auto indent in action!&lt;/p&gt;
 &lt;/body&gt;
@@ -370,7 +371,7 @@ newLine()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;html&gt;
     &lt;body&gt;
         &lt;p&gt;Auto indent in action!&lt;/p&gt;
     &lt;/body&gt;
@@ -385,7 +386,7 @@ newLine()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
    body {
 p('Auto indent in action!')
    }
@@ -397,7 +398,7 @@ p('Auto indent in action!')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">html {   body {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {   body {
 p('Auto indent in action!')
    }
 }</code></pre>
@@ -409,7 +410,7 @@ p('Auto indent in action!')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;&lt;body&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;html&gt;&lt;body&gt;
         &lt;p&gt;Auto indent in action!&lt;/p&gt;
     &lt;/body&gt;
 &lt;/html&gt;</code></pre>
@@ -426,7 +427,7 @@ p('Auto indent in action!')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">class User {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class User {
    Long id
    String name
 }
@@ -439,7 +440,7 @@ def model = [user: new User(id: 123, name: 'Cedric')]</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">def template = engine.createTemplate '''
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def template = engine.createTemplate '''
 p "User id: $user.id Name: $user.name Age: $user.age"
 '''</code></pre>
 </div>
@@ -449,7 +450,7 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">template.make(model).writeTo(new PrintWriter(System.out)) 	<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">template.make(model).writeTo(new PrintWriter(System.out)) 	<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -465,7 +466,7 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">def template = engine.createTypeCheckedModelTemplate '''	<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def template = engine.createTypeCheckedModelTemplate '''	<i class="conum" data-value="1"></i><b>(1)</b>
 p "User id: $user.id Name: $user.name Age: $user.age"
 ''', [user: 'User']						<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -505,7 +506,7 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
 @Grab('org.freemarker:freemarker:2.3.9')
 import groovy.text.markup.MarkupTemplateEngine
 import freemarker.template.*
@@ -658,10 +659,10 @@ FreeMarker loop                            2862       0  2862  2894</pre>
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -94,7 +95,7 @@ If you have an existing build that you want to try on Java 16, you can update th
 <div class="listingblock">
 <div class="title">gradle/wrapper/gradle-wrapper.properties</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>distributionBase=GRADLE_USER_HOME
+<pre class="highlightjs highlight"><code class="language-none hljs">distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-milestone-3-bin.zip
 zipStoreBase=GRADLE_USER_HOME
@@ -130,7 +131,7 @@ I&#8217;m personally recommending to use <a href="https://sdkman.io/">sdkman!</a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ sdk install gradle 6.8.3</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ sdk install gradle 6.8.3</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -138,7 +139,7 @@ I&#8217;m personally recommending to use <a href="https://sdkman.io/">sdkman!</a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ java -version
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ java -version
 java -version
 openjdk version "11.0.9.1" 2020-11-04
 OpenJDK Runtime Environment 18.9 (build 11.0.9.1+1)
@@ -151,7 +152,7 @@ Again you can do this with sdkman!:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ sdk install java 11.0.9.open</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ sdk install java 11.0.9.open</code></pre>
 </div>
 </div>
 <div class="sect2">
@@ -161,7 +162,7 @@ Again you can do this with sdkman!:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ mkdir demo-app
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir demo-app
 $ cd demo-app
 $ gradle init</code></pre>
 </div>
@@ -171,7 +172,7 @@ $ gradle init</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>Select type of project to generate:
+<pre class="highlightjs highlight"><code class="language-none hljs">Select type of project to generate:
   1: basic
   2: application
   3: library
@@ -216,7 +217,7 @@ Source package (default: demo.app):</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ ./gradlew run
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew run
 
 &gt; Task :app:run
 Hello World!
@@ -235,7 +236,7 @@ Let&#8217;s open the build script, found under <code>app</code>:</p>
 <div class="listingblock">
 <div class="title">app/build.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
 }
@@ -269,7 +270,7 @@ If it cannot find one you will see something like this happening:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">./gradlew run</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./gradlew run</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -290,7 +291,7 @@ To some extent, it&#8217;s good news, it means that Gradle is really using Java 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">tasks.withType(JavaCompile).configureEach {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(JavaCompile).configureEach {
 	// disable incremental compilation
     options.incremental = false
 }</code></pre>
@@ -301,7 +302,7 @@ To some extent, it&#8217;s good news, it means that Gradle is really using Java 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">./gradlew run</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./gradlew run</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -314,7 +315,7 @@ This solution is better for performance, even if a bit "hackish":</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>tasks.withType(JavaCompile).configureEach {
+<pre class="highlightjs highlight"><code class="language-none hljs">tasks.withType(JavaCompile).configureEach {
     options.forkOptions.jvmArgs.addAll( ['--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'] )
 }</code></pre>
 </div>
@@ -358,10 +359,10 @@ This solution is better for performance, even if a bit "hackish":</p>
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

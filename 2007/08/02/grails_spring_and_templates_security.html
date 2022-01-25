@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -97,7 +98,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>package com.example;
+<pre class="highlightjs highlight"><code class="language-none hljs">package com.example;
 
 public class MyPrivateService {
     private String[] theCreditCardNumbers;
@@ -117,7 +118,7 @@ public class MyPrivateService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code></code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs"></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -125,7 +126,7 @@ public class MyPrivateService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>import org.springframework.beans.factory.BeanFactory
+<pre class="highlightjs highlight"><code class="language-none hljs">import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.xml.XmlBeanFactory
 import org.springframework.core.io.ClassPathResource
 
@@ -146,7 +147,7 @@ creditCardService.creditCardNumbers.each {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>1114-554112-01115
+<pre class="highlightjs highlight"><code class="language-none hljs">1114-554112-01115
 1151-45454-454490</code></pre>
 </div>
 </div>
@@ -155,7 +156,7 @@ creditCardService.creditCardNumbers.each {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>Hello, M. ${user.name} !</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">Hello, M. ${user.name} !</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -163,7 +164,7 @@ creditCardService.creditCardNumbers.each {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>import groovy.text.SimpleTemplateEngine
+<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.text.SimpleTemplateEngine
 
 class ProofOfConceptController {
 
@@ -196,7 +197,7 @@ class ProofOfConceptController {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>Bean named creditCardService defined in application context
+<pre class="highlightjs highlight"><code class="language-none hljs">Bean named creditCardService defined in application context
 
     * metaClass=org.codehaus.groovy.grails.commons.metaclass.ExpandoMetaClass@ea7776[class com.example.CreditCardService]
     * transactional=true
@@ -258,10 +259,10 @@ class ProofOfConceptController {
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

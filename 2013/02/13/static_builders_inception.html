@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -103,7 +104,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>@groovy.transform.CompileStatic
+<pre class="highlightjs highlight"><code class="language-none hljs">@groovy.transform.CompileStatic
 String build() {
     def builder = new HTMLBuilder()
     builder.html {
@@ -154,7 +155,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    $ ./gradlew test</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">    $ ./gradlew test</code></pre>
 </div>
 </div>
 </div>
@@ -165,7 +166,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    import groovyx.transform.StaticMarkupBuilder
+<pre class="highlightjs highlight"><code class="language-none hljs">    import groovyx.transform.StaticMarkupBuilder
 
     @StaticMarkupBuilder
     class HTMLBuilder {
@@ -208,7 +209,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    @CompileStatic
+<pre class="highlightjs highlight"><code class="language-none hljs">    @CompileStatic
     void test() { // using a method to ensure that the builder will be statically compiled!
         def out = new ByteArrayOutputStream()
         def builder = new Builder3(out)
@@ -226,7 +227,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    Hello, Groovy!</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">    Hello, Groovy!</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -234,7 +235,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    @CompileStatic
+<pre class="highlightjs highlight"><code class="language-none hljs">    @CompileStatic
     void test() { // using a method to ensure that the builder will be statically compiled!
         def out = new ByteArrayOutputStream()
         def builder = new Builder3(out)
@@ -279,7 +280,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    static schema = {
+<pre class="highlightjs highlight"><code class="language-none hljs">    static schema = {
         html {}
     }</code></pre>
 </div>
@@ -289,7 +290,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -346,7 +347,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -440,10 +441,10 @@ String build() {
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -98,7 +99,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>String.metaClass.foo = { -&gt; 1 }
+<pre class="highlightjs highlight"><code class="language-none hljs">String.metaClass.foo = { -&gt; 1 }
 assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 </div>
@@ -110,7 +111,7 @@ assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>void method(String message) {
+<pre class="highlightjs highlight"><code class="language-none hljs">void method(String message) {
    if (rareCondition) {
  println "Did you spot the error in this ${message.toUppercase()}?"
    }
@@ -132,7 +133,7 @@ assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>import groovy.transform.TypeChecked
+<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.transform.TypeChecked
 
 @TypeChecked
 void method(String message) {
@@ -208,7 +209,7 @@ void method(String message) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>Dimension d = [100] // wrong number of arguments
+<pre class="highlightjs highlight"><code class="language-none hljs">Dimension d = [100] // wrong number of arguments
 Dimension d = ['100','200'] // wrong argument types
 
 class A {
@@ -223,7 +224,7 @@ A a = [x:100, y:200, z: 300] // missing property</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def myname = 'Cedric'
+<pre class="highlightjs highlight"><code class="language-none hljs">def myname = 'Cedric'
 "My upper case name is ${myname.toUpperCase()}"
 println "My upper case name is ${myname}".toUpperCase()</code></pre>
 </div>
@@ -233,7 +234,7 @@ println "My upper case name is ${myname}".toUpperCase()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def keys = [x:1,y:2,z:3]*.key
+<pre class="highlightjs highlight"><code class="language-none hljs">def keys = [x:1,y:2,z:3]*.key
 def values = [x:'1',y:'2',z:'3']*.value
 keys*.toUpperCase()
 values*.toUpperCase()</code></pre>
@@ -247,7 +248,7 @@ values*.toUpperCase()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>Object o
+<pre class="highlightjs highlight"><code class="language-none hljs">Object o
 if (o instanceof String) o.toUpperCase()</code></pre>
 </div>
 </div>
@@ -259,7 +260,7 @@ if (o instanceof String) o.toUpperCase()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>class A {
+<pre class="highlightjs highlight"><code class="language-none hljs">class A {
  void foo() {}
 }
 def name = new A()
@@ -274,7 +275,7 @@ name.toInteger() // no need to cast, and toInteger() is defined by DGM</code></p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>class A {
+<pre class="highlightjs highlight"><code class="language-none hljs">class A {
  void foo() {}
 }
 def name = new A()
@@ -320,7 +321,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each {
+<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each {
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -333,7 +334,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>private static  Iterator each(Iterator iter, Closure closure)</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">private static  Iterator each(Iterator iter, Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -341,7 +342,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>public static  Iterator each(Closure closure)</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">public static  Iterator each(Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -371,7 +372,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each { String it -&gt;
+<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each { String it -&gt;
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -381,7 +382,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -402,7 +403,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>class MyClass {
+<pre class="highlightjs highlight"><code class="language-none hljs">class MyClass {
    void myMethod(@ClosureTypeInfo(argTypes=[T]) Closure strategy) { ... } // this is not allowed because of type erasure
 }</code></pre>
 </div>
@@ -412,7 +413,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>public static</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">public static</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -423,7 +424,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -431,7 +432,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each {
+<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each {
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -457,7 +458,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each { String it -&gt;
+<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each { String it -&gt;
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -467,7 +468,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>class StringList extends LinkedList {}
+<pre class="highlightjs highlight"><code class="language-none hljs">class StringList extends LinkedList {}
 def list = new StringList()
 ...
 list.each {
@@ -480,7 +481,7 @@ list.each {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>class Foo {
+<pre class="highlightjs highlight"><code class="language-none hljs">class Foo {
     T foo(Closure cl) {
         cl.call(1)
     }
@@ -509,7 +510,7 @@ assert foo.bar {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def strategy = { println it.toUpperCase() }
+<pre class="highlightjs highlight"><code class="language-none hljs">def strategy = { println it.toUpperCase() }
 list.each(strategy)</code></pre>
 </div>
 </div>
@@ -518,7 +519,7 @@ list.each(strategy)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def strategy = { String it -&gt; println it.toUpperCase() }
+<pre class="highlightjs highlight"><code class="language-none hljs">def strategy = { String it -&gt; println it.toUpperCase() }
 list.each(strategy)</code></pre>
 </div>
 </div>
@@ -568,10 +569,10 @@ list.each(strategy)</code></pre>
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

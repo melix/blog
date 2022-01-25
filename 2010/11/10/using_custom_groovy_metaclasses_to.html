@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -111,7 +112,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>checkInitalised();
+<pre class="highlightjs highlight"><code class="language-none hljs">checkInitalised();
         if (object == null) {
             throw new NullPointerException("Cannot invoke method: " + methodName + " on null object");
         }
@@ -286,7 +287,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def myObject = new MySuperFastJavaObject()
+<pre class="highlightjs highlight"><code class="language-none hljs">def myObject = new MySuperFastJavaObject()
 myObject.mySuperFastMethod()</code></pre>
 </div>
 </div>
@@ -295,7 +296,7 @@ myObject.mySuperFastMethod()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>package groovy.runtime.metaclass.com.mypackage;
+<pre class="highlightjs highlight"><code class="language-none hljs">package groovy.runtime.metaclass.com.mypackage;
 
 public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
  ...
@@ -340,7 +341,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>package groovy.runtime.metaclass.com.mypackage;
+<pre class="highlightjs highlight"><code class="language-none hljs">package groovy.runtime.metaclass.com.mypackage;
 
 public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
  ...
@@ -369,7 +370,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>@Override
+<pre class="highlightjs highlight"><code class="language-none hljs">@Override
  public Object invokeMissingProperty(final Object instance, final String propertyName, final Object optionalValue, final boolean isGetter) {
   Layer layer = (Layer) instance; // Layer metaclass, it's ALWAYS a Layer
          return layer.java_propertyMissing(propertyName);
@@ -422,10 +423,10 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -115,7 +116,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>public int fib(int i) {
+<pre class="highlightjs highlight"><code class="language-none hljs">public int fib(int i) {
    return i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
 }</code></pre>
 </div>
@@ -125,7 +126,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>int fib(int i) {
+<pre class="highlightjs highlight"><code class="language-none hljs">int fib(int i) {
    i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
 }</code></pre>
 </div>
@@ -151,7 +152,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>@ast.Bytecode
+<pre class="highlightjs highlight"><code class="language-none hljs">@ast.Bytecode
 int fib(int i) {
  l0
     iload 1
@@ -194,7 +195,7 @@ println "Computed in ${(System.currentTimeMillis()-sd)}ms"</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>Pure Groovy
+<pre class="highlightjs highlight"><code class="language-none hljs">Pure Groovy
 165580141
 Computed in 18465ms
 Bytecode Groovy
@@ -213,7 +214,7 @@ Computed in 576ms</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>package ast
+<pre class="highlightjs highlight"><code class="language-none hljs">package ast
 
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention
@@ -234,7 +235,7 @@ public @interface Bytecode {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>package ast
+<pre class="highlightjs highlight"><code class="language-none hljs">package ast
 
 import groovyjarjarasm.asm.Label
 import groovyjarjarasm.asm.MethodVisitor
@@ -400,10 +401,10 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -98,7 +99,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.ImportCustomizer
+<pre class="highlightjs highlight"><code class="language-none hljs">import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 ...
 
@@ -116,7 +117,7 @@ importCustomizer.addStaticStar('java.lang.Math')</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
+<pre class="highlightjs highlight"><code class="language-none hljs">def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(importCustomizer)
 def shell = new GroovyShell(configuration)
 shell.evaluate """
@@ -140,7 +141,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
+<pre class="highlightjs highlight"><code class="language-none hljs">final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
 final SecureASTCustomizer secure = new SecureASTCustomizer()
 secure.with {
     closuresAllowed = false
@@ -229,7 +230,7 @@ GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>1+1
+<pre class="highlightjs highlight"><code class="language-none hljs">1+1
 ---
 
 will run perfectly, while this one :
@@ -279,7 +280,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+<pre class="highlightjs highlight"><code class="language-none hljs">import org.codehaus.groovy.control.customizers.SecureASTCustomizer
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
@@ -319,7 +320,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
+<pre class="highlightjs highlight"><code class="language-none hljs">def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(Log))
 def shell = new GroovyShell(configuration)</code></pre>
 </div>
@@ -345,7 +346,7 @@ def shell = new GroovyShell(configuration)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
+<pre class="highlightjs highlight"><code class="language-none hljs">def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(MyASTTransformationClass))
 def shell = new GroovyShell(configuration)</code></pre>
 </div>
@@ -396,10 +397,10 @@ def shell = new GroovyShell(configuration)</code></pre>
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

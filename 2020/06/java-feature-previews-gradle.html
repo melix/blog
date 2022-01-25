@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -123,7 +124,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public record Person(
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public record Person(
         String firstName,
         String lastName,
         boolean likeJavaRecords) {
@@ -136,7 +137,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">class PersonTest {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">class PersonTest {
     @Test void testRecord() {
         Person cedric = new Person("Cédric", "Champeau", true);
         Person otherCedric = new Person("Cédric", "Champeau", true);
@@ -154,7 +155,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="kotlin">tasks.withType&lt;JavaCompile&gt;().configureEach {
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">tasks.withType&lt;JavaCompile&gt;().configureEach {
     options.compilerArgs.add("--enable-preview")
 }</code></pre>
 </div>
@@ -164,7 +165,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="kotlin">tasks.withType&lt;Test&gt;().configureEach {
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">tasks.withType&lt;Test&gt;().configureEach {
     useJUnitPlatform()
     jvmArgs("--enable-preview")
 }</code></pre>
@@ -185,7 +186,7 @@ All you need is to tell what JDK to use and Gradle will take care of finding a J
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="kotlin">java {
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(15))
     }
@@ -230,10 +231,10 @@ All you need is to tell what JDK to use and Gradle will take care of finding a J
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

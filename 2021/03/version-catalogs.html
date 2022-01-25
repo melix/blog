@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -96,7 +97,7 @@ For example, let&#8217;s imagine that you have a multi-project build with this l
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>root
+<pre class="highlightjs highlight"><code class="language-none hljs">root
  |---- client
  |---- server</code></pre>
 </div>
@@ -108,7 +109,7 @@ For example, both of them would need Guava as an implementation detail and JUnit
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
     implementation("com.google.guava:guava:30.0-jre")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -146,7 +147,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">gradle.properties</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>guavaVersion=30.0-jre</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">guavaVersion=30.0-jre</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -154,7 +155,7 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code>dependencies {
+<pre class="highlightjs highlight"><code class="language-none hljs">dependencies {
     implementation("com.google.guava:guava:${guavaVersion}")
 }</code></pre>
 </div>
@@ -165,7 +166,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">extra properties</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">ext {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">ext {
    guavaVersion = '30.0-jre'
 }
 
@@ -185,7 +186,7 @@ dependencies {
 <div class="listingblock">
 <div class="title">buildSrc/src/main/kotlin/Libs.kt</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="kotlin">object Libs {
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">object Libs {
    val guava = "com.google.guava:guava:30.0-jre"
 }</code></pre>
 </div>
@@ -196,7 +197,7 @@ dependencies {
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>dependencies {
+<pre class="highlightjs highlight"><code class="language-none hljs">dependencies {
     implementation(Libs.guava)
 }</code></pre>
 </div>
@@ -218,7 +219,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">enableFeaturePreview("VERSION_CATALOGS")</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">enableFeaturePreview("VERSION_CATALOGS")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -227,7 +228,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <div class="listingblock">
 <div class="title">gradle/libs.versions.toml</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="toml">[libraries]
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[libraries]
 guava = "com.google.guava:guava:30.0-jre"
 junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
 junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
@@ -243,7 +244,7 @@ You still have to declare your dependencies, but this now can be done using a <e
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
     implementation(libs.guava)
     testImplementation(libs.testDependencies)
 }</code></pre>
@@ -264,7 +265,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">gradle/libs.versions.toml</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="toml">[versions]
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[versions]
 groovy = "2.5.14"
 guava = "30.0-jre"
 jupiter = "5.7.1"
@@ -299,7 +300,7 @@ The TOML format also provides us with the ability to declare <a href="https://do
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">dependencyResolutionManagement {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencyResolutionManagement {
    versionCatalogs {
       libs {
            alias("guava").to("com.google.guava", "guava").versionRef("guava")
@@ -327,7 +328,7 @@ For example, let&#8217;s imagine that the Spring Boot team <a href="https://docs
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">dependencyResolutionManagement {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencyResolutionManagement {
    versionCatalogs {
        spring {
            from("org.springframework:spring-catalog:1.0')
@@ -343,7 +344,7 @@ Therefore, you&#8217;d be able to use whatever version of SLF4J the Spring team 
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
     implementation(spring.slf4j)
 }</code></pre>
 </div>
@@ -410,10 +411,10 @@ Thanks to Gradle&#8217;s advanced dependency resolution engine, it&#8217;s total
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 

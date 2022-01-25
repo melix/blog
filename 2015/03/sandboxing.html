@@ -13,10 +13,11 @@
     <link href="/blog/css/asciidoctor.css" rel="stylesheet">
     <link href="/blog/css/base.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="/js/html5shiv.js"></script>
+      <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
 
     <!-- Fav and touch icons -->
@@ -24,11 +25,11 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
-    <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    </head>
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
   <body>
     <div id="wrap">
+   
 	
 	<!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -130,7 +131,7 @@ but the most simple example is just using the <code>Eval</code> class:</p>
 <div class="listingblock">
 <div class="title">Example.java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">int sum = (Integer) Eval.me("1+1");</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">int sum = (Integer) Eval.me("1+1");</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -139,7 +140,7 @@ add parameters, but the idea is that the code which is executed here is arbitrar
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">1+1
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">1+1
 x+y
 1+(2*x)**y
 cos(alpha)*r
@@ -151,7 +152,7 @@ v=1+x</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">println 'Hello'
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">println 'Hello'
 (0..100).each { println 'Blah' }
 Pong p = new Pong()
 println(new File('/etc/passwd').text)
@@ -237,7 +238,7 @@ to make the difference between the integration code and the scripts clear.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Sandbox {
     public static void main(String[] args)  {
         CompilerConfiguration conf = new CompilerConfiguration();				<i class="conum" data-value="1"></i><b>(1)</b>
         SecureASTCustomizer customizer = new SecureASTCustomizer();				<i class="conum" data-value="2"></i><b>(2)</b>
@@ -304,7 +305,7 @@ java.lang.SecurityException: Method calls not allowed on [java.lang.System]</pre
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">def c = System
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def c = System
 c.exit(-1)</code></pre>
 </div>
 </div>
@@ -319,7 +320,7 @@ with def</strong>, which is equivalent to declaring it as <code>Object</code>, s
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">((Object)System).exit(-1)
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">((Object)System).exit(-1)
 Class.forName('java.lang.System').exit(-1)
 ('java.lang.System' as Class).exit(-1)
 
@@ -363,7 +364,7 @@ of methods or properties called on "implicit this", like in builders for example
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">xml {
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">xml {
    cars {				 // cars is a method call on an implicit this: "this".cars(...)
      car(make:'Renault', model: 'Clio')
    }
@@ -397,7 +398,7 @@ checking extensions are even used internally in Groovy to support the static com
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">((Object)System).exit(-1)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">((Object)System).exit(-1)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -415,7 +416,7 @@ checking extensions are even used internally in Groovy to support the static com
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">def c = System
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def c = System
 c.exit(-1)</code></pre>
 </div>
 </div>
@@ -424,7 +425,7 @@ c.exit(-1)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@groovy.transform.TypeChecked // or even @CompileStatic
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@groovy.transform.TypeChecked // or even @CompileStatic
 void foo() {
   def c = System
   c.exit(-1)
@@ -447,7 +448,7 @@ parameter of the <code>@TypeChecked</code> annotation (or <code>@CompileStatic</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@TypeChecked(extensions=['SecureExtension1.groovy'])
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@TypeChecked(extensions=['SecureExtension1.groovy'])
 void foo() {
   def c = System
   c.exit(-1)
@@ -461,7 +462,7 @@ foo()</code></pre>
 <div class="listingblock">
 <div class="title">SecureExtension1.groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">onMethodSelection { expr, methodNode -&gt;					<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">onMethodSelection { expr, methodNode -&gt;					<i class="conum" data-value="1"></i><b>(1)</b>
    if (methodNode.declaringClass.name=='java.lang.System') {		<i class="conum" data-value="2"></i><b>(2)</b>
       addStaticTypeError("Method call is not allowed!", expr)		<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -523,7 +524,7 @@ start working with a bit more complex example.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">abs(cos(1+score))</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">abs(cos(1+score))</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -532,7 +533,7 @@ start working with a bit more complex example.</p>
 <div class="listingblock">
 <div class="title">Sandbox.java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">CompilerConfiguration conf = new CompilerConfiguration();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">CompilerConfiguration conf = new CompilerConfiguration();
 ImportCustomizer customizer = new ImportCustomizer();
 customizer.addStaticStars("java.lang.Math");                        <i class="conum" data-value="1"></i><b>(1)</b>
 conf.addCompilationCustomizers(customizer);
@@ -590,7 +591,7 @@ transparently:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(CompileStatic.class);
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(CompileStatic.class);
 conf.addCompilationCustomizers(astcz);</code></pre>
 </div>
 </div>
@@ -622,7 +623,7 @@ so that compilation passes. In this case, we will want to indicate that the <cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
         singletonMap("extensions", singletonList("SecureExtension2.groovy")),
         CompileStatic.class);</code></pre>
 </div>
@@ -633,7 +634,7 @@ so that compilation passes. In this case, we will want to indicate that the <cod
 <div class="listingblock">
 <div class="title">SecureExtension2.groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">unresolvedVariable { var -&gt;			<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">unresolvedVariable { var -&gt;			<i class="conum" data-value="1"></i><b>(1)</b>
    if (var.name=='score') {			<i class="conum" data-value="2"></i><b>(2)</b>
       return makeDynamic(var, double_TYPE)	<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -674,7 +675,7 @@ variable on another. So if we combine both, we have a first, complete, securing 
 <div class="listingblock">
 <div class="title">SecureExtension3.groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">// disallow calls on System
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">// disallow calls on System
 onMethodSelection { expr, methodNode -&gt;
     if (methodNode.declaringClass.name=='java.lang.System') {
         addStaticTypeError("Method call is not allowed!", expr)
@@ -694,7 +695,7 @@ unresolvedVariable { var -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
         singletonMap("extensions", singletonList("SecureExtension3.groovy")),
 	CompileStatic.class);</code></pre>
 </div>
@@ -741,7 +742,7 @@ thread locals to pass configuration data to the type checker.</p>
 <div class="listingblock">
 <div class="title">Sandbox.java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Sandbox {
     public static final String VAR_TYPES = "sandboxing.variable.types";
 
     public static final ThreadLocal&lt;Map&lt;String, Object&gt;&gt; COMPILE_OPTIONS = new ThreadLocal&lt;&gt;();		<i class="conum" data-value="1"></i><b>(1)</b>
@@ -815,7 +816,7 @@ thread locals to pass configuration data to the type checker.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">import static Sandbox.*
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import static Sandbox.*
 
 def typesOfVariables = COMPILE_OPTIONS.get()[VAR_TYPES]				<i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -871,7 +872,7 @@ the method descriptor consists of the fully-qualified class name of the method, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Sandbox {
     public static final String WHITELIST_PATTERNS = "sandboxing.whitelist.patterns";
 
     // ...
@@ -918,7 +919,7 @@ the method descriptor consists of the fully-qualified class name of the method, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.CompileStatic
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
@@ -1017,7 +1018,7 @@ for improved performance. But the idea is exactly the same.</p>
 <div class="listingblock">
 <div class="title">SandboxingTypeCheckingExtension.groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.CompileStatic
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport
 import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
@@ -1125,7 +1126,7 @@ class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport
 <div class="listingblock">
 <div class="title">Sandbox.java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Sandbox {
     public static final String WHITELIST_PATTERNS = "sandboxing.whitelist.patterns";
     public static final String VAR_TYPES = "sandboxing.variable.types";
 
@@ -1262,10 +1263,10 @@ glad if someone or some people improve this solution and make a pull request so 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/blog/js/jquery-1.9.1.min.js"></script>
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
     <script src="/blog/js/bootstrap.min.js"></script>
-    <script src="/blog/js/run_prettify.js"></script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
     <script type="text/javascript">
     var disqus_shortname = 'melixblog';
 
