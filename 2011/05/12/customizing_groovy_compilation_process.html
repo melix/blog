@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/1.8.html">1.8</a> 
 	</em>
-		<a href="/blog/tags/compilation.html"> compilation</a> 
+		<a href="/blog/tags/compilation.html">compilation</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_groovy_compilation_customizers">Groovy compilation customizers</h2>
@@ -99,7 +98,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import org.codehaus.groovy.control.customizers.ImportCustomizer
+<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 ...
 
@@ -109,8 +108,7 @@ importCustomizer.addImports('java.util.concurrent.atomic.AtomicInteger', 'java.u
 // star imports
 importCustomizer.addStarImports('java.util.concurrent')
 // static star imports
-importCustomizer.addStaticStar('java.lang.Math')
-</code></pre>
+importCustomizer.addStaticStar('java.lang.Math')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -118,13 +116,12 @@ importCustomizer.addStaticStar('java.lang.Math')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(importCustomizer)
 def shell = new GroovyShell(configuration)
 shell.evaluate """
   new AtomicInteger(0) // won't throw ClassNotFoundException
-"""
-</code></pre>
+"""</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -143,7 +140,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
+<pre class="prettyprint highlight"><code>final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
 final SecureASTCustomizer secure = new SecureASTCustomizer()
 secure.with {
     closuresAllowed = false
@@ -196,8 +193,7 @@ secure.with {
 
 CompilerConfiguration config = new CompilerConfiguration()
 config.addCompilationCustomizers(imports, secure)
-GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
-</code></pre>
+GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -233,7 +229,7 @@ GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>1+1
+<pre class="prettyprint highlight"><code>1+1
 ---
 
 will run perfectly, while this one :
@@ -275,8 +271,7 @@ def shell = new GroovyShell(config)
 shell.evaluate """
    def allowed = 1+1
    def Disallowed = 1+1
-"""
-</pre>
+"""</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -284,7 +279,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.SecureASTCustomizer
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
@@ -311,8 +306,7 @@ config.addCompilationCustomizers(secure)
 def shell = new GroovyShell(config)
 shell.evaluate """
    System.exit(0)
-"""
-</code></pre>
+"""</code></pre>
 </div>
 </div>
 </div>
@@ -325,10 +319,9 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(Log))
-def shell = new GroovyShell(configuration)
-</code></pre>
+def shell = new GroovyShell(configuration)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -352,10 +345,9 @@ def shell = new GroovyShell(configuration)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(MyASTTransformationClass))
-def shell = new GroovyShell(configuration)
-</code></pre>
+def shell = new GroovyShell(configuration)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -397,7 +389,7 @@ def shell = new GroovyShell(configuration)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

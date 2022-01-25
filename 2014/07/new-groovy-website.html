@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -196,7 +195,7 @@ of the website.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>menu {
+<pre class="prettyprint highlight"><code data-lang="groovy">menu {
     group('Groovy') {
         item 'Learn',                       'learn.html'
         item 'Documentation',               'documentation.html'
@@ -229,7 +228,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>downloads {
+<pre class="prettyprint highlight"><code data-lang="groovy">downloads {
     // ...
     distribution('Groovy 2.3') {
         description {
@@ -253,7 +252,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>books {
+<pre class="prettyprint highlight"><code data-lang="groovy">books {
     book('Groovy in Action, 2nd edition') {
         authors "Dierk König, Guillaume Laforge, Paul King, Cédric Champeau, Hamlet D'Arcy, Erik Pragt, and Jon Skeet"
         cover 'img/books/regina.png'
@@ -265,7 +264,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
 </div>
 </div>
 <div class="paragraph">
-<p>The same is done for all contents that need regular updates: user groups, events, projects of the ecosystem, &#8230; I think
+<p>The same is done for all contents that need regular updates: user groups, events, projects of the ecosystem, &#8230;&#8203; I think
 this DSL provides a very nice way to add contents to the website without caring about where it has to be done. You can
 really think of it as a small database, but making use of a Groovy DSL.</p>
 </div>
@@ -284,7 +283,7 @@ of templates (even if the model is dynamic), layouts and of course a human reada
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    head {
     title 'Groovy markup template engine in action!'
    }
@@ -308,7 +307,7 @@ and you can read my <a href="http://melix.github.io/blog/2014/02/markuptemplatee
 <div class="ulist">
 <ul>
 <li>
-<p>assets: contains static assets, like Javascript, CSS, images, &#8230;</p>
+<p>assets: contains static assets, like Javascript, CSS, images, &#8230;&#8203;</p>
 </li>
 <li>
 <p>html: contains pure HTML files which are easier to embed as is than using a markup syntax</p>
@@ -331,7 +330,7 @@ the <a href="http://beta.groovy-lang.org/ecosystem.html">Ecosystem</a> page is g
 <div class="listingblock">
 <div class="title">ecosystem.groovy</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>layout 'layouts/main.groovy', true,                                             <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">layout 'layouts/main.groovy', true,                                             <i class="conum" data-value="1"></i><b>(1)</b>
     pageTitle: 'The Groovy programming language - Ecosystem',                   <i class="conum" data-value="2"></i><b>(2)</b>
     mainContent: contents {                                                     <i class="conum" data-value="3"></i><b>(3)</b>
       div(id: 'content', class: 'page-1') {
@@ -442,7 +441,7 @@ say produced almost all contents. He spent countless hours fixing responsiveness
 </li>
 <li>
 <p><a href="https://twitter.com/CedricChampeau">I streamlined</a> the process by setting up the Gradle project, designing the sitemap DSL,
-the integration of the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>, CI integration, &#8230; that is to say pretty much all the "backend" stuff.</p>
+the integration of the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>, CI integration, &#8230;&#8203; that is to say pretty much all the "backend" stuff.</p>
 </li>
 <li>
 <p><strong>You</strong>, as a community, provided awesome <a href="https://github.com/groovy/groovy-website/pulls?direction=desc&amp;page=1&amp;sort=created&amp;state=closed">pull requests</a> within hours. Keep them coming, we love it!</p>
@@ -484,7 +483,7 @@ end, I think the combination works quite good and that the site as it is now is 
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

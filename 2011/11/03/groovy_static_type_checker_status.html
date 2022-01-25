@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/checking.html">checking</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/static.html"> static</a> 
+		<a href="/blog/tags/static.html">static</a> 
 	</em>
-		<a href="/blog/tags/type.html"> type</a> 
+		<a href="/blog/tags/type.html">type</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_about_groovy">About Groovy</h2>
@@ -95,29 +94,27 @@
 <p><em>Update: Now <a href="http://docs.codehaus.org/pages/viewpage.action?pageId=227053189">Groovy 2.0.0-beta-1 has been released</a> with the static type checker integrated! You can give it a try, and give us feedback of course.</em></p>
 </div>
 <div class="paragraph">
-<p>First of all, you’ll want to take a look at the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">Groovy Enhancement Proposal</a> page which describes what are the goals of this feature. Right now, it’s still in heavy development, so it’s being developed on its own branch (called <em>grumpy</em>). Basically, the idea is to make Groovy complain at compile time about types, instead of runtime. In fact, as Jochen Theodorou <a href="http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">explains on his blog post</a>, the Groovy compiler in &#8220;regular&#8221; mode, cannot make many checks at compile time regarding types, missing properties, missing methods and so on, because the language allows runtime meta-programming. Runtime meta-programming allows you, for example, to dynamically add members to a class, change the methods which are invoked, change the return types, bind external properties, … This means that if a program was to be statically checked, then it would fail, although it would work perfectly at runtime. An example is better than words, let’s take this code:</p>
+<p>First of all, you’ll want to take a look at the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">Groovy Enhancement Proposal</a> page which describes what are the goals of this feature. Right now, it’s still in heavy development, so it’s being developed on its own branch (called <em>grumpy</em>). Basically, the idea is to make Groovy complain at compile time about types, instead of runtime. In fact, as Jochen Theodorou <a href="http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">explains on his blog post</a>, the Groovy compiler in ``regular'' mode, cannot make many checks at compile time regarding types, missing properties, missing methods and so on, because the language allows runtime meta-programming. Runtime meta-programming allows you, for example, to dynamically add members to a class, change the methods which are invoked, change the return types, bind external properties, … This means that if a program was to be statically checked, then it would fail, although it would work perfectly at runtime. An example is better than words, let’s take this code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>String.metaClass.foo = { -&gt; 1 }
-assert 'Hello, World!'.foo() == 1
-</code></pre>
+<pre class="prettyprint highlight"><code>String.metaClass.foo = { -&gt; 1 }
+assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If you run it, then you will see that it’s perfectly fine: at <strong>runtime</strong>, we modify the metaClass of the String class so that it adds a new method on the String class which is known as foo() and returns an int. If this program was to be statically checked, then it would fail at compile time, because the compiler would not find the &#8220;foo&#8221; method on the String class.</p>
+<p>If you run it, then you will see that it’s perfectly fine: at <strong>runtime</strong>, we modify the metaClass of the String class so that it adds a new method on the String class which is known as foo() and returns an int. If this program was to be statically checked, then it would fail at compile time, because the compiler would not find the ``foo'' method on the String class.</p>
 </div>
 <div class="paragraph">
-<p>So, why should we add STC if it will make the compiler fail where a program is perfectly valid ? In fact, there are many reasons for that. One of them is that Java programmers who discover Groovy are often amazed about the conciseness of the language as compared to Java, and start programming in Groovy like they would in Java, that is to say with types and leveraging the syntax of Groovy. The key here is that many programmers never use the dynamic features of Groovy, but rather use the language as a &#8220;better Java syntax&#8221;. If you don’t do runtime metaprogramming, then you can do static type checking. This drives me to another reason for using STC: fail early. It’s always better to discover errors at compile time that at runtime. No need for long talks here: you can easily imagine a program running perfectly fine for long, until it reaches a poorly tested branch where you made a typo:</p>
+<p>So, why should we add STC if it will make the compiler fail where a program is perfectly valid ? In fact, there are many reasons for that. One of them is that Java programmers who discover Groovy are often amazed about the conciseness of the language as compared to Java, and start programming in Groovy like they would in Java, that is to say with types and leveraging the syntax of Groovy. The key here is that many programmers never use the dynamic features of Groovy, but rather use the language as a ``better Java syntax''. If you don’t do runtime metaprogramming, then you can do static type checking. This drives me to another reason for using STC: fail early. It’s always better to discover errors at compile time that at runtime. No need for long talks here: you can easily imagine a program running perfectly fine for long, until it reaches a poorly tested branch where you made a typo:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>void method(String message) {
+<pre class="prettyprint highlight"><code>void method(String message) {
    if (rareCondition) {
  println "Did you spot the error in this ${message.toUppercase()}?"
    }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -135,15 +132,14 @@ assert 'Hello, World!'.foo() == 1
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.transform.TypeChecked
+<pre class="prettyprint highlight"><code>import groovy.transform.TypeChecked
 
 @TypeChecked
 void method(String message) {
    if (rareCondition) {
  println "Did you spot the error in this ${message.toUppercase()}?"
    }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -175,7 +171,7 @@ void method(String message) {
 <p>type inferrence</p>
 </li>
 <li>
-<p>support for &#8220;GDK methods&#8221;, that is to say methods added by Groovy to common classes, aka extension methods</p>
+<p>support for ``GDK methods'', that is to say methods added by Groovy to common classes, aka extension methods</p>
 </li>
 <li>
 <p>support for Groovy idiomatic constructs like <em>with</em>, <em>each</em>, …</p>
@@ -200,7 +196,7 @@ void method(String message) {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_what_s_implemented_what_s_not_implemented">What’s implemented, what’s not implemented</h3>
+<h3 id="_whats_implemented_whats_not_implemented">What’s implemented, what’s not implemented</h3>
 <div class="paragraph">
 <p>The best way to find out what’s implemented or not is to checkout the <em>grumpy</em> branch from <a href="http://xircles.codehaus.org/projects/groovy/repo/git/repo">Codehaus Git repository</a> (also available on <a href="https://github.com/groovy/groovy-core/tree/grumpy">GitHub</a> and have a look at the unit tests located in <em>src/test/groovy/transform/stc</em>. Another way is to read the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">GEP-8 page on the wiki</a> which gives you examples plus textual explanations. However, this page is not always up-to-date. Let’s show some nice examples of already implemented stuff:</p>
 </div>
@@ -212,15 +208,14 @@ void method(String message) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>Dimension d = [100] // wrong number of arguments
+<pre class="prettyprint highlight"><code>Dimension d = [100] // wrong number of arguments
 Dimension d = ['100','200'] // wrong argument types
 
 class A {
  int x
  int y
  }
-A a = [x:100, y:200, z: 300] // missing property
-</code></pre>
+A a = [x:100, y:200, z: 300] // missing property</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -228,10 +223,9 @@ A a = [x:100, y:200, z: 300] // missing property
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def myname = 'Cedric'
+<pre class="prettyprint highlight"><code>def myname = 'Cedric'
 "My upper case name is ${myname.toUpperCase()}"
-println "My upper case name is ${myname}".toUpperCase()
-</code></pre>
+println "My upper case name is ${myname}".toUpperCase()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -239,24 +233,22 @@ println "My upper case name is ${myname}".toUpperCase()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def keys = [x:1,y:2,z:3]*.key
+<pre class="prettyprint highlight"><code>def keys = [x:1,y:2,z:3]*.key
 def values = [x:'1',y:'2',z:'3']*.value
 keys*.toUpperCase()
-values*.toUpperCase()
-</code></pre>
+values*.toUpperCase()</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>instanceof</p>
 </div>
 <div class="paragraph">
-<p>If we detect that we are in an &#8220;instanceof&#8221; block, we can avoid explicit casting:</p>
+<p>If we detect that we are in an ``instanceof'' block, we can avoid explicit casting:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>Object o
-if (o instanceof String) o.toUpperCase()
-</code></pre>
+<pre class="prettyprint highlight"><code>Object o
+if (o instanceof String) o.toUpperCase()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -267,15 +259,14 @@ if (o instanceof String) o.toUpperCase()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class A {
+<pre class="prettyprint highlight"><code>class A {
  void foo() {}
 }
 def name = new A()
 name.foo() // no need to cast
 name = 1
 name = '123'
-name.toInteger() // no need to cast, and toInteger() is defined by DGM
-</code></pre>
+name.toInteger() // no need to cast, and toInteger() is defined by DGM</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -283,19 +274,18 @@ name.toInteger() // no need to cast, and toInteger() is defined by DGM
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class A {
+<pre class="prettyprint highlight"><code>class A {
  void foo() {}
 }
 def name = new A()
 ((Foo)name).foo() // no need to cast
 name = 1
 name = '123'
-((String)name).toInteger() // no need to cast, and toInteger() is defined by DGM
-</code></pre>
+((String)name).toInteger() // no need to cast, and toInteger() is defined by DGM</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Casts are necessary because the <em>name</em> variable is assigned multiple times with different incompatible types. Personnaly, I think flow typing is more Groovy style than &#8220;regular&#8221; typing.</p>
+<p>Casts are necessary because the <em>name</em> variable is assigned multiple times with different incompatible types. Personnaly, I think flow typing is more Groovy style than ``regular'' typing.</p>
 </div>
 </div>
 <div class="sect2">
@@ -309,7 +299,7 @@ name = '123'
 <p>Support for generics</p>
 </li>
 <li>
-<p>Support for Groovy idiomatic constructs like &#8220;each&#8221;</p>
+<p>Support for Groovy idiomatic constructs like ``each''</p>
 </li>
 </ul>
 </div>
@@ -330,10 +320,9 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>['I','feel','grumpy'].each {
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each {
    println it.toUpperCase()
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -344,8 +333,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>private static  Iterator each(Iterator iter, Closure closure)
-</code></pre>
+<pre class="prettyprint highlight"><code>private static  Iterator each(Iterator iter, Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -353,8 +341,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public static  Iterator each(Closure closure)
-</code></pre>
+<pre class="prettyprint highlight"><code>public static  Iterator each(Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -384,10 +371,9 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>['I','feel','grumpy'].each { String it -&gt;
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each { String it -&gt;
    println it.toUpperCase()
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -395,8 +381,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }
-</code></pre>
+<pre class="prettyprint highlight"><code>void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -417,10 +402,9 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class MyClass {
+<pre class="prettyprint highlight"><code>class MyClass {
    void myMethod(@ClosureTypeInfo(argTypes=[T]) Closure strategy) { ... } // this is not allowed because of type erasure
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -428,8 +412,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public static
-</code></pre>
+<pre class="prettyprint highlight"><code>public static</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -440,8 +423,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }
-</code></pre>
+<pre class="prettyprint highlight"><code>public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -449,10 +431,9 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>['I','feel','grumpy'].each {
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each {
    println it.toUpperCase()
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -476,10 +457,9 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>['I','feel','grumpy'].each { String it -&gt;
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each { String it -&gt;
    println it.toUpperCase()
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -487,13 +467,12 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class StringList extends LinkedList {}
+<pre class="prettyprint highlight"><code>class StringList extends LinkedList {}
 def list = new StringList()
 ...
 list.each {
    println it.toUpperCase()
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -501,7 +480,7 @@ list.each {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class Foo {
+<pre class="prettyprint highlight"><code>class Foo {
     T foo(Closure cl) {
         cl.call(1)
     }
@@ -516,8 +495,7 @@ assert foo.foo {
 } == 2
 assert foo.bar {
     it
-}.class == HashSet
-</code></pre>
+}.class == HashSet</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -531,9 +509,8 @@ assert foo.bar {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def strategy = { println it.toUpperCase() }
-list.each(strategy)
-</code></pre>
+<pre class="prettyprint highlight"><code>def strategy = { println it.toUpperCase() }
+list.each(strategy)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -541,9 +518,8 @@ list.each(strategy)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def strategy = { String it -&gt; println it.toUpperCase() }
-list.each(strategy)
-</code></pre>
+<pre class="prettyprint highlight"><code>def strategy = { String it -&gt; println it.toUpperCase() }
+list.each(strategy)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -555,7 +531,7 @@ list.each(strategy)
 <h2 id="_last_word">Last word</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I hope this post has given you the opportunity to better understand the goals of the static type checker in upcoming Groovy. It is also there for you to give your opinion, as we want the behaviour of the type checker to be &#8220;community driven&#8221;, that is to say we want to find a behaviour that matches your expectations. Eventually, feel free to contribute, and suggest ways to solve problems like the ones I have highlighted here. Thanks for reading!</p>
+<p>I hope this post has given you the opportunity to better understand the goals of the static type checker in upcoming Groovy. It is also there for you to give your opinion, as we want the behaviour of the type checker to be ``community driven'', that is to say we want to find a behaviour that matches your expectations. Eventually, feel free to contribute, and suggest ways to solve problems like the ones I have highlighted here. Thanks for reading!</p>
 </div>
 </div>
 </div></p>
@@ -585,7 +561,7 @@ list.each(strategy)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

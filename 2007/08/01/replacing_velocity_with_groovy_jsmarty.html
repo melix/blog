@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/smarty.html"> smarty</a> 
+		<a href="/blog/tags/smarty.html">smarty</a> 
 	</em>
-		<a href="/blog/tags/velocity.html"> velocity</a> 
+		<a href="/blog/tags/velocity.html">velocity</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_templating_languages_as_first_choice_technology_for_front_end_customization">Templating languages as first choice technology for front-end customization </h2>
@@ -90,7 +89,7 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_velocity_s_main_drawback">Velocity’s main drawback </h2>
+<h2 id="_velocitys_main_drawback">Velocity’s main drawback </h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>But Velocity does not offer the softness Smarty has : imagine your web designer needs a date format tag in order to pretty print a date variable. In Smarty, you just need to write a plugin (ok, for dates it is just included ;-)), and it is straight available in your templates. With Velocity, you must imagine all usages of the variables or objects you expose before you make a template. I mean that you must think that a web designer would like to format a date, then expose the date utility to the template.</p>
@@ -103,7 +102,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.text.SimpleTemplateEngine
+<pre class="prettyprint highlight"><code>import groovy.text.SimpleTemplateEngine
 
 def tpl_src ='''
 &lt;% def formatDate(date) {
@@ -114,8 +113,7 @@ The date today is &lt;% print formatDate(date) %&gt;'''
 
 def binding = [ "date": Calendar.getInstance().getTime() ]
 def engine = new SimpleTemplateEngine()
-println engine.createTemplate(tpl_src).make(binding)
-</code></pre>
+println engine.createTemplate(tpl_src).make(binding)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -124,7 +122,7 @@ println engine.createTemplate(tpl_src).make(binding)
 </div>
 </div>
 <div class="sect1">
-<h2 id="__should_i_move"> Should I move ?</h2>
+<h2 id="_should_i_move"> Should I move ?</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Well, before moving, I’ll have to double check things like :</p>
@@ -176,7 +174,7 @@ println engine.createTemplate(tpl_src).make(binding)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

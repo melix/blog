@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,7 +73,7 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/misconceptions.html"> misconceptions</a> 
+		<a href="/blog/tags/misconceptions.html">misconceptions</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -125,7 +124,7 @@ I always said that the learning curve of Gradle is difficult, but once you get i
 <p>One of the reasons is that Gradle is fundamentally different from other build tools: it focuses on modeling software components and their relationships, and as such it can be considered as a language for building <em>any</em> kind of application. It raises the concept of convention over configuration to another level.</p>
 </div>
 <div class="paragraph">
-<p>That&#8217;s no surprise that Gradle has been successfully used to build software in various ecosystems: the JVM, where it&#8217;s born (with Java, Groovy, Scala in particular), but also native development (take a look at <a href="https://nokee.dev/">Nokee</a> if you are interested), Go (<a href="https://github.com/gogradle/gogradle">Go Gradle</a>), &#8230;</p>
+<p>That&#8217;s no surprise that Gradle has been successfully used to build software in various ecosystems: the JVM, where it&#8217;s born (with Java, Groovy, Scala in particular), but also native development (take a look at <a href="https://nokee.dev/">Nokee</a> if you are interested), Go (<a href="https://github.com/gogradle/gogradle">Go Gradle</a>), &#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>Some ecosystems actually build on top of unique features of Gradle, in particular in terms of dependency management: Android (with multiple flavors of libraries and applications) or Kotlin in particular (with Kotlin Multiplatform).</p>
@@ -148,16 +147,16 @@ I always said that the learning curve of Gradle is difficult, but once you get i
 <p>That is not quite correct in case for Gradle: Gradle is responsible for wiring units of work together, either through explicit or implicit dependencies.
 It&#8217;s important to understand that "dependency" here has a wider meaning: it&#8217;s something which is required to be able to execute a unit of work.
 There is, technically speaking, no difference between an external and an internal dependency. What matters is that we have units of work, which have inputs and outputs.
-The role of Gradle is to wire things so that everything is ordered properly and optimized for execution (parallelism, caching, &#8230;).
+The role of Gradle is to wire things so that everything is ordered properly and optimized for execution (parallelism, caching, &#8230;&#8203;).
 It&#8217;s a mistake to think that there are only tasks and dependencies (files, mostly): there are work units, inputs and outputs.
-A task (say, <code>JavaCompile</code>) is just <em>one kind</em> of work unit, but that&#8217;s not the only one. Here are some other kind of work units: transforming artifacts (for example, transform a <em>jar</em> into something else before it is consumed), downloading a toolchain, uploading an artifact to the build cache, &#8230; A task itself can be splitted into several work units in order to maximize incrementality and parallelism.</p>
+A task (say, <code>JavaCompile</code>) is just <em>one kind</em> of work unit, but that&#8217;s not the only one. Here are some other kind of work units: transforming artifacts (for example, transform a <em>jar</em> into something else before it is consumed), downloading a toolchain, uploading an artifact to the build cache, &#8230;&#8203; A task itself can be splitted into several work units in order to maximize incrementality and parallelism.</p>
 </div>
 <div class="paragraph">
 <p>A lot of the criticism we see on Gradle is because there&#8217;s a mismatch between the mental model of what Gradle is, and the surface, which is the language(s) it uses to configure the actual model.</p>
 </div>
 <div class="paragraph">
 <p>A lot of the confusion comes from the fact that while Gradle has a vision, it should be better shared and explained.
-It&#8217;s also victim of its age which means success: the road towards fine grained execution, safe parallelism, configuration, &#8230; is hard and there are some APIs which are sub-optimal for this, and <a href="https://docs.google.com/forms/d/e/1FAIpQLSc9aQrjjsxVqXDkYR35ExeiI1yEIksRXVtN6asuaem084l3aA/viewform">maintaining backwards compatibility is a day-to-day challenge</a>.</p>
+It&#8217;s also victim of its age which means success: the road towards fine grained execution, safe parallelism, configuration, &#8230;&#8203; is hard and there are some APIs which are sub-optimal for this, and <a href="https://docs.google.com/forms/d/e/1FAIpQLSc9aQrjjsxVqXDkYR35ExeiI1yEIksRXVtN6asuaem084l3aA/viewform">maintaining backwards compatibility is a day-to-day challenge</a>.</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s explain a bit what Gradle has to do, when you say that you want to execute a <em>task</em>:</p>
@@ -192,16 +191,16 @@ It&#8217;s also true that the docs contain <em>outdated patterns</em> and it&#82
 <div class="ulist">
 <ul>
 <li>
-<p>samples: <a href="https://docs.gradle.org/current/samples/index.html">https://docs.gradle.org/current/samples/index.html</a></p>
+<p>samples: <a href="https://docs.gradle.org/current/samples/index.html" class="bare">https://docs.gradle.org/current/samples/index.html</a></p>
 </li>
 <li>
-<p>guides (slowly replaced with the samples above): <a href="https://gradle.org/guides/">https://gradle.org/guides/</a></p>
+<p>guides (slowly replaced with the samples above): <a href="https://gradle.org/guides/" class="bare">https://gradle.org/guides/</a></p>
 </li>
 <li>
-<p>free trainings: <a href="https://gradle.com/training/">https://gradle.com/training/</a></p>
+<p>free trainings: <a href="https://gradle.com/training/" class="bare">https://gradle.com/training/</a></p>
 </li>
 <li>
-<p>webcasts: <a href="https://gradle.com/blog/tag/webcast/">https://gradle.com/blog/tag/webcast/</a></p>
+<p>webcasts: <a href="https://gradle.com/blog/tag/webcast/" class="bare">https://gradle.com/blog/tag/webcast/</a></p>
 </li>
 </ul>
 </div>
@@ -214,8 +213,8 @@ It&#8217;s also true that the docs contain <em>outdated patterns</em> and it&#82
 </div>
 </blockquote>
 <div class="attribution">
-<cite>The Problem With Gradle</cite><br>
-&#8212; Bruce Eckel
+&#8212; Bruce Eckel<br>
+<cite>The Problem With Gradle</cite>
 </div>
 </div>
 <div class="paragraph">
@@ -233,7 +232,7 @@ We, in the Gradle team, think that we can be more correct, more performant <em>w
 <p>At this stage, it&#8217;s time to deconstruct some misconceptions of the blog post, because as long as this message is propagated, we will not achieve what should be the focus of our industry: safer, faster, reproducible builds for everyone.</p>
 </div>
 <div class="sect3">
-<h4 id="_1_you_re_not_configuring_you_re_programming">1. You&#8217;re not Configuring, You’re Programming</h4>
+<h4 id="_1_youre_not_configuring_youre_programming">1. You&#8217;re not Configuring, You’re Programming</h4>
 <div class="paragraph">
 <p>You should see <em>Gradle build scripts</em> as <em>configuration scripts</em>, which actually configure a <em>model</em>.
 The surface is a DSL, a language, but what you do, what you <em>should do</em>, is to declaratively model your software.</p>
@@ -243,15 +242,14 @@ The surface is a DSL, a language, but what you do, what you <em>should do</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
    id 'java-library'
 }
 
 dependencies {
     api 'org.springframework:spring-core:2.5.6'
     implementation 'org.apache.commons:commons-lang3:3.3.10'
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -259,7 +257,7 @@ dependencies {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="kotlin">plugins {
     id("org.gradle.presentation.asciidoctor")
 }
 
@@ -329,12 +327,12 @@ I think it&#8217;s a mistake to consider that you need a programming language to
 <div class="sect3">
 <h4 id="_4_there_are_many_ways_to_do_the_same_thing">4. There are Many Ways to do the Same Thing</h4>
 <div class="paragraph">
-<p>This one is one of my favourites. I always read "there are too many ways to do the same thing". Sure there are. Just like in Java, can you tell me how many ways you can write a loop? Let&#8217;s see&#8230;</p>
+<p>This one is one of my favourites. I always read "there are too many ways to do the same thing". Sure there are. Just like in Java, can you tell me how many ways you can write a loop? Let&#8217;s see&#8230;&#8203;</p>
 </div>
 <div class="listingblock">
 <div class="title">indexed loop</div>
 <div class="content">
-<pre class="prettyprint"><code>for (int i=0; i&lt;items.length(); i++) {
+<pre class="prettyprint highlight"><code>for (int i=0; i&lt;items.length(); i++) {
    ...
 }</code></pre>
 </div>
@@ -342,7 +340,7 @@ I think it&#8217;s a mistake to consider that you need a programming language to
 <div class="listingblock">
 <div class="title">foreach loop</div>
 <div class="content">
-<pre class="prettyprint"><code>for (String item: items) {
+<pre class="prettyprint highlight"><code>for (String item: items) {
 ...
 }</code></pre>
 </div>
@@ -350,30 +348,30 @@ I think it&#8217;s a mistake to consider that you need a programming language to
 <div class="listingblock">
 <div class="title">while loop</div>
 <div class="content">
-<pre class="prettyprint"><code>Iterator&lt;String&gt; it = items.iterator();
+<pre class="prettyprint highlight"><code>Iterator&lt;String&gt; it = items.iterator();
 while (it.hasNext()) {
   ...
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>(not mentioning the <code>do...while</code> variant)</p>
+<p>(not mentioning the <code>do&#8230;&#8203;while</code> variant)</p>
 </div>
 <div class="listingblock">
 <div class="title">streams</div>
 <div class="content">
-<pre class="prettyprint"><code>items.stream()
+<pre class="prettyprint highlight"><code>items.stream()
    .map(...)</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="title">streams again</div>
 <div class="content">
-<pre class="prettyprint"><code>items.forEach(...)</code></pre>
+<pre class="prettyprint highlight"><code>items.forEach(...)</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Does anyone complain that Java has too many ways to do the same thing? Certainly not, because there are different reasons: historical (good old loops came first), performance (sometimes streams are not that fast), semantic (iterator lets you delete things while iterating), &#8230; Even Python has many ways to do the same thing. Isn&#8217;t it the case when you&#8217;re free to write code? Some consider it&#8217;s a reason alone <em>not to use Gradle</em>. It would be a mistake, because you don&#8217;t stop programming Java because it has too many ways to write a loop.</p>
+<p>Does anyone complain that Java has too many ways to do the same thing? Certainly not, because there are different reasons: historical (good old loops came first), performance (sometimes streams are not that fast), semantic (iterator lets you delete things while iterating), &#8230;&#8203; Even Python has many ways to do the same thing. Isn&#8217;t it the case when you&#8217;re free to write code? Some consider it&#8217;s a reason alone <em>not to use Gradle</em>. It would be a mistake, because you don&#8217;t stop programming Java because it has too many ways to write a loop.</p>
 </div>
 <div class="paragraph">
 <p>The thing is "use the right tool for the right job". Gradle is no different. Except that there are not so many ways to do things 😉 Some are legacy patterns, and there we need to do better at documenting, some are just because people are trying to write code in their build scripts when <em>they shouldn&#8217;t</em> (write plugins!).</p>
@@ -409,8 +407,8 @@ There will be a blog post from the team about this project, in the meantime you 
 </div>
 </blockquote>
 <div class="attribution">
-<cite>Profiles of the Future: An Inquiry Into the Limits of the Possible</cite><br>
-&#8212; Arthur C. Clarke
+&#8212; Arthur C. Clarke<br>
+<cite>Profiles of the Future: An Inquiry Into the Limits of the Possible</cite>
 </div>
 </div>
 <div class="paragraph">
@@ -421,7 +419,7 @@ There will be a blog post from the team about this project, in the meantime you 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public abstract class ProcessTemplates extends DefaultTask {
+<pre class="prettyprint highlight"><code data-lang="java">public abstract class ProcessTemplates extends DefaultTask {
 
     @Input
     public abstract Property&lt;TemplateEngineType&gt; getTemplateEngine();
@@ -543,7 +541,7 @@ However, with the experimental <a href="https://docs.gradle.org/current/userguid
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

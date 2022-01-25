@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,7 +73,7 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/micronaut.html"> micronaut</a> 
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -93,7 +92,7 @@ Today I&#8217;m going to focus on an example I found in the Micronaut build itse
 <div class="sectionbody">
 <div class="paragraph">
 <p>In a nutshell, Gradle works by computing a graph of task dependencies.
-Say that you want to build a JAR file: you&#8217;re going to call the <code>jar</code> task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc&#8230;
+Say that you want to build a JAR file: you&#8217;re going to call the <code>jar</code> task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc&#8230;&#8203;
 Determining the <em>task dependencies</em>, that is to say what other tasks need to be executed, is done by looking up at 3 different things:</p>
 </div>
 <div class="olist arabic">
@@ -117,7 +116,7 @@ Determining the <em>task dependencies</em>, that is to say what other tasks need
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint gradle language-gradle"><code>task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+<pre class="prettyprint highlight"><code data-lang="gradle">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
     from "src/main/template"
@@ -138,7 +137,7 @@ Yet, there&#8217;s something interesting in what it does, which is a <strong>typ
 </div>
 <div class="paragraph">
 <p>It&#8217;s tempting, especially when you&#8217;re not used to Gradle, to think the same way as other build tools do, like Maven or Ant.
-You&#8217;re thinking "there&#8217;s a task, jar, which basically packages everything it finds in <code>classes/groovy/main</code>, so if I want to add more stuff to the jar task, let&#8217;s put more stuff in <code>classes/groovy/main</code>".</p>
+You&#8217;re thinking "there&#8217;s a task, jar, which basically packages everything it finds in <code>classes/groovy/main</code>, so if I want to add more stuff to the jar task, let&#8217;s put more stuff in `classes/groovy/main`".</p>
 </div>
 <div class="paragraph">
 <p><strong>This is wrong!</strong></p>
@@ -201,7 +200,7 @@ So, what are the inputs of our <code>docsFileJar</code>? The resources we want t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+<pre class="prettyprint highlight"><code data-lang="groovy">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
     from "src/main/template"
@@ -247,7 +246,7 @@ jar {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register('docFilesJar', Jar) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register('docFilesJar', Jar) {
     description = 'Package up files used for generating documentation.'
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
@@ -308,7 +307,7 @@ tasks.named('jar', Jar) {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

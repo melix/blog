@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,24 +73,22 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/cglib.html">cglib</a> 
 	</em>
-		<a href="/blog/tags/delegate.html"> delegate</a> 
+		<a href="/blog/tags/delegate.html">delegate</a> 
 	</em>
-		<a href="/blog/tags/design.html"> design</a> 
+		<a href="/blog/tags/design.html">design</a> 
 	</em>
-		<a href="/blog/tags/java.html"> java</a> 
+		<a href="/blog/tags/java.html">java</a> 
 	</em>
-		<a href="/blog/tags/pattern.html"> pattern</a> 
+		<a href="/blog/tags/pattern.html">pattern</a> 
 	</p>
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><div class="paragraph">
 <p>This week I had some third party class I needed to override, but as in many cases, I had to use the delegate design pattern in order to be able to expand the class without modifying the 3rd party library.<br>
  <br>
  However, I came to a problem when the base class used the visitor pattern. The following snippet explains it all:<br></p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class MyBaseClass implements AnInterface {
+<pre class="prettyprint highlight"><code>public class MyBaseClass implements AnInterface {
 
 ...
 
@@ -99,8 +96,7 @@ public void accept(Visitor visitor) {
    visitor.visit(this);
 }
 
-...
-</code></pre>
+...</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -108,13 +104,12 @@ public void accept(Visitor visitor) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class DelegatingClass implements AnInterface,AnotherInterface {
+<pre class="prettyprint highlight"><code>public class DelegatingClass implements AnInterface,AnotherInterface {
 ...
 public void visit(Visitor visitor) {
    delegate.visit(visitor); // ok, assume you can't do visitor.visit(this), that would be too easy. Imagine the delegate does more stuff or imagine another method like doSomething() { something.call(this); }
 }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -122,7 +117,7 @@ public void visit(Visitor visitor) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package com.lingway.cglib;
+<pre class="prettyprint highlight"><code>package com.lingway.cglib;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -166,8 +161,7 @@ public class AdvancedEnhancer {
      * @return T&lt;/&gt; delegating object implementing the T interface
      */
     @SuppressWarnings("unchecked")
-    public static
-</code></pre>
+    public static</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -175,7 +169,7 @@ public class AdvancedEnhancer {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package com.lingway.cglib;
+<pre class="prettyprint highlight"><code>package com.lingway.cglib;
 
 /**
  * A proof of concept of the "cglib delegate pattern"
@@ -212,16 +206,13 @@ public class ProofOfConcept {
         System.out.println("mixin.self (shows this is the proxy) = " + mixin.self());
         mixin.echo();
     }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In the previous example, I &#8220;enhance&#8221; the Self class with the features of the Echo class. This is really easy, and perfectly solves our problem. Note that technically, the delegate and the delegator are switched.<br>
+<p>In the previous example, I ``enhance'' the Self class with the features of the Echo class. This is really easy, and perfectly solves our problem. Note that technically, the delegate and the delegator are switched.<br>
  <br>
  Enjoy !</p>
-</div>
-</div>
 </div></p>
    
 
@@ -249,7 +240,7 @@ public class ProofOfConcept {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

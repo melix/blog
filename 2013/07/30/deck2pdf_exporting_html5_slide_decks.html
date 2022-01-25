@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,19 +73,19 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/deckjs.html">deckjs</a> 
 	</em>
-		<a href="/blog/tags/dzslides.html"> dzslides</a> 
+		<a href="/blog/tags/dzslides.html">dzslides</a> 
 	</em>
-		<a href="/blog/tags/html5.html"> html5</a> 
+		<a href="/blog/tags/html5.html">html5</a> 
 	</em>
-		<a href="/blog/tags/impressjs.html"> impressjs</a> 
+		<a href="/blog/tags/impressjs.html">impressjs</a> 
 	</em>
-		<a href="/blog/tags/javascript.html"> javascript</a> 
+		<a href="/blog/tags/javascript.html">javascript</a> 
 	</em>
-		<a href="/blog/tags/pdf.html"> pdf</a> 
+		<a href="/blog/tags/pdf.html">pdf</a> 
 	</em>
-		<a href="/blog/tags/revealjs.html"> revealjs</a> 
+		<a href="/blog/tags/revealjs.html">revealjs</a> 
 	</em>
-		<a href="/blog/tags/slideshow.html"> slideshow</a> 
+		<a href="/blog/tags/slideshow.html">slideshow</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_exporting_your_awesome_html5_presentation_to_pdf">Exporting your awesome HTML5 presentation to PDF</h2>
@@ -126,9 +125,8 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>totalSlides=$.deck('getSlides').length
-nextSlide=$.deck('next')
-</code></pre>
+<pre class="prettyprint highlight"><code>totalSlides=$.deck('getSlides').length
+nextSlide=$.deck('next')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -136,7 +134,7 @@ nextSlide=$.deck('next')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>setup = {
+<pre class="prettyprint highlight"><code>setup = {
     js 'var api = impress();'
     js '''var $$ = function ( selector, context ) {
         context = context || document;
@@ -156,8 +154,7 @@ totalSlides = {
 }
 
 // longer pause because of transitions
-pause = 2000
-</code></pre>
+pause = 2000</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -191,7 +188,7 @@ pause = 2000
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

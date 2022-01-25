@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
-		<a href="/blog/tags/plugins.html"> plugins</a> 
+		<a href="/blog/tags/plugins.html">plugins</a> 
 	
-		<a href="/blog/tags/provider-api.html"> provider api</a> 
+		<a href="/blog/tags/provider-api.html">provider api</a> 
 	</p>
 			
   			<p><div class="sect1">
@@ -133,7 +132,7 @@ We&#8217;re also going to create 2 files in that directory:</p>
 <div class="listingblock">
 <div class="title">flex-plugin/settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>rootProject.name = 'jflex-plugin'</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">rootProject.name = 'jflex-plugin'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -142,7 +141,7 @@ We&#8217;re also going to create 2 files in that directory:</p>
 <div class="listingblock">
 <div class="title">flex-plugin/build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id 'java-gradle-plugin'
 }
 
@@ -179,7 +178,7 @@ This is all the boilerplate you have to write to create a plugin, really.</p>
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>includeBuild "jflex-plugin"</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">includeBuild "jflex-plugin"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -188,7 +187,7 @@ This is all the boilerplate you have to write to create a plugin, really.</p>
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id 'java-library'
     id 'io.micronaut.internal.jflex'
 }</code></pre>
@@ -222,17 +221,17 @@ Here&#8217;s its skeleton:</p>
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>@CacheableTask                                                  <b>(1)</b>
-public abstract class JFlexTask extends DefaultTask {           <b>(2)</b>
+<pre class="prettyprint highlight"><code data-lang="java">@CacheableTask                                                  // <b class="conum">(1)</b>
+public abstract class JFlexTask extends DefaultTask {           // <b class="conum">(2)</b>
 
-    @InputDirectory                                             <b>(3)</b>
+    @InputDirectory                                             // <b class="conum">(3)</b>
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract DirectoryProperty getSourceDirectory();
 
-    @OutputDirectory                                            <b>(4)</b>
+    @OutputDirectory                                            // <b class="conum">(4)</b>
     public abstract DirectoryProperty getOutputDirectory();
 
-    @TaskAction                                                 <b>(5)</b>
+    @TaskAction                                                 // <b class="conum">(5)</b>
     public void generateSources() {
       // call JFlex library
     }
@@ -279,9 +278,9 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("generateLexer", JFlexTask) {
-    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) <b>(1)</b>
-    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  <b>(2)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) // <b class="conum">(1)</b>
+    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  // <b class="conum">(2)</b>
 }</code></pre>
 </div>
 </div>
@@ -301,7 +300,7 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("generateLexer", JFlexTask) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
     sourceDirectory = file("src/main/jflex")
     outputDirectory = file("build/generated/jflex')
 }</code></pre>
@@ -349,28 +348,28 @@ It&#8217;s time to create our plugin class:</p>
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexPlugin.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  <b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="java">public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  // <b class="conum">(1)</b>
     @Override
     public void apply(Project project) {
-        project.getPluginManager().apply(JavaPlugin.class);                            <b>(2)</b>
+        project.getPluginManager().apply(JavaPlugin.class);                            // <b class="conum">(2)</b>
         JavaPluginExtension javaExt = project.getExtensions()
-           .getByType(JavaPluginExtension.class);                                      <b>(3)</b>
+           .getByType(JavaPluginExtension.class);                                      // <b class="conum">(3)</b>
         TaskProvider&lt;JFlexTask&gt; generateLexer = project.getTasks()
-            .register("generateLexer", JFlexTask.class, task -&gt; {                      <b>(4)</b>
+            .register("generateLexer", JFlexTask.class, task -&gt; {                      // <b class="conum">(4)</b>
                task.setGroup(LifecycleBasePlugin.BUILD_GROUP);
                task.setDescription("Generates lexer files from JFlex grammar files.");
                task.getSourceDirectory().convention(
-                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    <b>(5)</b>
+                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    // <b class="conum">(5)</b>
                );
                task.getOutputDirectory().convention(
-                    project.getLayout().getBuildDirectory().dir("generated/jflex")     <b>(6)</b>
+                    project.getLayout().getBuildDirectory().dir("generated/jflex")     // <b class="conum">(6)</b>
                );
         });
         // Register the output of the JFlex task as generated sources
         javaExt.getSourceSets()
                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                 .getJava()
-                .srcDir(generateLexer);                                                <b>(7)</b>
+                .srcDir(generateLexer);                                                // <b class="conum">(7)</b>
     }
 }</code></pre>
 </div>
@@ -432,7 +431,7 @@ In particular, it defines the Java source sets (<code>main</code> and <code>test
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>javaExt.getSourceSets()
+<pre class="prettyprint highlight"><code data-lang="java">javaExt.getSourceSets()
     .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     .getJava()
     .srcDir(generateLexer);</code></pre>
@@ -478,7 +477,7 @@ Instead of having our task directly invoke JFlex, we need to create a class whic
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>@CacheableTask
+<pre class="prettyprint highlight"><code data-lang="java">@CacheableTask
 public abstract class JFlexTask extends DefaultTask {
 
     @InputDirectory
@@ -517,7 +516,7 @@ In this case, we declare <em>classloader isolation</em>, as well as the inputs o
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexAction.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
+<pre class="prettyprint highlight"><code data-lang="java">public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
     public interface Parameters extends WorkParameters {
         DirectoryProperty getSourceDirectory();
         ConfigurableFileCollection getSourceFiles();
@@ -549,7 +548,7 @@ In this case, we declare <em>classloader isolation</em>, as well as the inputs o
 </div>
 <div class="paragraph">
 <p>The action declares its inputs with the <code>WorkParameters</code> interface and the code which is going to be executed in an isolated classloader lives in the <code>execute</code> method.
-You can see how it uses static state (<code>OptionsUtils.setDefaultOptions()</code>, <code>Options.dump</code>, &#8230;).
+You can see how it uses static state (<code>OptionsUtils.setDefaultOptions()</code>, <code>Options.dump</code>, &#8230;&#8203;).
 The worker API lets us workaround what should probably be considered as a <em>bug</em> in JFlex!</p>
 </div>
 <div class="paragraph">
@@ -568,7 +567,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>abstract class Greeter extends DefaultTask {
+<pre class="prettyprint highlight"><code data-lang="java">abstract class Greeter extends DefaultTask {
     @Input
     public abstract Property&lt;String&gt; getUser()
 
@@ -593,7 +592,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("sayHello", Greeter) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("sayHello", Greeter) {
    intro = "Hello, "
    user = "Cédric"
    outro = "!"
@@ -605,7 +604,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("direBonjour", Greeter) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("direBonjour", Greeter) {
    intro = "Bonjour "
    user = "Cédric"
    outro = " !"
@@ -621,7 +620,7 @@ To avoid this redundancy, we&#8217;re going to write a plugin which makes all th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>interface GreetingExtension {
+<pre class="prettyprint highlight"><code data-lang="java">interface GreetingExtension {
     Property&lt;String&gt; getUser()
     Property&lt;String&gt; getOutro()
 }</code></pre>
@@ -632,7 +631,7 @@ To avoid this redundancy, we&#8217;re going to write a plugin which makes all th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
+<pre class="prettyprint highlight"><code data-lang="java">GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
 extension.getOutro().convention("!");</code></pre>
 </div>
 </div>
@@ -643,7 +642,7 @@ The plugin can then register both tasks for us:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>tasks.register("sayHello", Greeter.class, task -&gt; {
+<pre class="prettyprint highlight"><code data-lang="java">tasks.register("sayHello", Greeter.class, task -&gt; {
    task.getIntro().convention("Hello, ");
    task.getUser().convention(extension.getUser());
    task.getOutro().convention(extension.getOutro());
@@ -663,7 +662,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>greeting {
+<pre class="prettyprint highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
 }</code></pre>
 </div>
@@ -693,7 +692,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>greeting {
+<pre class="prettyprint highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
     outro = "!!!"
 }</code></pre>
@@ -724,7 +723,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>greeting {
+<pre class="prettyprint highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
     outro = "!!!"
 }
@@ -747,7 +746,7 @@ tasks.named("direBonjour") {
 <p><strong>Outcome #4</strong>: The provider API lets precisely define how to compute a value from another property, in a lazy manner, and provides an elegant way to supply default, or conventional values.</p>
 </div>
 <div class="paragraph">
-<p>You can read more about lazy configuration and the provider API in the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">Gradle documentation</a>, but in a nutshell, the derivation logic is <em>exactly</em> what the <code>layout.buildDirectory.dir("...")</code> is doing: it defines a directory which is <em>derived from</em> the existing build directory value.</p>
+<p>You can read more about lazy configuration and the provider API in the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">Gradle documentation</a>, but in a nutshell, the derivation logic is <em>exactly</em> what the <code>layout.buildDirectory.dir("&#8230;&#8203;")</code> is doing: it defines a directory which is <em>derived from</em> the existing build directory value.</p>
 </div>
 </div>
 </div>
@@ -783,7 +782,7 @@ We&#8217;ve also hinted at how plugins can expose configuration mechanisms which
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id "io.micronaut.internal.jflex"
 }</code></pre>
 </div>
@@ -804,11 +803,11 @@ There is effectively no need to publish a plugin, either to a local repository, 
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
-		<a href="/blog/tags/maven.html"> maven</a> 
+		<a href="/blog/tags/maven.html">maven</a> 
 	
-		<a href="/blog/tags/composition.html"> composition</a> 
+		<a href="/blog/tags/composition.html">composition</a> 
 	
-		<a href="/blog/tags/inheritance.html"> inheritance</a> 
+		<a href="/blog/tags/inheritance.html">inheritance</a> 
 	</p>
 			
   			<p><div class="sect1">
@@ -860,7 +859,7 @@ It is a particularly important difference which completely changes the way we th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
 
@@ -916,7 +915,7 @@ It is a particularly important difference which completely changes the way we th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
 
@@ -950,7 +949,7 @@ In the example above, we don&#8217;t have to specify the <code>groupId</code> an
 <div class="ulist">
 <ul>
 <li>
-<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common. It won&#8217;t be a surprise for many that you have to <em>exclude dependencies</em> just because they came through parent poms&#8230;</p>
+<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common. It won&#8217;t be a surprise for many that you have to <em>exclude dependencies</em> just because they came through parent poms&#8230;&#8203;</p>
 </li>
 <li>
 <p>you can only have a <em>single</em> parent, meaning that you cannot inherit from a framework parent POM <em>and</em> from your own conventions.</p>
@@ -1045,7 +1044,7 @@ Finally, your application module would simply <em>apply both plugins</em>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
    id 'com.mycompany.conventions' version '1.0.0'
    id 'io.micronaut.application' version '3.0.0'
 }
@@ -1061,7 +1060,7 @@ In the example above, we could replace the use of the 2 plugins with a single on
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
    id 'com.mycompany.micronaut-application' version '3.0.0'
 }</code></pre>
 </div>
@@ -1072,7 +1071,7 @@ I&#8217;m not going to explain how to write a custom Gradle plugin in this blog 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id 'com.mycompany.conventions' version '1.0.0'
     id 'io.micronaut.application' version '3.0.0'
 }
@@ -1093,7 +1092,7 @@ For example, a plugin can do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>pluginManager.withPlugin('io.micronaut.application') {
+<pre class="prettyprint highlight"><code data-lang="groovy">pluginManager.withPlugin('io.micronaut.application') {
     // configure the Micronaut application plugin
 }
 pluginManager.withPlugin('io.micronaut.library') {
@@ -1175,9 +1174,9 @@ On the other hand, Gradle uses a <em>composition</em> model which makes it possi
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
-		<a href="/blog/tags/multirepo-development.html"> multirepo development</a> 
+		<a href="/blog/tags/multirepo-development.html">multirepo development</a> 
 	
-		<a href="/blog/tags/micronaut.html"> micronaut</a> 
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
 	</p>
 			
   			<p><div class="sect1">
@@ -1261,7 +1260,7 @@ In the example above, it means that I can explain, when I&#8217;m working on <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>gitRepositories {
+<pre class="prettyprint highlight"><code data-lang="groovy">gitRepositories {
 	include('core') {
 		uri = 'git@github.com:mycompany/core.git'
 		branch = 'some-branch'
@@ -1294,7 +1293,7 @@ So if I have:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>gitRepositories {
+<pre class="prettyprint highlight"><code data-lang="groovy">gitRepositories {
 	include('micronaut-core') {
 		uri = 'git@github.com:mycompany/core.git'
 		branch = 'some-branch'
@@ -1332,13 +1331,13 @@ It will also be interesting to get your user stories so that we, collectively, c
 <div class="ulist">
 <ul>
 <li>
-<p>Plugin documentation: <a href="https://melix.github.io/includegit-gradle-plugin">https://melix.github.io/includegit-gradle-plugin</a></p>
+<p>Plugin documentation: <a href="https://melix.github.io/includegit-gradle-plugin" class="bare">https://melix.github.io/includegit-gradle-plugin</a></p>
 </li>
 <li>
-<p>Plugin development home: <a href="https://github.com/melix/includegit-gradle-plugin">https://github.com/melix/includegit-gradle-plugin</a></p>
+<p>Plugin development home: <a href="https://github.com/melix/includegit-gradle-plugin" class="bare">https://github.com/melix/includegit-gradle-plugin</a></p>
 </li>
 <li>
-<p>Plugin on Gradle plugin portal: <a href="https://plugins.gradle.org/plugin/me.champeau.includegit">https://plugins.gradle.org/plugin/me.champeau.includegit</a></p>
+<p>Plugin on Gradle plugin portal: <a href="https://plugins.gradle.org/plugin/me.champeau.includegit" class="bare">https://plugins.gradle.org/plugin/me.champeau.includegit</a></p>
 </li>
 </ul>
 </div>
@@ -1350,7 +1349,7 @@ It will also be interesting to get your user stories so that we, collectively, c
 			<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	
-		<a href="/blog/tags/micronaut.html"> micronaut</a> 
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
 	</p>
 			
   			<p><div id="preamble">
@@ -1370,7 +1369,7 @@ Today I&#8217;m going to focus on an example I found in the Micronaut build itse
 <div class="sectionbody">
 <div class="paragraph">
 <p>In a nutshell, Gradle works by computing a graph of task dependencies.
-Say that you want to build a JAR file: you&#8217;re going to call the <code>jar</code> task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc&#8230;
+Say that you want to build a JAR file: you&#8217;re going to call the <code>jar</code> task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc&#8230;&#8203;
 Determining the <em>task dependencies</em>, that is to say what other tasks need to be executed, is done by looking up at 3 different things:</p>
 </div>
 <div class="olist arabic">
@@ -1394,7 +1393,7 @@ Determining the <em>task dependencies</em>, that is to say what other tasks need
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint gradle language-gradle"><code>task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+<pre class="prettyprint highlight"><code data-lang="gradle">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
     from "src/main/template"
@@ -1415,7 +1414,7 @@ Yet, there&#8217;s something interesting in what it does, which is a <strong>typ
 </div>
 <div class="paragraph">
 <p>It&#8217;s tempting, especially when you&#8217;re not used to Gradle, to think the same way as other build tools do, like Maven or Ant.
-You&#8217;re thinking "there&#8217;s a task, jar, which basically packages everything it finds in <code>classes/groovy/main</code>, so if I want to add more stuff to the jar task, let&#8217;s put more stuff in <code>classes/groovy/main</code>".</p>
+You&#8217;re thinking "there&#8217;s a task, jar, which basically packages everything it finds in <code>classes/groovy/main</code>, so if I want to add more stuff to the jar task, let&#8217;s put more stuff in `classes/groovy/main`".</p>
 </div>
 <div class="paragraph">
 <p><strong>This is wrong!</strong></p>
@@ -1478,7 +1477,7 @@ So, what are the inputs of our <code>docsFileJar</code>? The resources we want t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+<pre class="prettyprint highlight"><code data-lang="groovy">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
     from "src/main/template"
@@ -1524,7 +1523,7 @@ jar {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register('docFilesJar', Jar) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register('docFilesJar', Jar) {
     description = 'Package up files used for generating documentation.'
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
@@ -1573,7 +1572,7 @@ tasks.named('jar', Jar) {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

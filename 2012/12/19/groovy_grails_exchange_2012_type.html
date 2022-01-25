@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/conferences.html">conferences</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_long_time_no_see">Long time no see!</h2>
@@ -87,7 +86,7 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_groovy_grails_exchange_2012">The Groovy&amp;Grails eXchange 2012</h2>
+<h2 id="_the_groovygrails_exchange_2012">The Groovy&amp;Grails eXchange 2012</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Last week, I spoke at the <a href="http://skillsmatter.com/podcast/groovy-grails/type-checking-your-dsls">Groovy&amp;Grails eXchange 2012</a>. It was a really pleasant experience and I wanted to share some feelings with you.</p>
@@ -95,19 +94,19 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_static_guy">The &#8220;static&#8221; guy</h2>
+<h2 id="_the_static_guy">The ``static'' guy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>There is something very funny when I meet people now. One or two years ago, people knowing my name were just a few, focused, guys on the mailing list. Now, with the work I’ve done in Groovy 2, that is to say <em>static type checking</em> and <em>static compilation</em>, more and more people recognize me and even those who knew me before start to think of me as the &#8220;static guy&#8221;.</p>
+<p>There is something very funny when I meet people now. One or two years ago, people knowing my name were just a few, focused, guys on the mailing list. Now, with the work I’ve done in Groovy 2, that is to say <em>static type checking</em> and <em>static compilation</em>, more and more people recognize me and even those who knew me before start to think of me as the ``static guy''.</p>
 </div>
 <div class="paragraph">
 <p>The truth is that while it’s correct that my main focus was to develop those features and that I really enjoy it, I spent a lot of time working with Groovy before, and advocating its dynamic nature to my coworkers. The dynamic nature of the language helped us a lot and it’s definitely the main focus of the language. This means that in the dynamic vs static language war, I’m in the middle camp: I like both!</p>
 </div>
 <div class="paragraph">
-<p>This directly drives me to the most surprising talk given at the <a href="http://skillsmatter.com/event/groovy-grails/groovy-grails-exchange-2012">Groovy&amp;Grails eXchange</a>, I mean <a href="http://skillsmatter.com/podcast/groovy-grails/why-groovy-when-java-8-or-scala-or">&#8220;Why Groovy when Java 8 or Scala or…&#8221;</a> by Russel Winder. When I say surprising, I mean that it’s not often that you can hear &#8220;War Pigs&#8221; from Black Sabbath before the talk begins, and it’s not often either that in a Groovy conference, a speaker tries to demonstrate that Groovy is no longer necessary. At least, he tried to, because knowing him as one of the best Groovy advocates in town, I was just wondering all the short 45 minutes session along, when turnaround would occur. It did not. Maybe because Russel expected the session to last 1 hour, but even with 15 more minutes, I’m not convinced that he would, because if I understood him well, he wanted by this talk to conduce the Groovy community to be more active in the JVM community in general, by proving by the fact that Groovy is a major language, not just a poor substitute to Java 8.</p>
+<p>This directly drives me to the most surprising talk given at the <a href="http://skillsmatter.com/event/groovy-grails/groovy-grails-exchange-2012">Groovy&amp;Grails eXchange</a>, I mean <a href="http://skillsmatter.com/podcast/groovy-grails/why-groovy-when-java-8-or-scala-or"><code>Why Groovy when Java 8 or Scala or…''</a> by Russel Winder. When I say surprising, I mean that it’s not often that you can hear </code>War Pigs'' from Black Sabbath before the talk begins, and it’s not often either that in a Groovy conference, a speaker tries to demonstrate that Groovy is no longer necessary. At least, he tried to, because knowing him as one of the best Groovy advocates in town, I was just wondering all the short 45 minutes session along, when turnaround would occur. It did not. Maybe because Russel expected the session to last 1 hour, but even with 15 more minutes, I’m not convinced that he would, because if I understood him well, he wanted by this talk to conduce the Groovy community to be more active in the JVM community in general, by proving by the fact that Groovy is a major language, not just a poor substitute to Java 8.</p>
 </div>
 <div class="paragraph">
-<p>I <em>think</em> I’m not too far from the truth when I read this very funny comment about me in his <a href="http://www.russel.org.uk/blog/2012-12-18-19-57">blog post</a>: <em>Cédric Champeau the person driving the static type checking and compilation was in the audience and I survived. Perhaps I wasn’t contentious enough.</em>. I’m sorry if I disappointed you, Russel, but as I’m not in particular the &#8220;static guy&#8221; people think I am and that I have a very clear idea of what static compilation in Groovy is good for, I think it makes it difficult to make me unconfortable on the subject. In fact, I’m most worried about what people would think of this talk just reading the slides! Another thing, maybe, is that humour and cultural references in this talk were very british centered (that makes sense, we were in London after all) and that it was sometimes difficult to follow for me.</p>
+<p>I <em>think</em> I’m not too far from the truth when I read this very funny comment about me in his <a href="http://www.russel.org.uk/blog/2012-12-18-19-57">blog post</a>: <em>Cédric Champeau the person driving the static type checking and compilation was in the audience and I survived. Perhaps I wasn’t contentious enough.</em>. I’m sorry if I disappointed you, Russel, but as I’m not in particular the ``static guy'' people think I am and that I have a very clear idea of what static compilation in Groovy is good for, I think it makes it difficult to make me unconfortable on the subject. In fact, I’m most worried about what people would think of this talk just reading the slides! Another thing, maybe, is that humour and cultural references in this talk were very british centered (that makes sense, we were in London after all) and that it was sometimes difficult to follow for me.</p>
 </div>
 <div class="sect2">
 <h3 id="_static_type_checking_for_groovy">Static type checking for Groovy</h3>
@@ -166,7 +165,7 @@
 <div class="sect2">
 <h3 id="_static_type_checking_for_dsls">Static type checking for DSLs</h3>
 <div class="paragraph">
-<p>GGX was the first conference where I talked about a new feature in Groovy 2.1, which is &#8220;customizable&#8221; type checking. The idea is to help the type checker where it fails, because you know more about your code, what it does, how it is implemented than it does. This allows very nice features, like the ability to throw errors at compile time where Groovy would normally fail at runtime, but using DSLs, independently of their implementation. This is in particular important for people that implement DSLs using dynamic features of the language, because the type checker is obviously totally lost in that situation. Having the ability to check a user script at compile time, report errors before it goes in production is a big win here. You can even have the compiler be smarter than Java (or another statically compiled language) is given your domain.</p>
+<p>GGX was the first conference where I talked about a new feature in Groovy 2.1, which is ``customizable'' type checking. The idea is to help the type checker where it fails, because you know more about your code, what it does, how it is implemented than it does. This allows very nice features, like the ability to throw errors at compile time where Groovy would normally fail at runtime, but using DSLs, independently of their implementation. This is in particular important for people that implement DSLs using dynamic features of the language, because the type checker is obviously totally lost in that situation. Having the ability to check a user script at compile time, report errors before it goes in production is a big win here. You can even have the compiler be smarter than Java (or another statically compiled language) is given your domain.</p>
 </div>
 <div class="paragraph">
 <p>The talk was rather technical and dealing with such a subject in only 45 minutes was a challenge (that I only half acheived) but I had good feedback. For those who are interested in the subject and missed this talk, you can still attend my session at <a href="http://greach.es/">the Greach conference</a> in Madrid in the end of January. I hope I’ll be able to do it at GR8Conf in an extended version in May too. Of course, you can still watch the recorded session online.</p>
@@ -178,7 +177,7 @@
 <div class="sect2">
 <h3 id="_meeting_the_community">Meeting the community</h3>
 <div class="paragraph">
-<p>Talking at conferences is always the best way to meet the community and gather feedback and new ideas from actual users. We are not, as Groovy or Grails committers, super heroes. I’m always amazed to see what users manage to do with what we implement in the language and I tend to think you are the real super heroes. At GGX, once again, I was really impressed with what Spock offers, for example. The talk was given by <a href="http://freeside.co/">Rob Fletcher</a> who also gave another talk about Grails for Hipsters. Both of his talks were so attended that at this point, the conference could have been named &#8220;The Rob Fletcher eXchange&#8221;. If you want someone to demonstrate the superiority of dynamic languages over static ones, he’s your man.</p>
+<p>Talking at conferences is always the best way to meet the community and gather feedback and new ideas from actual users. We are not, as Groovy or Grails committers, super heroes. I’m always amazed to see what users manage to do with what we implement in the language and I tend to think you are the real super heroes. At GGX, once again, I was really impressed with what Spock offers, for example. The talk was given by <a href="http://freeside.co/">Rob Fletcher</a> who also gave another talk about Grails for Hipsters. Both of his talks were so attended that at this point, the conference could have been named ``The Rob Fletcher eXchange''. If you want someone to demonstrate the superiority of dynamic languages over static ones, he’s your man.</p>
 </div>
 <div class="paragraph">
 <p>Oh wait, did I say dynamic? ;-)</p>
@@ -215,7 +214,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

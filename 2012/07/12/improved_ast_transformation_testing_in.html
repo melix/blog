@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,13 +73,13 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/ast.html">ast</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</em>
-		<a href="/blog/tags/testing.html"> testing</a> 
+		<a href="/blog/tags/testing.html">testing</a> 
 	</em>
-		<a href="/blog/tags/transformation.html"> transformation</a> 
+		<a href="/blog/tags/transformation.html">transformation</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_structural_ast_testing">Structural (AST) testing</h2>
@@ -119,7 +118,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>The most useful tool is the <em>AST browser</em> which can be found in the <em>Groovy Console</em>. It allows you to &#8220;browse&#8221; the AST of the code which is in the console. This is very useful because it allows you to write the code you’d like to generate and see what AST structure you need to produce. Or you can use it the opposite way, looking for patterns of AST to recognize in order to transform them.</p>
+<p>The most useful tool is the <em>AST browser</em> which can be found in the <em>Groovy Console</em>. It allows you to ``browse'' the AST of the code which is in the console. This is very useful because it allows you to write the code you’d like to generate and see what AST structure you need to produce. Or you can use it the opposite way, looking for patterns of AST to recognize in order to transform them.</p>
 </li>
 <li>
 <p>Testing if the AST transform is successul can only be done externally, that is to say by testing that the effects of the transform are visible on a class. For example, testing the <em>@Log</em> AST transform consists in applying the transform on a test class, then add calls to <em>log</em> and see if they are successful.</p>
@@ -154,19 +153,18 @@
 <h2 id="_improved_ast_transformation_testing">Improved AST transformation testing</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="__asttest">@ASTTest</h3>
+<h3 id="_asttest">@ASTTest</h3>
 <div class="paragraph">
 <p>For that reason, Groovy 2.0 introduces a new AST transformation which is precisely aimed at testing AST transformations! This AST transformation is named <em>ASTTest</em> and allows you to execute assertions on the AST tree. Let’s take a simple example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    for (int i in 1..n) {
+<pre class="prettyprint highlight"><code>    for (int i in 1..n) {
         @ASTTest(phase=INSTRUCTION_SELECTION, value= {
             assert node.getNodeMetaData(DECLARATION_INFERRED_TYPE) == int_TYPE
         })
         def k = i
-    }
-</code></pre>
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -192,20 +190,20 @@
 <p>If the assertion fails, the unit test will fail. This is very important, because we now have a mean to test the AST itself. I said it was impossible before, but in fact, it was possible but it required a lot of trickery such custom classloaders and so on…</p>
 </div>
 <div class="paragraph">
-<p>In Groovy 2.0.0, <em>ASTTest</em> does nothing more than this, but we have a problem: not every node in the AST can be annotated. We’re limited to what it is syntactically possible to annotate: classes, methods, types, packages, declarations, … If what you want to test is a node which doesn’t belong to that category, then you need to annotate a wrapping node (in most situations, a method) then &#8220;browse&#8221; manually to the node you want to test. For example, in the previous example, we could access the right hand side of the declaration expression using <em>node.rightExpression</em> and perform assertions on that.</p>
+<p>In Groovy 2.0.0, <em>ASTTest</em> does nothing more than this, but we have a problem: not every node in the AST can be annotated. We’re limited to what it is syntactically possible to annotate: classes, methods, types, packages, declarations, … If what you want to test is a node which doesn’t belong to that category, then you need to annotate a wrapping node (in most situations, a method) then ``browse'' manually to the node you want to test. For example, in the previous example, we could access the right hand side of the declaration expression using <em>node.rightExpression</em> and perform assertions on that.</p>
 </div>
 <div class="paragraph">
-<p>However, if you start from a method and try to access a particular node into the method body, I admit it is quite painful, because you have to check what is the exact AST tree which is generated by the compiler, then find a &#8220;path&#8221; to your node. And it is very easy to break this path just by adding a statement in the code, which makes the unit tests fragile.</p>
+<p>However, if you start from a method and try to access a particular node into the method body, I admit it is quite painful, because you have to check what is the exact AST tree which is generated by the compiler, then find a ``path'' to your node. And it is very easy to break this path just by adding a statement in the code, which makes the unit tests fragile.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_improving_asttest">Improving @ASTTest</h3>
 <div class="paragraph">
-<p>For that reason, I wrote an utility class which will allow you to perform &#8220;smart&#8221; lookups in the AST tree. This helper class is not available in Groovy 2.0.0 but it is easy to add and I will probably introduce it in the next release(<em>edit:</em> see <a href="https://jira.codehaus.org/browse/GROOVY-5597">GROOVY-5597</a>): it is called <em>LabelFinder</em>. The idea is that even if you cannot annotate everything in the code, it’s still very easy to add <em>labels</em> to your code. Then, Groovy may be able to search for a particular label and return to you the list of AST nodes which are defined on such a label:</p>
+<p>For that reason, I wrote an utility class which will allow you to perform ``smart'' lookups in the AST tree. This helper class is not available in Groovy 2.0.0 but it is easy to add and I will probably introduce it in the next release(<em>edit:</em> see <a href="https://jira.codehaus.org/browse/GROOVY-5597">GROOVY-5597</a>): it is called <em>LabelFinder</em>. The idea is that even if you cannot annotate everything in the code, it’s still very easy to add <em>labels</em> to your code. Then, Groovy may be able to search for a particular label and return to you the list of AST nodes which are defined on such a label:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>void foo() {
+<pre class="prettyprint highlight"><code>void foo() {
     def x = 1
     x++
     forLoop:
@@ -269,8 +267,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     List getTargets() {
         return Collections.unmodifiableList(targets)
     }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 </div>
@@ -308,7 +305,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

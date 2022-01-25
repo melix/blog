@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/maven.html"> maven</a> 
+		<a href="/blog/tags/maven.html">maven</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/kotlin.html"> kotlin</a> 
+		<a href="/blog/tags/kotlin.html">kotlin</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -98,14 +97,14 @@ You&#8217;ll aways find people telling you that XML is better because it locks y
 I don&#8217;t counter those arguments, this is a strength of Maven, but it also comes with a number of drawbacks.</p>
 </div>
 <div class="paragraph">
-<p>I promised some of the folks in the conversation some answers (please look down for direct answers to tweets), so here they are. I&#8217;m answering on a blog post because again Twitter is not good for this, it&#8217;s causing a lot of misunderstandings, because you get into multiple, parallel conversations with different people who accidentally get mentioned, and get scuds fired at you without even having time to answer&#8230; Even a blog post is not enough, there&#8217;s so much to say on this topic.</p>
+<p>I promised some of the folks in the conversation some answers (please look down for direct answers to tweets), so here they are. I&#8217;m answering on a blog post because again Twitter is not good for this, it&#8217;s causing a lot of misunderstandings, because you get into multiple, parallel conversations with different people who accidentally get mentioned, and get scuds fired at you without even having time to answer&#8230;&#8203; Even a blog post is not enough, there&#8217;s so much to say on this topic.</p>
 </div>
 <div class="paragraph">
 <p>First, on the so called "declarative vs imperative" model, I will always disagree on this dichotomy. I disagree that Gradle isn&#8217;t declarative. It&#8217;s as declarative as you want it to be. Take this build file I wrote recently, which is an <em>Asciidoctor Reveal.js presentation template</em> (it allows writing slide decks with Asciidoctor and reveal.js). Here&#8217;s what my build file looks like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="kotlin">plugins {
     id("org.gradle.presentation.asciidoctor")
 }
 
@@ -130,10 +129,10 @@ tasks {
 Note, however, that a dependency was declared for <em>asciidoctor</em>. This is a major, and probably the most important, difference with Maven: <em>compile</em> or <em>runtime</em> doesn&#8217;t make sense here. We declare a dependency for <em>asciidoctor rendering</em>. There&#8217;s no Java library being built here, it&#8217;s a presentation. Gradle lets you model precisely <em>what you build</em>.</p>
 </div>
 <div class="paragraph">
-<p>So, in the end, I think what matters is not <em>declarative</em> vs <em>scripting</em>. I think what people really want is to reduce the risks of writing bad things. Locking down using XML is <em>one</em> way to achieve this, but it&#8217;s not the only one. For example, Gradle build scripts <a href="https://github.com/nebula-plugins/gradle-lint-plugin">may be linted</a>. In other words, you can apply on a Gradle build the same tooling you are used to work with when dealing with your own code: checkstyle, findbugs, &#8230; You don&#8217;t <em>have to</em>, but you can.</p>
+<p>So, in the end, I think what matters is not <em>declarative</em> vs <em>scripting</em>. I think what people really want is to reduce the risks of writing bad things. Locking down using XML is <em>one</em> way to achieve this, but it&#8217;s not the only one. For example, Gradle build scripts <a href="https://github.com/nebula-plugins/gradle-lint-plugin">may be linted</a>. In other words, you can apply on a Gradle build the same tooling you are used to work with when dealing with your own code: checkstyle, findbugs, &#8230;&#8203; You don&#8217;t <em>have to</em>, but you can.</p>
 </div>
 <div class="paragraph">
-<p>The consequence is that yes, there are many different ways you can layout your build with Gradle. This is not different from how you can layout your code in a project: we don&#8217;t tell you in which package you should put your beans, services, &#8230; However, there&#8217;s a big misconception that I&#8217;d like to fight:</p>
+<p>The consequence is that yes, there are many different ways you can layout your build with Gradle. This is not different from how you can layout your code in a project: we don&#8217;t tell you in which package you should put your beans, services, &#8230;&#8203; However, there&#8217;s a big misconception that I&#8217;d like to fight:</p>
 </div>
 <div class="paragraph">
 <p>By default, for a Java project, Gradle follows the same conventions as Maven.</p>
@@ -179,13 +178,13 @@ Therefore, <em>correctness</em>, incremental builds, incremental compilation, co
 </ul>
 </div>
 <div class="paragraph">
-<p>As a consequence, I already wrote about why <a href="https://melix.github.io/blog/2018/09/gradle-lifecycle.html">it&#8217;s wrong to think that Gradle doesn&#8217;t have lifecycle tasks</a>. In fact, Gradle has them, but is also <em>significantly more precise</em>. The "phase" approach of Maven is way to coarse: it&#8217;s doomed to execute too much, prevents smart parallelism, and leads to dirty workarounds (<code>-x ....</code> on the CLI to avoid things you know are not necessary).</p>
+<p>As a consequence, I already wrote about why <a href="https://melix.github.io/blog/2018/09/gradle-lifecycle.html">it&#8217;s wrong to think that Gradle doesn&#8217;t have lifecycle tasks</a>. In fact, Gradle has them, but is also <em>significantly more precise</em>. The "phase" approach of Maven is way to coarse: it&#8217;s doomed to execute too much, prevents smart parallelism, and leads to dirty workarounds (<code>-x &#8230;&#8203;.</code> on the CLI to avoid things you know are not necessary).</p>
 </div>
 <div class="paragraph">
 <p>Similarly, say you want to test your application on different JDKs and have a single build execute tests for all target JVMs, which is different from the JVM which runs the build tool. With a scripting approach like Gradle, this is totally doable. I won&#8217;t say easy because we can definitely do better to make this use case better, but the underlying model makes it quite simple. You don&#8217;t want to <em>rebuild</em> your application for each target VM. All you want is to <em>test</em> on different platforms, and therefore the only step should be a different target VM for test execution. Tools like Maven force you into arbitrary things like defining Maven profiles, and force you into rebuilding everything. This is a giant waste of time for something you don&#8217;t need!</p>
 </div>
 <div class="paragraph">
-<p>In a different topic, this is no surprise that Gradle can build for different ecosystems: Java, Scala, C++, Kotlin, Kotlin Native, Python, &#8230; The underlying infrastructure makes it possible. Even for a single ecosystem, Gradle can declare what the difference between a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_library_plugin.html">Java Library</a>, a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_platform_plugin.html">Java Platform</a> or an <a href="https://docs.gradle.org/6.0-rc-2/userguide/application_plugin.html">application</a> is.</p>
+<p>In a different topic, this is no surprise that Gradle can build for different ecosystems: Java, Scala, C++, Kotlin, Kotlin Native, Python, &#8230;&#8203; The underlying infrastructure makes it possible. Even for a single ecosystem, Gradle can declare what the difference between a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_library_plugin.html">Java Library</a>, a <a href="https://docs.gradle.org/6.0-rc-2/userguide/java_platform_plugin.html">Java Platform</a> or an <a href="https://docs.gradle.org/6.0-rc-2/userguide/application_plugin.html">application</a> is.</p>
 </div>
 <div class="paragraph">
 <p>I could talk hours about why it&#8217;s important to model properly software, and actually with the release of Gradle 6 we&#8217;ll have a series of blog posts explaining why we think it&#8217;s a game changer in terms of dependency management. If you&#8217;re tired of having to fix the same "multiple slf4j bindings" in each and every project, tired of Guava being upgraded from <code>jre</code> to <code>android</code>, frustrated by incompatibilities of Scala 2.11 and 2.12 dependencies, tired of not knowing which of those Maven optional dependencies is important for you to add, you&#8217;ll understand what I mean.</p>
@@ -196,7 +195,7 @@ Therefore, <em>correctness</em>, incremental builds, incremental compilation, co
 <h2 id="_direct_answer_to_some_tweets">Direct answer to some tweets</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I&#8217;ll try to answer more direct questions in this section. Sorry if I missed yours, I got quite a few comments/answers&#8230;</p>
+<p>I&#8217;ll try to answer more direct questions in this section. Sorry if I missed yours, I got quite a few comments/answers&#8230;&#8203;</p>
 </div>
 <div class="quoteblock">
 <blockquote>
@@ -292,7 +291,7 @@ Therefore, <em>correctness</em>, incremental builds, incremental compilation, co
 </blockquote>
 </div>
 <div class="paragraph">
-<p>Yes, there are bad builds out there. With Gradle it&#8217;s frequent for quite old builds from early adopters. More recent builds tend to be much cleaner, because we made a significant effort in guides, getting started samples, documentation. You&#8217;ll always find bad things, and it should be encouraged to fix. On this topic, tools like <a href="https://scans.gradle.com">build scans</a> really help. And copy/pasting from SO is indeed a bad thing. If you copy and paste without understanding what it does, well, bad things can happen&#8230; That said I&#8217;ve seen very scary Maven builds too, and believe me or not, some of our customers wouldn&#8217;t be proud to show you their Maven builds. It&#8217;s the "personal experience fallacy". I&#8217;ve experienced very clean Gradle builds, you&#8217;ve experienced very bad Gradle builds. I&#8217;ve also written bad Gradle builds, which I dramatically improved, making them more correct, faster, &#8230; Gradle is like any other technology: learn it and you can understand what it brings.</p>
+<p>Yes, there are bad builds out there. With Gradle it&#8217;s frequent for quite old builds from early adopters. More recent builds tend to be much cleaner, because we made a significant effort in guides, getting started samples, documentation. You&#8217;ll always find bad things, and it should be encouraged to fix. On this topic, tools like <a href="https://scans.gradle.com">build scans</a> really help. And copy/pasting from SO is indeed a bad thing. If you copy and paste without understanding what it does, well, bad things can happen&#8230;&#8203; That said I&#8217;ve seen very scary Maven builds too, and believe me or not, some of our customers wouldn&#8217;t be proud to show you their Maven builds. It&#8217;s the "personal experience fallacy". I&#8217;ve experienced very clean Gradle builds, you&#8217;ve experienced very bad Gradle builds. I&#8217;ve also written bad Gradle builds, which I dramatically improved, making them more correct, faster, &#8230;&#8203; Gradle is like any other technology: learn it and you can understand what it brings.</p>
 </div>
 <div class="quoteblock">
 <blockquote>
@@ -302,7 +301,7 @@ Therefore, <em>correctness</em>, incremental builds, incremental compilation, co
 </blockquote>
 </div>
 <div class="paragraph">
-<p>Again I think "declarative" is the wrong term here. Locked down to reduce the risks of doing bad things is what you want. It doesn&#8217;t matter if it&#8217;s Kotlin, Groovy, XML or whatever else. It doesn&#8217;t matter if you can use <code>if</code> or <code>for</code> loops. What matters is <em>what you can express</em>, and <em>what should be limited</em>. It&#8217;s all good engineering that we must share within the industry, find the best patterns, discourage the bad ones. There are quite a few things in the Android world (which uses Gradle) in this direction. We, at Gradle, should do more, but it&#8217;s always a matter of priorities: fixing the most important user pain first. By the way, we provide a Maven build cache with Gradle Enterprise. That is to say, the ability to cache Maven builds using Gradle Enterprise. However, this is limited to "clean builds" (which Maven users are used to do in any case), because of the limitations of the Maven execution model (no knowledge of what each plugin or mojo does, where it writes files, &#8230;).</p>
+<p>Again I think "declarative" is the wrong term here. Locked down to reduce the risks of doing bad things is what you want. It doesn&#8217;t matter if it&#8217;s Kotlin, Groovy, XML or whatever else. It doesn&#8217;t matter if you can use <code>if</code> or <code>for</code> loops. What matters is <em>what you can express</em>, and <em>what should be limited</em>. It&#8217;s all good engineering that we must share within the industry, find the best patterns, discourage the bad ones. There are quite a few things in the Android world (which uses Gradle) in this direction. We, at Gradle, should do more, but it&#8217;s always a matter of priorities: fixing the most important user pain first. By the way, we provide a Maven build cache with Gradle Enterprise. That is to say, the ability to cache Maven builds using Gradle Enterprise. However, this is limited to "clean builds" (which Maven users are used to do in any case), because of the limitations of the Maven execution model (no knowledge of what each plugin or mojo does, where it writes files, &#8230;&#8203;).</p>
 </div>
 <div class="quoteblock">
 <blockquote>
@@ -327,7 +326,7 @@ Therefore, <em>correctness</em>, incremental builds, incremental compilation, co
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
-<p>I like all those (caching, incrementality, &#8230;) , in theory, but for my needs they are more complexity than feature</p>
+<p>I like all those (caching, incrementality, &#8230;&#8203;) , in theory, but for my needs they are more complexity than feature</p>
 </div>
 </blockquote>
 </div>
@@ -362,7 +361,7 @@ Therefore, <em>correctness</em>, incremental builds, incremental compilation, co
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

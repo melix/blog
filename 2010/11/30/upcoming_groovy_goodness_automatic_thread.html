@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/ast.html">ast</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_introduction">Introduction</h2>
@@ -100,10 +99,9 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>while (true) {
+<pre class="prettyprint highlight"><code>while (true) {
  // eat cpu
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -118,19 +116,18 @@
 <p><strong>Note that the following is based on an early implementation and subject to changes. Those annotations are available since the Groovy 1.8.0-beta-3 release.</strong></p>
 </div>
 <div class="sect2">
-<h3 id="__threadinterrupt">@ThreadInterrupt</h3>
+<h3 id="_threadinterrupt">@ThreadInterrupt</h3>
 <div class="paragraph">
 <p>This is the most basic transformation we can apply. The script above becomes :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@ThreadInterrupt
+<pre class="prettyprint highlight"><code>@ThreadInterrupt
 import groovy.transform.ThreadInterrupt
 
 while (true) {
 // eat cpu
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -138,11 +135,10 @@ while (true) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>java.lang.InterruptedException: Execution Interrupted
+<pre class="prettyprint highlight"><code>java.lang.InterruptedException: Execution Interrupted
  at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
  at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:39)
- at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:27)
-</code></pre>
+ at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:27)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -150,11 +146,10 @@ while (true) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>while (true) {
+<pre class="prettyprint highlight"><code>while (true) {
   if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Execution Interrupted");
 // eat cpu
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -175,19 +170,18 @@ while (true) {
 </div>
 </div>
 <div class="sect2">
-<h3 id="__timedinterrupt">@TimedInterrupt</h3>
+<h3 id="_timedinterrupt">@TimedInterrupt</h3>
 <div class="paragraph">
 <p>The second AST Transformation to be added allows interrupting a script after a maximum execution time. It is interesting when you want to automatically timeout scripts. For example :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@TimedInterrupt(10)
+<pre class="prettyprint highlight"><code>@TimedInterrupt(10)
 import groovy.transform.TimedInterrupt
 
 while (true) {
 // eat cpu
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -205,13 +199,13 @@ while (true) {
 </div>
 </div>
 <div class="sect2">
-<h3 id="__conditionalinterrupt">@ConditionalInterrupt</h3>
+<h3 id="_conditionalinterrupt">@ConditionalInterrupt</h3>
 <div class="paragraph">
 <p>This one is another powerful variant of automatic thread interruption annotation. It allows the user to provide a custom condition for interruption. For example, one would like to check that user credentials are valid, while other would like to ensure that there are enough file descriptors left to allow script execution. There’s a wide variety of problems that can be solved thanks to this one. In my examples, I’ll focus on simple test cases to show off the advantages of this annotation.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@ConditionalInterrupt({counter++&gt;1})
+<pre class="prettyprint highlight"><code>@ConditionalInterrupt({counter++&gt;1})
 import groovy.transform.ConditionalInterrupt
 
 counter=0
@@ -221,8 +215,7 @@ def scriptMethod() {
      }
 }
 
-scriptMethod()
-</code></pre>
+scriptMethod()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -230,8 +223,7 @@ scriptMethod()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>counter=0
-</code></pre>
+<pre class="prettyprint highlight"><code>counter=0</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -239,19 +231,18 @@ scriptMethod()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def counter=0
-</code></pre>
+<pre class="prettyprint highlight"><code>def counter=0</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>would cause the compilation to fail because the counter variable would not be in the scope. Now the hard question is given the annotated script upper, how many times would you expect the &#8216;executing script method…&#8217; message to be displayed ? If your answer is 2, not bad, but you missed one point. If your answer is 1, either you are lucky, or you are brilliant. If your answer is anything else, you’ll be interested in the explanation.</p>
+<p>would cause the compilation to fail because the counter variable would not be in the scope. Now the hard question is given the annotated script upper, how many times would you expect the `executing script method…' message to be displayed ? If your answer is 2, not bad, but you missed one point. If your answer is 1, either you are lucky, or you are brilliant. If your answer is anything else, you’ll be interested in the explanation.</p>
 </div>
 <div class="paragraph">
 <p>How is this script updated ? To check it out, you can use the AST Browser found in the Groovy console. It will show you how your script gets transformed, and help you tune your custom conditions. Here, the generated script looks like this (stripped for clarity) :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class script1291150384631 extends groovy.lang.Script {
+<pre class="prettyprint highlight"><code>public class script1291150384631 extends groovy.lang.Script {
 
     public java.lang.Object run() {
         counter = 0
@@ -274,8 +265,7 @@ scriptMethod()
         ( counter )++ &gt; 1
     }
 
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -286,7 +276,7 @@ scriptMethod()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.transform.ConditionalInterrupt
+<pre class="prettyprint highlight"><code>import groovy.transform.ConditionalInterrupt
 
 class Helper {
   static int i=0
@@ -302,8 +292,7 @@ class MyOtherClass {
    def myOtherMethod() { new MyClass().myMethod() }
 }
 
-new MyOtherClass().myOtherMethod()
-</code></pre>
+new MyOtherClass().myOtherMethod()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -364,7 +353,7 @@ new MyOtherClass().myOtherMethod()
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

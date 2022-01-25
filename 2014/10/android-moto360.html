@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -86,7 +85,7 @@
 <p>I have been working on making <a href="http://beta.groovy-lang.org">Groovy</a> work on Android for several months now. In the last weeks, I even
 showed at SpringOne2GX an example of an application written in Groovy that worked on Android Wear. However, that code
 worked in an emulator. Recently, I got a real device, a Moto 360, so I wanted to see that application running on a
-real device. For some very obscure (understand buggy Android SDK) reason, it was far from being that easy&#8230;</p>
+real device. For some very obscure (understand buggy Android SDK) reason, it was far from being that easy&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>I litteraly spent <strong>hours</strong> trying to figure out what was wrong, so I thought it would be interesting for those of you
@@ -144,7 +143,7 @@ dcfbbafd	device
 localhost:4444	offline</pre>
 </div>
 </div>
-<div class="imageblock" style="text-align: center">
+<div class="imageblock text-center">
 <div class="content">
 <img src="/blog/img/rage-offline.jpg" alt="Why so evil?">
 </div>
@@ -156,7 +155,7 @@ of doing them in the same line. I thought that maybe there was a timing issue an
 but no, wasn&#8217;t that easy.</p>
 </div>
 <div class="paragraph">
-<p>In the end, I was totally convinced that the problem was because I had previously associated my handheld with an emulator. I was convinced of it because even if I had now associated it with a real device (the Moto 360), in the Android Wear companion app, the device was recognized as an "emulator"&#8230; mmm&#8230; So I tried uninstalling the Android Wear app, clear its cache, but no matter what I did, after reinstalling, the settings were kept, and the Moto recognized as an emulator. So sad&#8230;</p>
+<p>In the end, I was totally convinced that the problem was because I had previously associated my handheld with an emulator. I was convinced of it because even if I had now associated it with a real device (the Moto 360), in the Android Wear companion app, the device was recognized as an "emulator"&#8230;&#8203; mmm&#8230;&#8203; So I tried uninstalling the Android Wear app, clear its cache, but no matter what I did, after reinstalling, the settings were kept, and the Moto recognized as an emulator. So sad&#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -189,15 +188,15 @@ but no, wasn&#8217;t that easy.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>I am unsure that the two last steps are really necessary, but I did it because I wanted to make sure that force stopping and clearing data did not introduce some weird behavior after that. When you reopen the Android Wear companion app, it should now be as if it was the first time you opened it and ask you to associate it with your watch. Do it, and now, you should be able to follow the normal procedure described in the Android documentation and&#8230;</p>
+<p>I am unsure that the two last steps are really necessary, but I did it because I wanted to make sure that force stopping and clearing data did not introduce some weird behavior after that. When you reopen the Android Wear companion app, it should now be as if it was the first time you opened it and ask you to associate it with your watch. Do it, and now, you should be able to follow the normal procedure described in the Android documentation and&#8230;&#8203;</p>
 </div>
-<div class="imageblock" style="text-align: center">
+<div class="imageblock text-center">
 <div class="content">
 <img src="/blog/img/yes-baby.jpg" alt="yes baby">
 </div>
 </div>
 <div class="paragraph">
-<p>Success, now you can debug your application on a real device (which includes deploying it&#8230;).</p>
+<p>Success, now you can debug your application on a real device (which includes deploying it&#8230;&#8203;).</p>
 </div>
 <blockquote class="twitter-tweet" lang="fr"><p>Hey, finally got it working! I need to blog about how I arrived the insane emulator issue... <a href="https://twitter.com/hashtag/groovylang?src=hash">#groovylang</a> <a href="http://t.co/XINccF3V7k">pic.twitter.com/XINccF3V7k</a></p>&mdash; Cédric Champeau (@CedricChampeau) <a href="https://twitter.com/CedricChampeau/status/523934124898521090">19 Octobre 2014</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -229,7 +228,7 @@ but no, wasn&#8217;t that easy.</p>
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

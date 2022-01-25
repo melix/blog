@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -78,7 +77,7 @@
 	</em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/kotlin.html"> kotlin</a> 
+		<a href="/blog/tags/kotlin.html">kotlin</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_writing_a_simple_http_server_with_graalvm">Writing a simple HTTP server with GraalVM</h2>
@@ -91,7 +90,7 @@ Using it is as easy as running:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>python -m SimpleHTTPServer 8000</code></pre>
+<pre class="prettyprint highlight"><code>python -m SimpleHTTPServer 8000</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -128,7 +127,7 @@ Knowing that Kotlin is a statically compiled language from the ground up and tha
 <div class="listingblock">
 <div class="title">HttpServer.kt</div>
 <div class="content">
-<pre class="prettyprint ruby language-ruby"><code>fun main(args: Array&lt;String&gt;) {
+<pre class="prettyprint highlight"><code data-lang="ruby">fun main(args: Array&lt;String&gt;) {
     val port = if (args.size &gt; 0) args[0].toInt() else 8080
     val baseDir = if (args.size &gt; 1) File(args[1]).canonicalFile else File(".").canonicalFile
 
@@ -169,7 +168,7 @@ Knowing that Kotlin is a statically compiled language from the ground up and tha
 <div class="listingblock">
 <div class="title">build.gradle.kts</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
    kotlin("jvm") version "1.3.21"
    id("com.palantir.graal") version "0.3.0-6-g0b828af"
 }
@@ -191,14 +190,14 @@ graal {
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see, we just apply the Kotlin plugin to build our code, then the GraalVM plugin and configure the basics of the GraalVM plugin (version, main class, &#8230;).</p>
+<p>As you can see, we just apply the Kotlin plugin to build our code, then the GraalVM plugin and configure the basics of the GraalVM plugin (version, main class, &#8230;&#8203;).</p>
 </div>
 <div class="paragraph">
 <p>Building the image can be done by calling:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>./gradlew http-kotlin:nativeImage</code></pre>
+<pre class="prettyprint highlight"><code>./gradlew http-kotlin:nativeImage</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -208,7 +207,7 @@ Then you can try to serve files running:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
+<pre class="prettyprint highlight"><code>http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -231,7 +230,7 @@ At some point, I even thought of abandoning, however, using perseverance, I mana
 <div class="listingblock">
 <div class="title">HttpServerGroovy.groovy</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@CompileStatic
+<pre class="prettyprint highlight"><code data-lang="groovy">@CompileStatic
 abstract class HttpServerGroovy {
 
     // VERY dirty trick to avoid the creation of a groovy.lang.Reference
@@ -290,7 +289,7 @@ The resulting file is both a consequence of limitations of GraalVM, and historic
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
+<pre class="prettyprint highlight"><code>com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -314,7 +313,7 @@ For example, I had this innocent looking code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def baseDir = args[0]
+<pre class="prettyprint highlight"><code data-lang="groovy">def baseDir = args[0]
 server.createContext("/", new HttpHandler() {
     @Override
     void handle(HttpExchange exchange) throws IOException {
@@ -325,7 +324,7 @@ server.createContext("/", new HttpHandler() {
 </div>
 <div class="paragraph">
 <p>The fact that we use <code>baseDir</code> <em>within</em> an anonymous inner class, and that Groovy uses the same code generation under the hood for both closures and anonymous inner classes, that the <code>baseDir</code> variable is allowed to be mutated in the inner class. Of course here I&#8217;m not doing it, but because the compiler doesn&#8217;t eliminate that possibility, what it does is generating a <code>groovy.lang.Reference</code> for my local variable, that is used in the inner class.
-And, initializing the <code>Reference</code> class would cause an additional path to this <code>IndyInterface</code> method call&#8230;</p>
+And, initializing the <code>Reference</code> class would cause an additional path to this <code>IndyInterface</code> method call&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>In the end, the problem is not that much that there&#8217;s a <code>MethodHandle</code>, it&#8217;s that there are potentially different code paths that lead to this, and that GraalVM can&#8217;t figure out in the end a single method to be called: we&#8217;re just defeating the system!</p>
@@ -338,7 +337,7 @@ And, initializing the <code>Reference</code> class would cause an additional pat
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
+<pre class="prettyprint highlight"><code>Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -359,7 +358,7 @@ And, initializing the <code>Reference</code> class would cause an additional pat
 <p>replacing the short-hand syntax for creating lists (<code>def foo=[]</code>) with an explicit call</p>
 </li>
 <li>
-<p>removing calls to <code>+</code> with strings (first attempt to remove GString&#8230;)</p>
+<p>removing calls to <code>+</code> with strings (first attempt to remove GString&#8230;&#8203;)</p>
 </li>
 <li>
 <p>eliminating some classes from the Groovy runtime</p>
@@ -380,7 +379,7 @@ And, initializing the <code>Reference</code> class would cause an additional pat
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>./gradlew http-groovy:nativeImage</code></pre>
+<pre class="prettyprint highlight"><code>./gradlew http-groovy:nativeImage</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -389,7 +388,7 @@ Running it is as easy:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
+<pre class="prettyprint highlight"><code>http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -457,7 +456,7 @@ After this blog post was published, I received a <a href="https://github.com/mel
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

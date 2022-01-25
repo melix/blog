@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -175,7 +174,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@Override
+<pre class="prettyprint highlight"><code data-lang="groovy">@Override
     public void call(final SourceUnit source, final GeneratorContext context, final ClassNode classNode) throws CompilationFailedException {
         if (classNode.isScriptBody()) {							<i class="conum" data-value="1"></i><b>(1)</b>
             classNode.setSuperClass(MarkupTemplateEngine.BASETEMPLATE_CLASSNODE);	<i class="conum" data-value="2"></i><b>(2)</b>
@@ -216,7 +215,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>p(text)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -224,11 +223,11 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>p(getModel().get("text"))</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(getModel().get("text"))</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Technically speaking, there is no need to do such a change: we could rely on <code>BaseTemplate</code> implementing <code>propertyMissing</code> to resolve missing variables (here, <code>text</code>) and delegate the call to its internal <code>model</code> field. However, this can be particularily slow, especially in builders where there are lots of nested closures, which involve a very long call chain. By doing this change, we transform a so-called <code>DynamicVariable</code> (<code>text</code>) into something that can be resolved statically (<code>getModel</code> is declared in <code>BaseTemplate</code> and is of type <code>Map</code>). Slowly, we&#8217;re making a switch towards <strong>statically compilable</strong> code&#8230; but we&#8217;re not there yet.</p>
+<p>Technically speaking, there is no need to do such a change: we could rely on <code>BaseTemplate</code> implementing <code>propertyMissing</code> to resolve missing variables (here, <code>text</code>) and delegate the call to its internal <code>model</code> field. However, this can be particularily slow, especially in builders where there are lots of nested closures, which involve a very long call chain. By doing this change, we transform a so-called <code>DynamicVariable</code> (<code>text</code>) into something that can be resolved statically (<code>getModel</code> is declared in <code>BaseTemplate</code> and is of type <code>Map</code>). Slowly, we&#8217;re making a switch towards <strong>statically compilable</strong> code&#8230;&#8203; but we&#8217;re not there yet.</p>
 </div>
 <div class="paragraph">
 <p>In classic builder code, compiling this would work and eventually, when the <code>p</code> method is called, the meta-object protocol goes into action and eventually calls the <code>methodMissing</code> method on the <code>BaseTemplate</code> class if it is defined. So to make our code work, all we have to do is to write that method:</p>
@@ -236,7 +235,7 @@
 <div class="listingblock">
 <div class="title">BaseTemplate.java</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>    public Object methodMissing(String tagName, Object args) throws IOException {
+<pre class="prettyprint highlight"><code data-lang="groovy">    public Object methodMissing(String tagName, Object args) throws IOException {
         Object o = model.get(tagName);
         if (args instanceof Object[]) {
             final Writer wrt = out;
@@ -272,7 +271,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -294,7 +293,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>text</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">text</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -302,7 +301,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>getModel().get("text")</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">getModel().get("text")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -310,22 +309,22 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>yield(getModel().get("text"))</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">yield(getModel().get("text"))</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>where <code>yield</code> is the method which will escape contents&#8230; So it&#8217;s a very flexible way to perform parametrized transformations of templates! The same technique is used to:</p>
+<p>where <code>yield</code> is the method which will escape contents&#8230;&#8203; So it&#8217;s a very flexible way to perform parametrized transformations of templates! The same technique is used to:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>transform <code>include (template|escaped|unescaped):'path/to/template'</code> into `include(Groovy|Escaped|Unescaped)(<em>/path/to/template</em>)</p>
+<p>transform <code>include (template|escaped|unescaped):'path/to/template'</code> into `include(Groovy|Escaped|Unescaped)('/path/to/template')</p>
 </li>
 <li>
 <p>transform <code>unescaped.foo</code> into <code>getModel().get("foo")</code></p>
 </li>
 <li>
-<p>transform <code>':XXX'()</code> method calls into <code>methodMissing('XXX', ...)</code>. This gives a way to render tags which have the same name as helper methods like <code>yield</code>. In that case, the user can write <code>':yield'()</code> to create a tag <code>&lt;yield&gt;</code> instead of calling the <code>yield</code> method for example.</p>
+<p>transform <code>':XXX'()</code> method calls into <code>methodMissing('XXX', &#8230;&#8203;)</code>. This gives a way to render tags which have the same name as helper methods like <code>yield</code>. In that case, the user can write <code>':yield'()</code> to create a tag <code>&lt;yield&gt;</code> instead of calling the <code>yield</code> method for example.</p>
 </li>
 </ul>
 </div>
@@ -337,11 +336,11 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <div class="sect2">
 <h3 id="_oops_i_did_it_again">Oops, I did it again!</h3>
 <div class="paragraph">
-<p>Going further towards statically compilable code requires additional trickery. In the previous example, we still have a call (<code>p(...)</code>) which is <em>unresolved</em>, goes through the MOP and eventually calls <code>methodMissing</code>. The same way we converted the <code>text</code> variable into a dynamic call, we can make it statically compilable. Since the method which would eventually be called would be <code>methodMissing</code>, instead of going through the MOP, since we know that this particular method will always be called in our case, we can directly make the change, and hardwire it. The resulting code would look like this:</p>
+<p>Going further towards statically compilable code requires additional trickery. In the previous example, we still have a call (<code>p(&#8230;&#8203;)</code>) which is <em>unresolved</em>, goes through the MOP and eventually calls <code>methodMissing</code>. The same way we converted the <code>text</code> variable into a dynamic call, we can make it statically compilable. Since the method which would eventually be called would be <code>methodMissing</code>, instead of going through the MOP, since we know that this particular method will always be called in our case, we can directly make the change, and hardwire it. The resulting code would look like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>methodMissing("p", new Object[]{getModel().get("text")})</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">methodMissing("p", new Object[]{getModel().get("text")})</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -349,7 +348,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>compilerConfiguration.addCompilationCustomizers(new TemplateASTTransformer(tplConfig)); 		<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">compilerConfiguration.addCompilationCustomizers(new TemplateASTTransformer(tplConfig)); 		<i class="conum" data-value="1"></i><b>(1)</b>
 compilerConfiguration.addCompilationCustomizers(
                 new ASTTransformationCustomizer(CompileStatic.class));					<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -371,7 +370,7 @@ compilerConfiguration.addCompilationCustomizers(
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -393,7 +392,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>yield 'Some text'</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">yield 'Some text'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -401,7 +400,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>methodMissing("yield", new Object[] {"Some &lt;text to escape&gt;"})</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">methodMissing("yield", new Object[] {"Some &lt;text to escape&gt;"})</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -409,7 +408,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;yield&gt;Some &lt;text to escape&gt;&lt;/yield&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;yield&gt;Some &lt;text to escape&gt;&lt;/yield&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -423,7 +422,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -475,7 +474,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>methodNotFound { receiver, name, argList, argTypes, call -&gt;	<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;	<i class="conum" data-value="1"></i><b>(1)</b>
     if (call.lineNumber &gt; 0) {					<i class="conum" data-value="2"></i><b>(2)</b>
         if (call.implicitThis) {				<i class="conum" data-value="3"></i><b>(3)</b>
             return makeDynamic(call, OBJECT_TYPE)		<i class="conum" data-value="4"></i><b>(4)</b>
@@ -512,7 +511,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class MarkupTemplateTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
+<pre class="prettyprint highlight"><code data-lang="groovy">class MarkupTemplateTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
 
     @Override
     Object run() {
@@ -528,7 +527,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>compilerConfiguration.addCompilationCustomizers(
+<pre class="prettyprint highlight"><code data-lang="groovy">compilerConfiguration.addCompilationCustomizers(
         new ASTTransformationCustomizer(
             Collections.singletonMap("extensions","groovy.text.markup.MarkupTemplateTypeCheckingExtension"), <i class="conum" data-value="1"></i><b>(1)</b>
             CompileStatic.class));									     <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
@@ -559,10 +558,10 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <table>
 <tr>
 <td class="icon">
-<i class="icon-warning" title="Warning"></i>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Before going further, you have to be warned. What I am going to show you is things that I wouldn&#8217;t recommand for beginners in AST transformations. We&#8217;re going to update the AST <strong>just before it is going to generate bytecode</strong>. This is very late in the compilation process, meaning that you are walking along a thin rope without net! Traditional AST transformations run much earlier in the compilation process, and the compiler will do a lot of things for you (like resolving methods, variables, &#8230;). Here, it is so late that all those things have already been done, so you have to do it all yourself!
+Before going further, you have to be warned. What I am going to show you is things that I wouldn&#8217;t recommand for beginners in AST transformations. We&#8217;re going to update the AST <strong>just before it is going to generate bytecode</strong>. This is very late in the compilation process, meaning that you are walking along a thin rope without net! Traditional AST transformations run much earlier in the compilation process, and the compiler will do a lot of things for you (like resolving methods, variables, &#8230;&#8203;). Here, it is so late that all those things have already been done, so you have to do it all yourself!
 </td>
 </tr>
 </table>
@@ -588,7 +587,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>beforeVisitMethod {		<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">beforeVisitMethod {		<i class="conum" data-value="1"></i><b>(1)</b>
    newScope {			<i class="conum" data-value="2"></i><b>(2)</b>
       builderCalls = []		<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -616,7 +615,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>methodNotFound { receiver, name, argList, argTypes, call -&gt;
+<pre class="prettyprint highlight"><code data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;
     if (call.lineNumber &gt; 0) {
         if (call.implicitThis) {
             currentScope.builderCalls &lt;&lt; call
@@ -631,7 +630,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>afterVisitMethod { mn -&gt;							<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">afterVisitMethod { mn -&gt;							<i class="conum" data-value="1"></i><b>(1)</b>
    scopeExit {									<i class="conum" data-value="2"></i><b>(2)</b>
       new BuilderMethodReplacer(context.source, builderCalls).visitMethod(mn)	<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -659,7 +658,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>    private static class BuilderMethodReplacer extends ClassCodeExpressionTransformer {
+<pre class="prettyprint highlight"><code data-lang="groovy">    private static class BuilderMethodReplacer extends ClassCodeExpressionTransformer {
 
         private static final MethodNode METHOD_MISSING = ClassHelper.make(BaseTemplate).getMethods('methodMissing')[0]		<i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -743,14 +742,14 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 </div>
 <div class="sect1">
-<h2 id="_more_things_to_fix">More things to fix&#8230;</h2>
+<h2 id="_more_things_to_fix">More things to fix&#8230;&#8203;</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You may think that all problems are solved, but in fact, there are still issues with this code. Imagine the following template:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>p(text.toUpperCase())</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text.toUpperCase())</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -758,11 +757,11 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The reason is that we compile the template statically. While we instructed the compiler that <code>text</code> is in fact <code>getModel().get("text")</code>, it is still unable to know what is the return type of this call. Then, it assumes that it returns an <code>Object</code>, and if you try to call <code>toUpperCase</code> on an <code>Object</code>, the method doesn&#8217;t exist&#8230; This can easily be solved, by making all unresolved method calls dynamic. This means that the template compilation will never throw such errors anymore, but it will instead make a dynamic call. Problem solved.</p>
+<p>The reason is that we compile the template statically. While we instructed the compiler that <code>text</code> is in fact <code>getModel().get("text")</code>, it is still unable to know what is the return type of this call. Then, it assumes that it returns an <code>Object</code>, and if you try to call <code>toUpperCase</code> on an <code>Object</code>, the method doesn&#8217;t exist&#8230;&#8203; This can easily be solved, by making all unresolved method calls dynamic. This means that the template compilation will never throw such errors anymore, but it will instead make a dynamic call. Problem solved.</p>
 </div>
 <div class="paragraph">
 <p>Well, almost.</p>
@@ -772,7 +771,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>p(((String)text).toUpperCase())</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(((String)text).toUpperCase())</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -783,7 +782,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -819,7 +818,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>[text:'String']</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">[text:'String']</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -827,7 +826,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>[text:'Integer']</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">[text:'Integer']</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -843,7 +842,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>[persons:'List&lt;Person&gt;', posts:[List&lt;Post&gt;]]</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">[persons:'List&lt;Person&gt;', posts:[List&lt;Post&gt;]]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -859,7 +858,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>div {
+<pre class="prettyprint highlight"><code data-lang="groovy">div {
   p('text')
 }</code></pre>
 </div>
@@ -869,7 +868,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;div&gt;
+<pre class="prettyprint highlight"><code data-lang="html">&lt;div&gt;
     &lt;p&gt;Text&lt;/p&gt;
 &lt;/div&gt;</code></pre>
 </div>
@@ -879,7 +878,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>div {  p('text') }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">div {  p('text') }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -887,15 +886,15 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;div&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/div&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="html">&lt;div&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The problem is that our templates are actually Groovy code&#8230; And new lines are not significant. They are not even visible in the AST, so how can we implement such a feature?! The answer relies in each AST node&#8230; They all carry line and column number information. So, by comparing, in a <code>ClosureExpression</code>, the line number of the closure itself with the line number of its first code statement, we can determine if there was a new line in source code! The same way, we can check if the last line number of the closure is greater than the line number of the last statement, and if so, introduce a new line&#8230; So, in the first example, the code is actually transformed into:</p>
+<p>The problem is that our templates are actually Groovy code&#8230;&#8203; And new lines are not significant. They are not even visible in the AST, so how can we implement such a feature?! The answer relies in each AST node&#8230;&#8203; They all carry line and column number information. So, by comparing, in a <code>ClosureExpression</code>, the line number of the closure itself with the line number of its first code statement, we can determine if there was a new line in source code! The same way, we can check if the last line number of the closure is greater than the line number of the last statement, and if so, introduce a new line&#8230;&#8203; So, in the first example, the code is actually transformed into:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>div {
+<pre class="prettyprint highlight"><code data-lang="groovy">div {
   newLine()
   p('text')
   newLine()
@@ -944,7 +943,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

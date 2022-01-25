@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -269,8 +268,7 @@ jbake -i                                                            <i class="co
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>
-buildscript {
+<pre class="prettyprint highlight"><code data-lang="groovy">buildscript {
   repositories {
       mavenLocal() // needed to use the local JBake 2.3.0 build
       jcenter()
@@ -343,7 +341,7 @@ to our build.</p>
 <div class="listingblock">
 <div class="title">publish.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>buildscript {
+<pre class="prettyprint highlight"><code data-lang="groovy">buildscript {
   repositories {
       jcenter()
   }
@@ -390,7 +388,7 @@ githubPages {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>task publish(type: GradleBuild) {           <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">task publish(type: GradleBuild) {           <i class="conum" data-value="1"></i><b>(1)</b>
     buildFile = 'publish.gradle'
     tasks = ['publishGhPages']
 }</code></pre>
@@ -419,7 +417,7 @@ all in one step! A few seconds later, you should see the result on github.io!</p
 <div class="paragraph">
 <p>One last thing: this configuration does <strong>not</strong> add the sources to your git repository. It only deals with the output,
 so you still need to add the source files, commit them and push them to GitHub. This is of course optional if you
-don&#8217;t want to publish the sources&#8230; If you decide to make them public, then you can also use the git plugin to do it
+don&#8217;t want to publish the sources&#8230;&#8203; If you decide to make them public, then you can also use the git plugin to do it
 automatically!</p>
 </div>
 </div>
@@ -465,7 +463,7 @@ would say, that&#8217;s a <a href="https://twitter.com/aalmiray/status/429236158
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

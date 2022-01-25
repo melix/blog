@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -89,7 +88,7 @@
 		<a href="/blog/tags/C++.html">C++</a> 
 	</p>
 	<p><div class="sect1">
-<h2 id="_but_maybe_mine_can">But maybe mine can&#8230;</h2>
+<h2 id="_but_maybe_mine_can">But maybe mine can&#8230;&#8203;</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>For those of you who do not know me, and you are likely much more in that category than in the other, I&#8217;ve been working on
@@ -132,13 +131,13 @@ the JVM world, because this is the one I know the best.</p>
 <table>
 <tr>
 <td class="icon">
-<i class="icon-caution" title="Caution"></i>
+<i class="fa icon-caution" title="Caution"></i>
 </td>
 <td class="content">
 As expected I got lots of comments on various social media. Some are positive, some not, that&#8217;s ok, but again, I
 would like to remember that this is <strong>not</strong> static languages bashing, nor dynamic languages promotion. Maybe some of you
 will think "hey, but my static language can do it!" and yes, it is possible, because as the subtitle of this post says,
-mine can too. But when it does, often, there&#8217;s a drawback (like loosing type safety, decreased performance,&#8230; ) or you fall on
+mine can too. But when it does, often, there&#8217;s a drawback (like loosing type safety, decreased performance,&#8230;&#8203; ) or you fall on
 dynamic behavior without even noticing it. When it is the case, I tried to be honest and tell about the possibilities. But I also
 voluntarily hide some static features of Groovy that make it a very interesting solution (flow typing for example). Last but not
 least, I am not saying that <strong>all</strong> dynamic features implement <strong>all</strong> those items. I am saying that by nature a dynamic language make
@@ -178,7 +177,7 @@ points illustrated in this blog post derive from it.</p>
 <table>
 <tr>
 <td class="icon">
-<i class="icon-note" title="Note"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 I had some comments that the fact that dynamic languages can do OO right wasn&#8217;t really interesting. In fact, I insisted on keeping this
@@ -199,7 +198,7 @@ of the same name accepting different parameters. Let&#8217;s illustrate this wit
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static int foo(String o) { return 1; }
+<pre class="prettyprint highlight"><code data-lang="java">public static int foo(String o) { return 1; }
 public static int foo(Date o) { return 2; }
 public static int foo(Object o) { return 3; }</code></pre>
 </div>
@@ -209,7 +208,7 @@ public static int foo(Object o) { return 3; }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static void main(String[] args) {
+<pre class="prettyprint highlight"><code data-lang="java">public static void main(String[] args) {
     Object[] array = new Object[] { "a string", new Date(), 666 };
     for (Object o : array) {
         System.out.println(foo(o));
@@ -248,14 +247,14 @@ public static int foo(Object o) { return 3; }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>It is theorically possible for a static language to do the same. But it comes at the price of performance. It would mean that the arguments have to be checked at runtime, and since static languages do not, as far as I know, implement an inlining cache, performance would be lower than those of a well designed dynamic language&#8230;</p>
+<p>It is theorically possible for a static language to do the same. But it comes at the price of performance. It would mean that the arguments have to be checked at runtime, and since static languages do not, as far as I know, implement an inlining cache, performance would be lower than those of a well designed dynamic language&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>But to add something to a dynamic language, what if you remove the <code>Object</code> version of <code>foo</code>, and remove <code>666</code> from the array? As an exercise to the reader, would this Java code compile?</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public static int foo(String o) { return 1; }
+<pre class="prettyprint highlight"><code data-lang="java">public static int foo(String o) { return 1; }
 public static int foo(Date o) { return 2; }
 
 public static void main(String[] args) {
@@ -267,7 +266,7 @@ public static void main(String[] args) {
 </div>
 </div>
 <div class="paragraph">
-<p>If not, what do you have to do to make it pass? Yes, dynamic languages are superior here&#8230;</p>
+<p>If not, what do you have to do to make it pass? Yes, dynamic languages are superior here&#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -279,7 +278,7 @@ public static void main(String[] args) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class Duck {
+<pre class="prettyprint highlight"><code data-lang="groovy">class Duck {
    String getName() { 'Duck' }
 }
 class Cat {
@@ -292,7 +291,7 @@ class Cat {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def list = [cat, dog, human, hal]
+<pre class="prettyprint highlight"><code data-lang="groovy">def list = [cat, dog, human, hal]
 list.each { obj -&gt;
    println obj.getName()
 }</code></pre>
@@ -303,7 +302,7 @@ list.each { obj -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>if (obj instanceof Cat) {
+<pre class="prettyprint highlight"><code data-lang="java">if (obj instanceof Cat) {
    return ((Cat)obj).getName();
 }
 if (obj instanceof Duck) {
@@ -322,7 +321,7 @@ if (obj instanceof Computer) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public abstract class Something {} // should define getName, but does not for some obscure reason
+<pre class="prettyprint highlight"><code data-lang="java">public abstract class Something {} // should define getName, but does not for some obscure reason
 public class Cat extends Something {
    public String getName() { return "Cat"; }
 }
@@ -351,22 +350,22 @@ public class Dog extends Something {
 <p>Of course, one may say "but why the hell didn&#8217;t you use an interface". This is of course a good way to solve this in Java, but it is not always possible. Not for example if you don&#8217;t have access to the source code (think of the various classes being split in third party libraries). I often faced this problem in the past, and believe me it&#8217;s no fun (I look at you, <em>Apache Lucene</em>).</p>
 </div>
 <div class="paragraph">
-<p>There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate <code>getName</code> method. Of course it is overkill: for each object of your list you have a proxy instantiated&#8230; Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn&#8217;t have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do&#8230;</p>
+<p>There are actually alternatives for static languages. In Java, you could use a reflective proxy: define an interface, then create a proxy implementing that interface which will delegate to the appropriate <code>getName</code> method. Of course it is overkill: for each object of your list you have a proxy instantiated&#8230;&#8203; Another option, again in Java, is to make the call reflective. But in that case, the call becomes slow and in fact, what you are doing is a dynamic call like a dynamic language would do. A language like Groovy doesn&#8217;t have that problem because it implements smart techniques like call site caching and runtime bytecode generation which make it much faster than what a reflective call would do&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
-<p>An elegant alternative used by other static languages is <strong>structural typing</strong>. This is for example what the <code>Go</code> language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the <em>invokedynamic</em> bytecode instruction but guess what? You are relying on a <em>dynamic</em> feature of the VM&#8230; Can you hear it?</p>
+<p>An elegant alternative used by other static languages is <strong>structural typing</strong>. This is for example what the <code>Go</code> language does. In this case, you define an interface, but the object does not have to explicitly implement the interface: the fact that the object defines a method corresponding to the method in the interface is enough to implement it. This is elegant but it changes the semantics of an interface as you define it in Java. Last but not least, this technique cannot be used on a platform like the JVM, because the virtual machine has no way to do it. Well, this is not totally true since now we have the <em>invokedynamic</em> bytecode instruction but guess what? You are relying on a <em>dynamic</em> feature of the VM&#8230;&#8203; Can you hear it?</p>
 </div>
 <div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="icon-note" title="Note"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 Some argued that this is very bad design. I must repeat that if you think so, you missed the point. The idea is to <strong>workaround poorly designed
 APIs</strong> (or APIs which were "optimized"). When I talked about <em>Lucene</em> it was for a very good reason. I faced the problem. <em>Lucene</em> is a highly
 optimized piece of code. It makes design decisions which are often based on performance: flattening as much as possible class hierarchies (the HotSpot
-JIT doesn&#8217;t like deep class hierarchies), make classes final, prefer abstract classes over interfaces, &#8230; So it is easy to find classes that you want
+JIT doesn&#8217;t like deep class hierarchies), make classes final, prefer abstract classes over interfaces, &#8230;&#8203; So it is easy to find classes that you want
 to extend, but you can&#8217;t because they are final, or classes that implicitly implement a contract but do not define interfaces. This is a pain to work
 with, and the ability of a dynamic language to be able to call such methods without having to explicitly declare a contract is a real gain. Some
 static languages offer similar features through structural typing, but then you have to think about what it means (virtual table lookup?) and how
@@ -382,11 +381,11 @@ me with a way to call some methods.
 <h2 id="_7_respond_to_non_existing_methods">7. Respond to non-existing methods</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A dynamic language answers to messages (method calls) at runtime. This means that a well designed dynamic language should be able to let you answer <strong>any</strong> kind of method call, including&#8230; non existing methods! This feature is at the core of powerful facilitating frameworks like Grails. In Grails, you can define a domain class like this:</p>
+<p>A dynamic language answers to messages (method calls) at runtime. This means that a well designed dynamic language should be able to let you answer <strong>any</strong> kind of method call, including&#8230;&#8203; non existing methods! This feature is at the core of powerful facilitating frameworks like Grails. In Grails, you can define a domain class like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class Person {
+<pre class="prettyprint highlight"><code data-lang="groovy">class Person {
    String firstName
    String lastName
    int age
@@ -398,19 +397,19 @@ me with a way to call some methods.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def adults = Person.findByAge { it&gt;= 18 }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def adults = Person.findByAge { it&gt;= 18 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>I will not dig into the details about how this is done, but the idea is to intercept the fact that the <code>findByAge</code> method does not exist, then parse the name of the method and build a query based on the method name and the rest of the arguments (here, a closure, an open block of code). Queries can be as complex as you wish, like <code>findByLastNameAndAge</code> or whatever you can think of. Of course Grails does some smart things here, like <strong>generating a new method at runtime</strong>, so that the next time this method is hit, it is not an unknown method anymore, and can be invoked faster! Only a dynamic language would let you do that. Say bye to infamous DAOs that you have to change everytime you have
-a new query, it is not necessary. One could say that they prefer safety at compile time rather than the ability to do this, but Grails also offers that possibility of checking that the syntax is correct at compile time, while still leveraging the dynamic runtime to make this work&#8230; It&#8217;s all about boilerplate removed, code verbosity and productivity&#8230;</p>
+a new query, it is not necessary. One could say that they prefer safety at compile time rather than the ability to do this, but Grails also offers that possibility of checking that the syntax is correct at compile time, while still leveraging the dynamic runtime to make this work&#8230;&#8203; It&#8217;s all about boilerplate removed, code verbosity and productivity&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>The ability to react to arbitrary messages is actually at the core of many DSLs (domain specific languages) written in Groovy. They are at the core of builders for example, which will let you write code like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>catalog {
+<pre class="prettyprint highlight"><code data-lang="groovy">catalog {
    book {
    	isbn 123
 	name 'Awesome dynamic languages'
@@ -429,7 +428,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>builder.catalog( (el) -&gt; {
+<pre class="prettyprint highlight"><code data-lang="java">builder.catalog( (el) -&gt; {
   el.book ( (p) -&gt; {
      p.setISBN("123");
      p.setName("Awesome dynamic languages");
@@ -449,7 +448,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class VulnerableService {
+<pre class="prettyprint highlight"><code data-lang="java">public class VulnerableService {
    public void vulnerableMethod() {
       FileUtils.recurseDeleteWithRootPrivileges("/");
    }
@@ -461,13 +460,13 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>VulnerableService.metaClass.vulnerableMethod = {
+<pre class="prettyprint highlight"><code data-lang="groovy">VulnerableService.metaClass.vulnerableMethod = {
    println "Well tried, but you have been logged to Santa's naughty guys list!"
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then a caller that would call the vulnerableMethod would call the monkey-patched version instead of the original one. Of course in a language like Groovy, this would only be true if the callee is dynamically compiled: if you use <code>@CompileStatic</code> to behave like a static compiler, you&#8217;re out of luck, because the method which will be invoked is selected at compile time, so you <strong>will</strong> be vulnerable even if you try to monkey patch&#8230; Groovy provides other extension mechanisms to work around this, but it&#8217;s not the topic here ;-)</p>
+<p>Then a caller that would call the vulnerableMethod would call the monkey-patched version instead of the original one. Of course in a language like Groovy, this would only be true if the callee is dynamically compiled: if you use <code>@CompileStatic</code> to behave like a static compiler, you&#8217;re out of luck, because the method which will be invoked is selected at compile time, so you <strong>will</strong> be vulnerable even if you try to monkey patch&#8230;&#8203; Groovy provides other extension mechanisms to work around this, but it&#8217;s not the topic here ;-)</p>
 </div>
 </div>
 </div>
@@ -475,14 +474,14 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 <h2 id="_5_dynamic_objects">5. Dynamic objects</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Most dynamic languages let you create&#8230; dynamic objects. It is basically an object for which you attach methods and properties <em>at runtime</em>. Not that I am a big fan of it but there are some valid use cases (serialization, languages like <a href="https://github.com/golo-lang/golo-lang/">Golo</a> not supporting classes, prototype based construction, &#8230;). It can also be convenient if you want to rapidly prototype a class.</p>
+<p>Most dynamic languages let you create&#8230;&#8203; dynamic objects. It is basically an object for which you attach methods and properties <em>at runtime</em>. Not that I am a big fan of it but there are some valid use cases (serialization, languages like <a href="https://github.com/golo-lang/golo-lang/">Golo</a> not supporting classes, prototype based construction, &#8230;&#8203;). It can also be convenient if you want to rapidly prototype a class.</p>
 </div>
 <div class="paragraph">
 <p>As an example, let&#8217;s see how you could create an arbitrary object to represent a person, without actually leveraging on a class, using the Groovy language:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def p = new Expando()
+<pre class="prettyprint highlight"><code data-lang="groovy">def p = new Expando()
 p.name = 'Cédric'
 p.sayHello = { println "Hello $name" }
 
@@ -490,7 +489,7 @@ p.sayHello()</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The code is totally dynamic here. It lets you create an arbitrary object, attach new methods to it, data, &#8230;, without relying on strong typing. Of course it is interesting when you see that the <code>sayHello</code> method is capable of referencing "pseudo-fields" which are themselves dynamic!</p>
+<p>The code is totally dynamic here. It lets you create an arbitrary object, attach new methods to it, data, &#8230;&#8203;, without relying on strong typing. Of course it is interesting when you see that the <code>sayHello</code> method is capable of referencing "pseudo-fields" which are themselves dynamic!</p>
 </div>
 </div>
 </div>
@@ -521,7 +520,7 @@ p.sayHello()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.json.JsonSlurper
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.json.JsonSlurper
 
 def json = new JsonSlurper().parse('https://api.github.com/repos/groovy/groovy-core/issues?state=closed'.toURL())
 json.user.collectEntries { u -&gt;
@@ -560,7 +559,7 @@ json.user.collectEntries { u -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
+<pre class="prettyprint highlight"><code data-lang="groovy">Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
 Point p = [x:1, y:2] // coercion of a map literal into an object of class Point thanks to setter injection</code></pre>
 </div>
 </div>
@@ -569,7 +568,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class A {
+<pre class="prettyprint highlight"><code data-lang="groovy">class A {
    Object asType(Class&lt;?&gt; clazz) { new B(...) }
 }</code></pre>
 </div>
@@ -587,11 +586,11 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>a+b</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">a+b</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In this script, variables <code>a</code> and <code>b</code> are <code>unbound</code>. They are not known from a compiler, so if you tried to statically compile this with a compiler like <em>Java</em> (or <em>C++</em>, or <em>Scala</em>) it would definitely blow up. Not if you compile this with <em>Groovy</em>. Because it&#8217;s dynamic, it&#8217;s able to know that those variables <strong>will</strong> be eventually bound, when the script is executed. Groovy provides means to <em>inject</em> those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> uses <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">Groovy as the default scripting language</a>: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve <code>a</code> and <code>b</code> at compile time and that you fear to write code which might fail at runtime&#8230;</p>
+<p>In this script, variables <code>a</code> and <code>b</code> are <code>unbound</code>. They are not known from a compiler, so if you tried to statically compile this with a compiler like <em>Java</em> (or <em>C++</em>, or <em>Scala</em>) it would definitely blow up. Not if you compile this with <em>Groovy</em>. Because it&#8217;s dynamic, it&#8217;s able to know that those variables <strong>will</strong> be eventually bound, when the script is executed. Groovy provides means to <em>inject</em> those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> uses <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">Groovy as the default scripting language</a>: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve <code>a</code> and <code>b</code> at compile time and that you fear to write code which might fail at runtime&#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -642,7 +641,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -93,11 +92,11 @@
 <h2 id="_an_interesting_experiment">An interesting experiment</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For that reason, I started working on a new template engine leveraging Groovy. The primary focus of this template engine would be XML-like markup (XHTML, HTML5, XML, &#8230;), but in theory, it can be used to render anything. The basic idea is that you can write a template which looks like this:</p>
+<p>For that reason, I started working on a new template engine leveraging Groovy. The primary focus of this template engine would be XML-like markup (XHTML, HTML5, XML, &#8230;&#8203;), but in theory, it can be used to render anything. The basic idea is that you can write a template which looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
     body {
         yield message			<i class="conum" data-value="1"></i><b>(1)</b>
     }
@@ -108,7 +107,7 @@
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><em>message</em> is a template variable</td>
+<td>'message' is a template variable</td>
 </tr>
 </table>
 </div>
@@ -117,7 +116,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;html&gt;&lt;body&gt;It works!&lt;/body&gt;&lt;/html&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;&lt;body&gt;It works!&lt;/body&gt;&lt;/html&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -125,7 +124,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+<pre class="prettyprint highlight"><code data-lang="groovy">@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
 @Grab('org.freemarker:freemarker:2.3.9')
 import groovy.text.markup.MarkupTemplateEngine
 import freemarker.template.*
@@ -180,7 +179,7 @@ Freemarker (simple toUpper)                 1161       0   1161   1171</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As wisdom says, make it work, make it right, then make it fast. I already had it working and it did what I wanted, so the next logical step would therefore be optimizing&#8230; But before I show you the results of that steps, let&#8217;s take a look at the features I have implemented so far.</p>
+<p>As wisdom says, make it work, make it right, then make it fast. I already had it working and it did what I wanted, so the next logical step would therefore be optimizing&#8230;&#8203; But before I show you the results of that steps, let&#8217;s take a look at the features I have implemented so far.</p>
 </div>
 </div>
 </div>
@@ -207,7 +206,7 @@ Freemarker (simple toUpper)                 1161       0   1161   1171</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Page title&lt;/title&gt;&lt;/head&gt;&lt;/body&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Page title&lt;/title&gt;&lt;/head&gt;&lt;/body&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -215,7 +214,7 @@ Freemarker (simple toUpper)                 1161       0   1161   1171</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -240,7 +239,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h3 id="_groovy_goodness">Groovy goodness</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>ul {
+<pre class="prettyprint highlight"><code data-lang="groovy">ul {
    persons.each { p -&gt;
    	li(p.name)
    }
@@ -252,7 +251,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def model = [persons: [new Person(name:'Bob'), new Person(name:'Alice')]]</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def model = [persons: [new Person(name:'Bob'), new Person(name:'Alice')]]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -260,7 +259,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;ul&gt;&lt;li&gt;Bob&lt;/li&gt;&lt;li&gt;Alice&lt;/li&gt;&lt;/ul&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="html">&lt;ul&gt;&lt;li&gt;Bob&lt;/li&gt;&lt;li&gt;Alice&lt;/li&gt;&lt;/ul&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -270,7 +269,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h4 id="_inclusion_of_another_template">inclusion of another template</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    include template: 'includes/header.tpl'
    include template: 'includes/body.tpl'
 }</code></pre>
@@ -281,7 +280,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h4 id="_inclusion_of_escaped_text">inclusion of escaped text</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    div(class:'post') {
    	include escaped: 'content/text.txt'
    }
@@ -293,7 +292,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <h4 id="_inclusion_of_unescaped_text">inclusion of unescaped text</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    div(class:'post') {
    	include unescaped: 'content/raw.txt'
    }
@@ -308,7 +307,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def model = [text:'&lt;html&gt;']</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def model = [text:'&lt;html&gt;']</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -316,7 +315,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>p(text)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -324,7 +323,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>&lt;p&gt;&amp;lt;html&amp;gt;&lt;/p&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">&lt;p&gt;&amp;lt;html&amp;gt;&lt;/p&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -332,7 +331,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>p(unescaped.text)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(unescaped.text)</code></pre>
 </div>
 </div>
 </div>
@@ -343,7 +342,7 @@ mkpTemplate1.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    newLine()
    body {
 newLine()
@@ -359,7 +358,7 @@ newLine()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;html&gt;
+<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;
 &lt;body&gt;
 &lt;p&gt;Auto indent in action!&lt;/p&gt;
 &lt;/body&gt;
@@ -371,7 +370,7 @@ newLine()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;html&gt;
+<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;
     &lt;body&gt;
         &lt;p&gt;Auto indent in action!&lt;/p&gt;
     &lt;/body&gt;
@@ -386,7 +385,7 @@ newLine()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    body {
 p('Auto indent in action!')
    }
@@ -398,7 +397,7 @@ p('Auto indent in action!')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>html {   body {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {   body {
 p('Auto indent in action!')
    }
 }</code></pre>
@@ -410,7 +409,7 @@ p('Auto indent in action!')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint html language-html"><code>&lt;html&gt;&lt;body&gt;
+<pre class="prettyprint highlight"><code data-lang="html">&lt;html&gt;&lt;body&gt;
         &lt;p&gt;Auto indent in action!&lt;/p&gt;
     &lt;/body&gt;
 &lt;/html&gt;</code></pre>
@@ -427,7 +426,7 @@ p('Auto indent in action!')
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class User {
+<pre class="prettyprint highlight"><code data-lang="groovy">class User {
    Long id
    String name
 }
@@ -440,7 +439,7 @@ def model = [user: new User(id: 123, name: 'Cedric')]</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def template = engine.createTemplate '''
+<pre class="prettyprint highlight"><code data-lang="groovy">def template = engine.createTemplate '''
 p "User id: $user.id Name: $user.name Age: $user.age"
 '''</code></pre>
 </div>
@@ -450,7 +449,7 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>template.make(model).writeTo(new PrintWriter(System.out)) 	<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">template.make(model).writeTo(new PrintWriter(System.out)) 	<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -466,7 +465,7 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def template = engine.createTypeCheckedModelTemplate '''	<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">def template = engine.createTypeCheckedModelTemplate '''	<i class="conum" data-value="1"></i><b>(1)</b>
 p "User id: $user.id Name: $user.name Age: $user.age"
 ''', [user: 'User']						<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -492,7 +491,7 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 </div>
 </div>
 <div class="paragraph">
-<p>This means that it won&#8217;t wait for an actual template to be rendered for failing, which is a feature some people like (yes, I&#8217;m looking at you, Play! Framework ;)). Now that we&#8217;ve showed a quick list of those features (there are more, like helper methods in model, &#8230;), what about performance? Is it worth it? I thought Groovy, and builders, were slow?</p>
+<p>This means that it won&#8217;t wait for an actual template to be rendered for failing, which is a feature some people like (yes, I&#8217;m looking at you, Play! Framework ;)). Now that we&#8217;ve showed a quick list of those features (there are more, like helper methods in model, &#8230;&#8203;), what about performance? Is it worth it? I thought Groovy, and builders, were slow?</p>
 </div>
 </div>
 </div>
@@ -502,11 +501,11 @@ p "User id: $user.id Name: $user.name Age: $user.age"
 <h2 id="_statically_compiled_templates">Statically compiled templates</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I had already played with <a href="/blog/2013/02/13/static_builders_inception.html">static builders</a> in the past, and we also have this very nice feature of static type checking extensions in Groovy 2.1. In Groovy 2.2, type checking extensions were extended to static compilation&#8230; So my first idea was to get rid of the <code>StreamingMarkupBuilder</code>, which is good but not really suited for optimizations. And before I explain the implementation details, here is the result of a more complete benchmark, using my latest implementation:</p>
+<p>I had already played with <a href="/blog/2013/02/13/static_builders_inception.html">static builders</a> in the past, and we also have this very nice feature of static type checking extensions in Groovy 2.1. In Groovy 2.2, type checking extensions were extended to static compilation&#8230;&#8203; So my first idea was to get rid of the <code>StreamingMarkupBuilder</code>, which is good but not really suited for optimizations. And before I explain the implementation details, here is the result of a more complete benchmark, using my latest implementation:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
+<pre class="prettyprint highlight"><code data-lang="groovy">@Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
 @Grab('org.freemarker:freemarker:2.3.9')
 import groovy.text.markup.MarkupTemplateEngine
 import freemarker.template.*
@@ -602,7 +601,7 @@ FreeMarker loop                            2862       0  2862  2894</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see, there is a <strong>huge</strong> difference. For non trivial templates, the markup template engine is even faster than Freemarker! To acheive such performance, all templates are compiled into bytecode, but also make use of static compilation, type checking extensions, AST transformations, &#8230;</p>
+<p>As you can see, there is a <strong>huge</strong> difference. For non trivial templates, the markup template engine is even faster than Freemarker! To acheive such performance, all templates are compiled into bytecode, but also make use of static compilation, type checking extensions, AST transformations, &#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>In the next part, I will describe the techniques I used to implement this engine. Meanwhile, let me know what you think of it. If you feel brave, you can test it by checking out the sources on my fork:</p>
@@ -652,7 +651,7 @@ FreeMarker loop                            2862       0  2862  2894</pre>
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,7 +73,7 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/dependabot.html"> dependabot</a> 
+		<a href="/blog/tags/dependabot.html">dependabot</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -119,7 +118,7 @@ I don&#8217;t have the expertise to tell if it&#8217;s different in the other su
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
    &lt;group&gt;junit&lt;/group&gt;
    &lt;name&gt;junit&lt;/version&gt;
    &lt;version&gt;4.13&lt;/version&gt;
@@ -134,10 +133,10 @@ I don&#8217;t have the expertise to tell if it&#8217;s different in the other su
 <p>Yes, and no. Because this is extremely easy to defeat.</p>
 </div>
 <div class="paragraph">
-<p>First, as I said, it only looks for known files. For Maven, it&#8217;s pretty simple, there&#8217;s only one place to look for: <code>pom.xml</code> files, but for other build tools, like Gradle, Ivy, Ant, Bazel, Pants, &#8230; that&#8217;s not the case: dependencies can be declared in different files, not all named the same. Dependency versions can be separate (in properties files) or inherited from context (parent POMs, platforms, &#8230;).</p>
+<p>First, as I said, it only looks for known files. For Maven, it&#8217;s pretty simple, there&#8217;s only one place to look for: <code>pom.xml</code> files, but for other build tools, like Gradle, Ivy, Ant, Bazel, Pants, &#8230;&#8203; that&#8217;s not the case: dependencies can be declared in different files, not all named the same. Dependency versions can be separate (in properties files) or inherited from context (parent POMs, platforms, &#8230;&#8203;).</p>
 </div>
 <div class="paragraph">
-<p>A more complete strategy is to look for patterns too, like <code>*.gradle</code>, but then, they also miss the <code>*.gradle.kts</code> files (they do), or the plugins which can contribute dependencies.
+<p>A more complete strategy is to look for patterns too, like <code><strong>.gradle</code>, but then, they also miss the <code></strong>.gradle.kts</code> files (they do), or the plugins which can contribute dependencies.
 In short: it&#8217;s a whack-a-mole game.</p>
 </div>
 <div class="paragraph">
@@ -187,7 +186,7 @@ Say, for example, that you write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
    implementation 'org.mylib:awesome:[1.0, 2['
 }</code></pre>
 </div>
@@ -199,7 +198,7 @@ In Gradle you can even improve this by explaining what version you prefer in the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
    implementation('org.mylib:awesome') {
       version {
           require '[1.0, 2['
@@ -227,7 +226,7 @@ It does so by writing the result of the dependency resolution process in a lock 
 <p>In the example above, imagine that I use range <code>[1.0, 2[</code> and that I&#8217;m resolving 1.3.
 At some point in time, version 2.1 is released and is vulnerable.
 You could imagine that because you used a range and that 2.1 is out of the range, you are safe.
-That&#8217;s what those tools would assume, but they would be wrong: the reality is that despite this declaration, by the play of conflict resolution (Ivy, Gradle, &#8230;) or ordering (Maven), a totally different version can be selected, even 2.1!</p>
+That&#8217;s what those tools would assume, but they would be wrong: the reality is that despite this declaration, by the play of conflict resolution (Ivy, Gradle, &#8230;&#8203;) or ordering (Maven), a totally different version can be selected, even 2.1!</p>
 </div>
 <div class="paragraph">
 <p>Again there are <a href="https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html">tools to mitigate this problem</a>, but the reality is that by just reading the declaration, you&#8217;re not safe.</p>
@@ -239,7 +238,7 @@ That&#8217;s what those tools would assume, but they would be wrong: the reality
 <p>Imagine that you have:</p>
 </div>
 <div class="paragraph">
-<p><code>Foo -&gt; Bar -&gt; Baz</code></p>
+<p><code>Foo &#8594; Bar &#8594; Baz</code></p>
 </div>
 <div class="paragraph">
 <p>And that you depend on <code>Foo</code>. What if a vulnerability is discovered on <code>Baz</code>? Will you be notified? What kind of automated pull request can such a tool make to make sure that you upgrade <code>Baz</code>?</p>
@@ -354,7 +353,7 @@ However, we have alternate solutions. For example a few weeks ago I experimented
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

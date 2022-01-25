@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,15 +73,15 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/configuration.html">configuration</a> 
 	</em>
-		<a href="/blog/tags/j2ee.html"> j2ee</a> 
+		<a href="/blog/tags/j2ee.html">j2ee</a> 
 	</em>
-		<a href="/blog/tags/java.html"> java</a> 
+		<a href="/blog/tags/java.html">java</a> 
 	</em>
-		<a href="/blog/tags/spring.html"> spring</a> 
+		<a href="/blog/tags/spring.html">spring</a> 
 	</em>
-		<a href="/blog/tags/tomcat.html"> tomcat</a> 
+		<a href="/blog/tags/tomcat.html">tomcat</a> 
 	</em>
-		<a href="/blog/tags/web.html"> web</a> 
+		<a href="/blog/tags/web.html">web</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -100,7 +99,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>for the developer, this requires writing down a burn-proof upgrade guide which mostly consists of saying &#8220;backup all your data and do what you’ve done for the first version another time&#8221;.</p>
+<p>for the developer, this requires writing down a burn-proof upgrade guide which mostly consists of saying ``backup all your data and do what you’ve done for the first version another time''.</p>
 </li>
 <li>
 <p>for the customer, this leads to situations when you prefer not to upgrade because you <strong>fear the upgrade procedure</strong> : you cannot allow breaking your system</p>
@@ -120,7 +119,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public static final String PROPERTIES_FILE="/CONFIG/configuration.properties";
+<pre class="prettyprint highlight"><code>public static final String PROPERTIES_FILE="/CONFIG/configuration.properties";
 
 // ...
 
@@ -130,8 +129,7 @@ try {
    props.load(in);
 } catch (IOException e) {
    theLogger.warn("Unable to read configuration file " + PROPERTIES_FILE, e);
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -193,8 +191,7 @@ try {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>
-In the previous snippet, _$\{myproperty}_ is a property. The idea is to read all those properties from a custom property placeholder configurer and use them into our Spring configuration file. The good thing is that you can actually *use those properties for importing other Spring configuration files*, for example:
+<pre class="prettyprint highlight"><code>In the previous snippet, _$\{myproperty}_ is a property. The idea is to read all those properties from a custom property placeholder configurer and use them into our Spring configuration file. The good thing is that you can actually *use those properties for importing other Spring configuration files*, for example:
 
 code,prettyprint---- code,prettyprint
 
@@ -333,7 +330,7 @@ This post showed you that you could, at level design, avoid some lacks to the Ja
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

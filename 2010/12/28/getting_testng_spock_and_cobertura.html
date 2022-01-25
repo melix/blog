@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,15 +73,13 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/cobertura.html">cobertura</a> 
 	</em>
-		<a href="/blog/tags/maven.html"> maven</a> 
+		<a href="/blog/tags/maven.html">maven</a> 
 	</em>
-		<a href="/blog/tags/spock.html"> spock</a> 
+		<a href="/blog/tags/spock.html">spock</a> 
 	</em>
-		<a href="/blog/tags/testng.html"> testng</a> 
+		<a href="/blog/tags/testng.html">testng</a> 
 	</p>
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><div class="paragraph">
 <p>Cobertura, TestNG and Maven play well together. However, I had problems when I started migrating some tests to <a href="http://code.google.com/p/spock/">the Spock framework</a>. Long story short, Spock uses JUnit internally, not TestNG, and the surefire plugin only triggers tests for one of those frameworks at a time. Therefore, if you mix TestNG with Spock, you’ll run with problems where your Spock tests won’t be started automatically by Maven, and eventually, Cobertura will never generate test coverage for the corresponding classes.</p>
 </div>
 <div class="paragraph">
@@ -90,8 +87,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>
-...
+<pre class="prettyprint highlight"><code>...
 
                 1.7.6
   0.5-groovy-1.7
@@ -232,20 +228,11 @@
       cobertura-clean
       clean
 
-       clean
-
-
-
-
-
-
-</code></pre>
+       clean</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The trick is to add two executions of the surefire plugin, as <a href="http://bit.ly/ePc0oG">indicated here</a>, but forcing the plugin version to 2.7.1. Also, adding two dependencies to the surefire plugin, as suggested by <a href="http://twitter.com/#!/krosenvold/status/19442054924861441">Kristian Rosenvold</a> didn’t work for me. My pom.xml file also includes the necessary configuration for GMaven to work with Groovy 1.7 instead of 1.6 by default.</p>
-</div>
-</div>
 </div></p>
    
 
@@ -273,7 +260,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/plugins.html"> plugins</a> 
+		<a href="/blog/tags/plugins.html">plugins</a> 
 	</em>
-		<a href="/blog/tags/provider-api.html"> provider api</a> 
+		<a href="/blog/tags/provider-api.html">provider api</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_introduction">Introduction</h2>
@@ -132,7 +131,7 @@ We&#8217;re also going to create 2 files in that directory:</p>
 <div class="listingblock">
 <div class="title">flex-plugin/settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>rootProject.name = 'jflex-plugin'</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">rootProject.name = 'jflex-plugin'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -141,7 +140,7 @@ We&#8217;re also going to create 2 files in that directory:</p>
 <div class="listingblock">
 <div class="title">flex-plugin/build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id 'java-gradle-plugin'
 }
 
@@ -178,7 +177,7 @@ This is all the boilerplate you have to write to create a plugin, really.</p>
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>includeBuild "jflex-plugin"</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">includeBuild "jflex-plugin"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -187,7 +186,7 @@ This is all the boilerplate you have to write to create a plugin, really.</p>
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id 'java-library'
     id 'io.micronaut.internal.jflex'
 }</code></pre>
@@ -221,17 +220,17 @@ Here&#8217;s its skeleton:</p>
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>@CacheableTask                                                  <b>(1)</b>
-public abstract class JFlexTask extends DefaultTask {           <b>(2)</b>
+<pre class="prettyprint highlight"><code data-lang="java">@CacheableTask                                                  // <b class="conum">(1)</b>
+public abstract class JFlexTask extends DefaultTask {           // <b class="conum">(2)</b>
 
-    @InputDirectory                                             <b>(3)</b>
+    @InputDirectory                                             // <b class="conum">(3)</b>
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract DirectoryProperty getSourceDirectory();
 
-    @OutputDirectory                                            <b>(4)</b>
+    @OutputDirectory                                            // <b class="conum">(4)</b>
     public abstract DirectoryProperty getOutputDirectory();
 
-    @TaskAction                                                 <b>(5)</b>
+    @TaskAction                                                 // <b class="conum">(5)</b>
     public void generateSources() {
       // call JFlex library
     }
@@ -278,9 +277,9 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("generateLexer", JFlexTask) {
-    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) <b>(1)</b>
-    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  <b>(2)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) // <b class="conum">(1)</b>
+    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  // <b class="conum">(2)</b>
 }</code></pre>
 </div>
 </div>
@@ -300,7 +299,7 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("generateLexer", JFlexTask) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
     sourceDirectory = file("src/main/jflex")
     outputDirectory = file("build/generated/jflex')
 }</code></pre>
@@ -348,28 +347,28 @@ It&#8217;s time to create our plugin class:</p>
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexPlugin.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  <b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="java">public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  // <b class="conum">(1)</b>
     @Override
     public void apply(Project project) {
-        project.getPluginManager().apply(JavaPlugin.class);                            <b>(2)</b>
+        project.getPluginManager().apply(JavaPlugin.class);                            // <b class="conum">(2)</b>
         JavaPluginExtension javaExt = project.getExtensions()
-           .getByType(JavaPluginExtension.class);                                      <b>(3)</b>
+           .getByType(JavaPluginExtension.class);                                      // <b class="conum">(3)</b>
         TaskProvider&lt;JFlexTask&gt; generateLexer = project.getTasks()
-            .register("generateLexer", JFlexTask.class, task -&gt; {                      <b>(4)</b>
+            .register("generateLexer", JFlexTask.class, task -&gt; {                      // <b class="conum">(4)</b>
                task.setGroup(LifecycleBasePlugin.BUILD_GROUP);
                task.setDescription("Generates lexer files from JFlex grammar files.");
                task.getSourceDirectory().convention(
-                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    <b>(5)</b>
+                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    // <b class="conum">(5)</b>
                );
                task.getOutputDirectory().convention(
-                    project.getLayout().getBuildDirectory().dir("generated/jflex")     <b>(6)</b>
+                    project.getLayout().getBuildDirectory().dir("generated/jflex")     // <b class="conum">(6)</b>
                );
         });
         // Register the output of the JFlex task as generated sources
         javaExt.getSourceSets()
                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                 .getJava()
-                .srcDir(generateLexer);                                                <b>(7)</b>
+                .srcDir(generateLexer);                                                // <b class="conum">(7)</b>
     }
 }</code></pre>
 </div>
@@ -431,7 +430,7 @@ In particular, it defines the Java source sets (<code>main</code> and <code>test
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>javaExt.getSourceSets()
+<pre class="prettyprint highlight"><code data-lang="java">javaExt.getSourceSets()
     .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     .getJava()
     .srcDir(generateLexer);</code></pre>
@@ -477,7 +476,7 @@ Instead of having our task directly invoke JFlex, we need to create a class whic
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>@CacheableTask
+<pre class="prettyprint highlight"><code data-lang="java">@CacheableTask
 public abstract class JFlexTask extends DefaultTask {
 
     @InputDirectory
@@ -516,7 +515,7 @@ In this case, we declare <em>classloader isolation</em>, as well as the inputs o
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexAction.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
+<pre class="prettyprint highlight"><code data-lang="java">public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
     public interface Parameters extends WorkParameters {
         DirectoryProperty getSourceDirectory();
         ConfigurableFileCollection getSourceFiles();
@@ -548,7 +547,7 @@ In this case, we declare <em>classloader isolation</em>, as well as the inputs o
 </div>
 <div class="paragraph">
 <p>The action declares its inputs with the <code>WorkParameters</code> interface and the code which is going to be executed in an isolated classloader lives in the <code>execute</code> method.
-You can see how it uses static state (<code>OptionsUtils.setDefaultOptions()</code>, <code>Options.dump</code>, &#8230;).
+You can see how it uses static state (<code>OptionsUtils.setDefaultOptions()</code>, <code>Options.dump</code>, &#8230;&#8203;).
 The worker API lets us workaround what should probably be considered as a <em>bug</em> in JFlex!</p>
 </div>
 <div class="paragraph">
@@ -567,7 +566,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>abstract class Greeter extends DefaultTask {
+<pre class="prettyprint highlight"><code data-lang="java">abstract class Greeter extends DefaultTask {
     @Input
     public abstract Property&lt;String&gt; getUser()
 
@@ -592,7 +591,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("sayHello", Greeter) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("sayHello", Greeter) {
    intro = "Hello, "
    user = "Cédric"
    outro = "!"
@@ -604,7 +603,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.register("direBonjour", Greeter) {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.register("direBonjour", Greeter) {
    intro = "Bonjour "
    user = "Cédric"
    outro = " !"
@@ -620,7 +619,7 @@ To avoid this redundancy, we&#8217;re going to write a plugin which makes all th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>interface GreetingExtension {
+<pre class="prettyprint highlight"><code data-lang="java">interface GreetingExtension {
     Property&lt;String&gt; getUser()
     Property&lt;String&gt; getOutro()
 }</code></pre>
@@ -631,7 +630,7 @@ To avoid this redundancy, we&#8217;re going to write a plugin which makes all th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
+<pre class="prettyprint highlight"><code data-lang="java">GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
 extension.getOutro().convention("!");</code></pre>
 </div>
 </div>
@@ -642,7 +641,7 @@ The plugin can then register both tasks for us:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>tasks.register("sayHello", Greeter.class, task -&gt; {
+<pre class="prettyprint highlight"><code data-lang="java">tasks.register("sayHello", Greeter.class, task -&gt; {
    task.getIntro().convention("Hello, ");
    task.getUser().convention(extension.getUser());
    task.getOutro().convention(extension.getOutro());
@@ -662,7 +661,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>greeting {
+<pre class="prettyprint highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
 }</code></pre>
 </div>
@@ -692,7 +691,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>greeting {
+<pre class="prettyprint highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
     outro = "!!!"
 }</code></pre>
@@ -723,7 +722,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>greeting {
+<pre class="prettyprint highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
     outro = "!!!"
 }
@@ -746,7 +745,7 @@ tasks.named("direBonjour") {
 <p><strong>Outcome #4</strong>: The provider API lets precisely define how to compute a value from another property, in a lazy manner, and provides an elegant way to supply default, or conventional values.</p>
 </div>
 <div class="paragraph">
-<p>You can read more about lazy configuration and the provider API in the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">Gradle documentation</a>, but in a nutshell, the derivation logic is <em>exactly</em> what the <code>layout.buildDirectory.dir("...")</code> is doing: it defines a directory which is <em>derived from</em> the existing build directory value.</p>
+<p>You can read more about lazy configuration and the provider API in the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">Gradle documentation</a>, but in a nutshell, the derivation logic is <em>exactly</em> what the <code>layout.buildDirectory.dir("&#8230;&#8203;")</code> is doing: it defines a directory which is <em>derived from</em> the existing build directory value.</p>
 </div>
 </div>
 </div>
@@ -782,7 +781,7 @@ We&#8217;ve also hinted at how plugins can expose configuration mechanisms which
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id "io.micronaut.internal.jflex"
 }</code></pre>
 </div>
@@ -823,7 +822,7 @@ There is effectively no need to publish a plugin, either to a local repository, 
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

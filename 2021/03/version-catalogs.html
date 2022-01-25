@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/catalog.html"> catalog</a> 
+		<a href="/blog/tags/catalog.html">catalog</a> 
 	</em>
-		<a href="/blog/tags/convenience.html"> convenience</a> 
+		<a href="/blog/tags/convenience.html">convenience</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -97,7 +96,7 @@ For example, let&#8217;s imagine that you have a multi-project build with this l
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>root
+<pre class="prettyprint highlight"><code>root
  |---- client
  |---- server</code></pre>
 </div>
@@ -109,7 +108,7 @@ For example, both of them would need Guava as an implementation detail and JUnit
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
     implementation("com.google.guava:guava:30.0-jre")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -147,7 +146,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">gradle.properties</div>
 <div class="content">
-<pre class="prettyprint"><code>guavaVersion=30.0-jre</code></pre>
+<pre class="prettyprint highlight"><code>guavaVersion=30.0-jre</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -155,7 +154,7 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>dependencies {
+<pre class="prettyprint highlight"><code>dependencies {
     implementation("com.google.guava:guava:${guavaVersion}")
 }</code></pre>
 </div>
@@ -166,7 +165,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">extra properties</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>ext {
+<pre class="prettyprint highlight"><code data-lang="groovy">ext {
    guavaVersion = '30.0-jre'
 }
 
@@ -186,7 +185,7 @@ dependencies {
 <div class="listingblock">
 <div class="title">buildSrc/src/main/kotlin/Libs.kt</div>
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>object Libs {
+<pre class="prettyprint highlight"><code data-lang="kotlin">object Libs {
    val guava = "com.google.guava:guava:30.0-jre"
 }</code></pre>
 </div>
@@ -197,7 +196,7 @@ dependencies {
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint"><code>dependencies {
+<pre class="prettyprint highlight"><code>dependencies {
     implementation(Libs.guava)
 }</code></pre>
 </div>
@@ -219,7 +218,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>enableFeaturePreview("VERSION_CATALOGS")</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">enableFeaturePreview("VERSION_CATALOGS")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -228,7 +227,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <div class="listingblock">
 <div class="title">gradle/libs.versions.toml</div>
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[libraries]
+<pre class="prettyprint highlight"><code data-lang="toml">[libraries]
 guava = "com.google.guava:guava:30.0-jre"
 junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
 junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
@@ -244,7 +243,7 @@ You still have to declare your dependencies, but this now can be done using a <e
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
     implementation(libs.guava)
     testImplementation(libs.testDependencies)
 }</code></pre>
@@ -265,7 +264,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">gradle/libs.versions.toml</div>
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[versions]
+<pre class="prettyprint highlight"><code data-lang="toml">[versions]
 groovy = "2.5.14"
 guava = "30.0-jre"
 jupiter = "5.7.1"
@@ -300,7 +299,7 @@ The TOML format also provides us with the ability to declare <a href="https://do
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencyResolutionManagement {
    versionCatalogs {
       libs {
            alias("guava").to("com.google.guava", "guava").versionRef("guava")
@@ -328,7 +327,7 @@ For example, let&#8217;s imagine that the Spring Boot team <a href="https://docs
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencyResolutionManagement {
    versionCatalogs {
        spring {
            from("org.springframework:spring-catalog:1.0')
@@ -344,7 +343,7 @@ Therefore, you&#8217;d be able to use whatever version of SLF4J the Spring team 
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
     implementation(spring.slf4j)
 }</code></pre>
 </div>
@@ -404,7 +403,7 @@ Thanks to Gradle&#8217;s advanced dependency resolution engine, it&#8217;s total
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

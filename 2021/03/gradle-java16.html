@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,7 +73,7 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/java16.html"> java16</a> 
+		<a href="/blog/tags/java16.html">java16</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -95,7 +94,7 @@ If you have an existing build that you want to try on Java 16, you can update th
 <div class="listingblock">
 <div class="title">gradle/wrapper/gradle-wrapper.properties</div>
 <div class="content">
-<pre class="prettyprint"><code>distributionBase=GRADLE_USER_HOME
+<pre class="prettyprint highlight"><code>distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-milestone-3-bin.zip
 zipStoreBase=GRADLE_USER_HOME
@@ -131,7 +130,7 @@ I&#8217;m personally recommending to use <a href="https://sdkman.io/">sdkman!</a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>$ sdk install gradle 6.8.3</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ sdk install gradle 6.8.3</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -139,7 +138,7 @@ I&#8217;m personally recommending to use <a href="https://sdkman.io/">sdkman!</a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>$ java -version
+<pre class="prettyprint highlight"><code data-lang="bash">$ java -version
 java -version
 openjdk version "11.0.9.1" 2020-11-04
 OpenJDK Runtime Environment 18.9 (build 11.0.9.1+1)
@@ -152,7 +151,7 @@ Again you can do this with sdkman!:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>$ sdk install java 11.0.9.open</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ sdk install java 11.0.9.open</code></pre>
 </div>
 </div>
 <div class="sect2">
@@ -162,7 +161,7 @@ Again you can do this with sdkman!:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>$ mkdir demo-app
+<pre class="prettyprint highlight"><code data-lang="bash">$ mkdir demo-app
 $ cd demo-app
 $ gradle init</code></pre>
 </div>
@@ -172,7 +171,7 @@ $ gradle init</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>Select type of project to generate:
+<pre class="prettyprint highlight"><code>Select type of project to generate:
   1: basic
   2: application
   3: library
@@ -217,7 +216,7 @@ Source package (default: demo.app):</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>$ ./gradlew run
+<pre class="prettyprint highlight"><code data-lang="bash">$ ./gradlew run
 
 &gt; Task :app:run
 Hello World!
@@ -236,7 +235,7 @@ Let&#8217;s open the build script, found under <code>app</code>:</p>
 <div class="listingblock">
 <div class="title">app/build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
 }
@@ -270,7 +269,7 @@ If it cannot find one you will see something like this happening:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>./gradlew run</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">./gradlew run</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -291,7 +290,7 @@ To some extent, it&#8217;s good news, it means that Gradle is really using Java 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>tasks.withType(JavaCompile).configureEach {
+<pre class="prettyprint highlight"><code data-lang="groovy">tasks.withType(JavaCompile).configureEach {
 	// disable incremental compilation
     options.incremental = false
 }</code></pre>
@@ -302,7 +301,7 @@ To some extent, it&#8217;s good news, it means that Gradle is really using Java 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint bash language-bash"><code>./gradlew run</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">./gradlew run</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -315,7 +314,7 @@ This solution is better for performance, even if a bit "hackish":</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>tasks.withType(JavaCompile).configureEach {
+<pre class="prettyprint highlight"><code>tasks.withType(JavaCompile).configureEach {
     options.forkOptions.jvmArgs.addAll( ['--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'] )
 }</code></pre>
 </div>
@@ -352,7 +351,7 @@ This solution is better for performance, even if a bit "hackish":</p>
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

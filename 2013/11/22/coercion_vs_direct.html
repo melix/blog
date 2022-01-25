@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/coercion.html"> coercion</a> 
+		<a href="/blog/tags/coercion.html">coercion</a> 
 	</em>
-		<a href="/blog/tags/performance.html"> performance</a> 
+		<a href="/blog/tags/performance.html">performance</a> 
 	</em>
-		<a href="/blog/tags/gbench.html"> gbench</a> 
+		<a href="/blog/tags/gbench.html">gbench</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -105,9 +104,9 @@ need for casting in Groovy.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>String pretty(Object o) {
+<pre class="prettyprint highlight"><code data-lang="java">String pretty(Object o) {
     if (o instanceof Person) {
-	return ((Person)o).getName(); <b>(1)</b>
+	return ((Person)o).getName(); // <b class="conum">(1)</b>
     }
 }</code></pre>
 </div>
@@ -125,8 +124,8 @@ equivalent to this in Groovy:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>String pretty(o) {
-    o.name <b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">String pretty(o) {
+    o.name // <b class="conum">(1)</b>
 }</code></pre>
 </div>
 </div>
@@ -154,7 +153,7 @@ handy because it basically allows you to convert an object of some type into an 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def lines = file as String[]</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def lines = file as String[]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -162,7 +161,7 @@ handy because it basically allows you to convert an object of some type into an 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def lines = (String[]) file</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def lines = (String[]) file</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -171,7 +170,7 @@ treatment. It is also possible to implement your own coercion rules, by implemen
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>class Person {
+<pre class="prettyprint highlight"><code data-lang="groovy">class Person {
    String name
    int age
    def asType(Class target) {
@@ -193,7 +192,7 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>interface Predicate {
+<pre class="prettyprint highlight"><code data-lang="groovy">interface Predicate {
     boolean apply(Object target)
 }</code></pre>
 </div>
@@ -203,7 +202,7 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>Predicate filter = { it.length() &gt; 3 } as Predicate</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">Predicate filter = { it.length() &gt; 3 } as Predicate</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -211,8 +210,8 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>List filter(List source, Predicate predicate) {
-   source.findAll { predicate.apply(it) } <b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">List filter(List source, Predicate predicate) {
+   source.findAll { predicate.apply(it) } // <b class="conum">(1)</b>
 }</code></pre>
 </div>
 </div>
@@ -228,7 +227,7 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def items = filter(['foo','bar', 'foobar'], {
+<pre class="prettyprint highlight"><code data-lang="groovy">def items = filter(['foo','bar', 'foobar'], {
     it.length()&gt;3
 } as Predicate)
 assert items == ['foobar']</code></pre>
@@ -242,7 +241,7 @@ assert items == ['foobar']</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def items = filter(source) { it.length()&gt;3 } <b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">def items = filter(source) { it.length()&gt;3 } // <b class="conum">(1)</b>
 assert items == ['foobar']</code></pre>
 </div>
 </div>
@@ -258,7 +257,7 @@ assert items == ['foobar']</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>List&lt;String&gt; items = filter(source, String str -&gt; str.length()&gt;3)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">List&lt;String&gt; items = filter(source, String str -&gt; str.length()&gt;3)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -266,7 +265,7 @@ assert items == ['foobar']</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def method(Closure c) { ... }
+<pre class="prettyprint highlight"><code data-lang="groovy">def method(Closure c) { ... }
 def method(SAMType arg) { ... }</code></pre>
 </div>
 </div>
@@ -275,7 +274,7 @@ def method(SAMType arg) { ... }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>method { ...do something... }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">method { ...do something... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -283,7 +282,7 @@ def method(SAMType arg) { ... }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def method(Runnable c) { ... }
+<pre class="prettyprint highlight"><code data-lang="groovy">def method(Runnable c) { ... }
 def method(SAMType arg) { ... }
 method { ...do something... } // will call method(Runnable)</code></pre>
 </div>
@@ -293,7 +292,7 @@ method { ...do something... } // will call method(Runnable)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>method { ...do something... } as SAMType</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">method { ...do something... } as SAMType</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -353,7 +352,7 @@ method { ...do something... } // will call method(Runnable)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>interface SAMType {
+<pre class="prettyprint highlight"><code data-lang="groovy">interface SAMType {
     void apply()
 }
 
@@ -369,7 +368,7 @@ void coercion(SAMType s) { s.apply() }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>Closure cachedClosure = { 'do something' }
+<pre class="prettyprint highlight"><code data-lang="groovy">Closure cachedClosure = { 'do something' }
 SAMType cachedSAMType = { 'do something' }
 
 @Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
@@ -420,7 +419,7 @@ def r = benchmark {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>SAMType cachedSAMType = { 'do something' }
+<pre class="prettyprint highlight"><code data-lang="groovy">SAMType cachedSAMType = { 'do something' }
 // ...
 'cached SAM type' {
     coercion cachedSAMType
@@ -432,7 +431,7 @@ def r = benchmark {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>SAMType cachedSAMType = { 'do something' }
+<pre class="prettyprint highlight"><code data-lang="groovy">SAMType cachedSAMType = { 'do something' }
 // ...
 10000.times {
     coercion cachedSAMType
@@ -491,7 +490,7 @@ cached closure      259       0   259   261</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>interface SAMType {
+<pre class="prettyprint highlight"><code data-lang="groovy">interface SAMType {
     void apply()
 }
 
@@ -557,7 +556,7 @@ cached closure          0  160848  160848  100214197</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>// real method
+<pre class="prettyprint highlight"><code data-lang="groovy">// real method
 void addListener(Listener listener) { ... }
 // convenience method to avoid explicit coercion from user code
 void addListener(Closure cl) { addListener(cl as Listener) }</code></pre>
@@ -571,7 +570,7 @@ void addListener(Closure cl) { addListener(cl as Listener) }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>void doSomething(SAMType arg) { ... }
+<pre class="prettyprint highlight"><code data-lang="groovy">void doSomething(SAMType arg) { ... }
 void doSomething(Closure cl) {
    def clone = cl.rehydrate(delegate,this,this)
    doSomething(clone as SAMType)</code></pre>
@@ -608,7 +607,7 @@ void doSomething(Closure cl) {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/java.html">java</a> 
 	</em>
-		<a href="/blog/tags/jdk.html"> jdk</a> 
+		<a href="/blog/tags/jdk.html">jdk</a> 
 	</em>
-		<a href="/blog/tags/xinclude.html"> xinclude</a> 
+		<a href="/blog/tags/xinclude.html">xinclude</a> 
 	</em>
-		<a href="/blog/tags/xpointer.html"> xpointer</a> 
+		<a href="/blog/tags/xpointer.html">xpointer</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -95,12 +94,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>
-
-
-
-
---
+<pre class="prettyprint highlight"><code>--
 
 You may activate this feature using the following lines of configuration :
 
@@ -114,20 +108,14 @@ code,prettyprint</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>
-
-
-
-
---
+<pre>--
 
 (note the *xpointer=``xpointer(//macros/*)''* syntax).
 
 Well, if you came to this page thinking you’d find a solution to the fact that this does not work, I can’t help you. It doesn’t. While the documentation says that _XInclude_ support is implemented in the JDK, the truth is that it is incomplete. The JDK just supports the http://www.w3.org/TR/xinclude/#XPElement[element scheme] but not the http://www.w3.org/TR/xinclude/#XPointer[xpointer scheme]. Well, the specification of XInclude says that the implementation of the second one is optional, but the main problem with the JDK is that is never throws an _UnsupportedOperationException_. Worse, it silently parses your includes, and never throws any error (hence, the xi:fallback element is ignored).
 
 [[]]
-XPointer scheme support ?
-</pre>
+XPointer scheme support ?</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -161,7 +149,7 @@ XPointer scheme support ?
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

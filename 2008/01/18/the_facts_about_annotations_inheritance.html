@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,13 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/annotations.html">annotations</a> 
 	</em>
-		<a href="/blog/tags/inheritance.html"> inheritance</a> 
+		<a href="/blog/tags/inheritance.html">inheritance</a> 
 	</em>
-		<a href="/blog/tags/java.html"> java</a> 
+		<a href="/blog/tags/java.html">java</a> 
 	</p>
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><div class="paragraph">
 <p>Following my post about <a href="http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance">the behaviour of annotations in an inheritance model</a>, <a href="http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance#comments">Mike Kaufman made a very interesting comment</a>. The <strong>truth</strong>, as I said, is that annotations are <strong>technically</strong> inherited only if the annotation definition itself is annotated with <em>@Inherited</em>.</p>
 </div>
 <div class="paragraph">
@@ -88,12 +85,11 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@WebService(serviceName="myService")
+<pre class="prettyprint highlight"><code>@WebService(serviceName="myService")
 public class MyService {
     @WebMethod
     public int sum(int x, int y) { return x+y; }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -101,7 +97,7 @@ public class MyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public interface IMyService {
+<pre class="prettyprint highlight"><code>public interface IMyService {
    void sum(int x, int y);
 }
 
@@ -110,8 +106,7 @@ public class MyService {
 @WebService(serviceName="myService")
 public class MyService implements IMyService {
 ...
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -119,11 +114,10 @@ public class MyService implements IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@WebService
+<pre class="prettyprint highlight"><code>@WebService
 public interface IMyService {
   @WebMethod void sum(@WebParam(name="x") int x, @WebParam(name="y") int y);
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -131,11 +125,10 @@ public interface IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@WebService(serviceName="myService")
+<pre class="prettyprint highlight"><code>@WebService(serviceName="myService")
 public class MyService implements IMyService {
    public int sum(int x, int y) { return x+y; }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -152,11 +145,11 @@ public class MyService implements IMyService {
 </ul>
 </div>
 <div class="paragraph">
-<p>Note that I must copy down the @WebService annotation just to specify the service name (as multiple services may implement the same interface). There, you should already see a problem, but let’s continue : Metro does not allow this. You cannot annotate interfaces and hope subclasses will be &#8220;annotated&#8221;. Bas point, but it’s rather logic :</p>
+<p>Note that I must copy down the @WebService annotation just to specify the service name (as multiple services may implement the same interface). There, you should already see a problem, but let’s continue : Metro does not allow this. You cannot annotate interfaces and hope subclasses will be ``annotated''. Bas point, but it’s rather logic :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package javax.jws;
+<pre class="prettyprint highlight"><code>package javax.jws;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -178,8 +171,7 @@ public @interface WebService
     String endpointInterface() default "";
 
     String portName() default "";
-};
-</code></pre>
+};</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -193,8 +185,6 @@ public @interface WebService
 </div>
 <div class="paragraph">
 <p>With this second example, here you see the problem : although the <strong>technical truth</strong> is that annotations are not inherited by default, the <strong>facts</strong> are that frameworks define their own rules… Thanks Mike for giving me a great transition ;)</p>
-</div>
-</div>
 </div></p>
    
 
@@ -222,7 +212,7 @@ public @interface WebService
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

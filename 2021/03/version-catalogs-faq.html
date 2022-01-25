@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/catalog.html"> catalog</a> 
+		<a href="/blog/tags/catalog.html">catalog</a> 
 	</em>
-		<a href="/blog/tags/convenience.html"> convenience</a> 
+		<a href="/blog/tags/convenience.html">convenience</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -88,28 +87,26 @@ This blog post will be updated as I&#8217;m seeing more questions.</p>
 <div id="toc" class="toc">
 <div id="toctitle" class="title">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_version_catalogs_faq">Version catalogs FAQ</a></li>
-<li>
+<li><a href="#_version_catalogs_faq">Version catalogs FAQ</a>
 <ul class="sectlevel2">
 <li><a href="#_can_i_use_a_version_catalog_to_declare_plugin_versions">Can I use a version catalog to declare plugin versions?</a></li>
 <li><a href="#_can_i_use_the_version_catalog_in_buildsrc">Can I use the version catalog in buildSrc?</a></li>
-<li><a href="#_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</a></li>
+<li><a href="#_but_how_can_i_use_the_catalog_in_plugins_defined_in_buildsrc">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</a></li>
 <li><a href="#_can_i_use_version_catalogs_in_production_code">Can I use version catalogs in production code?</a></li>
 <li><a href="#_should_i_use_a_platform_or_a_catalog">Should I use a platform or a catalog?</a></li>
 <li><a href="#_why_did_you_choose_toml_and_not_yaml">Why did you choose TOML and not YAML?</a></li>
 <li><a href="#_my_ide_is_red_everywhere_missing_dependency_class_error">My IDE is red everywhere, MISSING_DEPENDENCY_CLASS error</a></li>
-<li><a href="#_why_can_t_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</a></li>
-<li><a href="#_why_can_t_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</a></li>
-<li><a href="#_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</a></li>
+<li><a href="#_why_cant_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</a></li>
+<li><a href="#_why_cant_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</a></li>
+<li><a href="#_should_i_use_commons_lang3_as_an_alias_or_commonslang3">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</a></li>
 <li><a href="#_should_i_use_the_settings_api_or_the_toml_file">Should I use the settings API or the TOML file?</a></li>
-<li><a href="#_why_can_t_i_use_excludes_or_classifiers">Why can&#8217;t I use excludes or classifiers?</a></li>
-<li><a href="#_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em">How do I tell Gradle to use a specific <em>artifact</em>?</a></li>
+<li><a href="#_why_cant_i_use_excludes_or_classifiers">Why can&#8217;t I use excludes or classifiers?</a></li>
+<li><a href="#_how_do_i_tell_gradle_to_use_a_specific_artifact">How do I tell Gradle to use a specific <em>artifact</em>?</a></li>
 <li><a href="#_where_should_i_report_bugs_or_feature_requests">Where should I report bugs or feature requests?</a></li>
 </ul>
 </li>
 </ul>
 </div>
-
 </div>
 </div>
 <div class="sect1">
@@ -122,7 +119,7 @@ This blog post will be updated as I&#8217;m seeing more questions.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[plugins]
+<pre class="prettyprint highlight"><code data-lang="toml">[plugins]
 id.of.my.awesome.plugin="1.2.3"</code></pre>
 </div>
 </div>
@@ -133,7 +130,7 @@ This means that <em>currently</em>, you have to use the <code>pluginManagement</
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="prettyprint"><code>pluginManagement {
+<pre class="prettyprint highlight"><code>pluginManagement {
     plugins {
         id("me.champeau.jmh") version("0.6.3")
     }
@@ -155,7 +152,7 @@ This means that <em>currently</em>, you have to use the <code>pluginManagement</
 <div class="listingblock">
 <div class="title">buildSrc/settings.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencyResolutionManagement {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencyResolutionManagement {
     versionCatalogs {
         lib {
             from(files("../gradle/libs.versions.toml"))
@@ -166,7 +163,7 @@ This means that <em>currently</em>, you have to use the <code>pluginManagement</
 </div>
 </div>
 <div class="sect2">
-<h3 id="_but_how_can_i_use_the_catalog_in_em_plugins_em_defined_in_code_buildsrc_code">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</h3>
+<h3 id="_but_how_can_i_use_the_catalog_in_plugins_defined_in_buildsrc">But how can I use the catalog in <em>plugins</em> defined in <code>buildSrc</code>?</h3>
 <div class="paragraph">
 <p>The solution above lets you use the catalogs in the build scripts of <code>buildSrc</code> itself, but what if you want to use the catalog(s) in the plugins that <code>buildSrc</code> defines, or precompiled script plugins?
 Long story short, currently, you can do it using a <em>type unsafe</em> API only.</p>
@@ -176,7 +173,7 @@ Long story short, currently, you can do it using a <em>type unsafe</em> API only
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def catalogs = project.extensions.getByType(VersionCatalogsExtension)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def catalogs = project.extensions.getByType(VersionCatalogsExtension)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -184,7 +181,7 @@ Long story short, currently, you can do it using a <em>type unsafe</em> API only
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>val catalogs = extensions.getByType&lt;VersionCatalogsExtension&gt;()</code></pre>
+<pre class="prettyprint highlight"><code data-lang="kotlin">val catalogs = extensions.getByType&lt;VersionCatalogsExtension&gt;()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -192,7 +189,7 @@ Long story short, currently, you can do it using a <em>type unsafe</em> API only
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>pluginManager.withPlugin("java") {
+<pre class="prettyprint highlight"><code data-lang="kotlin">pluginManager.withPlugin("java") {
     val libs = catalogs.named("libs")
     dependencies.addProvider("implementation", libs.findDependency("lib").get())
 }</code></pre>
@@ -238,18 +235,18 @@ In the future we will probably provide a way to explain that, at your own risk, 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_why_can_t_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</h3>
+<h3 id="_why_cant_i_have_nested_aliases_with_the_same_prefix">Why can&#8217;t I have nested aliases with the same prefix?</h3>
 <div class="paragraph">
 <p>Imagine that you want to have 2 aliases, say <code>junit</code> and <code>junit-jupiter</code> and that both represent distinct dependencies: Gradle won&#8217;t let you do this and you will have to rename your aliases to, say <code>junit-core</code> and <code>junit-jupiter</code>.
 That&#8217;s because Gradle will map those aliases to <em>accessors</em>, that is to say <code>libs.getJunit()</code> and <code>libs.getJUnit().getJupiter()</code>.
 The problem is that you can&#8217;t have an accessor which is both a <em>leaf</em> (represents a dependency notation) and a <em>node</em> (that is to say an intermediate node to access a real dependency).
 The reason we can&#8217;t do this is that we&#8217;re using lazy accessors of type <code>Provider&lt;MinimalExternalDependency&gt;</code> for leaves and that type <em>cannot</em> be extended to provide accessors for "children" dependencies.
-In other words, the type which represents a <em>node with children</em> provides accessors which return <code>Provider&lt;...&gt;</code> for dependencies, but a provider itself cannot have children.
+In other words, the type which represents a <em>node with children</em> provides accessors which return <code>Provider&lt;&#8230;&#8203;&gt;</code> for dependencies, but a provider itself cannot have children.
 A potential workaround for this would be to support, in the future, an explicit call to say "I&#8217;m stopping here, that&#8217;s the dependency I need", for example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>dependencies {
+<pre class="prettyprint highlight"><code>dependencies {
     testImplementation(libs.junit.get())
     // or
     testImplemementation(libs.junit.peek()) // because `get()` might be confusing as it would return a `Provider` on which you can call `get()` itself
@@ -261,13 +258,13 @@ A potential workaround for this would be to support, in the future, an explicit 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_why_can_t_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</h3>
+<h3 id="_why_cant_i_use_an_alias_with_dots_directly">Why can&#8217;t I use an alias with dots directly?</h3>
 <div class="paragraph">
 <p>You will have noticed that if you declare an alias like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[libraries]
+<pre class="prettyprint highlight"><code data-lang="toml">[libraries]
 junit-jupiter = "..."</code></pre>
 </div>
 </div>
@@ -277,7 +274,7 @@ The question is, why can&#8217;t we just write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[libraries]
+<pre class="prettyprint highlight"><code data-lang="toml">[libraries]
 junit.jupiter = "..."</code></pre>
 </div>
 </div>
@@ -286,13 +283,13 @@ junit.jupiter = "..."</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[libraries]
+<pre class="prettyprint highlight"><code data-lang="toml">[libraries]
    [junit]
    jupiter = "..."</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>but technically, it&#8217;s undecidable where the "nesting hierarchy" stops, which would prevent tools from providing good completion (for example, where you can use <code>{ module = "..."}</code>.
+<p>but technically, it&#8217;s undecidable where the "nesting hierarchy" stops, which would prevent tools from providing good completion (for example, where you can use <code>{ module = "&#8230;&#8203;"}</code>.
 It also makes it harder for tooling to automatically patch the file since they wouldn&#8217;t know where to look for.</p>
 </div>
 <div class="paragraph">
@@ -300,7 +297,7 @@ It also makes it harder for tooling to automatically patch the file since they w
 </div>
 </div>
 <div class="sect2">
-<h3 id="_should_i_use_code_commons_lang3_code_as_an_alias_or_code_commonslang3_code">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</h3>
+<h3 id="_should_i_use_commons_lang3_as_an_alias_or_commonslang3">Should I use <code>commons-lang3</code> as an alias or <code>commonsLang3</code>?</h3>
 <div class="paragraph">
 <p>Problably neither one nor the other :) By choosing <code>commons-lang3</code>, you&#8217;re implicitly creating a <em>group of dependencies</em> called <code>commons</code>, which will include a number of dependencies, including <code>lang3</code>.
 The question then is, does that <code>commons</code> group make sense? It&#8217;s rather abstract, no? Does it actually say it&#8217;s "Apache Commons"?</p>
@@ -313,7 +310,7 @@ The question then is, does that <code>commons</code> group make sense? It&#8217;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint toml language-toml"><code>[libraries]
+<pre class="prettyprint highlight"><code data-lang="toml">[libraries]
 commonsLang = { module="org.apache.commons:commons-lang3:3.3.1" }</code></pre>
 </div>
 </div>
@@ -332,7 +329,7 @@ The settings API is great as soon as you want to implement <em>settings plugins<
 </div>
 </div>
 <div class="sect2">
-<h3 id="_why_can_t_i_use_excludes_or_classifiers">Why can&#8217;t I use excludes or classifiers?</h3>
+<h3 id="_why_cant_i_use_excludes_or_classifiers">Why can&#8217;t I use excludes or classifiers?</h3>
 <div class="paragraph">
 <p>By design, version catalogs talk about <em>dependency coordinates</em> only.
 The choice of applying excludes is on the consumer side: for example, for a specific project, you might need to exclude a transitive dependency because you don&#8217;t use the code path which exercises this dependency, but this might not be the case for all places.
@@ -341,7 +338,7 @@ Therefore, classifiers need to be declared on the <em>dependency declaration sit
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>dependencies {
+<pre class="prettyprint highlight"><code>dependencies {
    implementation(variantOf(libs.myLib) { classifier('test-fixtures') })
 }</code></pre>
 </div>
@@ -353,13 +350,13 @@ We want to encourage this model, rather than supporting <em>adhoc</em> classifie
 </div>
 </div>
 <div class="sect2">
-<h3 id="_how_do_i_tell_gradle_to_use_a_specific_em_artifact_em">How do I tell Gradle to use a specific <em>artifact</em>?</h3>
+<h3 id="_how_do_i_tell_gradle_to_use_a_specific_artifact">How do I tell Gradle to use a specific <em>artifact</em>?</h3>
 <div class="paragraph">
 <p>Similarly to classifiers or excludes, <em>artifact selectors</em> belong to the dependency declaration site. You need to write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>dependencies {
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
     implementation(libs.myLib) {
         artifact {
             name = 'my-lib' // note that ideally this will go away, see https://github.com/gradle/gradle/issues/16768
@@ -404,7 +401,7 @@ We want to encourage this model, rather than supporting <em>adhoc</em> classifie
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

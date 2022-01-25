@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/java.html"> java</a> 
+		<a href="/blog/tags/java.html">java</a> 
 	</em>
-		<a href="/blog/tags/preview.html"> preview</a> 
+		<a href="/blog/tags/preview.html">preview</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -124,7 +123,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public record Person(
+<pre class="prettyprint highlight"><code data-lang="java">public record Person(
         String firstName,
         String lastName,
         boolean likeJavaRecords) {
@@ -137,7 +136,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>class PersonTest {
+<pre class="prettyprint highlight"><code data-lang="java">class PersonTest {
     @Test void testRecord() {
         Person cedric = new Person("Cédric", "Champeau", true);
         Person otherCedric = new Person("Cédric", "Champeau", true);
@@ -155,7 +154,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>tasks.withType&lt;JavaCompile&gt;().configureEach {
+<pre class="prettyprint highlight"><code data-lang="kotlin">tasks.withType&lt;JavaCompile&gt;().configureEach {
     options.compilerArgs.add("--enable-preview")
 }</code></pre>
 </div>
@@ -165,7 +164,7 @@ Gradle 6.5, for example, works perfectly fine with Java 14 and even Java 15.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>tasks.withType&lt;Test&gt;().configureEach {
+<pre class="prettyprint highlight"><code data-lang="kotlin">tasks.withType&lt;Test&gt;().configureEach {
     useJUnitPlatform()
     jvmArgs("--enable-preview")
 }</code></pre>
@@ -186,7 +185,7 @@ All you need is to tell what JDK to use and Gradle will take care of finding a J
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint kotlin language-kotlin"><code>java {
+<pre class="prettyprint highlight"><code data-lang="kotlin">java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(15))
     }
@@ -224,7 +223,7 @@ All you need is to tell what JDK to use and Gradle will take care of finding a J
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

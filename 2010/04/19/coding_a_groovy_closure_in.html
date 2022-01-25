@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/closure.html">closure</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</p>
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><div class="paragraph">
 <p>Today I just wanted to share a simple trick that’s not well documented in Groovy : in a project which mixes Java and Groovy code, I’ve faced a problem where I wanted to use a Groovy method in Java which took a <em>Closure</em> as a parameter. Here’s how to do it. Actually, it’s quite simple :</p>
 </div>
 <div class="paragraph">
@@ -86,12 +83,11 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class Operation {
+<pre class="prettyprint highlight"><code>class Operation {
     def op(list, action) {
         list.each { action(it) }
     }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -99,7 +95,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class MyJavaClass {
+<pre class="prettyprint highlight"><code>public class MyJavaClass {
     private Operation groovy = new Operation();
 
     private void shouldBeUsedAsClosure(Object o) {
@@ -116,19 +112,18 @@
          MyJavaClass java = new MyJavaClass();
         java.demonstrateClosureUsage();
     }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This example is straighforward, however, this allows you to write your custom &#8220;closures&#8221; directly in Java. This is somehow interesting whenever performance matters and that critical portions of code need to be coded in Java.</p>
+<p>This example is straighforward, however, this allows you to write your custom ``closures'' directly in Java. This is somehow interesting whenever performance matters and that critical portions of code need to be coded in Java.</p>
 </div>
 <div class="paragraph">
 <p>Note that you can have multiple methods with the same name, Groovy will automatically dispatch the call to the appropriate delegate :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>public class MyJavaClass {
+<pre class="prettyprint highlight"><code>public class MyJavaClass {
     private Operation groovy = new Operation();
 
     private void shouldBeUsedAsClosure(String str) {
@@ -149,8 +144,7 @@
          MyJavaClass java = new MyJavaClass();
         java.demonstrateClosureUsage();
     }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -158,10 +152,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>   MethodClosure cl = new MethodClosure(MyJavaClass.class, "staticMethod");
-</code></pre>
-</div>
-</div>
+<pre class="prettyprint highlight"><code>   MethodClosure cl = new MethodClosure(MyJavaClass.class, "staticMethod");</code></pre>
 </div>
 </div></p>
    
@@ -190,7 +181,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

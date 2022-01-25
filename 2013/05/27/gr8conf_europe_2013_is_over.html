@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,9 +73,9 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gr8conf.html">gr8conf</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_gr8conf_europe_2013">GR8Conf Europe 2013</h2>
@@ -93,7 +92,7 @@
 <p><a href="http://twitter.com/glaforge">Guillaume Laforge</a>, the Groovy project lead</p>
 </li>
 <li>
-<p>http://[Jochen &#8220;Blackdrag&#8221; Theodorou], the Groovy technical lead</p>
+<p>http://[Jochen ``Blackdrag'' Theodorou], the Groovy technical lead</p>
 </li>
 <li>
 <p><a href="http://twitter.com/mittie">Dierk Koenig</a>, Groovy committer and main author of the famous Groovy in action book</p>
@@ -114,13 +113,12 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    interface Callback {
+<pre class="prettyprint highlight"><code>    interface Callback {
         void execute()
     }
     void onEvent(Callback c) { c.execute() }
 
-    onEvent({println 'hello'} as Callback)
-</code></pre>
+    onEvent({println 'hello'} as Callback)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -128,13 +126,12 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>    interface Callback {
+<pre class="prettyprint highlight"><code>    interface Callback {
         void execute()
     }
     void onEvent(Callback c) { c.execute() }
 
-    onEvent {println 'hello'}
-</code></pre>
+    onEvent {println 'hello'}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -154,7 +151,7 @@
 <h2 id="_type_checking_your_dsls">Type checking your DSLs</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I gave my second talk on Friday, last day of the conference. It was named <a href="http://gr8conf.us/Presentations/Type-checking-your-DSLs">Type checking your DSLs</a>. While I already gave this talk 3 times before (G&amp;G exchange, Greach and Devoxx France), I always like to change some contents to adapt to the audience and have some novelties inside. Unfortunately, for technical reasons, this talk went really bad for me. I assume people felt it, but I was quite disconcerted. The reason is that most of my talk relies on commenting code, but that I wasn’t able to show it properly! Even if the projectors were supposed to support full-HD through HDMI, for some obscure reason, my laptop wasn’t able to &#8220;discover&#8221; the HDMI output, and I was stuck to a 1024x768 VGA output. Worse than that, on screen, the borders were cut. This was the first time this ever happened to me, and to be honest, it completely troubled me. I wasn’t able to show code properly, so I wasn’t able to keep track of what I wanted to say. This was a horrible experience, but I hope people get the idea, as I only managed to give a rough idea of what I wanted to say :-( You know, that feeling when you try to explain something, and that people look at you as if you were an extraterrestrial…</p>
+<p>I gave my second talk on Friday, last day of the conference. It was named <a href="http://gr8conf.us/Presentations/Type-checking-your-DSLs">Type checking your DSLs</a>. While I already gave this talk 3 times before (G&amp;G exchange, Greach and Devoxx France), I always like to change some contents to adapt to the audience and have some novelties inside. Unfortunately, for technical reasons, this talk went really bad for me. I assume people felt it, but I was quite disconcerted. The reason is that most of my talk relies on commenting code, but that I wasn’t able to show it properly! Even if the projectors were supposed to support full-HD through HDMI, for some obscure reason, my laptop wasn’t able to ``discover'' the HDMI output, and I was stuck to a 1024x768 VGA output. Worse than that, on screen, the borders were cut. This was the first time this ever happened to me, and to be honest, it completely troubled me. I wasn’t able to show code properly, so I wasn’t able to keep track of what I wanted to say. This was a horrible experience, but I hope people get the idea, as I only managed to give a rough idea of what I wanted to say :-( You know, that feeling when you try to explain something, and that people look at you as if you were an extraterrestrial…</p>
 </div>
 <div class="paragraph">
 <p>I will give the same talk at Minneapolis later this year, so I sincerely hope things will go better, especially because I really like this talk, which gives a lot of hints on the power of the language, combining several features available in Groovy 2.1. All the (uncut) slides are available <a href="https://github.com/melix/gr8confeu2013">on GitHub</a>.</p>
@@ -195,7 +192,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

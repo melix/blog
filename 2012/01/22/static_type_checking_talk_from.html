@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,13 +73,13 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/checking.html">checking</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</em>
-		<a href="/blog/tags/static.html"> static</a> 
+		<a href="/blog/tags/static.html">static</a> 
 	</em>
-		<a href="/blog/tags/type.html"> type</a> 
+		<a href="/blog/tags/type.html">type</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_static_type_checking_and_compilation_in_groovy_2_0">Static type checking and compilation in Groovy 2.0</h2>
@@ -105,10 +104,10 @@
 <p>Java-like method dispatch, which has the main interest of being known of most people (at least, people who faced the problem once). This solution however has major drawbacks. In particular, it removes most of the interest of the flow typing mode, and requires extra verbosity which is the opposite of the Groovy philosophy.</p>
 </li>
 <li>
-<p>Dynamic-Groovy like method dispatch. Typically, this is wanted to avoid a &#8220;third language&#8221; (not Java, nor Groovy), and this is were you want a statically compiled Groovy program to behave at runtime like dynamic Groovy does. While this sounds interesting, it also has major problems. The first one is performance, which would be awful because we would have to introduce tons of &#8220;instanceof&#8221; checks at compile time to correctly dispatch methods. More complicated, this &#8220;instanceof cascade&#8221; would generate unreadable bytecode (think of parameter combinations) which would also be a major performance issue for CPUs (which, as Rémi said during the session, really do not like branching). Even worse, this wouldn’t work anymore if you subclass the statically compiled class because the new overloaded methods wouldn’t be known from the compiler. This is why I consider this solution the worse of all, though I understand people who want it. Last but not least, Groovy 2.0 will introduce <strong>InvokeDynamic</strong> support which should greatly improve performance of dynamic Groovy without loosing its semantics.</p>
+<p>Dynamic-Groovy like method dispatch. Typically, this is wanted to avoid a <code>third language'' (not Java, nor Groovy), and this is were you want a statically compiled Groovy program to behave at runtime like dynamic Groovy does. While this sounds interesting, it also has major problems. The first one is performance, which would be awful because we would have to introduce tons of </code>instanceof'' checks at compile time to correctly dispatch methods. More complicated, this ``instanceof cascade'' would generate unreadable bytecode (think of parameter combinations) which would also be a major performance issue for CPUs (which, as Rémi said during the session, really do not like branching). Even worse, this wouldn’t work anymore if you subclass the statically compiled class because the new overloaded methods wouldn’t be known from the compiler. This is why I consider this solution the worse of all, though I understand people who want it. Last but not least, Groovy 2.0 will introduce <strong>InvokeDynamic</strong> support which should greatly improve performance of dynamic Groovy without loosing its semantics.</p>
 </li>
 <li>
-<p>The third solution I presented is the one currently implemented in the experimental compiler: inference based method dispatch. This definitely creates a third language in terms of dispatch semantics, but as the developer explicitly adds an annotation, he should be aware of the differences (which only occur when you have overloaded methods). Inference based dispatch also has the advantage of being &#8220;flow typing&#8221; compatible, and removes a lot of verbosity. It has my preference, which explains why this is what is implemented right now.</p>
+<p>The third solution I presented is the one currently implemented in the experimental compiler: inference based method dispatch. This definitely creates a third language in terms of dispatch semantics, but as the developer explicitly adds an annotation, he should be aware of the differences (which only occur when you have overloaded methods). Inference based dispatch also has the advantage of being ``flow typing'' compatible, and removes a lot of verbosity. It has my preference, which explains why this is what is implemented right now.</p>
 </li>
 </ul>
 </div>
@@ -165,7 +164,7 @@
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

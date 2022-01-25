@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,15 +73,13 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/curry.html">curry</a> 
 	</em>
-		<a href="/blog/tags/functional.html"> functional</a> 
+		<a href="/blog/tags/functional.html">functional</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
-	<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
+	<p><div class="paragraph">
 <p>I’m sure you have heard of functional programming, at least when you were sill a student (if you are, then you’re probably digging into it). The <a href="http://groovy.codehaus.org">Groovy language</a>, built on top of Java, provides means of dealing with functional programming. Moreover, it offers a <em>curry</em> method which allows powerful recursion mechanisms.</p>
 </div>
 <div class="paragraph">
@@ -98,7 +95,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def reduce
+<pre class="prettyprint highlight"><code>def reduce
 reduce = { fn, params -&gt;
     if (params.size()==1) return params[0]
  fn(params[0], reduce(fn,params[1..
@@ -107,8 +104,7 @@ Note that for the reduce function to be known inside the closure, you have to de
 
 Then we may define the sum() function as this :
 
-def sum = reduce.curry({ x,y -&gt; x+y })
-</code></pre>
+def sum = reduce.curry({ x,y -&gt; x+y })</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -116,10 +112,9 @@ def sum = reduce.curry({ x,y -&gt; x+y })
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>println sum((1..10))
+<pre class="prettyprint highlight"><code>println sum((1..10))
 
---&gt; 55
-</code></pre>
+--&gt; 55</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -127,14 +122,13 @@ def sum = reduce.curry({ x,y -&gt; x+y })
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>println sum(("a".."z"))
+<pre class="prettyprint highlight"><code>println sum(("a".."z"))
 
 --&gt; abcdefghijklmnopqrstuvwxyz
 
 println sum([(1..10),(11..20)])
 
---&gt; [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-</code></pre>
+--&gt; [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -142,8 +136,6 @@ println sum([(1..10),(11..20)])
 </div>
 <div class="paragraph">
 <p>Addendum: You should also use this with caution, as it costs much in invocation time, and you should not use it for so simple functions (summing is a very bad example as the cost in time of the sum operation is much less that the method invocation cost). Furthermore, don’t forget that it is <strong>recursions</strong>, so too many parameters will drive you too a stack overflow error ;-)</p>
-</div>
-</div>
 </div></p>
    
 
@@ -171,7 +163,7 @@ println sum([(1..10),(11..20)])
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

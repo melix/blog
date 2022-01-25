@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,17 +73,17 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/performance.html"> performance</a> 
+		<a href="/blog/tags/performance.html">performance</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Groovy is a dynamic language by nature. This means, in Groovy, that method dispatches are controlled by metaclasses. This is really powerful, and allows nice tricks like the &#8220;method missing&#8221; or &#8220;property missing&#8221; calls that are used in many DSLs. The metaclass dictates what behaviour is expected whenever a call to a property or a method is made.</p>
+<p>Groovy is a dynamic language by nature. This means, in Groovy, that method dispatches are controlled by metaclasses. This is really powerful, and allows nice tricks like the <code>method missing'' or </code>property missing'' calls that are used in many DSLs. The metaclass dictates what behaviour is expected whenever a call to a property or a method is made.</p>
 </div>
 <div class="paragraph">
-<p>The &#8220;problem&#8221; with this is that method execution paths may be really long. Though Groovy uses call site caching to improve performance, the chain of invocation to call a method in Groovy is much, much longer than in plain Java. The only reason why this chain is long is to allow that dynamic behaviour.</p>
+<p>The ``problem'' with this is that method execution paths may be really long. Though Groovy uses call site caching to improve performance, the chain of invocation to call a method in Groovy is much, much longer than in plain Java. The only reason why this chain is long is to allow that dynamic behaviour.</p>
 </div>
 <div class="paragraph">
 <p>Now, when performance is critical and that you still want to use Groovy as a DSL, there are not so many things you can do to improve performance :</p>
@@ -108,11 +107,11 @@
 <h2 id="_the_explanation">The explanation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To simplify, almost every method call you make in Groovy will end up beeing dispatched by the class called <em>MetaClassImpl</em>. This class manages a wide variety of method calls or property access. It deals with closures as well as &#8220;regular objects&#8221;. We’ll take, as an example, the body of the <em>MetaClassImpl#invokeMethod(Class sender, Object object, String methodName, Object[] originalArguments, boolean isCallToSuper, boolean fromInsideClass)</em> method :</p>
+<p>To simplify, almost every method call you make in Groovy will end up beeing dispatched by the class called <em>MetaClassImpl</em>. This class manages a wide variety of method calls or property access. It deals with closures as well as ``regular objects''. We’ll take, as an example, the body of the <em>MetaClassImpl#invokeMethod(Class sender, Object object, String methodName, Object[] originalArguments, boolean isCallToSuper, boolean fromInsideClass)</em> method :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>checkInitalised();
+<pre class="prettyprint highlight"><code>checkInitalised();
         if (object == null) {
             throw new NullPointerException("Cannot invoke method: " + methodName + " on null object");
         }
@@ -279,8 +278,7 @@
             return method.doMethodInvoke(object, arguments);
         } else {
             return invokePropertyOrMissing(object, methodName, originalArguments, fromInsideClass, isCallToSuper);
-        }
-</code></pre>
+        }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -288,9 +286,8 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>def myObject = new MySuperFastJavaObject()
-myObject.mySuperFastMethod()
-</code></pre>
+<pre class="prettyprint highlight"><code>def myObject = new MySuperFastJavaObject()
+myObject.mySuperFastMethod()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -298,7 +295,7 @@ myObject.mySuperFastMethod()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package groovy.runtime.metaclass.com.mypackage;
+<pre class="prettyprint highlight"><code>package groovy.runtime.metaclass.com.mypackage;
 
 public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
  ...
@@ -319,8 +316,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
    return invokeMissingMethod(object, methodName, arguments);
   }
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -344,7 +340,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>package groovy.runtime.metaclass.com.mypackage;
+<pre class="prettyprint highlight"><code>package groovy.runtime.metaclass.com.mypackage;
 
 public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
  ...
@@ -365,8 +361,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
    throw new new MissingMethodException(methodName, sender, arguments);
   }
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -374,16 +369,15 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@Override
+<pre class="prettyprint highlight"><code>@Override
  public Object invokeMissingProperty(final Object instance, final String propertyName, final Object optionalValue, final boolean isGetter) {
   Layer layer = (Layer) instance; // Layer metaclass, it's ALWAYS a Layer
          return layer.java_propertyMissing(propertyName);
- }
-</code></pre>
+ }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Another case was dealing with the following bug (?) : <a href="http://jira.codehaus.org/browse/GROOVY-4495">http://jira.codehaus.org/browse/GROOVY-4495</a>. In a specific case, static method invocation always lead to the longest execution path possible. However, in my case, the class used is an utility class which inherits another, the two written in pure Java, and for which every method is static. In another words, it’s a toolbox. Why would I want dynamic method dispatching on this class ? There’s no reason. So, I implemented my own metaclass which directly delegated calls to the appropriate methods AND worked around the bug by adding the method defined by the parent class in the method cache.</p>
+<p>Another case was dealing with the following bug (?) : <a href="http://jira.codehaus.org/browse/GROOVY-4495" class="bare">http://jira.codehaus.org/browse/GROOVY-4495</a>. In a specific case, static method invocation always lead to the longest execution path possible. However, in my case, the class used is an utility class which inherits another, the two written in pure Java, and for which every method is static. In another words, it’s a toolbox. Why would I want dynamic method dispatching on this class ? There’s no reason. So, I implemented my own metaclass which directly delegated calls to the appropriate methods AND worked around the bug by adding the method defined by the parent class in the method cache.</p>
 </div>
 </div>
 </div>
@@ -421,7 +415,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

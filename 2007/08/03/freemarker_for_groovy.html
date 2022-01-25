@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,7 +73,7 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/freemarker.html">freemarker</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</p>
 	<p><div id="preamble">
 <div class="sectionbody">
@@ -87,7 +86,7 @@
 <h2 id="_freemarker_for_groovy">FreeMarker for Groovy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add &#8220;tags&#8221; or &#8220;plugins&#8221; to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a <a href="http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html">transform</a> for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :</p>
+<p>Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add <code>tags'' or </code>plugins'' to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a <a href="http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html">transform</a> for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :</p>
 </div>
 <div class="ulist">
 <ul>
@@ -122,8 +121,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form
-</code></pre>
+<pre class="prettyprint highlight"><code>&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -131,8 +129,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form
-</code></pre>
+<pre class="prettyprint highlight"><code>&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -140,14 +137,13 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.text.freemarker.IGroovyFreeMarkerPlugin
+<pre class="prettyprint highlight"><code>import groovy.text.freemarker.IGroovyFreeMarkerPlugin
 
 class urlencoder implements IGroovyFreeMarkerPlugin {
  String transform(Map params, String content) {
   URLEncoder.encode(content);
  }
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -155,15 +151,14 @@ class urlencoder implements IGroovyFreeMarkerPlugin {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>import groovy.text.freemarker.FreeMarkerTemplateEngine
+<pre class="prettyprint highlight"><code>import groovy.text.freemarker.FreeMarkerTemplateEngine
 
 def tpl = '''
 Hello, ${user.name}
 &lt;@groovy plugin="urlencoder" mode=user&gt;this is a test ${user.name}'''
 def engine = new FreeMarkerTemplateEngine("plugins")
 def binding = ["user" : ["name":"cedric"]]
-println engine.createTemplate(tpl).make(binding)
-</code></pre>
+println engine.createTemplate(tpl).make(binding)</code></pre>
 </div>
 </div>
 </div>
@@ -183,7 +178,7 @@ println engine.createTemplate(tpl).make(binding)
 <p>Plugin loader: there’s a default implementation which reads plugins from a directory. Feel free to implement the <em>IGroovyFreeMarkerPluginLoader</em> if you want more complex loaders</p>
 </li>
 <li>
-<p>Plugin parameters: if the &lt;@groovy&gt; tag content is not sufficient, you may add parameters to the transform, and use them in the plugin thanks to the params map. For example : &lt;@groovy plugin=&#8220;temperatureconvertor&#8221; source=&#8220;celcius&#8221; dest=&#8220;kelvin&#8221;&gt;112</p>
+<p>Plugin parameters: if the &lt;@groovy&gt; tag content is not sufficient, you may add parameters to the transform, and use them in the plugin thanks to the params map. For example : &lt;@groovy plugin=<code>temperatureconvertor'' source=</code>celcius'' dest=``kelvin''&gt;112</p>
 </li>
 </ul>
 </div>
@@ -236,7 +231,7 @@ println engine.createTemplate(tpl).make(binding)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

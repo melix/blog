@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cédric Champeau's blog: Inline assembly with Groovy&#8230; Evil or awesome?</title>
+    <title>Cédric Champeau's blog: Inline assembly with Groovy&#8230;&#8203; Evil or awesome?</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -67,18 +66,18 @@
       <div class="container">
 	
 	<div class="page-header">
-		<h1>Inline assembly with Groovy&#8230; Evil or awesome?</h1>
+		<h1>Inline assembly with Groovy&#8230;&#8203; Evil or awesome?</h1>
 	</div>
 
 	<p><em>31 January 2011</em></p>
 	<p><em>Tags: </em>
 		<a href="/blog/tags/asm.html">asm</a> 
 	</em>
-		<a href="/blog/tags/bytecode.html"> bytecode</a> 
+		<a href="/blog/tags/bytecode.html">bytecode</a> 
 	</em>
-		<a href="/blog/tags/groovy.html"> groovy</a> 
+		<a href="/blog/tags/groovy.html">groovy</a> 
 	</em>
-		<a href="/blog/tags/programming.html"> programming</a> 
+		<a href="/blog/tags/programming.html">programming</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_inline_assembly_with_groovy_evil_or_awesome">Inline assembly with Groovy… Evil or awesome ?</h2>
@@ -94,7 +93,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>class Private {
+<pre class="prettyprint highlight"><code>class Private {
     private int value;
 }
 
@@ -107,8 +106,7 @@ void set(Private b, int x) {
 }
 
 def bidon = new Private()
-set(bidon, 5)
-</code></pre>
+set(bidon, 5)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -116,7 +114,7 @@ set(bidon, 5)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint"><code>@groovyx.ast.bytecode.Bytecode
+<pre class="prettyprint highlight"><code>@groovyx.ast.bytecode.Bytecode
 int sum(int x, int y) {
     aload 1
     iload 2
@@ -124,8 +122,7 @@ int sum(int x, int y) {
     ireturn
 }
 
-println sum(3,6)
-</code></pre>
+println sum(3,6)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -142,7 +139,7 @@ println sum(3,6)
 </div>
 </div>
 <div class="sect1">
-<h2 id="_so_where_s_the_evil">So where’s the evil ?</h2>
+<h2 id="_so_wheres_the_evil">So where’s the evil ?</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Well, I think the problem is that every feature you add to a language will eventually be used. So, what would prevent someone from writing his whole code with bytecode instructions ? How can this be maintainable ? Not everyone speaks bytecode (to be honest, I find this more readable than Clojure, but that’s another debate ;)).</p>
@@ -203,7 +200,7 @@ println sum(3,6)
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

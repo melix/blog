@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -74,11 +73,11 @@
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
-		<a href="/blog/tags/maven.html"> maven</a> 
+		<a href="/blog/tags/maven.html">maven</a> 
 	</em>
-		<a href="/blog/tags/composition.html"> composition</a> 
+		<a href="/blog/tags/composition.html">composition</a> 
 	</em>
-		<a href="/blog/tags/inheritance.html"> inheritance</a> 
+		<a href="/blog/tags/inheritance.html">inheritance</a> 
 	</p>
 	<p><div class="sect1">
 <h2 id="_introduction">Introduction</h2>
@@ -129,7 +128,7 @@ It is a particularly important difference which completely changes the way we th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
 
@@ -185,7 +184,7 @@ It is a particularly important difference which completely changes the way we th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint xml language-xml"><code>&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
 
@@ -219,7 +218,7 @@ In the example above, we don&#8217;t have to specify the <code>groupId</code> an
 <div class="ulist">
 <ul>
 <li>
-<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common. It won&#8217;t be a surprise for many that you have to <em>exclude dependencies</em> just because they came through parent poms&#8230;</p>
+<p>as soon as you have different modules which share different set of dependencies, or use different sets of plugins, you have to create different parents and have an inheritance model between parents. Unfortunately this is the case here, since only our <code>library</code> and <code>application</code> modules have something in common. It won&#8217;t be a surprise for many that you have to <em>exclude dependencies</em> just because they came through parent poms&#8230;&#8203;</p>
 </li>
 <li>
 <p>you can only have a <em>single</em> parent, meaning that you cannot inherit from a framework parent POM <em>and</em> from your own conventions.</p>
@@ -314,7 +313,7 @@ Finally, your application module would simply <em>apply both plugins</em>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
    id 'com.mycompany.conventions' version '1.0.0'
    id 'io.micronaut.application' version '3.0.0'
 }
@@ -330,7 +329,7 @@ In the example above, we could replace the use of the 2 plugins with a single on
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
    id 'com.mycompany.micronaut-application' version '3.0.0'
 }</code></pre>
 </div>
@@ -341,7 +340,7 @@ I&#8217;m not going to explain how to write a custom Gradle plugin in this blog 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>plugins {
+<pre class="prettyprint highlight"><code data-lang="groovy">plugins {
     id 'com.mycompany.conventions' version '1.0.0'
     id 'io.micronaut.application' version '3.0.0'
 }
@@ -362,7 +361,7 @@ For example, a plugin can do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>pluginManager.withPlugin('io.micronaut.application') {
+<pre class="prettyprint highlight"><code data-lang="groovy">pluginManager.withPlugin('io.micronaut.application') {
     // configure the Micronaut application plugin
 }
 pluginManager.withPlugin('io.micronaut.library') {
@@ -464,7 +463,7 @@ On the other hand, Gradle uses a <em>composition</em> model which makes it possi
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

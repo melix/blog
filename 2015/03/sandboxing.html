@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -86,12 +85,13 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>One of the most current uses cases of Groovy is scripting. Groovy makes it very easy to execute code dynamically, at runtime. Depending
-on the application, scripts can be found in multiple sources: file system, databases, remote services, &#8230; but more importantly, the
+on the application, scripts can be found in multiple sources: file system, databases, remote services, &#8230;&#8203; but more importantly, the
 designer of the application which executes scripts is not necessarily the one writing those scripts. Moreover, the scripts might run in a
-constrained environment (limited memory, file descriptors, time, &#8230;) or your you simply don&#8217;t want to allow users to access the full
+constrained environment (limited memory, file descriptors, time, &#8230;&#8203;) or your you simply don&#8217;t want to allow users to access the full
 capabilities of the language from a script.</p>
 </div>
-<div class="openblock INFO"><div class="title">What you will learn in this post</div>
+<div class="openblock INFO">
+<div class="title">What you will learn in this post</div>
 <div class="content">
 <div class="ulist">
 <ul>
@@ -130,7 +130,7 @@ but the most simple example is just using the <code>Eval</code> class:</p>
 <div class="listingblock">
 <div class="title">Example.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>int sum = (Integer) Eval.me("1+1");</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">int sum = (Integer) Eval.me("1+1");</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -139,7 +139,7 @@ add parameters, but the idea is that the code which is executed here is arbitrar
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>1+1
+<pre class="prettyprint highlight"><code data-lang="groovy">1+1
 x+y
 1+(2*x)**y
 cos(alpha)*r
@@ -151,7 +151,7 @@ v=1+x</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>println 'Hello'
+<pre class="prettyprint highlight"><code data-lang="groovy">println 'Hello'
 (0..100).each { println 'Blah' }
 Pong p = new Pong()
 println(new File('/etc/passwd').text)
@@ -221,7 +221,7 @@ been the most misinterpreted of the whole.</p>
 <div class="paragraph">
 <p>I must apologize for this. Back then, I had no better name in mind. The important part of SecureASTCustomizer is <strong>AST</strong>. It was aimed at restricting access to some features of the AST. The
 "secure" part is actually not a good name at all, and I will illustrate why. You can even find a blog post from Kohsuke Kawagushi, of Jenkins fame, named
-Groovy SecureASTCustomizer is harmful[<a href="http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/">http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/</a>]. It is very true. The SecureASTCustomizer has never been designed with sandboxing
+Groovy SecureASTCustomizer is harmful[<a href="http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/" class="bare">http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/</a>]. It is very true. The SecureASTCustomizer has never been designed with sandboxing
 in mind. It was designed to restrict the language at compile time, not runtime. So a much better name, in retrospect, would have been <em>GrammarCustomizer</em>. But as you&#8217;re certainly aware, there
 are two hard things in computer science: cache invalidation, naming things and off by one errors.</p>
 </div>
@@ -237,7 +237,7 @@ to make the difference between the integration code and the scripts clear.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class Sandbox {
+<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
     public static void main(String[] args)  {
         CompilerConfiguration conf = new CompilerConfiguration();				<i class="conum" data-value="1"></i><b>(1)</b>
         SecureASTCustomizer customizer = new SecureASTCustomizer();				<i class="conum" data-value="2"></i><b>(2)</b>
@@ -292,7 +292,7 @@ java.lang.SecurityException: Method calls not allowed on [java.lang.System]</pre
 </div>
 </div>
 <div class="paragraph">
-<p>This is the result of the application of the secure AST customizer, which prevents the execution of methods on the <code>System</code> class. Success! Now we have secured our script! Oh wait&#8230;</p>
+<p>This is the result of the application of the secure AST customizer, which prevents the execution of methods on the <code>System</code> class. Success! Now we have secured our script! Oh wait&#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -304,7 +304,7 @@ java.lang.SecurityException: Method calls not allowed on [java.lang.System]</pre
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def c = System
+<pre class="prettyprint highlight"><code data-lang="groovy">def c = System
 c.exit(-1)</code></pre>
 </div>
 </div>
@@ -319,7 +319,7 @@ with def</strong>, which is equivalent to declaring it as <code>Object</code>, s
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>((Object)System).exit(-1)
+<pre class="prettyprint highlight"><code data-lang="groovy">((Object)System).exit(-1)
 Class.forName('java.lang.System').exit(-1)
 ('java.lang.System' as Class).exit(-1)
 
@@ -330,7 +330,7 @@ exit(-1)</code></pre>
 <div class="paragraph">
 <p>and there are <strong>much</strong> more options. The dynamic nature of Groovy just makes it impossible to resolve those cases at compile time. There are solutions though. One option is to rely on the JVM standard
 security manager. However this is a system wide solution which is often considered as a hammer. But it also doesn&#8217;t really work for all cases, for example you might not want to prevent creation of
-files, but only reads for example&#8230;</p>
+files, but only reads for example&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>This limitation - or should I say frustration for lots of us - led several people to create a solution based on <strong>runtime checks</strong>. Runtime checks do not suffer the same problem, because you
@@ -357,13 +357,13 @@ but misses a lot of possible hacks.</p>
 <div class="paragraph">
 <p>As a result, with friends of mine Corinne Krych, Fabrice Matrat and Sébastien Blanc, we decided to create a new runtime sandboxing mechanism that would not have the issues of those projects. We started
 implementing this during a hackathon in Nice, and <a href="http://greachconf.com/speakers/fabrice-matrat-cedric-champeau-groovy-head-in-the-cloud/">we gave a talk about this last year</a> at the Greach conference.
-It relies on AST transformations and heavily rewrites the code in order to perform a check before each method call, property access, increment of variable, binary expression, &#8230;
+It relies on AST transformations and heavily rewrites the code in order to perform a check before each method call, property access, increment of variable, binary expression, &#8230;&#8203;
 The <a href="https://github.com/rivieragug/groovy-core/tree/secureruntime">implementation</a> is still incomplete, and not much work has been done because I realized there was still a problem in case
 of methods or properties called on "implicit this", like in builders for example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>xml {
+<pre class="prettyprint highlight"><code data-lang="groovy">xml {
    cars {				 // cars is a method call on an implicit this: "this".cars(...)
      car(make:'Renault', model: 'Clio')
    }
@@ -372,7 +372,7 @@ of methods or properties called on "implicit this", like in builders for example
 </div>
 <div class="paragraph">
 <p>As of today I still didn&#8217;t find a way to properly handle this because of the design of the meta-object protocol in Groovy, that here relies on the fact that a receiver throws an exception when the method
-is not found before trying another receiver. In short, it means that you cannot know the type of the receiver before the method is actually called. And if it is called, it&#8217;s already too late&#8230;</p>
+is not found before trying another receiver. In short, it means that you cannot know the type of the receiver before the method is actually called. And if it is called, it&#8217;s already too late&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p>Until earlier this year I had still no perfect solution to this problem, in case the script being executed is using the dynamic features of the language. But now has come the time to explain how you can
@@ -397,7 +397,7 @@ checking extensions are even used internally in Groovy to support the static com
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>((Object)System).exit(-1)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">((Object)System).exit(-1)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -415,7 +415,7 @@ checking extensions are even used internally in Groovy to support the static com
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>def c = System
+<pre class="prettyprint highlight"><code data-lang="groovy">def c = System
 c.exit(-1)</code></pre>
 </div>
 </div>
@@ -424,7 +424,7 @@ c.exit(-1)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@groovy.transform.TypeChecked // or even @CompileStatic
+<pre class="prettyprint highlight"><code data-lang="groovy">@groovy.transform.TypeChecked // or even @CompileStatic
 void foo() {
   def c = System
   c.exit(-1)
@@ -447,7 +447,7 @@ parameter of the <code>@TypeChecked</code> annotation (or <code>@CompileStatic</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>@TypeChecked(extensions=['SecureExtension1.groovy'])
+<pre class="prettyprint highlight"><code data-lang="groovy">@TypeChecked(extensions=['SecureExtension1.groovy'])
 void foo() {
   def c = System
   c.exit(-1)
@@ -461,7 +461,7 @@ foo()</code></pre>
 <div class="listingblock">
 <div class="title">SecureExtension1.groovy</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>onMethodSelection { expr, methodNode -&gt;					<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">onMethodSelection { expr, methodNode -&gt;					<i class="conum" data-value="1"></i><b>(1)</b>
    if (methodNode.declaringClass.name=='java.lang.System') {		<i class="conum" data-value="2"></i><b>(2)</b>
       addStaticTypeError("Method call is not allowed!", expr)		<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -511,7 +511,7 @@ start working with a bit more complex example.</p>
 <p>will expose (at least) a variable named <code>score</code></p>
 </li>
 <li>
-<p>will allow the user to perform mathematical operations (including calling methods like <em>cos</em>, <em>abs</em>, &#8230;)</p>
+<p>will allow the user to perform mathematical operations (including calling methods like <em>cos</em>, <em>abs</em>, &#8230;&#8203;)</p>
 </li>
 <li>
 <p>should disallow all other method calls</p>
@@ -523,7 +523,7 @@ start working with a bit more complex example.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>abs(cos(1+score))</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">abs(cos(1+score))</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -532,7 +532,7 @@ start working with a bit more complex example.</p>
 <div class="listingblock">
 <div class="title">Sandbox.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>CompilerConfiguration conf = new CompilerConfiguration();
+<pre class="prettyprint highlight"><code data-lang="java">CompilerConfiguration conf = new CompilerConfiguration();
 ImportCustomizer customizer = new ImportCustomizer();
 customizer.addStaticStars("java.lang.Math");                        <i class="conum" data-value="1"></i><b>(1)</b>
 conf.addCompilationCustomizers(customizer);
@@ -563,7 +563,7 @@ System.out.println("userScore = " + userScore);</code></pre>
 <table>
 <tr>
 <td class="icon">
-<i class="icon-tip" title="Tip"></i>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
 There are options to cache the scripts, instead of parsing and compiling them each time. Please check the documentation for more details.
@@ -590,7 +590,7 @@ transparently:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(CompileStatic.class);
+<pre class="prettyprint highlight"><code data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(CompileStatic.class);
 conf.addCompilationCustomizers(astcz);</code></pre>
 </div>
 </div>
@@ -622,7 +622,7 @@ so that compilation passes. In this case, we will want to indicate that the <cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+<pre class="prettyprint highlight"><code data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
         singletonMap("extensions", singletonList("SecureExtension2.groovy")),
         CompileStatic.class);</code></pre>
 </div>
@@ -633,7 +633,7 @@ so that compilation passes. In this case, we will want to indicate that the <cod
 <div class="listingblock">
 <div class="title">SecureExtension2.groovy</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>unresolvedVariable { var -&gt;			<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">unresolvedVariable { var -&gt;			<i class="conum" data-value="1"></i><b>(1)</b>
    if (var.name=='score') {			<i class="conum" data-value="2"></i><b>(2)</b>
       return makeDynamic(var, double_TYPE)	<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -657,10 +657,10 @@ so that compilation passes. In this case, we will want to indicate that the <cod
 </table>
 </div>
 <div class="paragraph">
-<p>You can find a complete description of the type checking extension DSL in <a href="http://docs.groovy-lang.org/latest/html/documentation/#">http://docs.groovy-lang.org/latest/html/documentation/#</a><em>type_checking_extensions[this section of the documentation],
+<p>You can find a complete description of the type checking extension DSL in <a href="http://docs.groovy-lang.org/latest/html/documentation/#" class="bare">http://docs.groovy-lang.org/latest/html/documentation/#</a><em>type_checking_extensions[this section of the documentation],
 but you have here an example of _mixed mode compilation</em> : the compiler is not able to resolve the <code>score</code> variable. You, as the designer of the DSL, <strong>know</strong> that the variable is in fact
 found in the binding, and is of the <code>double</code>, so the <code>makeDynamic</code> call is here to tell the compiler: "ok, don&#8217;t worry, I know what I am doing, this variable can be resolved dynamically
-and it will be of type <code>double</code>". That&#8217;s it!</p>
+and it will be of type `double`". That&#8217;s it!</p>
 </div>
 </div>
 </div>
@@ -674,7 +674,7 @@ variable on another. So if we combine both, we have a first, complete, securing 
 <div class="listingblock">
 <div class="title">SecureExtension3.groovy</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>// disallow calls on System
+<pre class="prettyprint highlight"><code data-lang="groovy">// disallow calls on System
 onMethodSelection { expr, methodNode -&gt;
     if (methodNode.declaringClass.name=='java.lang.System') {
         addStaticTypeError("Method call is not allowed!", expr)
@@ -694,7 +694,7 @@ unresolvedVariable { var -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
+<pre class="prettyprint highlight"><code data-lang="java">ASTTransformationCustomizer astcz = new ASTTransformationCustomizer(
         singletonMap("extensions", singletonList("SecureExtension3.groovy")),
 	CompileStatic.class);</code></pre>
 </div>
@@ -741,7 +741,7 @@ thread locals to pass configuration data to the type checker.</p>
 <div class="listingblock">
 <div class="title">Sandbox.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class Sandbox {
+<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
     public static final String VAR_TYPES = "sandboxing.variable.types";
 
     public static final ThreadLocal&lt;Map&lt;String, Object&gt;&gt; COMPILE_OPTIONS = new ThreadLocal&lt;&gt;();		<i class="conum" data-value="1"></i><b>(1)</b>
@@ -815,7 +815,7 @@ thread locals to pass configuration data to the type checker.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import static Sandbox.*
+<pre class="prettyprint highlight"><code data-lang="groovy">import static Sandbox.*
 
 def typesOfVariables = COMPILE_OPTIONS.get()[VAR_TYPES]				<i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -871,7 +871,7 @@ the method descriptor consists of the fully-qualified class name of the method, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class Sandbox {
+<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
     public static final String WHITELIST_PATTERNS = "sandboxing.whitelist.patterns";
 
     // ...
@@ -918,7 +918,7 @@ the method descriptor consists of the fully-qualified class name of the method, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.transform.CompileStatic
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
@@ -1017,7 +1017,7 @@ for improved performance. But the idea is exactly the same.</p>
 <div class="listingblock">
 <div class="title">SandboxingTypeCheckingExtension.groovy</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>import groovy.transform.CompileStatic
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport
 import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
@@ -1125,7 +1125,7 @@ class SandboxingTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport
 <div class="listingblock">
 <div class="title">Sandbox.java</div>
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class Sandbox {
+<pre class="prettyprint highlight"><code data-lang="java">public class Sandbox {
     public static final String WHITELIST_PATTERNS = "sandboxing.whitelist.patterns";
     public static final String VAR_TYPES = "sandboxing.variable.types";
 
@@ -1255,7 +1255,7 @@ glad if someone or some people improve this solution and make a pull request so 
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     

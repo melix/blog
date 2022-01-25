@@ -49,10 +49,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/feed.xml">Feed</a></li>                
@@ -117,7 +116,7 @@ accordingly. Then you would have to write something like this (no kidding):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint java language-java"><code>public class FeedActivity {
+<pre class="prettyprint highlight"><code data-lang="java">public class FeedActivity {
     TextView mTextView;
 
     ...
@@ -185,7 +184,7 @@ accordingly. Then you would have to write something like this (no kidding):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>public class FeedActivity {
+<pre class="prettyprint highlight"><code data-lang="groovy">public class FeedActivity {
     TextView mTextView
 
     ...
@@ -214,7 +213,7 @@ an application in Groovy on Android. Why? Because it&#8217;s been some time alre
 to feel the pain of the Java developers on Android, so that I can write better tools for them. And that&#8217;s actually where you, as a user, come
 in action: there are so many Groovy libraries out there whose sole objective is to ease the pain, make things that shouldn&#8217;t be complicated a breeze.
 This is exactly the point. My example with <code>Fluent</code> is <strong>one</strong> example of simplification of usages of Android APIs, but you have many more to invent,
-especially because <strong>you</strong> must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&#8230;</p>
+especially because <strong>you</strong> must have been as annoyed as I did by all those asynchronous tasks, XML files (think of builders!), callback hell, etc&#8230;&#8203;</p>
 </div>
 </div>
 <div class="sect2">
@@ -230,18 +229,18 @@ Google already switched their main build system to Gradle, which is, by the way,
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://github.com/melix/gr8confagenda">https://github.com/melix/gr8confagenda</a></p>
+<p><a href="https://github.com/melix/gr8confagenda" class="bare">https://github.com/melix/gr8confagenda</a></p>
 </li>
 </ul>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_update_3_it_s_even_simpler_now">Update 3: it&#8217;s even simpler now</h3>
+<h3 id="_update_3_its_even_simpler_now">Update 3: it&#8217;s even simpler now</h3>
 <div class="admonitionblock tip">
 <table>
 <tr>
 <td class="icon">
-<i class="icon-tip" title="Tip"></i>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
 Groovy 2.4.0 has been released now and building an Android application in Groovy is even simpler. All you have to do is to apply a Gradle plugin. Instructions can be found <a href="https://github.com/groovy/groovy-android-gradle-plugin">here</a>. You absolutely don&#8217;t have to build Groovy from sources or add tasks to your Gradle build as described originally in this post! Just <a href="https://github.com/groovy/groovy-android-gradle-plugin">use the plugin</a>!
@@ -253,7 +252,7 @@ Groovy 2.4.0 has been released now and building an Android application in Groovy
 <table>
 <tr>
 <td class="icon">
-<i class="icon-warning" title="Warning"></i>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
 Information below is outdated. Please use the <a href="https://github.com/groovy/groovy-android-gradle-plugin">Gradle plugin !</a>.
@@ -300,7 +299,7 @@ as is:</p>
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="prettyprint groovy language-groovy"><code>android {
+<pre class="prettyprint highlight"><code data-lang="groovy">android {
    ...
    packagingOptions {
         // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
@@ -338,8 +337,7 @@ android.applicationVariants.all {
     }
     javaCompile.dependsOn("groovy${name}Compile")
     javaCompile.enabled = false
-}
-</code></pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -374,7 +372,7 @@ android.applicationVariants.all {
     <div id="footer">
       <div class="container">
 	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
-        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.3.0</a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
       </div>
     </div>
     
