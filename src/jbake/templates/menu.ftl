@@ -17,10 +17,9 @@
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/groovy.html">Groovy</a></li>
-                <li><a href="/blog/tags/groovy.html">Gradle</a></li>
-				<li><a href="/blog/2013/07/30/deck2pdf_exporting_html5_slide_decks.html">deck2pdf</a></li>
-				<li><a href="/blog/tags/jlangdetect.html">JLangDetect</a></li>
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/${config.feed_file}">Feed</a></li>                
