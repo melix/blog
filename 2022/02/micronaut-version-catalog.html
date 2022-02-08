@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Using the Micronaut Version Catalog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Using the Micronaut Version Catalog</h1>
+	</div>
+
+	<p><em>08 February 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
+	</em>
+		<a href="/blog/tags/version-catalog.html">version catalog</a> 
+	</p>
+	<p><div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With the <a href="https://docs.gradle.org/7.4/release-notes.html">release of Gradle 7.4</a>, Micronaut users now have an interesting option to manage their dependencies: using Gradle&#8217;s <a href="https://docs.gradle.org/current/userguide/platforms.html#sub:central-declaration-of-dependencies">version catalogs</a>.
+Indeed, for a few releases already, Micronaut has shipped its own version catalog alongside its BOM.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s explore how to use it and what&#8217;s the benefit.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_a_version_catalog">What is a version catalog?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a nutshell, a version catalog allows centralizing dependency versions in a single place.
+Instead a build script, a typical dependency declaration looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    implementation("org.apache.slf4j:slf4j-api:1.7.25")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With a version catalog, the declaration looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    implementation(libs.slf4j)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the dependency coordinates are defined in the <code>gradle/libs.versions.toml</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[versions]
+slf4j = "1.7.25"
+
+[libraries]
+slf4j = { module = "org.apache.slf4j", version.ref = "slf4j" }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are a couple of advantages in doing so:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>dependency versions are centralized in this TOML file</p>
+</li>
+<li>
+<p>the catalogs create "type safe accessors" which are completed by the IDE (although to my knowledge completion is only supported by IntelliJ IDEA with the Kotlin DSL)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can read a more complete description about version catalogs in <a href="https://melix.github.io/blog/2021/03/version-catalogs.html">this blog post I wrote a few months ago</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_micronaut_version_catalog">The Micronaut version catalog</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In addition, frameworks like Micronaut can <em>publish</em> version catalogs, which are then usable in your projects.
+You can then think of the Micronaut version catalog as a list of dependencies to pick up from: you don&#8217;t have to think about a version to choose, you can simply use the "recommendation" from Micronaut, but you don&#8217;t have to remember the dependency coordinates either.</p>
+</div>
+<div class="sect2">
+<h3 id="_importing_the_micronaut_version_catalog">Importing the Micronaut version catalog</h3>
+<div class="paragraph">
+<p>Let&#8217;s start with a project that you can generate using the Micronaut CLI:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">mn create-app catalog</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(alternatively, download the project using <a href="https://launch.micronaut.io/">Micronaut Launch</a>)</p>
+</div>
+<div class="paragraph">
+<p>Open the generated project.
+In order to import the Micronaut version catalog, add this to your <code>settings.gradle</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    versionCatalogs {
+        create("mn") {
+            from("io.micronaut:micronaut-bom:${micronautVersion}")
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, we&#8217;re creating a new version catalog called <code>mn</code>.
+Internally, Gradle will automatically download the catalog which is <a href="https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/">published at the same GAV coordinates as its BOM</a> as a <a href="https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/">TOML file</a> and expose it to your build scripts.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s open our <code>build.gradle</code> file.
+By default it defines the following dependencies:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, we can replace this with the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    annotationProcessor(mn.micronaut.http.validation)
+    implementation(mn.micronaut.http.client)
+    implementation(mn.micronaut.jackson.databind)
+    implementation(mn.micronaut.runtime)
+    implementation(mn.jakarta.annotation.api)
+    runtimeOnly(mn.logback)
+    implementation(mn.micronaut.validation)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What happened here?
+Basically, we replaced hardcoded dependency coordinates with references to the <code>mn</code> version catalog.
+It&#8217;s particularly interesting if you are using the Kotlin DSL as I mentioned earlier, because in this case, the dependency notations are <em>type-safe</em>: you <em>can&#8217;t</em> make a typo in dependency coordinates, and you get completion:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/catalog/catalog-completion.gif" alt="catalog completion">
+</div>
+</div>
+<div class="paragraph">
+<p>Nice!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_future_work">Future work</h3>
+<div class="paragraph">
+<p>Version catalogs will probably be enabled by default in future releases of Micronaut, which means that projects created via <a href="https://launch.micronaut.io/">Micronaut Launch</a> or the CLI tool would automatically use the catalog, so you don&#8217;t have to do the conversion described in this blog post. Stay tuned!</p>
+</div>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'micronaut-version-catalog';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="http://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="http://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

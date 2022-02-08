@@ -6,9 +6,181 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 25 Jan 2022 17:34:33 +0100</pubDate>
-    <lastBuildDate>Tue, 25 Jan 2022 17:34:33 +0100</lastBuildDate>
+    <pubDate>Tue, 8 Feb 2022 23:12:41 +0100</pubDate>
+    <lastBuildDate>Tue, 8 Feb 2022 23:12:41 +0100</lastBuildDate>
 
+    <item>
+      <title>Using the Micronaut Version Catalog</title>
+      <link>https://melix.github.io/blog//2022/02/micronaut-version-catalog.html</link>
+      <pubDate>Tue, 8 Feb 2022 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2022/02/micronaut-version-catalog.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introduction&quot;&gt;Introduction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With the &lt;a href=&quot;https://docs.gradle.org/7.4/release-notes.html&quot;&gt;release of Gradle 7.4&lt;/a&gt;, Micronaut users now have an interesting option to manage their dependencies: using Gradle&amp;#8217;s &lt;a href=&quot;https://docs.gradle.org/current/userguide/platforms.html#sub:central-declaration-of-dependencies&quot;&gt;version catalogs&lt;/a&gt;.
+Indeed, for a few releases already, Micronaut has shipped its own version catalog alongside its BOM.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s explore how to use it and what&amp;#8217;s the benefit.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_what_is_a_version_catalog&quot;&gt;What is a version catalog?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a nutshell, a version catalog allows centralizing dependency versions in a single place.
+Instead a build script, a typical dependency declaration looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-gradle hljs&quot; data-lang=&quot;gradle&quot;&gt;dependencies {
+    implementation(&quot;org.apache.slf4j:slf4j-api:1.7.25&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With a version catalog, the declaration looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-gradle hljs&quot; data-lang=&quot;gradle&quot;&gt;dependencies {
+    implementation(libs.slf4j)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And the dependency coordinates are defined in the &lt;code&gt;gradle/libs.versions.toml&lt;/code&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-toml hljs&quot; data-lang=&quot;toml&quot;&gt;[versions]
+slf4j = &quot;1.7.25&quot;
+
+[libraries]
+slf4j = { module = &quot;org.apache.slf4j&quot;, version.ref = &quot;slf4j&quot; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are a couple of advantages in doing so:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;dependency versions are centralized in this TOML file&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the catalogs create &quot;type safe accessors&quot; which are completed by the IDE (although to my knowledge completion is only supported by IntelliJ IDEA with the Kotlin DSL)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can read a more complete description about version catalogs in &lt;a href=&quot;https://melix.github.io/blog/2021/03/version-catalogs.html&quot;&gt;this blog post I wrote a few months ago&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_micronaut_version_catalog&quot;&gt;The Micronaut version catalog&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In addition, frameworks like Micronaut can &lt;em&gt;publish&lt;/em&gt; version catalogs, which are then usable in your projects.
+You can then think of the Micronaut version catalog as a list of dependencies to pick up from: you don&amp;#8217;t have to think about a version to choose, you can simply use the &quot;recommendation&quot; from Micronaut, but you don&amp;#8217;t have to remember the dependency coordinates either.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_importing_the_micronaut_version_catalog&quot;&gt;Importing the Micronaut version catalog&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s start with a project that you can generate using the Micronaut CLI:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-none hljs&quot;&gt;mn create-app catalog&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;(alternatively, download the project using &lt;a href=&quot;https://launch.micronaut.io/&quot;&gt;Micronaut Launch&lt;/a&gt;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Open the generated project.
+In order to import the Micronaut version catalog, add this to your &lt;code&gt;settings.gradle&lt;/code&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-gradle hljs&quot; data-lang=&quot;gradle&quot;&gt;dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    versionCatalogs {
+        create(&quot;mn&quot;) {
+            from(&quot;io.micronaut:micronaut-bom:${micronautVersion}&quot;)
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here, we&amp;#8217;re creating a new version catalog called &lt;code&gt;mn&lt;/code&gt;.
+Internally, Gradle will automatically download the catalog which is &lt;a href=&quot;https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/&quot;&gt;published at the same GAV coordinates as its BOM&lt;/a&gt; as a &lt;a href=&quot;https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/&quot;&gt;TOML file&lt;/a&gt; and expose it to your build scripts.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s open our &lt;code&gt;build.gradle&lt;/code&gt; file.
+By default it defines the following dependencies:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-gradle hljs&quot; data-lang=&quot;gradle&quot;&gt;dependencies {
+    annotationProcessor(&quot;io.micronaut:micronaut-http-validation&quot;)
+    implementation(&quot;io.micronaut:micronaut-http-client&quot;)
+    implementation(&quot;io.micronaut:micronaut-jackson-databind&quot;)
+    implementation(&quot;io.micronaut:micronaut-runtime&quot;)
+    implementation(&quot;jakarta.annotation:jakarta.annotation-api&quot;)
+    runtimeOnly(&quot;ch.qos.logback:logback-classic&quot;)
+    implementation(&quot;io.micronaut:micronaut-validation&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, we can replace this with the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-gradle hljs&quot; data-lang=&quot;gradle&quot;&gt;dependencies {
+    annotationProcessor(mn.micronaut.http.validation)
+    implementation(mn.micronaut.http.client)
+    implementation(mn.micronaut.jackson.databind)
+    implementation(mn.micronaut.runtime)
+    implementation(mn.jakarta.annotation.api)
+    runtimeOnly(mn.logback)
+    implementation(mn.micronaut.validation)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What happened here?
+Basically, we replaced hardcoded dependency coordinates with references to the &lt;code&gt;mn&lt;/code&gt; version catalog.
+It&amp;#8217;s particularly interesting if you are using the Kotlin DSL as I mentioned earlier, because in this case, the dependency notations are &lt;em&gt;type-safe&lt;/em&gt;: you &lt;em&gt;can&amp;#8217;t&lt;/em&gt; make a typo in dependency coordinates, and you get completion:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/catalog/catalog-completion.gif&quot; alt=&quot;catalog completion&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nice!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_future_work&quot;&gt;Future work&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Version catalogs will probably be enabled by default in future releases of Micronaut, which means that projects created via &lt;a href=&quot;https://launch.micronaut.io/&quot;&gt;Micronaut Launch&lt;/a&gt; or the CLI tool would automatically use the catalog, so you don&amp;#8217;t have to do the conversion described in this blog post. Stay tuned!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Understanding Gradle plugins: the provider API</title>
       <link>https://melix.github.io/blog//2022/01/understanding-provider-api.html</link>

@@ -70,6 +70,181 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2022/02/micronaut-version-catalog.html"><h1>Using the Micronaut Version Catalog</h1></a>
+  			<p>08 February 2022</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
+	
+		<a href="/blog/tags/version-catalog.html">version catalog</a> 
+	</p>
+			
+  			<p><div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With the <a href="https://docs.gradle.org/7.4/release-notes.html">release of Gradle 7.4</a>, Micronaut users now have an interesting option to manage their dependencies: using Gradle&#8217;s <a href="https://docs.gradle.org/current/userguide/platforms.html#sub:central-declaration-of-dependencies">version catalogs</a>.
+Indeed, for a few releases already, Micronaut has shipped its own version catalog alongside its BOM.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s explore how to use it and what&#8217;s the benefit.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_a_version_catalog">What is a version catalog?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a nutshell, a version catalog allows centralizing dependency versions in a single place.
+Instead a build script, a typical dependency declaration looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    implementation("org.apache.slf4j:slf4j-api:1.7.25")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With a version catalog, the declaration looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    implementation(libs.slf4j)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the dependency coordinates are defined in the <code>gradle/libs.versions.toml</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[versions]
+slf4j = "1.7.25"
+
+[libraries]
+slf4j = { module = "org.apache.slf4j", version.ref = "slf4j" }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are a couple of advantages in doing so:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>dependency versions are centralized in this TOML file</p>
+</li>
+<li>
+<p>the catalogs create "type safe accessors" which are completed by the IDE (although to my knowledge completion is only supported by IntelliJ IDEA with the Kotlin DSL)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can read a more complete description about version catalogs in <a href="https://melix.github.io/blog/2021/03/version-catalogs.html">this blog post I wrote a few months ago</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_micronaut_version_catalog">The Micronaut version catalog</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In addition, frameworks like Micronaut can <em>publish</em> version catalogs, which are then usable in your projects.
+You can then think of the Micronaut version catalog as a list of dependencies to pick up from: you don&#8217;t have to think about a version to choose, you can simply use the "recommendation" from Micronaut, but you don&#8217;t have to remember the dependency coordinates either.</p>
+</div>
+<div class="sect2">
+<h3 id="_importing_the_micronaut_version_catalog">Importing the Micronaut version catalog</h3>
+<div class="paragraph">
+<p>Let&#8217;s start with a project that you can generate using the Micronaut CLI:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">mn create-app catalog</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(alternatively, download the project using <a href="https://launch.micronaut.io/">Micronaut Launch</a>)</p>
+</div>
+<div class="paragraph">
+<p>Open the generated project.
+In order to import the Micronaut version catalog, add this to your <code>settings.gradle</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    versionCatalogs {
+        create("mn") {
+            from("io.micronaut:micronaut-bom:${micronautVersion}")
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, we&#8217;re creating a new version catalog called <code>mn</code>.
+Internally, Gradle will automatically download the catalog which is <a href="https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/">published at the same GAV coordinates as its BOM</a> as a <a href="https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/">TOML file</a> and expose it to your build scripts.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s open our <code>build.gradle</code> file.
+By default it defines the following dependencies:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, we can replace this with the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+    annotationProcessor(mn.micronaut.http.validation)
+    implementation(mn.micronaut.http.client)
+    implementation(mn.micronaut.jackson.databind)
+    implementation(mn.micronaut.runtime)
+    implementation(mn.jakarta.annotation.api)
+    runtimeOnly(mn.logback)
+    implementation(mn.micronaut.validation)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What happened here?
+Basically, we replaced hardcoded dependency coordinates with references to the <code>mn</code> version catalog.
+It&#8217;s particularly interesting if you are using the Kotlin DSL as I mentioned earlier, because in this case, the dependency notations are <em>type-safe</em>: you <em>can&#8217;t</em> make a typo in dependency coordinates, and you get completion:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/catalog/catalog-completion.gif" alt="catalog completion">
+</div>
+</div>
+<div class="paragraph">
+<p>Nice!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_future_work">Future work</h3>
+<div class="paragraph">
+<p>Version catalogs will probably be enabled by default in future releases of Micronaut, which means that projects created via <a href="https://launch.micronaut.io/">Micronaut Launch</a> or the CLI tool would automatically use the catalog, so you don&#8217;t have to do the conversion described in this blog post. Stay tuned!</p>
+</div>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2022/02/micronaut-version-catalog.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2022/01/understanding-provider-api.html"><h1>Understanding Gradle plugins: the provider API</h1></a>
   			<p>24 January 2022</p>
 			<p><em>Tags: </em>
@@ -1360,221 +1535,6 @@ It will also be interesting to get your user stories so that we, collectively, c
 </div>
 </div></p>
 			<p><a href="/blog/2021/11/multirepo-dev-made-easy.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2021/10/gradle-quickie-dependson.html"><h1>A Gradle quickie: properly using dependsOn</h1></a>
-  			<p>06 October 2021</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/micronaut.html">micronaut</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>Today I&#8217;d like to share a small example of what <em>not to do</em> with Gradle.
-Some of you may already know that I recently joined the <a href="https://micronaut.io/">Micronaut team at Oracle</a>, and part of my job is to improve the build experience, be it for Micronaut itself or Micronaut users.
-Today I&#8217;m going to focus on an example I found in the Micronaut build itself.</p>
-</div>
-<div class="paragraph">
-<p><strong>TL/DR</strong>: If you use <code>dependsOn</code>, you&#8217;re likely doing it wrong.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_when_should_you_use_dependson">When should you use dependsOn?</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In a nutshell, Gradle works by computing a graph of task dependencies.
-Say that you want to build a JAR file: you&#8217;re going to call the <code>jar</code> task, and Gradle is going to determine that to build the jar, it needs to compile the classes, process the resources, etc&#8230;&#8203;
-Determining the <em>task dependencies</em>, that is to say what other tasks need to be executed, is done by looking up at 3 different things:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>the task <code>dependsOn</code> dependencies. For example, <code>assemble.dependsOn(jar)</code> means that if you run <code>assemble</code>, then the <code>jar</code> task must be executed before</p>
-</li>
-<li>
-<p>the task <em>transitive dependencies</em>, in which case we&#8217;re not talking about tasks, but "publications". For example, when you need to compile project <code>A</code>, you need on classpath project <code>B</code>, which implies running <em>some</em> tasks of <code>B</code>.</p>
-</li>
-<li>
-<p>and last but not least, the <em>task inputs</em>, that is to say, what it needs to execute its work</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>In practice, it&#8217;s worth noting that 2. is a subset of 3. but I added it for clarity.</p>
-</div>
-<div class="paragraph">
-<p>Now let&#8217;s look at this snippet:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
-    archiveVersion = null
-    archiveFileName = "grails-doc-files.jar"
-    from "src/main/template"
-    doLast {
-        copy {
-            from docFilesJar.archivePath
-            into "${buildDir}/classes/groovy/main"
-        }
-    }
-}
-
-jar.dependsOn docFilesJar</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>First, let&#8217;s realize that this snippet is <em>years old</em>. I mean, very years old, copied from Grails, which was using early releases of Gradle.
-Yet, there&#8217;s something interesting in what it does, which is a <strong>typical mistake I see in all builds I modernize</strong>.</p>
-</div>
-<div class="paragraph">
-<p>It&#8217;s tempting, especially when you&#8217;re not used to Gradle, to think the same way as other build tools do, like Maven or Ant.
-You&#8217;re thinking "there&#8217;s a task, jar, which basically packages everything it finds in <code>classes/groovy/main</code>, so if I want to add more stuff to the jar task, let&#8217;s put more stuff in `classes/groovy/main`".</p>
-</div>
-<div class="paragraph">
-<p><strong>This is wrong!</strong></p>
-</div>
-<div class="paragraph">
-<p>This is wrong for different reasons, most notably:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>when the <code>docsFilesJar</code> task is going to be executed, it will contribute more files to the "classes" directory, but, wait, those are not classes that we&#8217;re putting in there, right? It&#8217;s just a jar, resources. Shouldn&#8217;t we use <code>resources/groovy/main</code> instead? Or is it <code>classes/groovy/resources</code>? Or what? Well, you <strong>shoudn&#8217;t care</strong> because it&#8217;s not your concern where the Java compile task is going to put its output!</p>
-</li>
-<li>
-<p>it breaks <em>cacheability</em>: Gradle has a <em>build cache</em>, and multiple tasks contributing to the same output directory is the typical example of what would break caching. In fact, it breaks all kinds of up-to-date checking, that is to say the ability for Gradle to understand that it doesn&#8217;t need to execute a task when nothing changed.</p>
-</li>
-<li>
-<p>it&#8217;s opaque to Gradle: the code above executes a copy in a <code>doLast</code> block. Nothing tells Gradle that the "classes" have additional output.</p>
-</li>
-<li>
-<p>imagine another task which needs the <code>classes</code> only. Depending on when it executes, it <em>may</em> or may not, include the <code>docsFileJar</code> that it doesn&#8217;t care about. This makes builds non-reproducible (note that this is exactly the reason why Maven build cannot be trusted and that you need to run <code>clean</code>, because any "goal" can write to any directory at any time, making it impossible to infer who contributed what).</p>
-</li>
-<li>
-<p>it requires to declare an <em>explicit dependency</em> between the <code>jar</code> task and the <code>docsFileJar</code> task, to make sure that if we execute <code>jar</code>, our "docs jar" file is present</p>
-</li>
-<li>
-<p>it doesn&#8217;t tell <em>why</em> there&#8217;s a dependency: is it because you want to <em>order</em> things, or is it because you require an <em>artifact</em> produced by the dependent task? Something else?</p>
-</li>
-<li>
-<p>it&#8217;s easy to forget about those: because you may run <code>build</code> often, you might think that your build works, because <code>jar</code> is part of the task graph, and <em>by accident</em>, the <code>docsFileJar</code> would be executed before</p>
-</li>
-<li>
-<p>it creates accidental extra work: most often a <code>dependsOn</code> will trigger too much work. Gradle is a smart build tool which can compute <em>precisely</em> what it needs to execute for each specific task. By using <code>dependsOn</code>, you&#8217;re a bit using a hammer and forcing it to integrate something in the graph which wasn&#8217;t necessarily needed. In short: you&#8217;re doing too much work.</p>
-</li>
-<li>
-<p>it&#8217;s difficult to get rid of them: when you see a <code>dependsOn</code>, because it doesn&#8217;t tell <em>why</em> it&#8217;s needed, it&#8217;s often hard to get rid of such dependencies when optimizing builds</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_use_implicit_dependencies_instead">Use implicit dependencies instead!</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The answer to our problem is actually simpler to reason about: reverse the logic.
-Instead of thinking "where should I put those things so that it&#8217;s picked up by jar", think "let&#8217;s tell the <code>jar</code> task that it also needs to pick up my resources".</p>
-</div>
-<div class="paragraph">
-<p>All in all, it&#8217;s about <em>properly declaring your task inputs</em>.</p>
-</div>
-<div class="paragraph">
-<p>Instead of patching up the output of another task (seriously, forget about this!), every single task must be thought as a function which takes inputs and produces an output: it&#8217;s <strong>isolated</strong>.
-So, what are the inputs of our <code>docsFileJar</code>? The resources we want to package. What are its outputs? The <code>jar</code> itself. There&#8217;s <em>nothing</em> about where we should put the jar, we let Gradle pick a reasonable place for us.</p>
-</div>
-<div class="paragraph">
-<p>Then what are the inputs of the <code>jar</code> task itself? Well, it&#8217;s regular inputs <strong>plus</strong> our jar. It&#8217;s easier to reason about, and as bonus, it&#8217;s even shorter to write!</p>
-</div>
-<div class="paragraph">
-<p>So let&#8217;s rewrite the code above to:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
-    archiveVersion = null
-    archiveFileName = "grails-doc-files.jar"
-    from "src/main/template"
-}
-
-jar {
-    from docFilesJar
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Can you spot the difference? We got rid of the <code>copy</code> in the <code>docFilesJar</code> task, we don&#8217;t want to do this. What we want, instead, is to say "when you build the jar, also pick this <code>docsFileJar</code>. And that&#8217;s what we&#8217;re doing by telling <code>from docsFileJar</code>. Gradle is smart enough to know that when it will need to execute the <code>jar</code> task, first, it will need to build the <code>docsFilesJar</code>.</p>
-</div>
-<div class="paragraph">
-<p>There are several advantages to this:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>the dependency becomes <em>implicit</em>: if we don&#8217;t want to include the jar anymore, we just have to remove it from the specification of the inputs.</p>
-</li>
-<li>
-<p>it doesn&#8217;t pollute the outputs of other tasks</p>
-</li>
-<li>
-<p>you can execute the <code>docsFileJar</code> independently of <code>jar</code></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>All in all, it&#8217;s about isolating things from each other and reducing the risks of breaking a build accidentally!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_all_things_lazy">All things lazy!</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The modified code isn&#8217;t 2021 compliant. The code above works, but it has one drawback: the <code>docFilesJar</code> and <code>jar</code> tasks are going to be configured (instantitated) even if we call something that doesn&#8217;t need it. For example, imagine that you call <code>gradle compileJava</code>: there&#8217;s no reason to configure the <code>jar</code> tasks there because we won&#8217;t execute them.</p>
-</div>
-<div class="paragraph">
-<p>For this purpose, to make builds faster, Gradle provides a <em>lazy API</em> instead:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register('docFilesJar', Jar) {
-    description = 'Package up files used for generating documentation.'
-    archiveVersion = null
-    archiveFileName = "grails-doc-files.jar"
-    from "src/main/template"
-}
-
-tasks.named('jar', Jar) {
-    from docFilesJar
-}</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>As a conclusion:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>avoid using explicit <code>dependsOn</code> <em>as much as you can</em></p>
-</li>
-<li>
-<p>I tend to say that the only reasonable use case for <code>dependsOn</code> is for lifecycle tasks (lifecycle tasks are tasks which goal is only there to "organize the build", for example <code>build</code>, <code>assemble</code>, <code>check</code>: they don&#8217;t do anything by themselves, they just bind a number of dependents together)</p>
-</li>
-<li>
-<p>if you find use cases which are not lifecycle tasks and cannot be expressed by <em>implicit task dependencies</em> (e.g declaring inputs instead of <code>dependsOn</code>), then report it to the Gradle team</p>
-</li>
-</ul>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2021/10/gradle-quickie-dependson.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
