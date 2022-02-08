@@ -167,8 +167,15 @@ You can then think of the Micronaut version catalog as a list of dependencies to
 <p>(alternatively, download the project using <a href="https://launch.micronaut.io/">Micronaut Launch</a>)</p>
 </div>
 <div class="paragraph">
-<p>Open the generated project.
-In order to import the Micronaut version catalog, add this to your <code>settings.gradle</code> file:</p>
+<p>Open the generated project and update the Gradle version by changing the <code>gradle/gradle-wrapper.properties</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, in order to import the Micronaut version catalog, add this to your <code>settings.gradle</code> file:</p>
 </div>
 <div class="listingblock">
 <div class="title">settings.gradle</div>

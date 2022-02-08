@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 8 Feb 2022 23:12:41 +0100</pubDate>
-    <lastBuildDate>Tue, 8 Feb 2022 23:12:41 +0100</lastBuildDate>
+    <pubDate>Tue, 8 Feb 2022 23:16:21 +0100</pubDate>
+    <lastBuildDate>Tue, 8 Feb 2022 23:16:21 +0100</lastBuildDate>
 
     <item>
       <title>Using the Micronaut Version Catalog</title>
@@ -102,8 +102,15 @@ You can then think of the Micronaut version catalog as a list of dependencies to
 &lt;p&gt;(alternatively, download the project using &lt;a href=&quot;https://launch.micronaut.io/&quot;&gt;Micronaut Launch&lt;/a&gt;)&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Open the generated project.
-In order to import the Micronaut version catalog, add this to your &lt;code&gt;settings.gradle&lt;/code&gt; file:&lt;/p&gt;
+&lt;p&gt;Open the generated project and update the Gradle version by changing the &lt;code&gt;gradle/gradle-wrapper.properties&lt;/code&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-none hljs&quot;&gt;distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, in order to import the Micronaut version catalog, add this to your &lt;code&gt;settings.gradle&lt;/code&gt; file:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
