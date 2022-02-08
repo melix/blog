@@ -20,7 +20,6 @@
   	</#list>
 	
 	<hr />
-        <a href="/blog/help-me.html" class="help-banner">If you like this blog or my talks, consider helping me acquire astronomy equipment</a>
 	
 	<p>Older posts are available in the <a href="/blog/${config.archive_file}">archive</a>.</p>
 

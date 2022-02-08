@@ -20,6 +20,7 @@
 				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
                 <li><a href="/blog/tags/groovy.html">Groovy</a></li>
                 <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
 		          </ul>
 	       </li>
                 <li><a href="/blog/${config.feed_file}">Feed</a></li>                
