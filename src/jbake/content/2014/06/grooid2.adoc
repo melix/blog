@@ -6,12 +6,12 @@ Cédric Champeau
 :jbake-status: published
 :source-highlighter: prettify
 :id: groovy_on_android_details
-:gr8conf: http://gr8conf.eu[GR8Conf Europe]
-:groovylang: http://groovy.codehaus.org[Groovy language]
-:gradle: http://www.gradle.org[Gradle]
+:gr8conf: https://gr8conf.eu[GR8Conf Europe]
+:groovylang: https://groovy.codehaus.org[Groovy language]
+:gradle: https://www.gradle.org[Gradle]
 :icons: font
 
-In my previous http://melix.github.io/blog/2014/06/grooid.html[post], I have introduced how we could now use the {groovylang} to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.
+In my previous https://melix.github.io/blog/2014/06/grooid.html[post], I have introduced how we could now use the {groovylang} to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.
 
 == Compiling Groovy
 
@@ -51,7 +51,7 @@ image::compilation_process_runtime.png[Groovy Android compilation process at run
 
 You can have an application, written in Groovy or not, but in the end, *once the application is running*, you have Groovy source code that you want to execute. Then it needs to compile the classes, call `dex` *directly on the device*, package the result into a `jar` file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow. 
 
-This process is demonstrated in https://github.com/melix/grooidshell-example[this application], which replicates the behavior of the well-known http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell[GroovyShell] but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.
+This process is demonstrated in https://github.com/melix/grooidshell-example[this application], which replicates the behavior of the well-known https://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell[GroovyShell] but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.
 
 image::groovy-scripting.png[Compiling Groovy at runtime,align="center"]
 

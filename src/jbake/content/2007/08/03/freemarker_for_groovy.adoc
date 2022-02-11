@@ -7,13 +7,13 @@ Cédric Champeau
 :source-highlighter: prettify
 :id: freemarker_for_groovy
 
-After finding out that http://www.jroller.com/melix/entry/replacing_velocity_with_groovy_jsmarty[Groovy templates would be great as a replacement for Velocity], then thinking about http://www.jroller.com/melix/entry/grails_spring_and_templates_security[security issues], I came to a third solution.
+After finding out that https://www.jroller.com/melix/entry/replacing_velocity_with_groovy_jsmarty[Groovy templates would be great as a replacement for Velocity], then thinking about https://www.jroller.com/melix/entry/grails_spring_and_templates_security[security issues], I came to a third solution.
 
 [[]]
 FreeMarker for Groovy
 ---------------------
 
-Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add ``tags'' or ``plugins'' to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a http://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html[transform] for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :
+Some of you told me that I could take a look at FreeMarker, as a practical replacement for Velocity. I went on, but seen nothing that would fit my needs : beeing able to dynamically add ``tags'' or ``plugins'' to a customer template. I mean I would not need to rebuild and redeploy an application just to get a simple plugin working. Then I thought I would be able to create a https://fmpp.sourceforge.net/freemarker/pgui_datamodel_transform.html[transform] for FreeMarker that would make the benefits of the FreeMarker template engine available for Groovy. Basically, it would fit my needs :
 
 * Beeing able to dynamically add plugins for a customer
 * fix does nasty security issues by making the web designer unable to directly write Groovy code (the programmer creates plugins, then makes them available to a customer)
@@ -90,8 +90,8 @@ I’ve built a rather simple implementation, but it still has some additional fe
 Grabbing the code
 -----------------
 
-* Binary: http://cedric.champeau.free.fr/freemarker/gfreemarker-0.1.0.jar[gfreemarker-0.1.0.jar]
-* Javadoc: http://cedric.champeau.free.fr/freemarker/gfreemarker-javadoc.zip[gfreemarker-javadoc.zip]
-* Sources (with IntelliJ IDEA project): http://cedric.champeau.free.fr/freemarker/GroovyFreeMarker.tar.gz[GroovyFreeMarker.tar.gz]
+* Binary: https://cedric.champeau.free.fr/freemarker/gfreemarker-0.1.0.jar[gfreemarker-0.1.0.jar]
+* Javadoc: https://cedric.champeau.free.fr/freemarker/gfreemarker-javadoc.zip[gfreemarker-javadoc.zip]
+* Sources (with IntelliJ IDEA project): https://cedric.champeau.free.fr/freemarker/GroovyFreeMarker.tar.gz[GroovyFreeMarker.tar.gz]
 
-You will also need the latest http://cedric.champeau.free.fr/freemarker/freemarker.jar[freemarker.jar]. I will not have much time to work on this, so feel free to contribute !
+You will also need the latest https://cedric.champeau.free.fr/freemarker/freemarker.jar[freemarker.jar]. I will not have much time to work on this, so feel free to contribute !

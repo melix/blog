@@ -6,12 +6,12 @@ Cédric Champeau
 :jbake-status: published
 :source-highlighter: prettify
 :id: new_groovy_website
-:groovylang: http://beta.groovy-lang.org
-:gradle: http://www.gradle.org[Gradle 2]
+:groovylang: https://beta.groovy-lang.org
+:gradle: https://www.gradle.org[Gradle 2]
 :github-repo: https://github.com/groovy/groovy-website
-:asciidoctor: http://asciidoctor.org/[Asciidoctor]
-:markuptemplateengine: http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html[markup template engine]
-:ratpack: http://www.ratpack.io/[Ratpack]
+:asciidoctor: https://asciidoctor.org/[Asciidoctor]
+:markuptemplateengine: https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html[markup template engine]
+:ratpack: https://www.ratpack.io/[Ratpack]
 :icons: font
 
 Last week, we revealed the beta of a {groovylang}[brand new website for the Groovy language]. This
@@ -36,7 +36,7 @@ blog, but even that can be statically generated even if you want to allow users 
 (this blog is a perfect example). So in short, this decision was motivated by one mantra:
 _the right tool for the right job_.
 
-The documentation, that you can find on http://beta.groovy-lang.org/documentation.html[this page], had
+The documentation, that you can find on https://beta.groovy-lang.org/documentation.html[this page], had
 already started migrating from the aging wiki to {asciidoctor}. It is generated independently of the
 website and integrated into it using iframes (we're thinking about source integration though).
 
@@ -63,7 +63,7 @@ cd groovy-website
 The output will be visible in `<project directory>/site/build/site`. There's also a `checkDeadlinks` tasks that we will
 use once we get out of the beta phase to ensure that the generated pages do not contain any dead link.
 
-Internally, we use our http://ci.groovy-lang.org/viewType.html?buildTypeId=Groovy_Website&guest=1[CI server] to deploy
+Internally, we use our https://ci.groovy-lang.org/viewType.html?buildTypeId=Groovy_Website&guest=1[CI server] to deploy
 changes to the `master` branch live. So any commit which is pushed onto the master branch is automatically published
 (in general, takes less than 2 minutes).
 
@@ -121,14 +121,14 @@ downloads {
         version('2.3.4') {
             stable true
             releaseNotes 'https://jira.codehaus.org/secure/ReleaseNote.jspa?projectId=10242&version=20432'
-            windowsInstaller 'http://dist.codehaus.org/groovy/distributions/installers/windows/nsis/groovy-2.3.4-installer.exe'
+            windowsInstaller 'https://dist.codehaus.org/groovy/distributions/installers/windows/nsis/groovy-2.3.4-installer.exe'
         }
     }
     // ...
 }
 ----
 
-or the books which are listed on the http://beta.groovy-lang.org/learn.html[learn page]:
+or the books which are listed on the https://beta.groovy-lang.org/learn.html[learn page]:
 
 [source,groovy]
 ----
@@ -136,7 +136,7 @@ books {
     book('Groovy in Action, 2nd edition') {
         authors "Dierk König, Guillaume Laforge, Paul King, Cédric Champeau, Hamlet D'Arcy, Erik Pragt, and Jon Skeet"
         cover 'img/books/regina.png'
-        url 'http://www.manning.com/koenig2/'
+        url 'https://www.manning.com/koenig2/'
         description 'The undisputed definitive reference on the Groovy programming language, authored by core members of the development team.'
     }
     // ...
@@ -148,7 +148,7 @@ this DSL provides a very nice way to add contents to the website without caring 
 really think of it as a small database, but making use of a Groovy DSL.
 
 In addition, this file also declares the https://github.com/groovy/groovy-website/blob/03e3806cf26af6b13d99e6ee7473687e3f36fedd/site/src/site/sitemap.groovy#L62-L74[mapping between pages in the documentation section]
-and http://beta.groovy-lang.org/documentation.html[the documentation page]. Last but not least, it lists the individual
+and https://beta.groovy-lang.org/documentation.html[the documentation page]. Last but not least, it lists the individual
 pages that the website contain. Those pages make use of the {markuptemplateengine}.
 
 === Eat your own dog food
@@ -173,19 +173,19 @@ html {
 
 It has already been integrated into https://spring.io/blog/2014/05/28/using-the-innovative-groovy-template-engine-in-spring-boot[Spring Boot]
 and {ratpack} will use it in the next version (to be released on August 1st). A hint about its performance can be found https://github.com/ratpack/ratpack/pull/370[here].
-If you are interested in details about how it works, you can find the documentation http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html[here]
-and you can read my http://melix.github.io/blog/2014/02/markuptemplateengine.html[blog posts] about it.
+If you are interested in details about how it works, you can find the documentation https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html[here]
+and you can read my https://melix.github.io/blog/2014/02/markuptemplateengine.html[blog posts] about it.
 
 The website subproject is therefore organized accordingly. Inside the https://github.com/groovy/groovy-website/tree/master/site/src/site[main source tree], you'll find the following directories:
 
 * assets: contains static assets, like Javascript, CSS, images, ...
 * html: contains pure HTML files which are easier to embed as is than using a markup syntax
 * includes: contains elements of code which are shared among multiple templates
-* layouts: contains template layouts, as defined in the http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html#_layouts[documentation]
+* layouts: contains template layouts, as defined in the https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html#_layouts[documentation]
 * pages: contains the main pages of the website
 
 In general, consider `pages` as the entry point. A page generally makes use of one layout. As an example, let's see how
-the http://beta.groovy-lang.org/ecosystem.html[Ecosystem] page is generated. The source file consists of this:
+the https://beta.groovy-lang.org/ecosystem.html[Ecosystem] page is generated. The source file consists of this:
 
 [source,groovy]
 .ecosystem.groovy
@@ -274,4 +274,3 @@ Each of us have different skills. Guillaume is far better than I am in any kind 
 end, I think the combination works quite good and that the site as it is now is already pretty usable.
 
 Let us know what you think, and don't forget that you can contribute, it's easy!
-

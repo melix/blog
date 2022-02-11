@@ -8,7 +8,7 @@ Cédric Champeau
 :id: markup_template_engine_part_1
 :icons: font
 
-Recently, I was https://twitter.com/CedricChampeau/status/431131840788041728[surprised] no-one had the idea of developping a template engine relying on the Groovy http://groovy.codehaus.org/Creating+XML+using+Groovy's+MarkupBuilder[MarkupBuilder]. Working on http://jbake.org/[JBake] made me take a look at existing template engines for Java again, something I hadn't done for years, and even if new technologies like http://www.thymeleaf.org/[Thymeleaf] or http://jknack.github.io/handlebars.java/gettingStarted.html[Handlebars] exist, not of them are as practical to use as the markup builder.
+Recently, I was https://twitter.com/CedricChampeau/status/431131840788041728[surprised] no-one had the idea of developping a template engine relying on the Groovy https://groovy.codehaus.org/Creating+XML+using+Groovy's+MarkupBuilder[MarkupBuilder]. Working on https://jbake.org/[JBake] made me take a look at existing template engines for Java again, something I hadn't done for years, and even if new technologies like https://www.thymeleaf.org/[Thymeleaf] or https://jknack.github.io/handlebars.java/gettingStarted.html[Handlebars] exist, not of them are as practical to use as the markup builder.
 
 == An interesting experiment
 
@@ -31,7 +31,7 @@ which renders to:
 <html><body>It works!</body></html>
 ----
 
-My first implementation was done quickly done and was leveraging the http://groovy.codehaus.org/gapi/groovy/xml/StreamingMarkupBuilder.html[StreamingMarkupBuilder]. It wasn't very difficult to write, but it had a problem: in general, builders are quite slow, so not very suitable for templating engines, where you should render a page as fast as possible. To check this, I wrote a simple micro-benchmark, which compared my template engine with Freemarker:
+My first implementation was done quickly done and was leveraging the https://groovy.codehaus.org/gapi/groovy/xml/StreamingMarkupBuilder.html[StreamingMarkupBuilder]. It wasn't very difficult to write, but it had a problem: in general, builders are quite slow, so not very suitable for templating engines, where you should render a page as fast as possible. To check this, I wrote a simple micro-benchmark, which compared my template engine with Freemarker:
 
 [source,groovy]
 ----

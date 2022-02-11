@@ -9,8 +9,8 @@ Cédric Champeau
 :icons: font
 :gradleinc: https://www.gradle.org[Gradle Inc.]
 :gradle: https://www.gradle.org[Gradle]
-:groovylang: http://groovy-lang.org[Apache Groovy]
-:codenarc: http://codenarc.sourceforge.net/[CodeNarc]
+:groovylang: https://groovy-lang.org[Apache Groovy]
+:codenarc: https://codenarc.sourceforge.net/[CodeNarc]
 :yourkit: https://www.yourkit.com/features/[YourKit]
 
 = A challenge at Gradle
@@ -219,5 +219,3 @@ Now, it was fun writing this "post-mortem", I hope it wasn't too obscure, it hel
 
 After writing this post, I made great progress, and I did manage to get rid of the leak, but I also discovered that the leak happens with the various `GroovyCompile`
 tasks... Anyway you can follow my progress on https://github.com/gradle/gradle/tree/cc-oom-codenarc[this branch].
-
-

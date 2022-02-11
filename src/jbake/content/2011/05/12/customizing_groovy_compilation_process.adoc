@@ -177,7 +177,7 @@ shell.evaluate """
 ----
 
 
-In this alternative example (suggested by http://twitter.com/#!/hansamann/status/68676573552852992[Sven Haiges]), we will prevent the user from calling _System.exit()_ :
+In this alternative example (suggested by https://twitter.com/#!/hansamann/status/68676573552852992[Sven Haiges]), we will prevent the user from calling _System.exit()_ :
 
 [source]
 ----
@@ -252,4 +252,4 @@ The difference from the local case is the type of the class passed as the argume
 Writing your own customizer
 ---------------------------
 
-In addition to those 3 bundled customizers, you may want to write your own. To to this, you just have to extend the _org.codehaus.groovy.control.customizers.CompilationCustomizer_ abstract class, which is basically a _PrimaryClassNodeOperation_ for which the compiler phase is fixed. If you need to write a customizer, I strongly encourage you to read the _ImportCustomizer_ or _ASTTransformation_ customizer sources, which are quite simple to understand. Eventually, if you have particular needs or see potential improvements to the current implementations, do not hesitate to join the http://groovy.329449.n5.nabble.com/[mailing list], or raise http://jira.codehaus.org/browse/GROOVY[JIRA issue].
+In addition to those 3 bundled customizers, you may want to write your own. To to this, you just have to extend the _org.codehaus.groovy.control.customizers.CompilationCustomizer_ abstract class, which is basically a _PrimaryClassNodeOperation_ for which the compiler phase is fixed. If you need to write a customizer, I strongly encourage you to read the _ImportCustomizer_ or _ASTTransformation_ customizer sources, which are quite simple to understand. Eventually, if you have particular needs or see potential improvements to the current implementations, do not hesitate to join the https://groovy.329449.n5.nabble.com/[mailing list], or raise https://jira.codehaus.org/browse/GROOVY[JIRA issue].

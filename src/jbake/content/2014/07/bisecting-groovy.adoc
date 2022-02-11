@@ -6,7 +6,7 @@ Cédric Champeau
 :jbake-status: published
 :source-highlighter: prettify
 :id: git_bisect_groovy
-:groovylang: http://beta.groovy-lang.org
+:groovylang: https://beta.groovy-lang.org
 :icons: font
 
 I had an interesting use case for `git bisect` today and as my blog also consistutes a good archive for things I don't
@@ -127,4 +127,3 @@ What? "bad commit"? Yes, remember that the logic is reversed, so "bad" means act
 first commit which *fixed* the bug was actually `74d991f`. And here we go, issue closed ;) One improvement I can see
 is to use a local clone of my repository instead of working directly in the same repository, so that I can continue
 working on my copy while bisecting is in progress.
-

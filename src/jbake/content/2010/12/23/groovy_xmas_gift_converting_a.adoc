@@ -13,9 +13,9 @@ If you ever studied French, you must have struggled with its writing of numbers.
 ----
 /**
  * Convertit un nombre en lettres.
- * Les règles d'écriture sont celles décrites sur http://www.miakinen.net/vrac/nombres
+ * Les règles d'écriture sont celles décrites sur https://www.miakinen.net/vrac/nombres
  * 
- * @author Cédric Champeau (http://twitter.com/CedricChampeau)
+ * @author Cédric Champeau (https://twitter.com/CedricChampeau)
  * 
  */
 def digits = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf']
@@ -50,7 +50,7 @@ asLetters = { number ->
 ----
 
 
-_Edit: Fixed ``80'' written ``quatre-vingt''. Sorry about the inline indenter, but copy/paste it and you’ll have a better rendering or http://groovyconsole.appspot.com/script/362001[check this]_
+_Edit: Fixed ``80'' written ``quatre-vingt''. Sorry about the inline indenter, but copy/paste it and you’ll have a better rendering or https://groovyconsole.appspot.com/script/362001[check this]_
 
 The next step would be to make it even more groovy. But it showed me Groovy misses some interesting features of Caml : pattern matching is interesting as it deals with multiple left hand side patterns, where closures only allow one signature with a single parameter. Here, I used indenting and over-used the ternary operator to emulate this behaviour.
 

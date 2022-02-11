@@ -7,7 +7,7 @@ Cédric Champeau
 :source-highlighter: prettify
 :id: the_facts_about_annotations_inheritance
 
-Following my post about http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance[the behaviour of annotations in an inheritance model], http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance#comments[Mike Kaufman made a very interesting comment]. The *truth*, as I said, is that annotations are *technically* inherited only if the annotation definition itself is annotated with _@Inherited_.
+Following my post about https://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance[the behaviour of annotations in an inheritance model], https://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance#comments[Mike Kaufman made a very interesting comment]. The *truth*, as I said, is that annotations are *technically* inherited only if the annotation definition itself is annotated with _@Inherited_.
 
 I must admit that while this is technically true, the facts are not so simple. Let me explain why I came to this test case. I had written a web service using the Metro (JAX-WS RI) project. With project Metro, web services are defined with annotations. For example, you would write :
 
@@ -100,9 +100,9 @@ public @interface WebService
 ----
 
 
-The _@WebService_ annotation is not itself annotated with _@Inherited_. Then, some weeks later, I moved to http://incubator.apache.org/cxf/[Apache CXF]. To my surprise, although CXF uses the very same JAX-WS annotations, those annotations can be set on interfaces rather than classes ! How could it be ? Are annotations inherited or not ? My http://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance[previous post] gave you a technical yet simple answer : in that particular case, annotations are *not inherited*.
+The _@WebService_ annotation is not itself annotated with _@Inherited_. Then, some weeks later, I moved to https://incubator.apache.org/cxf/[Apache CXF]. To my surprise, although CXF uses the very same JAX-WS annotations, those annotations can be set on interfaces rather than classes ! How could it be ? Are annotations inherited or not ? My https://www.jroller.com/melix/entry/the_truth_about_annotations_inheritance[previous post] gave you a technical yet simple answer : in that particular case, annotations are *not inherited*.
 
-That’s where http://www.closingbraces.net/[Mike’s comment] is interesting : it is a very complete explanation on why different frameworks did build their own annotations inheritance rules. To be clear, if an annotation has its retention policy set to runtime and is annotated with _@Inherited_, then the subclasses with have this annotation to their annotations list too. But this does not prevent a framework from building its own inheritance policy.
+That’s where https://www.closingbraces.net/[Mike’s comment] is interesting : it is a very complete explanation on why different frameworks did build their own annotations inheritance rules. To be clear, if an annotation has its retention policy set to runtime and is annotated with _@Inherited_, then the subclasses with have this annotation to their annotations list too. But this does not prevent a framework from building its own inheritance policy.
 
 In CXF, when you declare a class as a webservice, CXF looks for superclasses and interfaces to get those annotations. This is a *framework dedicated annotation inheritance rule*.
 

@@ -9,7 +9,7 @@ Cédric Champeau
 
 I had much trouble trying to figure out why a project we moved to Apache CXF (for managing web services) suddenly started to send malformed emails. Basically, we use Commons email for sending emails to the administrator whenever a monitored service goes wrong.
 
-Everything went good until we moved our web service layer to the powerful http://incubator.apache.org/cxf[Apache CXF]. Instead of sending a well formed e-mail, the server suddenly started sending emails without subject nor correct sender. As we use Maven for building our project, and CXF makes use of Apache Geronimo Javamail/activation implementations, I immediatly suspected a buggy implementation of javamail.
+Everything went good until we moved our web service layer to the powerful https://incubator.apache.org/cxf[Apache CXF]. Instead of sending a well formed e-mail, the server suddenly started sending emails without subject nor correct sender. As we use Maven for building our project, and CXF makes use of Apache Geronimo Javamail/activation implementations, I immediatly suspected a buggy implementation of javamail.
 
 Instead of sending, in the _DATA_ section of the email the following :
 

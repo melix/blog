@@ -7,7 +7,7 @@ Cédric Champeau
 :source-highlighter: prettify
 :id: groovy_functional_programming_and_the
 
-I’m sure you have heard of functional programming, at least when you were sill a student (if you are, then you’re probably digging into it). The http://groovy.codehaus.org[Groovy language], built on top of Java, provides means of dealing with functional programming. Moreover, it offers a _curry_ method which allows powerful recursion mechanisms.
+I’m sure you have heard of functional programming, at least when you were sill a student (if you are, then you’re probably digging into it). The https://groovy.codehaus.org[Groovy language], built on top of Java, provides means of dealing with functional programming. Moreover, it offers a _curry_ method which allows powerful recursion mechanisms.
 
 For example, in maths, you’ll want to define the sum function of a list as the sum of the first element and the (recursive) sum of the rest of the list. Going further, you’ll want to define a meta function which defines the behaviour of the sum method :
 

@@ -8,13 +8,13 @@ Cédric Champeau
 :id: coercion_vs_direct
 
 To inaugurate this new blog, I will discuss the topic of coercion performance in Groovy. Especially, you might now
-that Groovy 2.2 http://docs.codehaus.org/display/GROOVY/Groovy+2.2+release+notes[introduced implicit closure coercion].
+that Groovy 2.2 https://docs.codehaus.org/display/GROOVY/Groovy+2.2+release+notes[introduced implicit closure coercion].
 If you don't know what closure coercion is, or just what _coercion_ alone is, let's start with a reminder.
 
 == Casting vs coercion
 === Casting
 
-In an object oriented language like http://groovy.codehaus.org[Groovy], variables are typed. Even if Groovy is a dynamic
+In an object oriented language like https://groovy.codehaus.org[Groovy], variables are typed. Even if Groovy is a dynamic
 language, each variable has a type at runtime. Even if Groovy shares the same typing model as Java, there's almost no
 need for casting in Groovy.
 

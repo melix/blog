@@ -11,7 +11,7 @@ Cédric Champeau
 gradle-cf-plugin upgraded to 0.2
 --------------------------------
 
-I have just published a new version of the http://www.gradle.org[Gradle] plugin for link:[CloudFoundry]. The main change is that it supports standalone applications, meaning you will be able to push your applications to CloudFoundry all from Gradle.
+I have just published a new version of the https://www.gradle.org[Gradle] plugin for link:[CloudFoundry]. The main change is that it supports standalone applications, meaning you will be able to push your applications to CloudFoundry all from Gradle.
 
 To deploy a standalone application, you can do the following:
 
@@ -36,7 +36,7 @@ Then add to your _build.gradle_ file a section describing your deployment settin
 [source]
 ----
 cloudfoundry {
-   target='http://api.vcap.me'
+   target='https://api.vcap.me'
    username = 'user-AT-domain-DOT-com'
    password='foobar'
    application = 'myapp'
@@ -45,7 +45,7 @@ cloudfoundry {
    runtime = 'java'
    command = "$name/bin/$name"
    file = distZip.archivePath
-   uris = ['http://myurl.vcap.me']
+   uris = ['https://myurl.vcap.me']
    memory = 256
 }
 

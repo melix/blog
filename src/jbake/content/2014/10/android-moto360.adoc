@@ -6,7 +6,7 @@ Cédric Champeau
 :jbake-status: published
 :source-highlighter: prettify
 :id: bluetooth_debug_android
-:groovylang: http://beta.groovy-lang.org
+:groovylang: https://beta.groovy-lang.org
 :icons: font
 
 I have been working on making {groovylang}[Groovy] work on Android for several months now. In the last weeks, I even
@@ -57,8 +57,8 @@ localhost:4444	offline
 
 image::/blog/img/rage-offline.jpg[Why so evil?,align="center"]
 
-I have searched for an answer in a lot of pages, including http://stackoverflow.com/questions/25938998/debugging-on-moto-360[Stackoverflow] where
-I tried very unlikely answers like in http://stackoverflow.com/questions/25938998/debugging-on-moto-360[this page]: execute both commands separately instead
+I have searched for an answer in a lot of pages, including https://stackoverflow.com/questions/25938998/debugging-on-moto-360[Stackoverflow] where
+I tried very unlikely answers like in https://stackoverflow.com/questions/25938998/debugging-on-moto-360[this page]: execute both commands separately instead
 of doing them in the same line. I thought that maybe there was a timing issue and that the fact of separating both commands would give the toolkit a chance,
 but no, wasn't that easy.
 
@@ -82,7 +82,6 @@ image::/blog/img/yes-baby.jpg[align="center"]
 Success, now you can debug your application on a real device (which includes deploying it...). 
 
 ++++
-<blockquote class="twitter-tweet" lang="fr"><p>Hey, finally got it working! I need to blog about how I arrived the insane emulator issue... <a href="https://twitter.com/hashtag/groovylang?src=hash">#groovylang</a> <a href="http://t.co/XINccF3V7k">pic.twitter.com/XINccF3V7k</a></p>&mdash; Cédric Champeau (@CedricChampeau) <a href="https://twitter.com/CedricChampeau/status/523934124898521090">19 Octobre 2014</a></blockquote>
+<blockquote class="twitter-tweet" lang="fr"><p>Hey, finally got it working! I need to blog about how I arrived the insane emulator issue... <a href="https://twitter.com/hashtag/groovylang?src=hash">#groovylang</a> <a href="https://t.co/XINccF3V7k">pic.twitter.com/XINccF3V7k</a></p>&mdash; Cédric Champeau (@CedricChampeau) <a href="https://twitter.com/CedricChampeau/status/523934124898521090">19 Octobre 2014</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 ++++
-

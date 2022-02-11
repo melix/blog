@@ -11,7 +11,7 @@ Cédric Champeau
 Null-safe method invocation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Yesterday, I worked on http://jira.codehaus.org/browse/GROOVY-6101[a bug] reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:
+Yesterday, I worked on https://jira.codehaus.org/browse/GROOVY-6101[a bug] reported on the static compiler of Groovy. It appeared that the underlying problem was related to how null-safe invocations are handled when the expected return type is a primitive. Let’s take an example:
 
 [source]
 ----

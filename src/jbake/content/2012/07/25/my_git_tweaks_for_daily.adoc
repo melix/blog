@@ -11,13 +11,13 @@ Cédric Champeau
 A few tricks for daily Git usage
 --------------------------------
 
-Since http://groovy.codehaus.org[Groovy] switched to Git for version control, and more recently to GitHub for hosting, I’ve had great pleasure working with this tool. In this post, I’ll just show you some basic tricks that I use on a daily basis.
+Since https://groovy.codehaus.org[Groovy] switched to Git for version control, and more recently to GitHub for hosting, I’ve had great pleasure working with this tool. In this post, I’ll just show you some basic tricks that I use on a daily basis.
 
 [[]]
 Adding the git branch to the Bash prompt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-My first tweak is to have my bash prompt show me the current branch I’m working on. This is very handy. I borrowed the setup from http://pastebin.com/CLYTaS5A[this pastebin] but unfortunately, I can’t find the original author. Note that it also adds support for svn. Add the following to your _.bashrc_ file:
+My first tweak is to have my bash prompt show me the current branch I’m working on. This is very handy. I borrowed the setup from https://pastebin.com/CLYTaS5A[this pastebin] but unfortunately, I can’t find the original author. Note that it also adds support for svn. Add the following to your _.bashrc_ file:
 
 [source]
 ----

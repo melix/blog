@@ -11,11 +11,11 @@ Cédric Champeau
 Static compilation or no static compilation?
 --------------------------------------------
 
-In my http://www.jroller.com/melix/entry/static_type_checking_talk_from[previous blog post], I published a link to the slides from my talk at the Paris Groovy and Grails User Group, where I presented the state of static type checking and compilation for Groovy 2.0. This talk was a unique occasion to retrieve feeback from the user community before we make any final decision about what should (or should not) be included in Groovy 2.0. Especially, we discussed about static compilation (there’s a consensus about static type checking, so I won’t talk about that here).
+In my https://www.jroller.com/melix/entry/static_type_checking_talk_from[previous blog post], I published a link to the slides from my talk at the Paris Groovy and Grails User Group, where I presented the state of static type checking and compilation for Groovy 2.0. This talk was a unique occasion to retrieve feeback from the user community before we make any final decision about what should (or should not) be included in Groovy 2.0. Especially, we discussed about static compilation (there’s a consensus about static type checking, so I won’t talk about that here).
 
 I decided to add two polls to my presentation and especially, I wanted the poll about *why* people wanted static compilation to be answered *before* I talked about the feature. This was important to me because I didn’t want the result to be biased by my talk. After two weeks, 42 persons have answered the polls. Nor me, nor Guillaume Laforge nor Jochen Theodorou answered the poll, once again not to bias the results. Here are the results for question 1:
 
-image:http://jroller.com/melix/resource/polls/why-static-compilation.png[image]
+image:https://jroller.com/melix/resource/polls/why-static-compilation.png[image]
 
 Again, the question was introduced before I talked about the feature and it’s a multiple choices question (you may choose several answers). What is interesting is that only 3 persons said they didn’t want static compilation, although on the development mailing list, people against static compilation were very vocal. If only 3 people do not need static compilation, this would mean that the others have a good opinion about why they need it, so the following figures are interesting too:
 
@@ -26,7 +26,7 @@ Again, the question was introduced before I talked about the feature and it’s 
 
 In my talk, after this poll, I started explaining the semantic differences that may appear when you statically compile a program, as compared to dynamic behaviour. I did that because I expected my explanation to make some people change their mind about static compilation. Especially, the most visible difference comes from method dispatch (runtime based in dynamic Groovy or ahead of time in static Groovy). I wanted to tell people that this difference is probably the one which will ultimately make the decision about integrating static compilation in Groovy Core or not. I explained 3 options, which were Java-like method dispatch, dynamic groovy like method dispatch and inference based method dispatch. In the end, I asked people to tell which of the options they preferred:
 
-image:http://jroller.com/melix/resource/polls/method-dispatch.png[image]
+image:https://jroller.com/melix/resource/polls/method-dispatch.png[image]
 
 To summarize once more the pros and cons of each method, I would say that:
 
@@ -42,6 +42,6 @@ Last but not least, the polls are still open. Feel free to answer and comment, a
 
 _Update: below you’ll find the updated figures, as of February 9th, 2012:_
 
-image:http://www.jroller.com/melix/resource/polls/method-dispatch-20120209.png[image]
+image:https://www.jroller.com/melix/resource/polls/method-dispatch-20120209.png[image]
 
-image:http://www.jroller.com/melix/resource/polls/static-compilation-20120209.png[image]
+image:https://www.jroller.com/melix/resource/polls/static-compilation-20120209.png[image]

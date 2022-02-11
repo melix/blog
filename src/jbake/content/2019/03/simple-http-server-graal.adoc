@@ -30,7 +30,7 @@ We're going to use:
 * https://gradle.org/[Gradle] to build
 * the https://github.com/palantir/gradle-graal[Gradle Graal plugin] from Palantir
 
-And because I like the http://www.groovy-lang.org/[Groovy], and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
+And because I like the https://www.groovy-lang.org/[Groovy], and especially its static compiler, my first attempt was to use statically compiled Groovy to do this.
 Well, it turned out to become a nightmare, so after an hour trying to make it work, I switched to Kotlin, and try to make it work there first.
 Knowing that Kotlin is a statically compiled language from the ground up and that it doesn't have the whole dynamic history of Groovy, I did expect it to be simpler.
 
@@ -68,7 +68,7 @@ fun main(args: Array<String>) {
             }
         }
         executor = null
-        println("Listening at http://localhost:$port/")
+        println("Listening at https://localhost:$port/")
         start()
     }
 }
@@ -161,7 +161,7 @@ abstract class HttpServerGroovy {
             }
         })
         server.executor = null
-        System.out.println(String.format("Listening at http://localhost:%s/", port))
+        System.out.println(String.format("Listening at https://localhost:%s/", port))
         server.start()
     }
 

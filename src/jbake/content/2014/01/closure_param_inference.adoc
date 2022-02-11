@@ -181,7 +181,7 @@ Now can you guess what _professorX_ accepts as parameters? ;)
 == Tweaking the type system
 
 We have discussed several options and we took the time to think about it, and after the last Groovy DevCon, which took place just before the
-http://skillsmatter.com/event-details/home/groovy-grails-exchange-2013[Groovy and Grails eXchange 2013] in London, I decided to work on an implementation.
+https://skillsmatter.com/event-details/home/groovy-grails-exchange-2013[Groovy and Grails eXchange 2013] in London, I decided to work on an implementation.
 For Groovy 2.1, we had introduced _@DelegatesTo_ for closures, to be able to help the compiler in the case we described above (hinting at the delegate type)
 but we were still missing parameter type inference. My guess was that it was possible to do something similar to what _@DelegatesTo_ does, but for parameter
 types.
@@ -353,8 +353,8 @@ Which would totally avoid the "ugliness" of the annotation, while using the same
 
 Last thing, do not hesitate to comment on this blog about the solution we found. Of course, it took some time, and the discussions can be found here:
 
-* http://groovy.329449.n5.nabble.com/TypeChecked-type-inference-does-not-work-with-closure-td5709972.html#a5709981[an example of user complaint]
-* http://groovy.329449.n5.nabble.com/Closure-parameter-types-inference-td4978037.html[Initial, not satisfying, solution, two years ago]
-* http://groovy.329449.n5.nabble.com/Closure-parameter-type-inference-td5717804.html[discussion about this solution]
+* https://groovy.329449.n5.nabble.com/TypeChecked-type-inference-does-not-work-with-closure-td5709972.html#a5709981[an example of user complaint]
+* https://groovy.329449.n5.nabble.com/Closure-parameter-types-inference-td4978037.html[Initial, not satisfying, solution, two years ago]
+* https://groovy.329449.n5.nabble.com/Closure-parameter-type-inference-td5717804.html[discussion about this solution]
 
 Thanks to everybody who participated in the discussion, and, of course, thank you for your comments if any: this is still a _candidate_ solution, so if you come with any better idea, I'm open!

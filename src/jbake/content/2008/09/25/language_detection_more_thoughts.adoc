@@ -7,7 +7,7 @@ Cédric Champeau
 :source-highlighter: prettify
 :id: language_detection_more_thoughts
 
-Following my http://www.jroller.com/melix/entry/nlp_in_java_a_language[previous post], some people asked me if JLangDetect was sufficient by itself. The obvious answer is no. There are many reasons for that. A good language detection should combine several heuristics. JLangDetect is one. In Lingway KM, we use several techniques to improve detection. For example, there are few steps that you must ensure, in order to maximize your chances.
+Following my https://www.jroller.com/melix/entry/nlp_in_java_a_language[previous post], some people asked me if JLangDetect was sufficient by itself. The obvious answer is no. There are many reasons for that. A good language detection should combine several heuristics. JLangDetect is one. In Lingway KM, we use several techniques to improve detection. For example, there are few steps that you must ensure, in order to maximize your chances.
 
 JLangDetect does a good job because it requires a correct input :
 

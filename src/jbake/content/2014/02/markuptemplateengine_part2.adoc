@@ -15,10 +15,10 @@ In this post, I will discuss the implementations details for the markup template
 
 Even if my first implementation of the markup template engine was relying on `StreamingMarkupBuilder`, the technique used to compile templates into bytecode is actually the same after all optimizations. It relies on:
 
-* a http://groovy.codehaus.org/api/groovy/lang/GroovyClassLoader.html[GroovyClassLoader] to create and cache template classes
-* a http://groovy.codehaus.org/api/org/codehaus/groovy/control/CompilerConfiguration.html[CompilerConfiguration] to customize compilation
+* a https://groovy.codehaus.org/api/groovy/lang/GroovyClassLoader.html[GroovyClassLoader] to create and cache template classes
+* a https://groovy.codehaus.org/api/org/codehaus/groovy/control/CompilerConfiguration.html[CompilerConfiguration] to customize compilation
 
-The various template engines that Groovy provide extend the http://groovy.codehaus.org/api/groovy/text/TemplateEngine.html[TemplateEngine] class. All template engines must implement the `createTemplate` method which returns an instance of http://groovy.codehaus.org/api/groovy/text/Template.html[Template]. My first idea, here, was therefore to have a template engine which holds a `GroovyClassLoader`, and compiles scripts as `Template` instances. For thread safety reasons and to avoid compiling the same template again and again, I instead chose a slightly different approach, which is to compile the scripts, and cache the resulting class into a field of the `StreamingMarkupBuilderTemplate` class:
+The various template engines that Groovy provide extend the https://groovy.codehaus.org/api/groovy/text/TemplateEngine.html[TemplateEngine] class. All template engines must implement the `createTemplate` method which returns an instance of https://groovy.codehaus.org/api/groovy/text/Template.html[Template]. My first idea, here, was therefore to have a template engine which holds a `GroovyClassLoader`, and compiles scripts as `Template` instances. For thread safety reasons and to avoid compiling the same template again and again, I instead chose a slightly different approach, which is to compile the scripts, and cache the resulting class into a field of the `StreamingMarkupBuilderTemplate` class:
 
 [code,groovy]
 ----
@@ -64,7 +64,7 @@ html {
 }
 ----
 
-compiles to a class extending `BaseTemplate`. If you are familiar with `GroovyClassLoader` or `GroovyShell`, you should actually know that normally, a script compiles to a class extending http://groovy.codehaus.org/api/groovy/lang/Script.html[Script]. In our case, we don't want to extend `Script`, because it does things that we don't want, such as overriding `getProperty` or using a `Binding` class, or even having the semantics of a Groovy script. Furthermore, it doesn't allow us to have a custom constructor to have private final fields. So the first step of our compilation process is actually to change the super class of the compiled script. The next step is to create a constructor that takes our model and the template configuration as parameters, as seen in the `make` method. Last but not least, since the script being compiled defines a `run` method (which is abstract in `Script`) corresponding to the script body, we will perform additional code transformations on this specific method.
+compiles to a class extending `BaseTemplate`. If you are familiar with `GroovyClassLoader` or `GroovyShell`, you should actually know that normally, a script compiles to a class extending https://groovy.codehaus.org/api/groovy/lang/Script.html[Script]. In our case, we don't want to extend `Script`, because it does things that we don't want, such as overriding `getProperty` or using a `Binding` class, or even having the semantics of a Groovy script. Furthermore, it doesn't allow us to have a custom constructor to have private final fields. So the first step of our compilation process is actually to change the super class of the compiled script. The next step is to create a constructor that takes our model and the template configuration as parameters, as seen in the `make` method. Last but not least, since the script being compiled defines a `run` method (which is abstract in `Script`) corresponding to the script body, we will perform additional code transformations on this specific method.
 
 [source,groovy]
 ----
@@ -291,7 +291,7 @@ That's nice, but how can I help the compiler?
 
 Well, this is precisely why type checking extensions were added in Groovy 2.1. They allow the programmer to help the compiler when he knows about a method call that the type checker isn't able to resolve. You can give hints and tell "ok, this method exists, and it returns an object of type Foo". In Groovy 2.2, this mechanism was extended to static compilation, which opens another chapter in the incredible extensibility that Groovy has to offer.
 
-Writing type checking extensions require a bit of knowledge of the Groovy AST (abstract syntax tree), so anyone who ever wrote an AST transformation in Groovy should be capable of writing a type checking extension. Actually, it is even easier, and the process is described http://docs.codehaus.org/display/GROOVY/Type+checking+extensions[here]. In our case, we will start leveraging a feature of Groovy 2.2 will allows us to mix dynamic code with statically compiled code. That is to say that the only thing that our extension is going to do is saying "when you don't know what a method call does, perform a dynamic invocation".
+Writing type checking extensions require a bit of knowledge of the Groovy AST (abstract syntax tree), so anyone who ever wrote an AST transformation in Groovy should be capable of writing a type checking extension. Actually, it is even easier, and the process is described https://docs.codehaus.org/display/GROOVY/Type+checking+extensions[here]. In our case, we will start leveraging a feature of Groovy 2.2 will allows us to mix dynamic code with statically compiled code. That is to say that the only thing that our extension is going to do is saying "when you don't know what a method call does, perform a dynamic invocation".
 
 When we added this to Groovy 2.2, we really didn't want to make "mixed" mode a first class citizen in static compilation, because it defeats the idea of catching typos, which is one of the things people expect most from a type checking system. So this "mixed" mode is actually activated by type checking extensions. This means that the only method calls which will be made dynamic will be those that the programmer knows about, and really wants to convert to dynamic calls. It is an important difference, because we want the developper to be *aware* of what he is doing.
 
@@ -395,7 +395,7 @@ afterVisitMethod { mn ->							<1>
 <2> pop the current scope from stack
 <3> trigger an AST transformation which will visit this method knowing which calls need to be transformed
 
-Of course, we still miss the transformation code. For that, we need a class which extends http://groovy.codehaus.org/api/org/codehaus/groovy/ast/ClassCodeExpressionTransformer.html[ClassCodeExpressionTransformer] :
+Of course, we still miss the transformation code. For that, we need a class which extends https://groovy.codehaus.org/api/org/codehaus/groovy/ast/ClassCodeExpressionTransformer.html[ClassCodeExpressionTransformer] :
 
 [source,groovy]
 ----
@@ -592,6 +592,3 @@ And that's it!
 In this (long) blog post, I have demonstrated various techniques that allowed me to transform a slow, dynamic builder based template engine into a fast, statically compiled, template engine with optional user model type checking and unique features like automatic new line insertions. It goes far beyond what the `StreamingMarkupBuilder` has to offer and demonstrates that compile time metaprogramming can be used in Groovy to provide advanced features. Of course, no one would expect you to create such code from the beginning. If you https://github.com/melix/groovy-core/commits/markup-template-engine[take a look at the branch commits], you will definitely see that I went step by step. And eventually, I will issue a pull request when I think that the code is ready for prime time. I am not sure yet this should make into core groovy, or instead if it should go into an external project. Ideas are welcome!
 
 I still have to make some changes, like not reporting errors if the type checking mode is not active (and always going through dynamic mode in that case) and probably write more benchmarks, but I'm really looking forward to read what you think. Oh yes, one last thing: congratulations if you read that post throughfully!
-
-
-

@@ -11,9 +11,9 @@ Cédric Champeau
 Documentation is good for everybody
 -----------------------------------
 
-As part of the http://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html[Groovy documentation effort], I started writing documentation for several features of Groovy, including http://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration[compiler configuration], http://docs.codehaus.org/display/GROOVY/Type+checking+extensions[type checking extensions], and yesterday the http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo annotation].
+As part of the https://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html[Groovy documentation effort], I started writing documentation for several features of Groovy, including https://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration[compiler configuration], https://docs.codehaus.org/display/GROOVY/Type+checking+extensions[type checking extensions], and yesterday the https://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo annotation].
 
-What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo documentation], I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…
+What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the https://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo documentation], I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…
 
 In the following post, I will show you how I combined several features of Groovy 2.1 to provide an implementation of a statically compiled HTML builder: static compilation, @DelegatesTo, meta-annotations, custom type checking extensions and of course AST transformations, without having to write all the boilerplate necessary to make it type safe! Nothing less…
 
@@ -32,7 +32,7 @@ String build() {
         body {
             p {
                 out << "Hello, this is "
-                a(href:'http://groovy.codehaus.org') { out << 'Groovy' }
+                a(href:'https://groovy.codehaus.org') { out << 'Groovy' }
             }
         }
     }
@@ -41,7 +41,7 @@ String build() {
 ----
 
 
-Then you want *compile-time errors* if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo documentation] showed that it was possible to create a statically checked (and statically compiled) builder.
+Then you want *compile-time errors* if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for https://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation[@DelegatesTo documentation] showed that it was possible to create a statically checked (and statically compiled) builder.
 
 There were two problems in the approach from the documentation:
 
@@ -99,7 +99,7 @@ Creating a statically checked builder is easy:
 ----
 
 
-For examples of several builders, you can take a look at the http://bit.ly/XAOvhJ[unit test].
+For examples of several builders, you can take a look at the https://bit.ly/XAOvhJ[unit test].
 
 What is important here is that using the *@StaticMarkupBuilder*, we are not using a builder, we are defining one:
 
@@ -234,9 +234,9 @@ For the first part, my choice was to add an annotation in the map parameter of t
 
 Alright, so now we have the information available at runtime, when the compiler will select this method, the method will have an annotation that we can reflect to retrieve the list of attributes… Still, the compiler won’t use that information, so we’re doomed, right?
 
-Not really, because Groovy 2.1 includes http://docs.codehaus.org/display/GROOVY/Type+checking+extensions[type checking extensions]. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!
+Not really, because Groovy 2.1 includes https://docs.codehaus.org/display/GROOVY/Type+checking+extensions[type checking extensions]. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!
 
-The code of this type checking extension can be found http://bit.ly/Yryqb7[here].
+The code of this type checking extension can be found https://bit.ly/Yryqb7[here].
 
 We’re almost done! The only problem with this solution is that one has to annotate every method that uses our builder with @CompileStatic(extension=’groovyx/transform/StaticBuilderExtension.groovy’). This is not as cool as seeing the extension being automatically applied…
 
@@ -246,7 +246,7 @@ Global AST transformations to the rescue
 
 There’s one solution to this. We will use a global AST transformation here. Unlike local AST transformations that are triggered by seeing an annotation in the code, global AST transformations are automatically loaded by the compiler and applied to every class being compiled. Thanks to this feature, we will be able to scan classes being compiled and if we find something annotated with @CompileStatic, then change it to @CompileStatic(extensions=’…’). That’s all!
 
-The code for such an annotation can be found http://bit.ly/UfjmjQ[here].
+The code for such an annotation can be found https://bit.ly/UfjmjQ[here].
 
 You must remember that using global AST transformations have a significant impact on compilation times, since they are applied on every class, so always make sure you don’t use unnecessary transforms.
 

@@ -12,7 +12,7 @@ It’s been a while since I did not release a new version of https://code.google
 * package name changed from _com.lingway.jlangdetect_ to _me.champeau.jlangdetect_ : there have been several questions regarding licensing, and whether JLangDetect was related to Lingway or not. The answer is no : it’s a pet project I’m leading, so to be clearer about that, I decided to rename the main package.
 * 3 modules : _jlangdetect_, _jlangdetect-europarl_ and _jlangdetect-extra_ :
 ** _jlangdetect_ provides the basic language identification tooling : learning algorithms and language detection support, but it does *not* integrate any language profile. This is basically the same level of support as the previous releases.
-** _jlangdetect-europarl_ provides an http://www.statmt.org/europarl/[Europarl] based language detector which already includes resources for detecting languages for 21 european languages.
+** _jlangdetect-europarl_ provides an https://www.statmt.org/europarl/[Europarl] based language detector which already includes resources for detecting languages for 21 european languages.
 ** _jlangdetect-extra_ extends the Europarl detector with 4 languages : Russian, Chinese, Japanese and Korean. Those detectors are less robust than the Europarl ones due to the lack of royalty-free resources available, but should be sufficient for most needs.
 * less memory usage: JLangDetect 0.3 introduces a simple algorithm to reduce the size of each language profile without loosing too much accuracy. In version 0.2, an Europarl based language detector for 11 languages took about 25MB of RAM. Now, you can detect 21 languages with only 4MB of RAM for language profiles.
 
@@ -88,6 +88,6 @@ ULD.instance.with {
 Direct downloads
 ----------------
 
-* http://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect/0.3/jlangdetect-0.3.jar[JLangDetect 0.3 (jar)]
-* http://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect-europarl/0.3/jlangdetect-europarl-0.3.jar[JLangDetect Europarl 0.3 (jar)]
-* http://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect-extra/0.3/jlangdetect-extra-0.3.jar[JLangDetect Extra 0.3 (jar)]
+* https://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect/0.3/jlangdetect-0.3.jar[JLangDetect 0.3 (jar)]
+* https://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect-europarl/0.3/jlangdetect-europarl-0.3.jar[JLangDetect Europarl 0.3 (jar)]
+* https://jlangdetect.googlecode.com/svn/repo/me/champeau/jlangdetect/jlangdetect-extra/0.3/jlangdetect-extra-0.3.jar[JLangDetect Extra 0.3 (jar)]

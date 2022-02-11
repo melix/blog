@@ -239,7 +239,7 @@ Note how I used the `convention` method to set the input directory, instead of t
 
 Our plugin does one more thing, that we didn't cover yet: _wiring_ the task in the "lifecycle", as my colleague asked.
 The notion of "lifecyle" doesn't really make sense in Gradle, and most likely comes from the Maven mindset, where things are defined via a "lifecyle".
-I already covered this topic http://melix.github.io/blog/2018/09/gradle-lifecycle.html[in this blog post], but here's the major difference: in Gradle, _everything_ declares its inputs, and the tool is responsible for wiring things properly, so that you don't have to execute redundant work.
+I already covered this topic https://melix.github.io/blog/2018/09/gradle-lifecycle.html[in this blog post], but here's the major difference: in Gradle, _everything_ declares its inputs, and the tool is responsible for wiring things properly, so that you don't have to execute redundant work.
 
 Here, the legitimate question is: my plugin generates some sources, but they need to be compiled, and therefore available to my production code, how can I do that?
 This is where the `JavaPluginExtension` comes into play.
@@ -550,4 +550,3 @@ As a bonus, because we used a _separate build_ and https://docs.gradle.org/curre
 There is effectively no need to publish a plugin, either to a local repository, or a remote one, to be able to use plugins in Gradle!
 
 The full code is actually available in the upcoming https://github.com/micronaut-projects/micronaut-toml[Micronaut TOML module].
-

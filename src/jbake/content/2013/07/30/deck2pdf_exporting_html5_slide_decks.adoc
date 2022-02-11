@@ -11,22 +11,22 @@ Cédric Champeau
 Exporting your awesome HTML5 presentation to PDF
 ------------------------------------------------
 
-For some time now, I’ve started using http://imakewebthings.com/deck.js/[deck.js] to write my talks. One of the reasons I do this is that it saves me *lots* of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).
+For some time now, I’ve started using https://imakewebthings.com/deck.js/[deck.js] to write my talks. One of the reasons I do this is that it saves me *lots* of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).
 
-The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, https://speakerdeck.com/[SpeakerDeck], http://www.slideshare.net/[SlideShare] or http://www.parleys.com/[Parleys] all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.
+The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, https://speakerdeck.com/[SpeakerDeck], https://www.slideshare.net/[SlideShare] or https://www.parleys.com/[Parleys] all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.
 
 [[]]
 Deck2pdf
 --------
 
-That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? https://github.com/melix/deck2pdf[deck2pdf was born!]. I started with something that was able to export my http://imakewebthings.com/deck.js/[deck.js] presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, https://github.com/melix/deck2pdf[deck2pdf] supports:
+That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? https://github.com/melix/deck2pdf[deck2pdf was born!]. I started with something that was able to export my https://imakewebthings.com/deck.js/[deck.js] presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, https://github.com/melix/deck2pdf[deck2pdf] supports:
 
-* http://imakewebthings.com/deck.js/[deck.js]
-* http://lab.hakim.se/reveal-js[reveal.js]
-* http://bartaz.github.io/impress.js[impress.js]
+* https://imakewebthings.com/deck.js/[deck.js]
+* https://lab.hakim.se/reveal-js[reveal.js]
+* https://bartaz.github.io/impress.js[impress.js]
 * and https://github.com/paulrouget/dzslides[DZSlides]
 
-But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the http://imakewebthings.com/deck.js/[deck.js] profile is written:
+But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the https://imakewebthings.com/deck.js/[deck.js] profile is written:
 
 [source]
 ----
@@ -36,7 +36,7 @@ nextSlide=$.deck('next')
 ----
 
 
-That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in http://bartaz.github.io/impress.js[impress.js]:
+That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in https://bartaz.github.io/impress.js[impress.js]:
 
 [source]
 ----
@@ -65,4 +65,4 @@ pause = 2000
 ----
 
 
-Of course, https://github.com/melix/deck2pdf[deck2pdf] is open source and licensed under http://www.apache.org/licenses/LICENSE-2.0.html[APL2]. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!
+Of course, https://github.com/melix/deck2pdf[deck2pdf] is open source and licensed under https://www.apache.org/licenses/LICENSE-2.0.html[APL2]. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!

@@ -7,9 +7,9 @@ Cédric Champeau
 :source-highlighter: prettify
 :id: yes_fibonacci_in_groovy_can
 
-_After reading this, take a look at the complete @Bytecode AST transformation implementation http://www.jroller.com/melix/entry/asm_plugin_for_intellij_and[here]_
+_After reading this, take a look at the complete @Bytecode AST transformation implementation https://www.jroller.com/melix/entry/asm_plugin_for_intellij_and[here]_
 
-Yes, the famous Fibonacci test can be as fast in Groovy that it is in Java. In fact, Vaclav Pech showed us that http://www.jroller.com/vaclav/entry/memoize_groovy_functions_with_gpars[it could even be faster]. Here, I’ll show you how you can acheive the same level of performance as Java without changing the algorithm. I have buzzed on Twitter saying this was a pure Groovy solution. In fact, I’m cheating a little, as one would consider this is not really pure Groovy, but indeed, you can do this only with .groovy files.
+Yes, the famous Fibonacci test can be as fast in Groovy that it is in Java. In fact, Vaclav Pech showed us that https://www.jroller.com/vaclav/entry/memoize_groovy_functions_with_gpars[it could even be faster]. Here, I’ll show you how you can acheive the same level of performance as Java without changing the algorithm. I have buzzed on Twitter saying this was a pure Groovy solution. In fact, I’m cheating a little, as one would consider this is not really pure Groovy, but indeed, you can do this only with .groovy files.
 
 [[]]
 It all started with one quote
@@ -53,7 +53,7 @@ Definitely similar, but Groovy 1.7.6 runs this 30x slower than Java…
 Groovy’s revenge, part 1 : ASM
 ------------------------------
 
-The first episode for Groovy’s revenge consists of writing an http://www.jroller.com/melix/entry/asm_bytecode_outline_for_intellij[ASM plugin for IntelliJ IDEA], because, you know, it was such a pain to work with Eclipse. That’s done.
+The first episode for Groovy’s revenge consists of writing an https://www.jroller.com/melix/entry/asm_bytecode_outline_for_intellij[ASM plugin for IntelliJ IDEA], because, you know, it was such a pain to work with Eclipse. That’s done.
 
 [[]]
 Groovy’s revenge, part 2 : AST Transformations

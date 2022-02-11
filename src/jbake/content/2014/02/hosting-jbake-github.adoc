@@ -6,8 +6,8 @@ Cédric Champeau
 :jbake-status: published
 :source-highlighter: prettify
 :id: jbake_github_blog_toolception
-:jb: http://www.jbake.org[JBake]
-:gradle: http://www.gradle.org[Gradle]
+:jb: https://www.jbake.org[JBake]
+:gradle: https://www.gradle.org[Gradle]
 :icons: font
 
 A few weeks ago, I started this new blog and decided to host it on GitHub. I already explained
@@ -24,14 +24,14 @@ stuff with {gradle}.
 Since then, I have submitted several pull requests to the project, and we're actually thinking
 of using it to build the next Groovy website. {jb} has good chances to
 become the "Jekyll of the JVM" and already supports multiple markup languages (markdown, asciidoc)
-as well as multiple template engines (http://freemarker.org/[FreeMarker] in 2.2.1, http://groovy.codehaus.org[Groovy]
-and http://www.thymeleaf.org/[Thymeleaf] in 2.3.0).
+as well as multiple template engines (https://freemarker.org/[FreeMarker] in 2.2.1, https://groovy.codehaus.org[Groovy]
+and https://www.thymeleaf.org/[Thymeleaf] in 2.3.0).
 
 The idea behind {jb} is very simple: contents is written using a markup language and "baked"
 with template engines into actual HTML. Everything is generated statically and you can upload the generated site
 wherever you want.
 
-On the other side, GitHub offers a nice tool to publish pages: http://pages.github.com/[GitHub Pages], so we can
+On the other side, GitHub offers a nice tool to publish pages: https://pages.github.com/[GitHub Pages], so we can
 have both the sources of our blog and the output of bakery in the same repository. So the initial process looked
 like this:
 

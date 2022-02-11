@@ -7,7 +7,7 @@ Cédric Champeau
 :source-highlighter: prettify
 :id: nlp_in_java_a_language
 
-_Check out the http://www.jroller.com/melix/entry/jlangdetect_0_3_released_with[latest version of the project]_
+_Check out the https://www.jroller.com/melix/entry/jlangdetect_0_3_released_with[latest version of the project]_
 
 Hi,
 
@@ -83,7 +83,7 @@ For my own tests, I’ve searched a corpus which would satisfy the best conditio
 * the fact that the corpus size should be rather the same for every language
 * if not, the characters used in the corpus should be rather different (for example, it’s easy to discriminate between french and russian, because they use different characters, however, if you want to differenciate french and english, you need more accurate n-gram statistics).
 
-A ``parallel corpus'' is a good candidate for that : it’s a corpus for which the text is simply the same, translated in different languages. I’ve made my test using the http://www.statmt.org/europarl/[European Parliament Proceedings Parallel Corpus]. It covers the proceedings of the european parliament from 1996 to 2006, which is up to 40 million words per language.
+A ``parallel corpus'' is a good candidate for that : it’s a corpus for which the text is simply the same, translated in different languages. I’ve made my test using the https://www.statmt.org/europarl/[European Parliament Proceedings Parallel Corpus]. It covers the proceedings of the european parliament from 1996 to 2006, which is up to 40 million words per language.
 
 Translations exists for the following languages :
 
@@ -138,9 +138,9 @@ langof("eating some chocolate") = en : OK
 Downloads
 ~~~~~~~~~
 
-JLangDetect is licensed under http://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0].
+JLangDetect is licensed under https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0].
 
-* Binary : http://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1.jar[jlangdetect-0.1.jar]
-* Source: http://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1-sources.jar[jlangdetect-0.1-sources.jar]
-* Javadoc: http://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1-javadoc.jar[jlangdetect-0.1-javadoc.jar]
-* Europarl pre-compiled corpus: http://cedric.champeau.free.fr/jlangdetect/ngrams-europarl.zip[ngrams-europarl.zip]
+* Binary : https://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1.jar[jlangdetect-0.1.jar]
+* Source: https://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1-sources.jar[jlangdetect-0.1-sources.jar]
+* Javadoc: https://cedric.champeau.free.fr/jlangdetect/jlangdetect-0.1-javadoc.jar[jlangdetect-0.1-javadoc.jar]
+* Europarl pre-compiled corpus: https://cedric.champeau.free.fr/jlangdetect/ngrams-europarl.zip[ngrams-europarl.zip]

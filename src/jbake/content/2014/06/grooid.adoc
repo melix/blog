@@ -6,16 +6,16 @@ Cédric Champeau
 :jbake-status: published
 :source-highlighter: prettify
 :id: groovy_on_android
-:gr8conf: http://gr8conf.eu[GR8Conf Europe]
-:groovylang: http://groovy.codehaus.org[Groovy language]
-:gradle: http://www.gradle.org[Gradle]
+:gr8conf: https://gr8conf.eu[GR8Conf Europe]
+:groovylang: https://groovy.codehaus.org[Groovy language]
+:gradle: https://www.gradle.org[Gradle]
 :swiftlang: https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html[Swift language]
 :icons: font
 
 Yesterday ended {gr8conf}, a {groovylang} conference in Copenhagen that was once again a successful event.
 I want to thank the crew again for this, and of course the {groovylang} community which is so friendly and always helpful. This year
 turned out to be very special for me, because just two days after the announcement by Apple of the {swiftlang}, I was talking about
-running Groovy on Android! As Guillaume Laforge http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy[noticed], there
+running Groovy on Android! As Guillaume Laforge https://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy[noticed], there
 are a lot of similarities between the {swiftlang} and {groovylang}.
 
 The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
@@ -48,7 +48,7 @@ public class FeedActivity {
     ...
 
     void updateFeed() {
-    	new FeedTask().execute("http://path/to/feed");
+    	new FeedTask().execute("https://path/to/feed");
     } 
 
     class FeedTask extends AsyncTask<String, Void, String> {
@@ -116,7 +116,7 @@ public class FeedActivity {
 
     void updateFeed() {
     	Fluent.async {
-            def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
+            def json = new JsonSlurper().parse([:], new URL('https://path/to/feed'), 'utf-8')
             json.speakers.join(' ')
         } then {
 	    mTextView.text = it
@@ -176,7 +176,7 @@ cd ..
 git clone https://github.com/melix/gr8confagenda.git
 ----
 
-This contains a project that you can open using http://developer.android.com/sdk/installing/studio.html[Android Studio].
+This contains a project that you can open using https://developer.android.com/sdk/installing/studio.html[Android Studio].
 
 If you want to use the {groovylang} in your own Android project, a requirement is that it is using Gradle. If so, you can update your `build.gradle` file
 as is:
@@ -187,7 +187,7 @@ as is:
 android {
    ...
    packagingOptions {
-        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
+        // workaround for https://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/groovy-release-info.properties'
     }
@@ -227,4 +227,3 @@ android.applicationVariants.all {
 ----
 
 And that's all! Now, one option for you is to write support libraries and make them available to the community. Enjoy!
-
