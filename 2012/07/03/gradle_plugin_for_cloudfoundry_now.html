@@ -81,7 +81,7 @@
 <h2 id="_gradle_cf_plugin_upgraded_to_0_2">gradle-cf-plugin upgraded to 0.2</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I have just published a new version of the <a href="http://www.gradle.org">Gradle</a> plugin for <a href="">CloudFoundry</a>. The main change is that it supports standalone applications, meaning you will be able to push your applications to CloudFoundry all from Gradle.</p>
+<p>I have just published a new version of the <a href="https://www.gradle.org">Gradle</a> plugin for <a href="">CloudFoundry</a>. The main change is that it supports standalone applications, meaning you will be able to push your applications to CloudFoundry all from Gradle.</p>
 </div>
 <div class="paragraph">
 <p>To deploy a standalone application, you can do the following:</p>
@@ -106,7 +106,7 @@
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-none hljs">cloudfoundry {
-   target='http://api.vcap.me'
+   target='https://api.vcap.me'
    username = 'user-AT-domain-DOT-com'
    password='foobar'
    application = 'myapp'
@@ -115,7 +115,7 @@
    runtime = 'java'
    command = "$name/bin/$name"
    file = distZip.archivePath
-   uris = ['http://myurl.vcap.me']
+   uris = ['https://myurl.vcap.me']
    memory = 256
 }</code></pre>
 </div>

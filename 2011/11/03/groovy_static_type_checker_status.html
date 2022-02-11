@@ -93,10 +93,10 @@
 <h2 id="_groovy_static_type_checking">Groovy Static Type Checking</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><em>Update: Now <a href="http://docs.codehaus.org/pages/viewpage.action?pageId=227053189">Groovy 2.0.0-beta-1 has been released</a> with the static type checker integrated! You can give it a try, and give us feedback of course.</em></p>
+<p><em>Update: Now <a href="https://docs.codehaus.org/pages/viewpage.action?pageId=227053189">Groovy 2.0.0-beta-1 has been released</a> with the static type checker integrated! You can give it a try, and give us feedback of course.</em></p>
 </div>
 <div class="paragraph">
-<p>First of all, you’ll want to take a look at the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">Groovy Enhancement Proposal</a> page which describes what are the goals of this feature. Right now, it’s still in heavy development, so it’s being developed on its own branch (called <em>grumpy</em>). Basically, the idea is to make Groovy complain at compile time about types, instead of runtime. In fact, as Jochen Theodorou <a href="http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">explains on his blog post</a>, the Groovy compiler in ``regular'' mode, cannot make many checks at compile time regarding types, missing properties, missing methods and so on, because the language allows runtime meta-programming. Runtime meta-programming allows you, for example, to dynamically add members to a class, change the methods which are invoked, change the return types, bind external properties, … This means that if a program was to be statically checked, then it would fail, although it would work perfectly at runtime. An example is better than words, let’s take this code:</p>
+<p>First of all, you’ll want to take a look at the <a href="https://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">Groovy Enhancement Proposal</a> page which describes what are the goals of this feature. Right now, it’s still in heavy development, so it’s being developed on its own branch (called <em>grumpy</em>). Basically, the idea is to make Groovy complain at compile time about types, instead of runtime. In fact, as Jochen Theodorou <a href="https://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">explains on his blog post</a>, the Groovy compiler in ``regular'' mode, cannot make many checks at compile time regarding types, missing properties, missing methods and so on, because the language allows runtime meta-programming. Runtime meta-programming allows you, for example, to dynamically add members to a class, change the methods which are invoked, change the return types, bind external properties, … This means that if a program was to be statically checked, then it would fail, although it would work perfectly at runtime. An example is better than words, let’s take this code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -186,7 +186,7 @@ void method(String message) {
 <div class="ulist">
 <ul>
 <li>
-<p>flow typing (see <a href="http://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">Jochen’s post</a>)</p>
+<p>flow typing (see <a href="https://blackdragsview.blogspot.com/2011/10/flow-sensitive-typing.html">Jochen’s post</a>)</p>
 </li>
 <li>
 <p>unification types</p>
@@ -200,7 +200,7 @@ void method(String message) {
 <div class="sect2">
 <h3 id="_whats_implemented_whats_not_implemented">What’s implemented, what’s not implemented</h3>
 <div class="paragraph">
-<p>The best way to find out what’s implemented or not is to checkout the <em>grumpy</em> branch from <a href="http://xircles.codehaus.org/projects/groovy/repo/git/repo">Codehaus Git repository</a> (also available on <a href="https://github.com/groovy/groovy-core/tree/grumpy">GitHub</a> and have a look at the unit tests located in <em>src/test/groovy/transform/stc</em>. Another way is to read the <a href="http://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">GEP-8 page on the wiki</a> which gives you examples plus textual explanations. However, this page is not always up-to-date. Let’s show some nice examples of already implemented stuff:</p>
+<p>The best way to find out what’s implemented or not is to checkout the <em>grumpy</em> branch from <a href="https://xircles.codehaus.org/projects/groovy/repo/git/repo">Codehaus Git repository</a> (also available on <a href="https://github.com/groovy/groovy-core/tree/grumpy">GitHub</a> and have a look at the unit tests located in <em>src/test/groovy/transform/stc</em>. Another way is to read the <a href="https://docs.codehaus.org/display/GroovyJSR/GEP+8+-+Static+type+checking">GEP-8 page on the wiki</a> which gives you examples plus textual explanations. However, this page is not always up-to-date. Let’s show some nice examples of already implemented stuff:</p>
 </div>
 <div class="paragraph">
 <p>Groovy-style constructors checks</p>

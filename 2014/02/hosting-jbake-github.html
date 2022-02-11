@@ -89,7 +89,7 @@
 <p>A few weeks ago, I started this new blog and decided to host it on GitHub. I already explained
 <a href="/blog/2013/11/21/a_new_home.html">how I migrated contents from JRoller</a>, but I didn&#8217;t really
 the tool behind publishing. In this post, I will show you how easy it is, now that I have
-improved my toolchain with <a href="http://www.gradle.org">Gradle</a>!</p>
+improved my toolchain with <a href="https://www.gradle.org">Gradle</a>!</p>
 </div>
 </div>
 </div>
@@ -97,24 +97,24 @@ improved my toolchain with <a href="http://www.gradle.org">Gradle</a>!</p>
 <h2 id="_jbake">JBake</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="http://www.jbake.org">JBake</a> is a static site generator. When I chose this tool for my blog,
+<p><a href="https://www.jbake.org">JBake</a> is a static site generator. When I chose this tool for my blog,
 what attracted me is actually that it runs on the JVM, so I already had the idea of automating
-stuff with <a href="http://www.gradle.org">Gradle</a>.</p>
+stuff with <a href="https://www.gradle.org">Gradle</a>.</p>
 </div>
 <div class="paragraph">
 <p>Since then, I have submitted several pull requests to the project, and we&#8217;re actually thinking
-of using it to build the next Groovy website. <a href="http://www.jbake.org">JBake</a> has good chances to
+of using it to build the next Groovy website. <a href="https://www.jbake.org">JBake</a> has good chances to
 become the "Jekyll of the JVM" and already supports multiple markup languages (markdown, asciidoc)
-as well as multiple template engines (<a href="http://freemarker.org/">FreeMarker</a> in 2.2.1, <a href="http://groovy.codehaus.org">Groovy</a>
-and <a href="http://www.thymeleaf.org/">Thymeleaf</a> in 2.3.0).</p>
+as well as multiple template engines (<a href="https://freemarker.org/">FreeMarker</a> in 2.2.1, <a href="https://groovy.codehaus.org">Groovy</a>
+and <a href="https://www.thymeleaf.org/">Thymeleaf</a> in 2.3.0).</p>
 </div>
 <div class="paragraph">
-<p>The idea behind <a href="http://www.jbake.org">JBake</a> is very simple: contents is written using a markup language and "baked"
+<p>The idea behind <a href="https://www.jbake.org">JBake</a> is very simple: contents is written using a markup language and "baked"
 with template engines into actual HTML. Everything is generated statically and you can upload the generated site
 wherever you want.</p>
 </div>
 <div class="paragraph">
-<p>On the other side, GitHub offers a nice tool to publish pages: <a href="http://pages.github.com/">GitHub Pages</a>, so we can
+<p>On the other side, GitHub offers a nice tool to publish pages: <a href="https://pages.github.com/">GitHub Pages</a>, so we can
 have both the sources of our blog and the output of bakery in the same repository. So the initial process looked
 like this:</p>
 </div>
@@ -164,7 +164,7 @@ came up with a Gradle plugin to make this much easier, that is, focusing on cont
 <div class="sect2">
 <h3 id="_prerequisites">Prerequisites</h3>
 <div class="paragraph">
-<p>We&#8217;re going to setup a project that will allow you to publish to GitHub pages in one step, using <a href="http://www.gradle.org">Gradle</a>. For that,
+<p>We&#8217;re going to setup a project that will allow you to publish to GitHub pages in one step, using <a href="https://www.gradle.org">Gradle</a>. For that,
 we will need:</p>
 </div>
 <div class="ulist">
@@ -173,10 +173,10 @@ we will need:</p>
 <p>an empty <em>blog</em> repository that you created on GitHub</p>
 </li>
 <li>
-<p><a href="http://www.jbake.org">JBake</a> to setup the initial JBake project structure</p>
+<p><a href="https://www.jbake.org">JBake</a> to setup the initial JBake project structure</p>
 </li>
 <li>
-<p><a href="http://www.gradle.org">Gradle</a> 1.10 (previous versions should work too)</p>
+<p><a href="https://www.gradle.org">Gradle</a> 1.10 (previous versions should work too)</p>
 </li>
 <li>
 <p>The <a href="https://github.com/jbake-org/jbake-gradle-plugin">JBake plugin for Gradle</a>, will be downloaded automatically</p>
@@ -190,9 +190,9 @@ we will need:</p>
 <div class="sect2">
 <h3 id="_building_jbake">Building JBake</h3>
 <div class="paragraph">
-<p>This step will become optional when JBake 2.3.0 will be out (or a snapshot of <a href="http://www.jbake.org">JBake</a> will be published). Meanwhile, you
-need to install a local version of <a href="http://www.jbake.org">JBake</a> into your local Maven repository. Don&#8217;t worry, this will be easy, you will
-only need Maven (hey, too bad <a href="http://www.jbake.org">JBake</a> doesn&#8217;t use Gradle ;)):</p>
+<p>This step will become optional when JBake 2.3.0 will be out (or a snapshot of <a href="https://www.jbake.org">JBake</a> will be published). Meanwhile, you
+need to install a local version of <a href="https://www.jbake.org">JBake</a> into your local Maven repository. Don&#8217;t worry, this will be easy, you will
+only need Maven (hey, too bad <a href="https://www.jbake.org">JBake</a> doesn&#8217;t use Gradle ;)):</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -253,7 +253,7 @@ jbake -i                                                            <i class="co
 <div class="sect2">
 <h3 id="_using_gradle_to_render_pages">Using Gradle to render pages</h3>
 <div class="paragraph">
-<p>At this point, your <code>src/jbake</code> directory contains the classic <a href="http://www.jbake.org">JBake</a> folder contents:</p>
+<p>At this point, your <code>src/jbake</code> directory contains the classic <a href="https://www.jbake.org">JBake</a> folder contents:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -429,12 +429,12 @@ automatically!</p>
 <h2 id="_conclusion">Conclusion</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this post, we&#8217;ve shown you how you can leverage <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a> to publish a blog on GitHub. The setup is really
+<p>In this post, we&#8217;ve shown you how you can leverage <a href="https://www.jbake.org">JBake</a> and <a href="https://www.gradle.org">Gradle</a> to publish a blog on GitHub. The setup is really
 easy, so I hope more people will follow that way and contribute to Open Source too!</p>
 </div>
 <div class="paragraph">
-<p>Of course, this post has been published using the procedure described on this page, so I used <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a> to blog
-about how to publish a blog on <a href="https://github.com/melix/blog">GitHub</a> using <a href="http://www.jbake.org">JBake</a> and <a href="http://www.gradle.org">Gradle</a>! Like my friend Andres Almiray
+<p>Of course, this post has been published using the procedure described on this page, so I used <a href="https://www.jbake.org">JBake</a> and <a href="https://www.gradle.org">Gradle</a> to blog
+about how to publish a blog on <a href="https://github.com/melix/blog">GitHub</a> using <a href="https://www.jbake.org">JBake</a> and <a href="https://www.gradle.org">Gradle</a>! Like my friend Andres Almiray
 would say, that&#8217;s a <a href="https://twitter.com/aalmiray/status/429236158321950720">toolception</a>!</p>
 </div>
 </div>

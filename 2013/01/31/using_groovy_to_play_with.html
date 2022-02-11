@@ -127,16 +127,16 @@
 <div class="sect2">
 <h3 id="_the_bytecode_ast_transformation">The @Bytecode AST transformation</h3>
 <div class="paragraph">
-<p>Two years ago already, I released a new AST transformation for Groovy called the <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a>. Basically, the idea was that if you thought you were smarter than the compiler, you could write bytecode as a method body had have the compiler write it. Started as a joke, some people found a lot of interested in it (some others thought I opened the box of Pandora) but my idea has always been that it was an amazing tool for teaching.</p>
+<p>Two years ago already, I released a new AST transformation for Groovy called the <a href="https://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a>. Basically, the idea was that if you thought you were smarter than the compiler, you could write bytecode as a method body had have the compiler write it. Started as a joke, some people found a lot of interested in it (some others thought I opened the box of Pandora) but my idea has always been that it was an amazing tool for teaching.</p>
 </div>
 <div class="paragraph">
-<p>What I’m going to show you, here, is an extension of the <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a> that supports the invokedynamic instruction. The main reason to use this annotation is that there is <strong>no way of generating invokedynamic instructions</strong> using regular Java code. The only way to do this is to use a library like ASM. However, the ASM library is not easy to handle and it’s a pity that you have to spend time on bytecode generation tools just to be able to test invokedynamic. With the <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a>, you now have a way of testing bytecode that makes use of invokedynamic very easily.</p>
+<p>What I’m going to show you, here, is an extension of the <a href="https://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a> that supports the invokedynamic instruction. The main reason to use this annotation is that there is <strong>no way of generating invokedynamic instructions</strong> using regular Java code. The only way to do this is to use a library like ASM. However, the ASM library is not easy to handle and it’s a pity that you have to spend time on bytecode generation tools just to be able to test invokedynamic. With the <a href="https://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode transformation</a>, you now have a way of testing bytecode that makes use of invokedynamic very easily.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_setting_up">Setting up</h3>
 <div class="paragraph">
-<p>First of all, support for invokedynamic in <a href="http://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode</a> is still experimental. You’ll have to build the jar by yourself, but don’t worry, it’s very easy:</p>
+<p>First of all, support for invokedynamic in <a href="https://www.jroller.com/melix/entry/groovy_bytecode_ast_transformation_released">@Bytecode</a> is still experimental. You’ll have to build the jar by yourself, but don’t worry, it’s very easy:</p>
 </div>
 <div class="listingblock">
 <div class="content">

@@ -82,7 +82,7 @@
 		<a href="/blog/tags/testng.html">testng</a> 
 	</p>
 	<p><div class="paragraph">
-<p>Cobertura, TestNG and Maven play well together. However, I had problems when I started migrating some tests to <a href="http://code.google.com/p/spock/">the Spock framework</a>. Long story short, Spock uses JUnit internally, not TestNG, and the surefire plugin only triggers tests for one of those frameworks at a time. Therefore, if you mix TestNG with Spock, you’ll run with problems where your Spock tests won’t be started automatically by Maven, and eventually, Cobertura will never generate test coverage for the corresponding classes.</p>
+<p>Cobertura, TestNG and Maven play well together. However, I had problems when I started migrating some tests to <a href="https://code.google.com/p/spock/">the Spock framework</a>. Long story short, Spock uses JUnit internally, not TestNG, and the surefire plugin only triggers tests for one of those frameworks at a time. Therefore, if you mix TestNG with Spock, you’ll run with problems where your Spock tests won’t be started automatically by Maven, and eventually, Cobertura will never generate test coverage for the corresponding classes.</p>
 </div>
 <div class="paragraph">
 <p>I have found different proposals for fixing this problem, but only one worked for me, so here’s my working pom.xml :</p>
@@ -234,7 +234,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>The trick is to add two executions of the surefire plugin, as <a href="http://bit.ly/ePc0oG">indicated here</a>, but forcing the plugin version to 2.7.1. Also, adding two dependencies to the surefire plugin, as suggested by <a href="http://twitter.com/#!/krosenvold/status/19442054924861441">Kristian Rosenvold</a> didn’t work for me. My pom.xml file also includes the necessary configuration for GMaven to work with Groovy 1.7 instead of 1.6 by default.</p>
+<p>The trick is to add two executions of the surefire plugin, as <a href="https://bit.ly/ePc0oG">indicated here</a>, but forcing the plugin version to 2.7.1. Also, adding two dependencies to the surefire plugin, as suggested by <a href="https://twitter.com/#!/krosenvold/status/19442054924861441">Kristian Rosenvold</a> didn’t work for me. My pom.xml file also includes the necessary configuration for GMaven to work with Groovy 1.7 instead of 1.6 by default.</p>
 </div></p>
    
 

@@ -164,7 +164,7 @@ It means that an object is something that receives messages. In the Java world, 
 is enforced at compile time, but it is an implementation detail which reduces OO programming to a small subset of its capabilities.</p>
 </div>
 <div class="paragraph">
-<p>The great Alan Kay himself <a href="http://lists.squeakfoundation.org/pipermail/squeak-dev/1998-October/017019.html">explains it</a>.</p>
+<p>The great Alan Kay himself <a href="https://lists.squeakfoundation.org/pipermail/squeak-dev/1998-October/017019.html">explains it</a>.</p>
 </div>
 <div class="paragraph">
 <p>Groovy, as a dynamic language, supports commons OOP concepts (and also functional concepts) like class, interface, abstract classes or traits
@@ -592,7 +592,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 </div>
 </div>
 <div class="paragraph">
-<p>In this script, variables <code>a</code> and <code>b</code> are <code>unbound</code>. They are not known from a compiler, so if you tried to statically compile this with a compiler like <em>Java</em> (or <em>C++</em>, or <em>Scala</em>) it would definitely blow up. Not if you compile this with <em>Groovy</em>. Because it&#8217;s dynamic, it&#8217;s able to know that those variables <strong>will</strong> be eventually bound, when the script is executed. Groovy provides means to <em>inject</em> those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> uses <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">Groovy as the default scripting language</a>: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve <code>a</code> and <code>b</code> at compile time and that you fear to write code which might fail at runtime&#8230;&#8203;</p>
+<p>In this script, variables <code>a</code> and <code>b</code> are <code>unbound</code>. They are not known from a compiler, so if you tried to statically compile this with a compiler like <em>Java</em> (or <em>C++</em>, or <em>Scala</em>) it would definitely blow up. Not if you compile this with <em>Groovy</em>. Because it&#8217;s dynamic, it&#8217;s able to know that those variables <strong>will</strong> be eventually bound, when the script is executed. Groovy provides means to <em>inject</em> those variables when you need them. It is some kind of late binding, but it is the core of expression languages, and it is no surprise that products like <a href="https://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> uses <a href="https://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">Groovy as the default scripting language</a>: it allows it to be both compilable and late bound. But there is more, if you think you have an issue with not being able to resolve <code>a</code> and <code>b</code> at compile time and that you fear to write code which might fail at runtime&#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -600,13 +600,13 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 <h2 id="_1_mixed_mode_compilation">1. Mixed mode compilation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The last thing that a dynamic language like Groovy is capable of doing is leveraging <strong>mixed mode</strong> compilation. Behind this curious term is a unique concept in programming languages: Groovy is able of mixing static code with dynamic code, but more, you can instruct the compiler how to do so. So if you design a DSL like in <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> where you know that some variables will be bound, that the number, names and <strong>types</strong> of those variables are fixed and known in advance, then you can instruct the compiler and switch to a statically compilable mode! This means that if the user uses an unknown variable, compilation will fail.</p>
+<p>The last thing that a dynamic language like Groovy is capable of doing is leveraging <strong>mixed mode</strong> compilation. Behind this curious term is a unique concept in programming languages: Groovy is able of mixing static code with dynamic code, but more, you can instruct the compiler how to do so. So if you design a DSL like in <a href="https://www.elasticsearch.org/guide/en/elasticsearch/reference/1.4/modules-scripting.html#modules-scripting">ElasticSearch</a> where you know that some variables will be bound, that the number, names and <strong>types</strong> of those variables are fixed and known in advance, then you can instruct the compiler and switch to a statically compilable mode! This means that if the user uses an unknown variable, compilation will fail.</p>
 </div>
 <div class="paragraph">
-<p>This technique is already used in Groovy itself, in the powerful <a href="http://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html">Markup Template Engine</a>. It is a template engine which is capable of generating markup-like contents with a very nice builder-like syntax, but all templates are statically compiled even if the code seems to be full of unresolved method calls or variables!</p>
+<p>This technique is already used in Groovy itself, in the powerful <a href="https://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html">Markup Template Engine</a>. It is a template engine which is capable of generating markup-like contents with a very nice builder-like syntax, but all templates are statically compiled even if the code seems to be full of unresolved method calls or variables!</p>
 </div>
 <div class="paragraph">
-<p>For those who are interested in this, I invite them to take an eye at my <a href="http://melix.github.io/blog/2014/02/markuptemplateengine.html">blog posts</a> describing how you can do this.</p>
+<p>For those who are interested in this, I invite them to take an eye at my <a href="https://melix.github.io/blog/2014/02/markuptemplateengine.html">blog posts</a> describing how you can do this.</p>
 </div>
 </div>
 </div>
@@ -615,7 +615,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 <p>In conclusion, I have highlighted some points where dynamic languages can do what static languages cannot. Users of the most widely used dynamic language, Javascript, probably have lots of ideas too. The point for me is <strong>not to tell which one is better than the other</strong> because <strong>I don&#8217;t care</strong>. In general, I am not much into the war behind those, because I really enjoy both. I do static typing most of time, but I really enjoy the dynamic nature of the language too because often I don&#8217;t want to be slowed down just to make a compiler happy. I, as a developer, should be happy. Making a compiler happy is secondary and often not necessary. Last but not least, you might have thought, reading this post, that <strong>your</strong> static language can do this or that. I won&#8217;t blame you here, because mine can too. The idea here is more to show that it is totally unnatural for a static language or it often comes with horrible drawbacks like verbosity, performance issues or simply difficult to implement.</p>
 </div>
 <div class="paragraph">
-<p>So what about using a <a href="http://beta.groovy-lang.org">language that brings the best of the two worlds together</a>?</p>
+<p>So what about using a <a href="https://beta.groovy-lang.org">language that brings the best of the two worlds together</a>?</p>
 </div></p>
    
 

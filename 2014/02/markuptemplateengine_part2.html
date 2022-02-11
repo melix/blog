@@ -101,15 +101,15 @@
 <div class="ulist">
 <ul>
 <li>
-<p>a <a href="http://groovy.codehaus.org/api/groovy/lang/GroovyClassLoader.html">GroovyClassLoader</a> to create and cache template classes</p>
+<p>a <a href="https://groovy.codehaus.org/api/groovy/lang/GroovyClassLoader.html">GroovyClassLoader</a> to create and cache template classes</p>
 </li>
 <li>
-<p>a <a href="http://groovy.codehaus.org/api/org/codehaus/groovy/control/CompilerConfiguration.html">CompilerConfiguration</a> to customize compilation</p>
+<p>a <a href="https://groovy.codehaus.org/api/org/codehaus/groovy/control/CompilerConfiguration.html">CompilerConfiguration</a> to customize compilation</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The various template engines that Groovy provide extend the <a href="http://groovy.codehaus.org/api/groovy/text/TemplateEngine.html">TemplateEngine</a> class. All template engines must implement the <code>createTemplate</code> method which returns an instance of <a href="http://groovy.codehaus.org/api/groovy/text/Template.html">Template</a>. My first idea, here, was therefore to have a template engine which holds a <code>GroovyClassLoader</code>, and compiles scripts as <code>Template</code> instances. For thread safety reasons and to avoid compiling the same template again and again, I instead chose a slightly different approach, which is to compile the scripts, and cache the resulting class into a field of the <code>StreamingMarkupBuilderTemplate</code> class:</p>
+<p>The various template engines that Groovy provide extend the <a href="https://groovy.codehaus.org/api/groovy/text/TemplateEngine.html">TemplateEngine</a> class. All template engines must implement the <code>createTemplate</code> method which returns an instance of <a href="https://groovy.codehaus.org/api/groovy/text/Template.html">Template</a>. My first idea, here, was therefore to have a template engine which holds a <code>GroovyClassLoader</code>, and compiles scripts as <code>Template</code> instances. For thread safety reasons and to avoid compiling the same template again and again, I instead chose a slightly different approach, which is to compile the scripts, and cache the resulting class into a field of the <code>StreamingMarkupBuilderTemplate</code> class:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -172,7 +172,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>compiles to a class extending <code>BaseTemplate</code>. If you are familiar with <code>GroovyClassLoader</code> or <code>GroovyShell</code>, you should actually know that normally, a script compiles to a class extending <a href="http://groovy.codehaus.org/api/groovy/lang/Script.html">Script</a>. In our case, we don&#8217;t want to extend <code>Script</code>, because it does things that we don&#8217;t want, such as overriding <code>getProperty</code> or using a <code>Binding</code> class, or even having the semantics of a Groovy script. Furthermore, it doesn&#8217;t allow us to have a custom constructor to have private final fields. So the first step of our compilation process is actually to change the super class of the compiled script. The next step is to create a constructor that takes our model and the template configuration as parameters, as seen in the <code>make</code> method. Last but not least, since the script being compiled defines a <code>run</code> method (which is abstract in <code>Script</code>) corresponding to the script body, we will perform additional code transformations on this specific method.</p>
+<p>compiles to a class extending <code>BaseTemplate</code>. If you are familiar with <code>GroovyClassLoader</code> or <code>GroovyShell</code>, you should actually know that normally, a script compiles to a class extending <a href="https://groovy.codehaus.org/api/groovy/lang/Script.html">Script</a>. In our case, we don&#8217;t want to extend <code>Script</code>, because it does things that we don&#8217;t want, such as overriding <code>getProperty</code> or using a <code>Binding</code> class, or even having the semantics of a Groovy script. Furthermore, it doesn&#8217;t allow us to have a custom constructor to have private final fields. So the first step of our compilation process is actually to change the super class of the compiled script. The next step is to create a constructor that takes our model and the template configuration as parameters, as seen in the <code>make</code> method. Last but not least, since the script being compiled defines a <code>run</code> method (which is abstract in <code>Script</code>) corresponding to the script body, we will perform additional code transformations on this specific method.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -466,7 +466,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 <p>Well, this is precisely why type checking extensions were added in Groovy 2.1. They allow the programmer to help the compiler when he knows about a method call that the type checker isn&#8217;t able to resolve. You can give hints and tell "ok, this method exists, and it returns an object of type Foo". In Groovy 2.2, this mechanism was extended to static compilation, which opens another chapter in the incredible extensibility that Groovy has to offer.</p>
 </div>
 <div class="paragraph">
-<p>Writing type checking extensions require a bit of knowledge of the Groovy AST (abstract syntax tree), so anyone who ever wrote an AST transformation in Groovy should be capable of writing a type checking extension. Actually, it is even easier, and the process is described <a href="http://docs.codehaus.org/display/GROOVY/Type+checking+extensions">here</a>. In our case, we will start leveraging a feature of Groovy 2.2 will allows us to mix dynamic code with statically compiled code. That is to say that the only thing that our extension is going to do is saying "when you don&#8217;t know what a method call does, perform a dynamic invocation".</p>
+<p>Writing type checking extensions require a bit of knowledge of the Groovy AST (abstract syntax tree), so anyone who ever wrote an AST transformation in Groovy should be capable of writing a type checking extension. Actually, it is even easier, and the process is described <a href="https://docs.codehaus.org/display/GROOVY/Type+checking+extensions">here</a>. In our case, we will start leveraging a feature of Groovy 2.2 will allows us to mix dynamic code with statically compiled code. That is to say that the only thing that our extension is going to do is saying "when you don&#8217;t know what a method call does, perform a dynamic invocation".</p>
 </div>
 <div class="paragraph">
 <p>When we added this to Groovy 2.2, we really didn&#8217;t want to make "mixed" mode a first class citizen in static compilation, because it defeats the idea of catching typos, which is one of the things people expect most from a type checking system. So this "mixed" mode is actually activated by type checking extensions. This means that the only method calls which will be made dynamic will be those that the programmer knows about, and really wants to convert to dynamic calls. It is an important difference, because we want the developper to be <strong>aware</strong> of what he is doing.</p>
@@ -656,7 +656,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </table>
 </div>
 <div class="paragraph">
-<p>Of course, we still miss the transformation code. For that, we need a class which extends <a href="http://groovy.codehaus.org/api/org/codehaus/groovy/ast/ClassCodeExpressionTransformer.html">ClassCodeExpressionTransformer</a> :</p>
+<p>Of course, we still miss the transformation code. For that, we need a class which extends <a href="https://groovy.codehaus.org/api/org/codehaus/groovy/ast/ClassCodeExpressionTransformer.html">ClassCodeExpressionTransformer</a> :</p>
 </div>
 <div class="listingblock">
 <div class="content">

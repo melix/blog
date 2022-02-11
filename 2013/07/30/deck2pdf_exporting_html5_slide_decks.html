@@ -93,10 +93,10 @@
 <h2 id="_exporting_your_awesome_html5_presentation_to_pdf">Exporting your awesome HTML5 presentation to PDF</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For some time now, I’ve started using <a href="http://imakewebthings.com/deck.js/">deck.js</a> to write my talks. One of the reasons I do this is that it saves me <strong>lots</strong> of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).</p>
+<p>For some time now, I’ve started using <a href="https://imakewebthings.com/deck.js/">deck.js</a> to write my talks. One of the reasons I do this is that it saves me <strong>lots</strong> of time when I have to copy and paste code, because I can rely on javascript code highlighting libraries to do the job. I can focus on contents instead of rendering. If I had a better knowledge of CSS, too, I could certainly write impressive presentations (but unfortunately, no, I’m not good at CSS).</p>
 </div>
 <div class="paragraph">
-<p>The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, <a href="https://speakerdeck.com/">SpeakerDeck</a>, <a href="http://www.slideshare.net/">SlideShare</a> or <a href="http://www.parleys.com/">Parleys</a> all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.</p>
+<p>The problem with HTML5 slideshows is that you are often asked to upload your slides as PDF. For example, <a href="https://speakerdeck.com/">SpeakerDeck</a>, <a href="https://www.slideshare.net/">SlideShare</a> or <a href="https://www.parleys.com/">Parleys</a> all require you to upload slides as PDF. None of them supports HTML5 (which is understandable because there are many frameworks available). While I did find some libraries that did the job (often in Perl or Ruby), I never managed to find one that actually worked properly.</p>
 </div>
 </div>
 </div>
@@ -104,18 +104,18 @@
 <h2 id="_deck2pdf">Deck2pdf</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? <a href="https://github.com/melix/deck2pdf">deck2pdf was born!</a>. I started with something that was able to export my <a href="http://imakewebthings.com/deck.js/">deck.js</a> presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> supports:</p>
+<p>That’s where it all started. I knew that JavaFX2 provided a WebView, which allowed rendering HTML pages with WebKit. What if I could use it to render my slide deck and export it to PDF? <a href="https://github.com/melix/deck2pdf">deck2pdf was born!</a>. I started with something that was able to export my <a href="https://imakewebthings.com/deck.js/">deck.js</a> presentations, but I figured out very quickly that it could support other HTML5 presentation libraries quite easily. As of today, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> supports:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="http://imakewebthings.com/deck.js/">deck.js</a></p>
+<p><a href="https://imakewebthings.com/deck.js/">deck.js</a></p>
 </li>
 <li>
-<p><a href="http://lab.hakim.se/reveal-js">reveal.js</a></p>
+<p><a href="https://lab.hakim.se/reveal-js">reveal.js</a></p>
 </li>
 <li>
-<p><a href="http://bartaz.github.io/impress.js">impress.js</a></p>
+<p><a href="https://bartaz.github.io/impress.js">impress.js</a></p>
 </li>
 <li>
 <p>and <a href="https://github.com/paulrouget/dzslides">DZSlides</a></p>
@@ -123,7 +123,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the <a href="http://imakewebthings.com/deck.js/">deck.js</a> profile is written:</p>
+<p>But more importantly, if your favorite HTML5 slideware is not supported, adding custom profiles is supported and fairly easy! Adding support for another library is as simple as adding a descriptor file with the javascript commands inside. For example, here’s how the <a href="https://imakewebthings.com/deck.js/">deck.js</a> profile is written:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -132,7 +132,7 @@ nextSlide=$.deck('next')</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in <a href="http://bartaz.github.io/impress.js">impress.js</a>:</p>
+<p>That’s all! Support for more complex interactions is also provided using Groovy profiles, like for example in <a href="https://bartaz.github.io/impress.js">impress.js</a>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -160,7 +160,7 @@ pause = 2000</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Of course, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> is open source and licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">APL2</a>. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!</p>
+<p>Of course, <a href="https://github.com/melix/deck2pdf">deck2pdf</a> is open source and licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0.html">APL2</a>. Feel free to fork it and contribute new profiles! The home page of the project has documentation explaining how you can create your own. I’m waiting for your pull requests!</p>
 </div>
 </div>
 </div></p>

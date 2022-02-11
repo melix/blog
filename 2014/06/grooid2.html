@@ -84,7 +84,7 @@
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In my previous <a href="http://melix.github.io/blog/2014/06/grooid.html">post</a>, I have introduced how we could now use the <a href="http://groovy.codehaus.org">Groovy language</a> to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.</p>
+<p>In my previous <a href="https://melix.github.io/blog/2014/06/grooid.html">post</a>, I have introduced how we could now use the <a href="https://groovy.codehaus.org">Groovy language</a> to develop Android applications. In this post, I will give you more details about how it works internally, giving you more hints about what makes it possible.</p>
 </div>
 </div>
 </div>
@@ -92,7 +92,7 @@
 <h2 id="_compiling_groovy">Compiling Groovy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <a href="http://groovy.codehaus.org">Groovy language</a> is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it&#8217;s always compiled. This means that in Groovy, you have two options: either a class is compiled to a <code>.class</code> file and used like any other class file on the JVM, using the <code>groovyc</code> compiler instead of <code>javac</code>, or a class can be compiled <strong>at runtime</strong>, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is <strong>not</strong> an interpreted language: everything is turned into bytecode.</p>
+<p>The <a href="https://groovy.codehaus.org">Groovy language</a> is a JVM language which compiles to bytecode. Even if it has scripting capabilities, it&#8217;s always compiled. This means that in Groovy, you have two options: either a class is compiled to a <code>.class</code> file and used like any other class file on the JVM, using the <code>groovyc</code> compiler instead of <code>javac</code>, or a class can be compiled <strong>at runtime</strong>, for example if you rely on scripting. In the last case, the source script (or any Groovy source in general, not necessarily scripts) is available at runtime, and you rely on APIs that Groovy provide to compile those sources and execute them while your application is running. This is typical of scripting languages, but you must be aware that in any case, Groovy is <strong>not</strong> an interpreted language: everything is turned into bytecode.</p>
 </div>
 <div class="sect2">
 <h3 id="_a_classic_android_application">A classic Android application</h3>
@@ -140,7 +140,7 @@
 <div class="sect2">
 <h3 id="_runtime_scripting">Runtime scripting</h3>
 <div class="paragraph">
-<p>One of the difficulties of adapting the <a href="http://groovy.codehaus.org">Groovy language</a> is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:</p>
+<p>One of the difficulties of adapting the <a href="https://groovy.codehaus.org">Groovy language</a> is that, as we said, Groovy is a highly dynamic language. One of its capabilities is executing scripts at runtime. So what if we wanted to type a Groovy script on the device, and execute it directly on it? Is it possible? In fact, yes, it is possible, given that you follow this process:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -151,7 +151,7 @@
 <p>You can have an application, written in Groovy or not, but in the end, <strong>once the application is running</strong>, you have Groovy source code that you want to execute. Then it needs to compile the classes, call <code>dex</code> <strong>directly on the device</strong>, package the result into a <code>jar</code> file on the local filesystem, then load it using a special classloader. So why this is possible, the process is very complex, not straightforward, but more importantly, it is dramatically slow.</p>
 </div>
 <div class="paragraph">
-<p>This process is demonstrated in <a href="https://github.com/melix/grooidshell-example">this application</a>, which replicates the behavior of the well-known <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell">GroovyShell</a> but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.</p>
+<p>This process is demonstrated in <a href="https://github.com/melix/grooidshell-example">this application</a>, which replicates the behavior of the well-known <a href="https://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/#integ-groovyshell">GroovyShell</a> but directly on an Android device. To give you an idea, on my own device, a Samsung Galaxy Note 3, starting the application, written in Groovy, is blazing fast. Then if you hit the "execute" button, the first time, compilation of the little script will take around 3s.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">

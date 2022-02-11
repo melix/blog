@@ -611,7 +611,7 @@ Note how I used the <code>convention</code> method to set the input directory, i
 <div class="paragraph">
 <p>Our plugin does one more thing, that we didn&#8217;t cover yet: <em>wiring</em> the task in the "lifecycle", as my colleague asked.
 The notion of "lifecyle" doesn&#8217;t really make sense in Gradle, and most likely comes from the Maven mindset, where things are defined via a "lifecyle".
-I already covered this topic <a href="http://melix.github.io/blog/2018/09/gradle-lifecycle.html">in this blog post</a>, but here&#8217;s the major difference: in Gradle, <em>everything</em> declares its inputs, and the tool is responsible for wiring things properly, so that you don&#8217;t have to execute redundant work.</p>
+I already covered this topic <a href="https://melix.github.io/blog/2018/09/gradle-lifecycle.html">in this blog post</a>, but here&#8217;s the major difference: in Gradle, <em>everything</em> declares its inputs, and the tool is responsible for wiring things properly, so that you don&#8217;t have to execute redundant work.</p>
 </div>
 <div class="paragraph">
 <p>Here, the legitimate question is: my plugin generates some sources, but they need to be compiled, and therefore available to my production code, how can I do that?

@@ -131,10 +131,10 @@
 <h2 id="_then_came_groovy">Then came Groovy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I love <a href="http://groovy.codehaus.org">Groovy</a>. It’s easy to learn if you’re comfortable with Java, and it makes it very easy to write DSLs. The first thing to come was the integration of Ant into Groovy, and the creation of a Groovy DSL for Ant : Gant. It offers you the way to call Ant tasks from Groovy code easily, or, would you like it, build your project with Gant and Groovy code instead of XML files.</p>
+<p>I love <a href="https://groovy.codehaus.org">Groovy</a>. It’s easy to learn if you’re comfortable with Java, and it makes it very easy to write DSLs. The first thing to come was the integration of Ant into Groovy, and the creation of a Groovy DSL for Ant : Gant. It offers you the way to call Ant tasks from Groovy code easily, or, would you like it, build your project with Gant and Groovy code instead of XML files.</p>
 </div>
 <div class="paragraph">
-<p>A few days ago, the developers announced that Groovy 1.8, the next major version, would use <em>Gradle</em> as a build tool instead of <em>Ant</em>. What it <a href="http://www.gradle.org/">Gradle</a> ? As far as I understand, Gradle can be thought as a Groovy DSL for both Ant and Maven 2, while it does not rely on Maven : it takes the ideas from Maven, combines them with the descriptive tasks from Ant which makes it easy to build customized builds. Why is it so easy ? Well, just because your Gradle builds is actually Groovy code…</p>
+<p>A few days ago, the developers announced that Groovy 1.8, the next major version, would use <em>Gradle</em> as a build tool instead of <em>Ant</em>. What it <a href="https://www.gradle.org/">Gradle</a> ? As far as I understand, Gradle can be thought as a Groovy DSL for both Ant and Maven 2, while it does not rely on Maven : it takes the ideas from Maven, combines them with the descriptive tasks from Ant which makes it easy to build customized builds. Why is it so easy ? Well, just because your Gradle builds is actually Groovy code…</p>
 </div>
 <div class="paragraph">
 <p>That’s the idea. Ok, but I’m aware of different tools which do the same thing :</p>
@@ -142,16 +142,16 @@
 <div class="ulist">
 <ul>
 <li>
-<p><a href="http://buildr.apache.org">Buildr</a>, from Apache, defined as <em>A drop-in replacement for Maven 2.0, Buildr uses the same file layout, artifact specifications, local and remote repositories</em>, but uses a dedicated language (not XML, nor Groovy).</p>
+<p><a href="https://buildr.apache.org">Buildr</a>, from Apache, defined as <em>A drop-in replacement for Maven 2.0, Buildr uses the same file layout, artifact specifications, local and remote repositories</em>, but uses a dedicated language (not XML, nor Groovy).</p>
 </li>
 <li>
 <p><a href="https://kundo.dev.java.net/">Kundo</a>, which just seems to do exactly the same thing as Gradle, but leaks a decent documentation</p>
 </li>
 <li>
-<p><a href="http://docs.codehaus.org/display/GMAVEN/Home">GMaven</a>, which is a Maven plugin which allows you to compile Groovy code from Maven, compiling and using code from and to Java in Groovy, and allows you to write parts of your build process in Groovy too. This is the tool I’m currently using to build Groovy code from Maven.</p>
+<p><a href="https://docs.codehaus.org/display/GMAVEN/Home">GMaven</a>, which is a Maven plugin which allows you to compile Groovy code from Maven, compiling and using code from and to Java in Groovy, and allows you to write parts of your build process in Groovy too. This is the tool I’m currently using to build Groovy code from Maven.</p>
 </li>
 <li>
-<p><a href="http://www.wakaleo.com/blog/236-writing-your-pom-files-in-groovy-a-sneek-preview-of-maven-3s-polyglot-features">Maven 3</a>, yet to be released, which will allow you to abandon your XML files for a Groovy DSL, and use Groovy code in your builds. From what I read, it will likely allow us to to the same thing as Gradle and the previously mentioned tools</p>
+<p><a href="https://www.wakaleo.com/blog/236-writing-your-pom-files-in-groovy-a-sneek-preview-of-maven-3s-polyglot-features">Maven 3</a>, yet to be released, which will allow you to abandon your XML files for a Groovy DSL, and use Groovy code in your builds. From what I read, it will likely allow us to to the same thing as Gradle and the previously mentioned tools</p>
 </li>
 </ul>
 </div>

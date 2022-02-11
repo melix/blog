@@ -92,7 +92,7 @@
 <h2 id="_the_story">The story</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I’m using <a href="http://www.w3.org/TR/xinclude/">XInclude</a> to split long XML files into smaller parts. Basically, it allows you to write things like this :</p>
+<p>I’m using <a href="https://www.w3.org/TR/xinclude/">XInclude</a> to split long XML files into smaller parts. Basically, it allows you to write things like this :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -114,7 +114,7 @@ code,prettyprint</code></pre>
 
 (note the *xpointer=``xpointer(//macros/*)''* syntax).
 
-Well, if you came to this page thinking you’d find a solution to the fact that this does not work, I can’t help you. It doesn’t. While the documentation says that _XInclude_ support is implemented in the JDK, the truth is that it is incomplete. The JDK just supports the http://www.w3.org/TR/xinclude/#XPElement[element scheme] but not the http://www.w3.org/TR/xinclude/#XPointer[xpointer scheme]. Well, the specification of XInclude says that the implementation of the second one is optional, but the main problem with the JDK is that is never throws an _UnsupportedOperationException_. Worse, it silently parses your includes, and never throws any error (hence, the xi:fallback element is ignored).
+Well, if you came to this page thinking you’d find a solution to the fact that this does not work, I can’t help you. It doesn’t. While the documentation says that _XInclude_ support is implemented in the JDK, the truth is that it is incomplete. The JDK just supports the https://www.w3.org/TR/xinclude/#XPElement[element scheme] but not the https://www.w3.org/TR/xinclude/#XPointer[xpointer scheme]. Well, the specification of XInclude says that the implementation of the second one is optional, but the main problem with the JDK is that is never throws an _UnsupportedOperationException_. Worse, it silently parses your includes, and never throws any error (hence, the xi:fallback element is ignored).
 
 [[]]
 XPointer scheme support ?</pre>

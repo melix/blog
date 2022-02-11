@@ -126,7 +126,7 @@ the end you need to improve performance, for example by generating bytecode for 
 caching of those runtime generated classes, then Groovy is probably a very good option.</p>
 </div>
 <div class="paragraph">
-<p>There are lots of options available, described in the <a href="http://docs.groovy-lang.org/latest/html/documentation/index.html#_integrating_groovy_in_a_java_application">documentation</a>
+<p>There are lots of options available, described in the <a href="https://docs.groovy-lang.org/latest/html/documentation/index.html#_integrating_groovy_in_a_java_application">documentation</a>
 but the most simple example is just using the <code>Eval</code> class:</p>
 </div>
 <div class="listingblock">
@@ -197,7 +197,7 @@ problem without compromising the DSL nor the tooling or the performance of the a
 <div class="paragraph">
 <p>At that time, I had implemented my own solution, but I knew that other people also had implemented similar ones. In the end, Guillaume Laforge
 suggested to me that I wrote something that would help fixing those issues and make into Groovy core. This happened in Groovy 1.8.0 with
-<a href="http://docs.groovy-lang.org/latest/html/documentation/index.html#compilation-customizers">compilation customizers</a>.</p>
+<a href="https://docs.groovy-lang.org/latest/html/documentation/index.html#compilation-customizers">compilation customizers</a>.</p>
 </div>
 <div class="paragraph">
 <p>Compilation customizers are a set of classes that are aimed at tweaking the compilation of Groovy scripts. You can write your own customizer but Groovy ships with:</p>
@@ -216,14 +216,14 @@ suggested to me that I wrote something that would help fixing those issues and m
 </ul>
 </div>
 <div class="paragraph">
-<p>The AST transformation customizer allowed me to solve the infinite loop issue, by applying the <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/ThreadInterrupt.html">@ThreadInterrupt</a>
-transformation, but the <a href="http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/control/customizers/SecureASTCustomizer.html">SecureASTCustomizer</a> is probably the one which has
+<p>The AST transformation customizer allowed me to solve the infinite loop issue, by applying the <a href="https://docs.groovy-lang.org/latest/html/gapi/groovy/transform/ThreadInterrupt.html">@ThreadInterrupt</a>
+transformation, but the <a href="https://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/control/customizers/SecureASTCustomizer.html">SecureASTCustomizer</a> is probably the one which has
 been the most misinterpreted of the whole.</p>
 </div>
 <div class="paragraph">
 <p>I must apologize for this. Back then, I had no better name in mind. The important part of SecureASTCustomizer is <strong>AST</strong>. It was aimed at restricting access to some features of the AST. The
 "secure" part is actually not a good name at all, and I will illustrate why. You can even find a blog post from Kohsuke Kawagushi, of Jenkins fame, named
-Groovy SecureASTCustomizer is harmful[<a href="http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/" class="bare">http://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/</a>]. It is very true. The SecureASTCustomizer has never been designed with sandboxing
+Groovy SecureASTCustomizer is harmful[<a href="https://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/" class="bare">https://kohsuke.org/2012/04/27/groovy-secureastcustomizer-is-harmful/</a>]. It is very true. The SecureASTCustomizer has never been designed with sandboxing
 in mind. It was designed to restrict the language at compile time, not runtime. So a much better name, in retrospect, would have been <em>GrammarCustomizer</em>. But as you&#8217;re certainly aware, there
 are two hard things in computer science: cache invalidation, naming things and off by one errors.</p>
 </div>
@@ -344,7 +344,7 @@ will have for example the actual receiver type of a message before checking if a
 <p><a href="https://github.com/jimwhite/Gondor/blob/master/src/org/ifcx/gondor/SecuredScript.java">SecureScript</a> by Jim White</p>
 </li>
 <li>
-<p><a href="http://groovy-sandbox.kohsuke.org/">Groovy Sandbox</a> by Kohsuke Kawagushi</p>
+<p><a href="https://groovy-sandbox.kohsuke.org/">Groovy Sandbox</a> by Kohsuke Kawagushi</p>
 </li>
 <li>
 <p><a href="https://github.com/simon-temple/groovy-sandbox">Groovy Sandbox</a> by Simon Temple</p>
@@ -358,7 +358,7 @@ but misses a lot of possible hacks.</p>
 </div>
 <div class="paragraph">
 <p>As a result, with friends of mine Corinne Krych, Fabrice Matrat and Sébastien Blanc, we decided to create a new runtime sandboxing mechanism that would not have the issues of those projects. We started
-implementing this during a hackathon in Nice, and <a href="http://greachconf.com/speakers/fabrice-matrat-cedric-champeau-groovy-head-in-the-cloud/">we gave a talk about this last year</a> at the Greach conference.
+implementing this during a hackathon in Nice, and <a href="https://greachconf.com/speakers/fabrice-matrat-cedric-champeau-groovy-head-in-the-cloud/">we gave a talk about this last year</a> at the Greach conference.
 It relies on AST transformations and heavily rewrites the code in order to perform a check before each method call, property access, increment of variable, binary expression, &#8230;&#8203;
 The <a href="https://github.com/rivieragug/groovy-core/tree/secureruntime">implementation</a> is still incomplete, and not much work has been done because I realized there was still a problem in case
 of methods or properties called on "implicit this", like in builders for example:</p>
@@ -387,12 +387,12 @@ significantly improve the situation if you are ready to loose some of the dynami
 <div class="sectionbody">
 <div class="paragraph">
 <p>Let&#8217;s come back to the root problem of the SecureASTCustomizer: it works on the abstract syntax tree and has no knowledge of the concrete types of the receivers of messages. But since Groovy 2, Groovy has
-optional compilation, and in Groovy 2.1, we added <a href="http://docs.groovy-lang.org/latest/html/documentation/#_type_checking_extensions">type checking extensions</a>.</p>
+optional compilation, and in Groovy 2.1, we added <a href="https://docs.groovy-lang.org/latest/html/documentation/#_type_checking_extensions">type checking extensions</a>.</p>
 </div>
 <div class="paragraph">
 <p>Type checking extensions are very powerful: they allow the designer of a Groovy DSL to help the compiler infer types, but it also lets you throw compilation errors when normally it should not. Type
 checking extensions are even used internally in Groovy to support the static compiler, for example to implement traits or the
-<a href="http://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html">markup template engine</a>.</p>
+<a href="https://docs.groovy-lang.org/latest/html/documentation/markup-template-engine.html">markup template engine</a>.</p>
 </div>
 <div class="paragraph">
 <p>What if, instead of relying on the information available after parsing, we could rely on information from the type checker? Take the following code that our hacker tried to write:</p>
@@ -659,7 +659,7 @@ so that compilation passes. In this case, we will want to indicate that the <cod
 </table>
 </div>
 <div class="paragraph">
-<p>You can find a complete description of the type checking extension DSL in <a href="http://docs.groovy-lang.org/latest/html/documentation/#" class="bare">http://docs.groovy-lang.org/latest/html/documentation/#</a><em>type_checking_extensions[this section of the documentation],
+<p>You can find a complete description of the type checking extension DSL in <a href="https://docs.groovy-lang.org/latest/html/documentation/#" class="bare">https://docs.groovy-lang.org/latest/html/documentation/#</a><em>type_checking_extensions[this section of the documentation],
 but you have here an example of _mixed mode compilation</em> : the compiler is not able to resolve the <code>score</code> variable. You, as the designer of the DSL, <strong>know</strong> that the variable is in fact
 found in the binding, and is of the <code>double</code>, so the <code>makeDynamic</code> call is here to tell the compiler: "ok, don&#8217;t worry, I know what I am doing, this variable can be resolved dynamically
 and it will be of type `double`". That&#8217;s it!</p>

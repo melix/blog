@@ -84,15 +84,15 @@
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Yesterday ended <a href="http://gr8conf.eu">GR8Conf Europe</a>, a <a href="http://groovy.codehaus.org">Groovy language</a> conference in Copenhagen that was once again a successful event.
-I want to thank the crew again for this, and of course the <a href="http://groovy.codehaus.org">Groovy language</a> community which is so friendly and always helpful. This year
+<p>Yesterday ended <a href="https://gr8conf.eu">GR8Conf Europe</a>, a <a href="https://groovy.codehaus.org">Groovy language</a> conference in Copenhagen that was once again a successful event.
+I want to thank the crew again for this, and of course the <a href="https://groovy.codehaus.org">Groovy language</a> community which is so friendly and always helpful. This year
 turned out to be very special for me, because just two days after the announcement by Apple of the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a>, I was talking about
-running Groovy on Android! As Guillaume Laforge <a href="http://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy">noticed</a>, there
-are a lot of similarities between the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a> and <a href="http://groovy.codehaus.org">Groovy language</a>.</p>
+running Groovy on Android! As Guillaume Laforge <a href="https://glaforge.appspot.com/article/apple-s-swift-programming-language-inspired-by-groovy">noticed</a>, there
+are a lot of similarities between the <a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html">Swift language</a> and <a href="https://groovy.codehaus.org">Groovy language</a>.</p>
 </div>
 <div class="paragraph">
 <p>The timing is almost perfect, because Android users will want to have a language which is as modern as Swift is, but running on Android. And I see no
-better candidate than <a href="http://groovy.codehaus.org">Groovy language</a> here.</p>
+better candidate than <a href="https://groovy.codehaus.org">Groovy language</a> here.</p>
 </div>
 </div>
 </div>
@@ -100,7 +100,7 @@ better candidate than <a href="http://groovy.codehaus.org">Groovy language</a> h
 <h2 id="_the_presentation">The presentation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Should you be interested in the slides, you can find them below. Since it was presented at <a href="http://gr8conf.eu">GR8Conf Europe</a>, it gives a bit of history of the changes needed to
+<p>Should you be interested in the slides, you can find them below. Since it was presented at <a href="https://gr8conf.eu">GR8Conf Europe</a>, it gives a bit of history of the changes needed to
 have the runtime working on Android too:</p>
 </div>
 <script async class="speakerdeck-embed" data-id="e8e58fc0cdee0131f20616308848c4b8" data-ratio="1.6" src="//speakerdeck.com/assets/embed.js"></script>
@@ -124,7 +124,7 @@ accordingly. Then you would have to write something like this (no kidding):</p>
     ...
 
     void updateFeed() {
-    	new FeedTask().execute("http://path/to/feed");
+    	new FeedTask().execute("https://path/to/feed");
     }
 
     class FeedTask extends AsyncTask&lt;String, Void, String&gt; {
@@ -193,7 +193,7 @@ accordingly. Then you would have to write something like this (no kidding):</p>
 
     void updateFeed() {
     	Fluent.async {
-            def json = new JsonSlurper().parse([:], new URL('http://path/to/feed'), 'utf-8')
+            def json = new JsonSlurper().parse([:], new URL('https://path/to/feed'), 'utf-8')
             json.speakers.join(' ')
         } then {
 	    mTextView.text = it
@@ -292,10 +292,10 @@ git clone https://github.com/melix/gr8confagenda.git</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This contains a project that you can open using <a href="http://developer.android.com/sdk/installing/studio.html">Android Studio</a>.</p>
+<p>This contains a project that you can open using <a href="https://developer.android.com/sdk/installing/studio.html">Android Studio</a>.</p>
 </div>
 <div class="paragraph">
-<p>If you want to use the <a href="http://groovy.codehaus.org">Groovy language</a> in your own Android project, a requirement is that it is using Gradle. If so, you can update your <code>build.gradle</code> file
+<p>If you want to use the <a href="https://groovy.codehaus.org">Groovy language</a> in your own Android project, a requirement is that it is using Gradle. If so, you can update your <code>build.gradle</code> file
 as is:</p>
 </div>
 <div class="listingblock">
@@ -304,7 +304,7 @@ as is:</p>
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">android {
    ...
    packagingOptions {
-        // workaround for http://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
+        // workaround for https://stackoverflow.com/questions/20673625/android-gradle-plugin-0-7-0-duplicate-files-during-packaging-of-apk
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/groovy-release-info.properties'
     }

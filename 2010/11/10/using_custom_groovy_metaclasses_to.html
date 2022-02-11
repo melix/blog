@@ -379,7 +379,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 </div>
 <div class="paragraph">
-<p>Another case was dealing with the following bug (?) : <a href="http://jira.codehaus.org/browse/GROOVY-4495" class="bare">http://jira.codehaus.org/browse/GROOVY-4495</a>. In a specific case, static method invocation always lead to the longest execution path possible. However, in my case, the class used is an utility class which inherits another, the two written in pure Java, and for which every method is static. In another words, it’s a toolbox. Why would I want dynamic method dispatching on this class ? There’s no reason. So, I implemented my own metaclass which directly delegated calls to the appropriate methods AND worked around the bug by adding the method defined by the parent class in the method cache.</p>
+<p>Another case was dealing with the following bug (?) : <a href="https://jira.codehaus.org/browse/GROOVY-4495" class="bare">https://jira.codehaus.org/browse/GROOVY-4495</a>. In a specific case, static method invocation always lead to the longest execution path possible. However, in my case, the class used is an utility class which inherits another, the two written in pure Java, and for which every method is static. In another words, it’s a toolbox. Why would I want dynamic method dispatching on this class ? There’s no reason. So, I implemented my own metaclass which directly delegated calls to the appropriate methods AND worked around the bug by adding the method defined by the parent class in the method cache.</p>
 </div>
 </div>
 </div>

@@ -84,7 +84,7 @@
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Last week, we revealed the beta of a <a href="http://beta.groovy-lang.org">brand new website for the Groovy language</a>. This
+<p>Last week, we revealed the beta of a <a href="https://beta.groovy-lang.org">brand new website for the Groovy language</a>. This
 new website is <a href="https://github.com/groovy/groovy-website">open sourced</a> and already received a few contributions.
 In order to make it even easier and as it a fully statically generated site that makes use of Groovy
 I wanted to give more technical details on the toolchain and how it is generated.</p>
@@ -125,7 +125,7 @@ blog, but even that can be statically generated even if you want to allow users 
 <em>the right tool for the right job</em>.</p>
 </div>
 <div class="paragraph">
-<p>The documentation, that you can find on <a href="http://beta.groovy-lang.org/documentation.html">this page</a>, had
+<p>The documentation, that you can find on <a href="https://beta.groovy-lang.org/documentation.html">this page</a>, had
 already started migrating from the aging wiki to . It is generated independently of the
 website and integrated into it using iframes (we&#8217;re thinking about source integration though).</p>
 </div>
@@ -137,7 +137,7 @@ website and integrated into it using iframes (we&#8217;re thinking about source 
 <div class="sect2">
 <h3 id="_generator_and_site">Generator and site</h3>
 <div class="paragraph">
-<p>The <a href="https://github.com/groovy/groovy-website">project</a> is built using <a href="http://www.gradle.org">Gradle 2</a> and consists of 2 subprojects:</p>
+<p>The <a href="https://github.com/groovy/groovy-website">project</a> is built using <a href="https://www.gradle.org">Gradle 2</a> and consists of 2 subprojects:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -179,7 +179,7 @@ cd groovy-website
 use once we get out of the beta phase to ensure that the generated pages do not contain any dead link.</p>
 </div>
 <div class="paragraph">
-<p>Internally, we use our <a href="http://ci.groovy-lang.org/viewType.html?buildTypeId=Groovy_Website&amp;guest=1">CI server</a> to deploy
+<p>Internally, we use our <a href="https://ci.groovy-lang.org/viewType.html?buildTypeId=Groovy_Website&amp;guest=1">CI server</a> to deploy
 changes to the <code>master</code> branch live. So any commit which is pushed onto the master branch is automatically published
 (in general, takes less than 2 minutes).</p>
 </div>
@@ -242,7 +242,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
         version('2.3.4') {
             stable true
             releaseNotes 'https://jira.codehaus.org/secure/ReleaseNote.jspa?projectId=10242&amp;version=20432'
-            windowsInstaller 'http://dist.codehaus.org/groovy/distributions/installers/windows/nsis/groovy-2.3.4-installer.exe'
+            windowsInstaller 'https://dist.codehaus.org/groovy/distributions/installers/windows/nsis/groovy-2.3.4-installer.exe'
         }
     }
     // ...
@@ -250,7 +250,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
 </div>
 </div>
 <div class="paragraph">
-<p>or the books which are listed on the <a href="http://beta.groovy-lang.org/learn.html">learn page</a>:</p>
+<p>or the books which are listed on the <a href="https://beta.groovy-lang.org/learn.html">learn page</a>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -258,7 +258,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
     book('Groovy in Action, 2nd edition') {
         authors "Dierk König, Guillaume Laforge, Paul King, Cédric Champeau, Hamlet D'Arcy, Erik Pragt, and Jon Skeet"
         cover 'img/books/regina.png'
-        url 'http://www.manning.com/koenig2/'
+        url 'https://www.manning.com/koenig2/'
         description 'The undisputed definitive reference on the Groovy programming language, authored by core members of the development team.'
     }
     // ...
@@ -272,14 +272,14 @@ really think of it as a small database, but making use of a Groovy DSL.</p>
 </div>
 <div class="paragraph">
 <p>In addition, this file also declares the <a href="https://github.com/groovy/groovy-website/blob/03e3806cf26af6b13d99e6ee7473687e3f36fedd/site/src/site/sitemap.groovy#L62-L74">mapping between pages in the documentation section</a>
-and <a href="http://beta.groovy-lang.org/documentation.html">the documentation page</a>. Last but not least, it lists the individual
-pages that the website contain. Those pages make use of the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>.</p>
+and <a href="https://beta.groovy-lang.org/documentation.html">the documentation page</a>. Last but not least, it lists the individual
+pages that the website contain. Those pages make use of the <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_eat_your_own_dog_food">Eat your own dog food</h3>
 <div class="paragraph">
-<p>In Groovy 2.3, we introduced a new <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>. We decided that the new web site was an excellent showcase of
+<p>In Groovy 2.3, we introduced a new <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>. We decided that the new web site was an excellent showcase of
 this template engine, and a real life use case. This template engine has several remarkable features, like static compilation
 of templates (even if the model is dynamic), layouts and of course a human readable builder like syntax:</p>
 </div>
@@ -299,9 +299,9 @@ of templates (even if the model is dynamic), layouts and of course a human reada
 </div>
 <div class="paragraph">
 <p>It has already been integrated into <a href="https://spring.io/blog/2014/05/28/using-the-innovative-groovy-template-engine-in-spring-boot">Spring Boot</a>
-and <a href="http://www.ratpack.io/">Ratpack</a> will use it in the next version (to be released on August 1st). A hint about its performance can be found <a href="https://github.com/ratpack/ratpack/pull/370">here</a>.
-If you are interested in details about how it works, you can find the documentation <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">here</a>
-and you can read my <a href="http://melix.github.io/blog/2014/02/markuptemplateengine.html">blog posts</a> about it.</p>
+and <a href="https://www.ratpack.io/">Ratpack</a> will use it in the next version (to be released on August 1st). A hint about its performance can be found <a href="https://github.com/ratpack/ratpack/pull/370">here</a>.
+If you are interested in details about how it works, you can find the documentation <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">here</a>
+and you can read my <a href="https://melix.github.io/blog/2014/02/markuptemplateengine.html">blog posts</a> about it.</p>
 </div>
 <div class="paragraph">
 <p>The website subproject is therefore organized accordingly. Inside the <a href="https://github.com/groovy/groovy-website/tree/master/site/src/site">main source tree</a>, you&#8217;ll find the following directories:</p>
@@ -318,7 +318,7 @@ and you can read my <a href="http://melix.github.io/blog/2014/02/markuptemplatee
 <p>includes: contains elements of code which are shared among multiple templates</p>
 </li>
 <li>
-<p>layouts: contains template layouts, as defined in the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html#_layouts">documentation</a></p>
+<p>layouts: contains template layouts, as defined in the <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html#_layouts">documentation</a></p>
 </li>
 <li>
 <p>pages: contains the main pages of the website</p>
@@ -327,7 +327,7 @@ and you can read my <a href="http://melix.github.io/blog/2014/02/markuptemplatee
 </div>
 <div class="paragraph">
 <p>In general, consider <code>pages</code> as the entry point. A page generally makes use of one layout. As an example, let&#8217;s see how
-the <a href="http://beta.groovy-lang.org/ecosystem.html">Ecosystem</a> page is generated. The source file consists of this:</p>
+the <a href="https://beta.groovy-lang.org/ecosystem.html">Ecosystem</a> page is generated. The source file consists of this:</p>
 </div>
 <div class="listingblock">
 <div class="title">ecosystem.groovy</div>
@@ -414,10 +414,10 @@ head again on the wall to find an unclosed tag. Everything is embedded, readable
 <div class="sect2">
 <h3 id="_lessons_learnt">Lessons learnt</h3>
 <div class="paragraph">
-<p>Using the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a> for this project was interesting, because it was probably the first "real life" project
+<p>Using the <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a> for this project was interesting, because it was probably the first "real life" project
 to use it intensively. And as such, we discovered usability issues, but also bugs. Hopefully, none of those bugs or
 usability features were critical, and everything could be worked around, but expect some fixes in Groovy 2.3.5. It is
-also the reason why the project initially used <a href="http://www.gradle.org">Gradle 2</a>: it comes with Groovy 2.3.2 which embeds the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>,
+also the reason why the project initially used <a href="https://www.gradle.org">Gradle 2</a>: it comes with Groovy 2.3.2 which embeds the <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>,
 so it was possible to use it <strong>without</strong> organizing the project into separate modules like we have. In fact, the early
 versions of the site didn&#8217;t use subprojects. It&#8217;s only when we wanted to leverage improvements from Groovy 2.3.4 that
 we had to <a href="https://github.com/groovy/groovy-website/commit/e922701f747dbb78a7e695796c60d2b783f7e7ee">switch to that architecture</a>.</p>
@@ -443,7 +443,7 @@ say produced almost all contents. He spent countless hours fixing responsiveness
 </li>
 <li>
 <p><a href="https://twitter.com/CedricChampeau">I streamlined</a> the process by setting up the Gradle project, designing the sitemap DSL,
-the integration of the <a href="http://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>, CI integration, &#8230;&#8203; that is to say pretty much all the "backend" stuff.</p>
+the integration of the <a href="https://beta.groovy-lang.org/docs/latest/html/documentation/markup-template-engine.html">markup template engine</a>, CI integration, &#8230;&#8203; that is to say pretty much all the "backend" stuff.</p>
 </li>
 <li>
 <p><strong>You</strong>, as a community, provided awesome <a href="https://github.com/groovy/groovy-website/pulls?direction=desc&amp;page=1&amp;sort=created&amp;state=closed">pull requests</a> within hours. Keep them coming, we love it!</p>

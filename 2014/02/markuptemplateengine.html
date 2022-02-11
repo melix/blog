@@ -86,7 +86,7 @@
 	<p><div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Recently, I was <a href="https://twitter.com/CedricChampeau/status/431131840788041728">surprised</a> no-one had the idea of developping a template engine relying on the Groovy <a href="http://groovy.codehaus.org/Creating+XML+using+Groovy&#8217;s+MarkupBuilder">MarkupBuilder</a>. Working on <a href="http://jbake.org/">JBake</a> made me take a look at existing template engines for Java again, something I hadn&#8217;t done for years, and even if new technologies like <a href="http://www.thymeleaf.org/">Thymeleaf</a> or <a href="http://jknack.github.io/handlebars.java/gettingStarted.html">Handlebars</a> exist, not of them are as practical to use as the markup builder.</p>
+<p>Recently, I was <a href="https://twitter.com/CedricChampeau/status/431131840788041728">surprised</a> no-one had the idea of developping a template engine relying on the Groovy <a href="https://groovy.codehaus.org/Creating+XML+using+Groovy&#8217;s+MarkupBuilder">MarkupBuilder</a>. Working on <a href="https://jbake.org/">JBake</a> made me take a look at existing template engines for Java again, something I hadn&#8217;t done for years, and even if new technologies like <a href="https://www.thymeleaf.org/">Thymeleaf</a> or <a href="https://jknack.github.io/handlebars.java/gettingStarted.html">Handlebars</a> exist, not of them are as practical to use as the markup builder.</p>
 </div>
 </div>
 </div>
@@ -122,7 +122,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>My first implementation was done quickly done and was leveraging the <a href="http://groovy.codehaus.org/gapi/groovy/xml/StreamingMarkupBuilder.html">StreamingMarkupBuilder</a>. It wasn&#8217;t very difficult to write, but it had a problem: in general, builders are quite slow, so not very suitable for templating engines, where you should render a page as fast as possible. To check this, I wrote a simple micro-benchmark, which compared my template engine with Freemarker:</p>
+<p>My first implementation was done quickly done and was leveraging the <a href="https://groovy.codehaus.org/gapi/groovy/xml/StreamingMarkupBuilder.html">StreamingMarkupBuilder</a>. It wasn&#8217;t very difficult to write, but it had a problem: in general, builders are quite slow, so not very suitable for templating engines, where you should render a page as fast as possible. To check this, I wrote a simple micro-benchmark, which compared my template engine with Freemarker:</p>
 </div>
 <div class="listingblock">
 <div class="content">

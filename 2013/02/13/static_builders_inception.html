@@ -87,10 +87,10 @@
 <h2 id="_documentation_is_good_for_everybody">Documentation is good for everybody</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>As part of the <a href="http://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html">Groovy documentation effort</a>, I started writing documentation for several features of Groovy, including <a href="http://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration">compiler configuration</a>, <a href="http://docs.codehaus.org/display/GROOVY/Type+checking+extensions">type checking extensions</a>, and yesterday the <a href="http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation">@DelegatesTo annotation</a>.</p>
+<p>As part of the <a href="https://groovy.329449.n5.nabble.com/ANN-Documentation-effort-and-site-redesign-tp5712875.html">Groovy documentation effort</a>, I started writing documentation for several features of Groovy, including <a href="https://docs.codehaus.org/display/GROOVY/Advanced+compiler+configuration">compiler configuration</a>, <a href="https://docs.codehaus.org/display/GROOVY/Type+checking+extensions">type checking extensions</a>, and yesterday the <a href="https://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation">@DelegatesTo annotation</a>.</p>
 </div>
 <div class="paragraph">
-<p>What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the <a href="http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation">@DelegatesTo documentation</a>, I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…</p>
+<p>What is interesting when you do so, apart from the fact that this should have been done much sooner, is that it is interesting for our users, of course, but also for us. In particular, when I wrote the statically compiled builder example in the <a href="https://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation">@DelegatesTo documentation</a>, I found myself thinking there was a lot of repetitive code in there… And that gave me a new idea…</p>
 </div>
 <div class="paragraph">
 <p>In the following post, I will show you how I combined several features of Groovy 2.1 to provide an implementation of a statically compiled HTML builder: static compilation, @DelegatesTo, meta-annotations, custom type checking extensions and of course AST transformations, without having to write all the boilerplate necessary to make it type safe! Nothing less…</p>
@@ -112,7 +112,7 @@ String build() {
         body {
             p {
                 out &lt;&lt; "Hello, this is "
-                a(href:'http://groovy.codehaus.org') { out &lt;&lt; 'Groovy' }
+                a(href:'https://groovy.codehaus.org') { out &lt;&lt; 'Groovy' }
             }
         }
     }
@@ -120,7 +120,7 @@ String build() {
 </div>
 </div>
 <div class="paragraph">
-<p>Then you want <strong>compile-time errors</strong> if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for <a href="http://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation">@DelegatesTo documentation</a> showed that it was possible to create a statically checked (and statically compiled) builder.</p>
+<p>Then you want <strong>compile-time errors</strong> if any of the tags used in the builder is not recognized or at the wrong place. As you know, builders are normally dynamic in Groovy, but the documentation for <a href="https://docs.codehaus.org/display/GROOVY/The+@DelegatesTo+annotation">@DelegatesTo documentation</a> showed that it was possible to create a statically checked (and statically compiled) builder.</p>
 </div>
 <div class="paragraph">
 <p>There were two problems in the approach from the documentation:</p>
@@ -184,7 +184,7 @@ String build() {
 </div>
 </div>
 <div class="paragraph">
-<p>For examples of several builders, you can take a look at the <a href="http://bit.ly/XAOvhJ">unit test</a>.</p>
+<p>For examples of several builders, you can take a look at the <a href="https://bit.ly/XAOvhJ">unit test</a>.</p>
 </div>
 <div class="paragraph">
 <p>What is important here is that using the <strong>@StaticMarkupBuilder</strong>, we are not using a builder, we are defining one:</p>
@@ -355,10 +355,10 @@ String build() {
 <p>Alright, so now we have the information available at runtime, when the compiler will select this method, the method will have an annotation that we can reflect to retrieve the list of attributes… Still, the compiler won’t use that information, so we’re doomed, right?</p>
 </div>
 <div class="paragraph">
-<p>Not really, because Groovy 2.1 includes <a href="http://docs.codehaus.org/display/GROOVY/Type+checking+extensions">type checking extensions</a>. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!</p>
+<p>Not really, because Groovy 2.1 includes <a href="https://docs.codehaus.org/display/GROOVY/Type+checking+extensions">type checking extensions</a>. A type checking extension will allow us to plug into the type checking system and perform additional checks that the compiler normally doesn’t do. Here, if it chooses this method, we will ask it to check the annotation and check that the actual arguments, those provided by the user, are using keys allowed by the builder!</p>
 </div>
 <div class="paragraph">
-<p>The code of this type checking extension can be found <a href="http://bit.ly/Yryqb7">here</a>.</p>
+<p>The code of this type checking extension can be found <a href="https://bit.ly/Yryqb7">here</a>.</p>
 </div>
 <div class="paragraph">
 <p>We’re almost done! The only problem with this solution is that one has to annotate every method that uses our builder with @CompileStatic(extension=’groovyx/transform/StaticBuilderExtension.groovy’). This is not as cool as seeing the extension being automatically applied…</p>
@@ -370,7 +370,7 @@ String build() {
 <p>There’s one solution to this. We will use a global AST transformation here. Unlike local AST transformations that are triggered by seeing an annotation in the code, global AST transformations are automatically loaded by the compiler and applied to every class being compiled. Thanks to this feature, we will be able to scan classes being compiled and if we find something annotated with @CompileStatic, then change it to @CompileStatic(extensions=’…’). That’s all!</p>
 </div>
 <div class="paragraph">
-<p>The code for such an annotation can be found <a href="http://bit.ly/UfjmjQ">here</a>.</p>
+<p>The code for such an annotation can be found <a href="https://bit.ly/UfjmjQ">here</a>.</p>
 </div>
 <div class="paragraph">
 <p>You must remember that using global AST transformations have a significant impact on compilation times, since they are applied on every class, so always make sure you don’t use unnecessary transforms.</p>
