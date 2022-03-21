@@ -1,0 +1,378 @@
+= Conditional dependencies with Gradle
+Cédric Champeau
+2022-03-21
+:jbake-type: post
+:jbake-tags: gradle, dependencies
+:jbake-status: published
+:source-highlighter: pygments
+:id: conditional-dependencies-gradle
+:linkattrs:
+
+== Introduction
+
+If you ever wrote a Gradle plugin for a framework (e.g https://micronaut.io[Micronaut]) or a plugin which needs to add dependencies if the user configures a particular flag, then it is likely that you've faced some ordering issues.
+
+For example, imagine that you have this DSL:
+
+```groovy
+micronaut {
+    useNetty = true
+}
+```
+
+Obviously, _at some point in time_, you have to figure out if the property `useNetty` is set in order to transparently add dependencies.
+A naive solution is to use the good old `afterEvaluate` block.
+Many plugins do this:
+
+```groovy
+afterEvaluate {
+    dependencies {
+        if (micronaut.useNetty.get()) {
+            implementation("io.netty:netty-buffer:4.1.75.Final")
+        }
+    }
+}
+```
+
+The problem is that while _afterEvaluate_ seems to fix the problem, it's just a dirty workaround which defers the problem to a later stage: depending on the plugins which are applied, which themselves could use `afterEvaluate`, your block may, or may not, see the "final" configuration state.
+
+In a https://melix.github.io/blog/2022/01/understanding-provider-api.html[previous post], I introduced Gradle's provider API.
+In this post, we're going to show how to use it to properly fix this problem.
+
+== Using providers for dependencies
+
+Let's start with the easiest.
+It's a common requirement of a plugin to provide the ability to override the version of a runtime.
+For example, the `checkstyle` plugin would, by default, use version of checkstyle by convention, but it would still let you override the version if you want to use a different one.
+
+Micronaut provides a similar feature:
+
+```gradle
+micronaut {
+    version = "3.3.1"
+}
+```
+
+The Micronaut dependencies to be added on the user classpath depend on the value of the `version` in our `micronaut` extension.
+Let's see how we can implement this.
+Let's create our Gradle project (we're assuming that you have Gradle 7.4 installed):
+
+
+```bash
+$ mkdir conditional-deps && cd conditional-deps
+$ gradle init --dsl groovy \
+   --type java-library \
+   --package me.champeau.demo \
+   --incubating \
+   --test-framework junit-jupiter
+```
+
+Now we're going to create a folder for our build logic, which will contain our plugin sources:
+
+```bash
+$ mkdir -p build-logic/src/main/groovy/my/plugin
+```
+
+Let's update the `settings.gradle` file to _include_ that build logic:
+
+.settings.gradle
+[source,groovy]
+----
+pluginManagement {
+    // include our plugin
+    includeBuild "build-logic"
+}
+rootProject.name = 'provider-dependencies'
+include('lib')
+----
+
+For now our plugin is an empty shell, so let's create its `build.gradle` file so that we can use a https://docs.gradle.org/7.4.1/userguide/custom_plugins.html#sec:precompiled_plugins[precompiled script plugin].
+
+.build-logic/build.gradle
+[source,groovy]
+----
+plugins {
+    id 'groovy-gradle-plugin'
+}
+----
+
+Now let's define our extension, which is simply about declaring an _interface_:
+
+.build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy
+[source,groovy]
+----
+package my.plugin
+
+import org.gradle.api.provider.Property
+
+interface MicronautExtension {
+    Property<String> getVersion()
+}
+----
+
+It's now time to create our plugin: precompiled script plugins are a very easy way to create a plugin, simply by declaring a file in `build-logic/src/main/groovy` which name ends with `.gradle`:
+
+.build-logic/src/main/groovy/my.plugin.gradle
+[source,groovy]
+----
+import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create("micronaut", MicronautExtension) <1>
+micronautExtension.version.convention("3.3.0")                              <2>
+----
+<1> Create our extension, named "micronaut"
+<2> Assign a default value to the "version" property
+
+By convention, our plugin id will be `my.plugin` (it's derived from the file name).
+Our plugin is responsible for creating the extension, and it assigns a _convention_ value to the `version` property: this is the value which is going to be used if the user doesn't declare anything explicitly.
+
+Then we can _use_ the plugin in our main build, that is, in the `lib` project:
+
+.lib/build.gradle
+[source,groovy]
+----
+plugins {
+    // Apply the java-library plugin for API and implementation separation.
+    id 'java-library'
+    // And now apply our plugin
+    id 'my-plugin'
+}
+
+micronaut {
+   // empty for now
+}
+----
+
+If we look at the `lib` compile classpath, it will not include any Micronaut dependency for now:
+
+```bash
+$ ./gradlew lib:dependencies --configuration compileClasspath
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3
+
+```
+
+Our goal is to add a dependency which is _derived from_ the version defined in our Micronaut extension, so let's do this.
+Edit our `build-logic` plugin:
+
+.build-logic/src/main/groovy/my.plugin.gradle
+[source,groovy]
+----
+import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create("micronaut", MicronautExtension)
+micronautExtension.version.convention("3.3.0")
+
+dependencies {
+    implementation micronautExtension.version.map { 
+        v -> "io.micronaut:micronaut-core:$v" 
+    }
+}
+----
+
+Now let's run our dependencies report again:
+
+```bash
+$ ./gradlew lib:dependencies --configuration compileClasspath
+
+> Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.0
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3
+```
+
+Victory! Now we can see our `micronaut-core` dependency.
+How did we do this?
+
+Note that instead of using `afterEvaluate`, what we did is _adding a dependency_, but instead of using the traditional dependency notation, we used a _provider_: the actual dependency string is computed _only when we need it_.
+We can check that we can actually configure the version via our extension by editing our build file:
+
+.lib/build.gradle
+[source,groovy]
+----
+micronaut {
+   version = "3.3.1" // override the convention
+}
+----
+
+```bash
+$ ./gradlew lib:dependencies --configuration compileClasspath
+
+> Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3
+```
+
+== Maybe add, maybe not!
+
+In the previous example, we have _systematically added_ a dependency, based on the version defined in the extension.
+What if we want to add a dependency if a property is set to a particular value?
+For this purpose, let's say that we define a `runtime` property which will tell what runtime to use.
+Let's add this property to our extension:
+
+.build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy
+[source,groovy]
+----
+package my.plugin
+
+import org.gradle.api.provider.Property
+
+interface MicronautExtension {
+    Property<String> getVersion()
+    Property<String> getRuntime()
+}
+----
+
+Now let's update our plugin to use that property, and add a dependency based on the value of the _runtime_ property:
+
+.build-logic/src/main/groovy/my.plugin.gradle
+[source,groovy]
+----
+import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create("micronaut", MicronautExtension)
+micronautExtension.version.convention("3.3.0")
+
+dependencies {
+    implementation micronautExtension.version.map { v ->
+        "io.micronaut:micronaut-core:$v" 
+    }
+    
+    implementation micronautExtension.runtime.map { r ->
+        switch(r) {
+            case 'netty':                                                   <1>
+                return "io.netty:netty-buffer:4.1.75.Final"
+            case 'tomcat':
+                return "org.apache.tomcat.embed:tomcat-embed-core:10.0.18"  <2>
+            default:
+                return null                                                 <3>
+        }
+    }
+}
+----
+<1> Add a dependency if the runtime is set to netty
+<2> Add a dependency if the runtime is set to tomcat
+<3> But do nothing if the runtime isn't set
+
+The trick, therefore, is to _return null_ in the provider in case no dependency needs to be added.
+So let's check first that without declaring anything, we don't have any dependency added:
+
+```bash
+$ ./gradlew lib:dependencies --configuration compileClasspath
+
+> Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3
+```
+
+Now let's switch to use `tomcat`:
+
+.lib/build.gradle
+[source,groovy]
+----
+micronaut {
+   version = "3.3.1"
+   runtime = "tomcat"
+}
+----
+
+
+```bash
+$ ./gradlew lib:dependencies --configuration compileClasspath
+
+> Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
++--- org.apache.tomcat.embed:tomcat-embed-core:10.0.18
+|    \--- org.apache.tomcat:tomcat-annotations-api:10.0.18
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3
+```
+
+Note how the dependency on Tomcat is added!
+
+== More complex use cases are supported!
+
+We've shown how to add a dependency and derive the dependency notation from the version defined in our extension.
+We've then seen how we could add a dependency, or not, based on the value of an extension: either return a _supported dependency notation_, or _null_ if nothing needs to be added.
+
+Gradle actually supports more complex cases, that I will let as an exercise to the reader.
+For example:
+
+- adding a dependency provider and configure its rich version (see https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/dsl/DependencyHandler.html#addProvider-java.lang.String-org.gradle.api.provider.Provider-org.gradle.api.Action-[DependencyHandler#addProvider]).
+- adding a _list_ of dependencies, instead of a _single_ dependence (see https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/Configuration.html#getDependencies--[Configuration#getDependencies] and https://docs.gradle.org/current/javadoc/org/gradle/api/DomainObjectCollection.html#addAllLater-org.gradle.api.provider.Provider-[DependencySet#addAllLater]).
+- computing a dependency from two or more providers (see https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Provider.html#zip-org.gradle.api.provider.Provider-java.util.function.BiFunction-[Provider#zip]).
+
+== Conclusion
+
+In this post, we've seen how to leverage Gradle's provider API to properly implement plugins which need to add dependencies conditionally.
+This can either mean that they need to add dependencies which version depend on some user configuration, or even full dependency notations which depend on configuration.
+The interest of using the provider API again lies in the fact that it is _lazy_ and therefore is (largely) immune to ordering issues: instead of relying on hooks like `afterEvaluate` which come with a number of drawbacks (reliability, ordering, interaction with other plugins), we rely on the fact that it's only when a value is _needed_ that it is computed.
+At this moment, we know that the configuration is complete, so we can guarantee that our dependencies will be correct.
+
+

@@ -1,0 +1,139 @@
+= Using the Micronaut Version Catalog
+Cédric Champeau
+2022-02-08
+:jbake-type: post
+:jbake-tags: gradle, micronaut, version catalog
+:jbake-status: published
+:source-highlighter: pygments
+:id: micronaut-version-catalog
+:linkattrs:
+
+== Introduction
+
+With the https://docs.gradle.org/7.4/release-notes.html[release of Gradle 7.4], Micronaut users now have an interesting option to manage their dependencies: using Gradle's https://docs.gradle.org/current/userguide/platforms.html#sub:central-declaration-of-dependencies[version catalogs].
+Indeed, for a few releases already, Micronaut has shipped its own version catalog alongside its BOM.
+
+Let's explore how to use it and what's the benefit.
+
+== What is a version catalog?
+
+In a nutshell, a version catalog allows centralizing dependency versions in a single place.
+Instead a build script, a typical dependency declaration looks like this:
+
+[source,gradle]
+----
+dependencies {
+    implementation("org.apache.slf4j:slf4j-api:1.7.25")
+}
+----
+
+With a version catalog, the declaration looks like this:
+
+[source,gradle]
+----
+dependencies {
+    implementation(libs.slf4j)
+}
+----
+
+And the dependency coordinates are defined in the `gradle/libs.versions.toml` file:
+
+[source,toml]
+----
+[versions]
+slf4j = "1.7.25"
+
+[libraries]
+slf4j = { module = "org.apache.slf4j", version.ref = "slf4j" }
+----
+
+There are a couple of advantages in doing so:
+
+- dependency versions are centralized in this TOML file
+- the catalogs create "type safe accessors" which are completed by the IDE (although to my knowledge completion is only supported by IntelliJ IDEA with the Kotlin DSL)
+
+You can read a more complete description about version catalogs in https://melix.github.io/blog/2021/03/version-catalogs.html[this blog post I wrote a few months ago].
+
+== The Micronaut version catalog
+
+In addition, frameworks like Micronaut can _publish_ version catalogs, which are then usable in your projects.
+You can then think of the Micronaut version catalog as a list of dependencies to pick up from: you don't have to think about a version to choose, you can simply use the "recommendation" from Micronaut, but you don't have to remember the dependency coordinates either.
+
+=== Importing the Micronaut version catalog
+
+Let's start with a project that you can generate using the Micronaut CLI:
+
+```
+mn create-app catalog
+```
+
+(alternatively, download the project using https://launch.micronaut.io/[Micronaut Launch])
+
+Open the generated project and update the Gradle version by changing the `gradle/gradle-wrapper.properties` file:
+
+```
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip
+```
+
+Now, in order to import the Micronaut version catalog, add this to your `settings.gradle` file:
+
+.settings.gradle
+[source,gradle]
+----
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    versionCatalogs {
+        create("mn") {
+            from("io.micronaut:micronaut-bom:${micronautVersion}")
+        }
+    }
+}
+----
+
+Here, we're creating a new version catalog called `mn`.
+Internally, Gradle will automatically download the catalog which is https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/[published at the same GAV coordinates as its BOM] as a https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/[TOML file] and expose it to your build scripts.
+
+Let's open our `build.gradle` file.
+By default it defines the following dependencies:
+
+[source,gradle]
+----
+dependencies {
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+}
+----
+
+Now, we can replace this with the following:
+
+[source,gradle]
+----
+dependencies {
+    annotationProcessor(mn.micronaut.http.validation)
+    implementation(mn.micronaut.http.client)
+    implementation(mn.micronaut.jackson.databind)
+    implementation(mn.micronaut.runtime)
+    implementation(mn.jakarta.annotation.api)
+    runtimeOnly(mn.logback)
+    implementation(mn.micronaut.validation)
+}
+----
+
+What happened here?
+Basically, we replaced hardcoded dependency coordinates with references to the `mn` version catalog.
+It's particularly interesting if you are using the Kotlin DSL as I mentioned earlier, because in this case, the dependency notations are _type-safe_: you _can't_ make a typo in dependency coordinates, and you get completion:
+
+image::/blog/img/catalog/catalog-completion.gif[]
+
+Nice!
+
+=== Future work
+
+Version catalogs will probably be enabled by default in future releases of Micronaut, which means that projects created via https://launch.micronaut.io/[Micronaut Launch] or the CLI tool would automatically use the catalog, so you don't have to do the conversion described in this blog post. Stay tuned!
