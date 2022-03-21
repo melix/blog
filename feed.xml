@@ -6,9 +6,466 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Fri, 11 Feb 2022 10:30:01 +0100</pubDate>
-    <lastBuildDate>Fri, 11 Feb 2022 10:30:01 +0100</lastBuildDate>
+    <pubDate>Mon, 21 Mar 2022 23:06:46 +0100</pubDate>
+    <lastBuildDate>Mon, 21 Mar 2022 23:06:46 +0100</lastBuildDate>
 
+    <item>
+      <title>Conditional dependencies with Gradle</title>
+      <link>https://melix.github.io/blog//2022/03/gradle-conditional-dependencies.html</link>
+      <pubDate>Mon, 21 Mar 2022 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2022/03/gradle-conditional-dependencies.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introduction&quot;&gt;Introduction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you ever wrote a Gradle plugin for a framework (e.g &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut&lt;/a&gt;_ or a plugin which needs to add dependencies if the user configures a particular flag, then it is likely that you&amp;#8217;ve faced some ordering issues.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, imagine that you have this DSL:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;micronaut {
+    useNetty = true
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Obviously, &lt;em&gt;at some point in time&lt;/em&gt;, you have to figure out if the property &lt;code&gt;useNetty&lt;/code&gt; is set in order to transparently add dependencies.
+A naive solution is to use the good old &lt;code&gt;afterEvaluate&lt;/code&gt; block.
+Many plugins do this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;afterEvaluate {
+    dependencies {
+        if (micronaut.useNetty.get()) {
+            implementation(&quot;io.netty:netty-buffer:4.1.75.Final&quot;)
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The problem is that while &lt;em&gt;afterEvaluate&lt;/em&gt; seems to fix the problem, it&amp;#8217;s just a dirty workaround which defers the problem to a later stage: depending on the plugins which are applied, which themselves could use &lt;code&gt;afterEvaluate&lt;/code&gt;, your block may, or may not, see the &quot;final&quot; configuration state.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a &lt;a href=&quot;https://melix.github.io/blog/2022/01/understanding-provider-api.html&quot;&gt;previous post&lt;/a&gt;, I introduced Gradle&amp;#8217;s provider API.
+In this post, we&amp;#8217;re going to show how to use it to properly fix this problem.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_using_providers_for_dependencies&quot;&gt;Using providers for dependencies&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s start with the easiest.
+It&amp;#8217;s a common requirement of a plugin to provide the ability to override the version of a runtime.
+For example, the &lt;code&gt;checkstyle&lt;/code&gt; plugin would, by default, use version of checkstyle by convention, but it would still let you override the version if you want to use a different one.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Micronaut provides a similar feature:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-gradle hljs&quot; data-lang=&quot;gradle&quot;&gt;micronaut {
+    version = &quot;3.3.1&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Micronaut dependencies to be added on the user classpath depend on the value of the &lt;code&gt;version&lt;/code&gt; in our &lt;code&gt;micronaut&lt;/code&gt; extension.
+Let&amp;#8217;s see how we can implement this.
+Let&amp;#8217;s create our Gradle project (we&amp;#8217;re assuming that you have Gradle 7.4 installed):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ mkdir conditional-deps &amp;amp;&amp;amp; cd conditional-deps
+$ gradle init --dsl groovy \
+   --type java-library \
+   --package me.champeau.demo \
+   --incubating \
+   --test-framework junit-jupiter&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we&amp;#8217;re going to create a folder for our build logic, which will contain our plugin sources:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ mkdir -p build-logic/src/main/groovy/my/plugin&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s update the &lt;code&gt;settings.gradle&lt;/code&gt; file to &lt;em&gt;include&lt;/em&gt; that build logic:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;pluginManagement {
+    // include our plugin
+    includeBuild &quot;build-logic&quot;
+}
+rootProject.name = &apos;provider-dependencies&apos;
+include(&apos;lib&apos;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For now our plugin is an empty shell, so let&amp;#8217;s create its &lt;code&gt;build.gradle&lt;/code&gt; file so that we can use a &lt;a href=&quot;https://docs.gradle.org/7.4.1/userguide/custom_plugins.html#sec:precompiled_plugins&quot;&gt;precompiled script plugin&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build-logic/build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;plugins {
+    id &apos;groovy-gradle-plugin&apos;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s define our extension, which is simply about declaring an &lt;em&gt;interface&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;package my.plugin
+
+import org.gradle.api.provider.Property
+
+interface MicronautExtension {
+    Property&amp;lt;String&amp;gt; getVersion()
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s now time to create our plugin: precompiled script plugins are a very easy way to create a plugin, simply by declaring a file in &lt;code&gt;build-logic/src/main/groovy&lt;/code&gt; which name ends with &lt;code&gt;.gradle&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build-logic/src/main/groovy/my.plugin.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create(&quot;micronaut&quot;, MicronautExtension) &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+micronautExtension.version.convention(&quot;3.3.0&quot;)                              &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Create our extension, named &quot;micronaut&quot;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Assign a default value to the &quot;version&quot; property&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By convention, our plugin id will be &lt;code&gt;my.plugin&lt;/code&gt; (it&amp;#8217;s derived from the file name).
+Our plugin is responsible for creating the extension, and it assigns a &lt;em&gt;convention&lt;/em&gt; value to the &lt;code&gt;version&lt;/code&gt; property: this is the value which is going to be used if the user doesn&amp;#8217;t declare anything explicitly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then we can &lt;em&gt;use&lt;/em&gt; the plugin in our main build, that is, in the &lt;code&gt;lib&lt;/code&gt; project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;lib/build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;plugins {
+    // Apply the java-library plugin for API and implementation separation.
+    id &apos;java-library&apos;
+    // And now apply our plugin
+    id &apos;my-plugin&apos;
+}
+
+micronaut {
+   // empty for now
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we look at the &lt;code&gt;lib&lt;/code&gt; compile classpath, it will not include any Micronaut dependency for now:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ ./gradlew lib:dependencies --configuration compileClasspath
+
+------------------------------------------------------------
+Project &apos;:lib&apos;
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set &apos;main&apos;.
++--- org.apache.commons:commons-math3:3.6.1
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Our goal is to add a dependency which is &lt;em&gt;derived from&lt;/em&gt; the version defined in our Micronaut extension, so let&amp;#8217;s do this.
+Edit our &lt;code&gt;build-logic&lt;/code&gt; plugin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build-logic/src/main/groovy/my.plugin.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create(&quot;micronaut&quot;, MicronautExtension)
+micronautExtension.version.convention(&quot;3.3.0&quot;)
+
+dependencies {
+    implementation micronautExtension.version.map {
+        v -&amp;gt; &quot;io.micronaut:micronaut-core:$v&quot;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s run our dependencies report again:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&amp;gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project &apos;:lib&apos;
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set &apos;main&apos;.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.0
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Victory! Now we can see our &lt;code&gt;micronaut-core&lt;/code&gt; dependency.
+How did we do this?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that instead of using &lt;code&gt;afterEvaluate&lt;/code&gt;, what we did is &lt;em&gt;adding a dependency&lt;/em&gt;, but instead of using the traditional dependency notation, we used a &lt;em&gt;provider&lt;/em&gt;: the actual dependency string is computed &lt;em&gt;only when we need it&lt;/em&gt;.
+We can check that we can actually configure the version via our extension by editing our build file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;lib/build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;micronaut {
+   version = &quot;3.3.1&quot; // override the convention
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&amp;gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project &apos;:lib&apos;
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set &apos;main&apos;.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_maybe_add_maybe_not&quot;&gt;Maybe add, maybe not!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the previous example, we have &lt;em&gt;systematically added&lt;/em&gt; a dependency, based on the version defined in the extension.
+What if we want to add a dependency if a property is set to a particular value?
+For this purpose, let&amp;#8217;s say that we define a &lt;code&gt;runtime&lt;/code&gt; property which will tell what runtime to use.
+Let&amp;#8217;s add this property to our extension:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;package my.plugin
+
+import org.gradle.api.provider.Property
+
+interface MicronautExtension {
+    Property&amp;lt;String&amp;gt; getVersion()
+    Property&amp;lt;String&amp;gt; getRuntime()
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s update our plugin to use that property, and add a dependency based on the value of the &lt;em&gt;runtime&lt;/em&gt; property:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build-logic/src/main/groovy/my.plugin.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create(&quot;micronaut&quot;, MicronautExtension)
+micronautExtension.version.convention(&quot;3.3.0&quot;)
+
+dependencies {
+    implementation micronautExtension.version.map { v -&amp;gt;
+        &quot;io.micronaut:micronaut-core:$v&quot;
+    }
+
+    implementation micronautExtension.runtime.map { r -&amp;gt;
+        switch(r) {
+            case &apos;netty&apos;:                                                   &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+                return &quot;io.netty:netty-buffer:4.1.75.Final&quot;
+            case &apos;tomcat&apos;:
+                return &quot;org.apache.tomcat.embed:tomcat-embed-core:10.0.18&quot;  &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+            default:
+                return null                                                 &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Add a dependency if the runtime is set to netty&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Add a dependency if the runtime is set to tomcat&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;But do nothing if the runtime isn&amp;#8217;t set&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The trick, therefore, is to &lt;em&gt;return null&lt;/em&gt; in the provider in case no dependency needs to be added.
+So let&amp;#8217;s check first that without declaring anything, we don&amp;#8217;t have any dependency added:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&amp;gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project &apos;:lib&apos;
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set &apos;main&apos;.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s switch to use &lt;code&gt;tomcat&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;lib/build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;micronaut {
+   version = &quot;3.3.1&quot;
+   runtime = &quot;tomcat&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-bash hljs&quot; data-lang=&quot;bash&quot;&gt;$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&amp;gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project &apos;:lib&apos;
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set &apos;main&apos;.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
++--- org.apache.tomcat.embed:tomcat-embed-core:10.0.18
+|    \--- org.apache.tomcat:tomcat-annotations-api:10.0.18
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note how the dependency on Tomcat is added!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_more_complex_use_cases_are_supported&quot;&gt;More complex use cases are supported!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;ve shown how to add a dependency and derive the dependency notation from the version defined in our extension.
+We&amp;#8217;ve then seen how we could add a dependency, or not, based on the value of an extension: either return a &lt;em&gt;supported dependency notation&lt;/em&gt;, or &lt;em&gt;null&lt;/em&gt; if nothing needs to be added.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle actually supports more complex cases, that I will let as an exercise to the reader.
+For example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;adding a dependency provider and configure its rich version (see &lt;a href=&quot;https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/dsl/DependencyHandler.html#addProvider-java.lang.String-org.gradle.api.provider.Provider-org.gradle.api.Action-&quot;&gt;DependencyHandler#addProvider&lt;/a&gt;).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;adding a &lt;em&gt;list&lt;/em&gt; of dependencies, instead of a &lt;em&gt;single&lt;/em&gt; dependence (see &lt;a href=&quot;https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/Configuration.html#getDependencies--&quot;&gt;Configuration#getDependencies&lt;/a&gt; and &lt;a href=&quot;https://docs.gradle.org/current/javadoc/org/gradle/api/DomainObjectCollection.html#addAllLater-org.gradle.api.provider.Provider-&quot;&gt;DependencySet#addAllLater&lt;/a&gt;).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;computing a dependency from two or more providers (see &lt;a href=&quot;https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Provider.html#zip-org.gradle.api.provider.Provider-java.util.function.BiFunction-&quot;&gt;Provider#zip&lt;/a&gt;).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this post, we&amp;#8217;ve seen how to leverage Gradle&amp;#8217;s provider API to properly implement plugins which need to add dependencies conditionally.
+This can either mean that they need to add dependencies which version depend on some user configuration, or even full dependency notations which depend on configuration.
+The interest of using the provider API again lies in the fact that it is &lt;em&gt;lazy&lt;/em&gt; and therefore is (largely) immune to ordering issues: instead of relying on hooks like &lt;code&gt;afterEvaluate&lt;/code&gt; which come with a number of drawbacks (reliability, ordering, interaction with other plugins), we rely on the fact that it&amp;#8217;s only when a value is &lt;em&gt;needed&lt;/em&gt; that it is computed.
+At this moment, we know that the configuration is complete, so we can guarantee that our dependencies will be correct.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Using the Micronaut Version Catalog</title>
       <link>https://melix.github.io/blog//2022/02/micronaut-version-catalog.html</link>

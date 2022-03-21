@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Conditional dependencies with Gradle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Conditional dependencies with Gradle</h1>
+	</div>
+
+	<p><em>21 March 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/dependencies.html">dependencies</a> 
+	</p>
+	<p><div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you ever wrote a Gradle plugin for a framework (e.g <a href="https://micronaut.io">Micronaut</a>_ or a plugin which needs to add dependencies if the user configures a particular flag, then it is likely that you&#8217;ve faced some ordering issues.</p>
+</div>
+<div class="paragraph">
+<p>For example, imagine that you have this DSL:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+    useNetty = true
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obviously, <em>at some point in time</em>, you have to figure out if the property <code>useNetty</code> is set in order to transparently add dependencies.
+A naive solution is to use the good old <code>afterEvaluate</code> block.
+Many plugins do this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">afterEvaluate {
+    dependencies {
+        if (micronaut.useNetty.get()) {
+            implementation("io.netty:netty-buffer:4.1.75.Final")
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The problem is that while <em>afterEvaluate</em> seems to fix the problem, it&#8217;s just a dirty workaround which defers the problem to a later stage: depending on the plugins which are applied, which themselves could use <code>afterEvaluate</code>, your block may, or may not, see the "final" configuration state.</p>
+</div>
+<div class="paragraph">
+<p>In a <a href="https://melix.github.io/blog/2022/01/understanding-provider-api.html">previous post</a>, I introduced Gradle&#8217;s provider API.
+In this post, we&#8217;re going to show how to use it to properly fix this problem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_providers_for_dependencies">Using providers for dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s start with the easiest.
+It&#8217;s a common requirement of a plugin to provide the ability to override the version of a runtime.
+For example, the <code>checkstyle</code> plugin would, by default, use version of checkstyle by convention, but it would still let you override the version if you want to use a different one.</p>
+</div>
+<div class="paragraph">
+<p>Micronaut provides a similar feature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">micronaut {
+    version = "3.3.1"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Micronaut dependencies to be added on the user classpath depend on the value of the <code>version</code> in our <code>micronaut</code> extension.
+Let&#8217;s see how we can implement this.
+Let&#8217;s create our Gradle project (we&#8217;re assuming that you have Gradle 7.4 installed):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir conditional-deps &amp;&amp; cd conditional-deps
+$ gradle init --dsl groovy \
+   --type java-library \
+   --package me.champeau.demo \
+   --incubating \
+   --test-framework junit-jupiter</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we&#8217;re going to create a folder for our build logic, which will contain our plugin sources:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir -p build-logic/src/main/groovy/my/plugin</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s update the <code>settings.gradle</code> file to <em>include</em> that build logic:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">pluginManagement {
+    // include our plugin
+    includeBuild "build-logic"
+}
+rootProject.name = 'provider-dependencies'
+include('lib')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For now our plugin is an empty shell, so let&#8217;s create its <code>build.gradle</code> file so that we can use a <a href="https://docs.gradle.org/7.4.1/userguide/custom_plugins.html#sec:precompiled_plugins">precompiled script plugin</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">build-logic/build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+    id 'groovy-gradle-plugin'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s define our extension, which is simply about declaring an <em>interface</em>:</p>
+</div>
+<div class="listingblock">
+<div class="title">build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package my.plugin
+
+import org.gradle.api.provider.Property
+
+interface MicronautExtension {
+    Property&lt;String&gt; getVersion()
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s now time to create our plugin: precompiled script plugins are a very easy way to create a plugin, simply by declaring a file in <code>build-logic/src/main/groovy</code> which name ends with <code>.gradle</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create("micronaut", MicronautExtension) <i class="conum" data-value="1"></i><b>(1)</b>
+micronautExtension.version.convention("3.3.0")                              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create our extension, named "micronaut"</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Assign a default value to the "version" property</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By convention, our plugin id will be <code>my.plugin</code> (it&#8217;s derived from the file name).
+Our plugin is responsible for creating the extension, and it assigns a <em>convention</em> value to the <code>version</code> property: this is the value which is going to be used if the user doesn&#8217;t declare anything explicitly.</p>
+</div>
+<div class="paragraph">
+<p>Then we can <em>use</em> the plugin in our main build, that is, in the <code>lib</code> project:</p>
+</div>
+<div class="listingblock">
+<div class="title">lib/build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+    // Apply the java-library plugin for API and implementation separation.
+    id 'java-library'
+    // And now apply our plugin
+    id 'my-plugin'
+}
+
+micronaut {
+   // empty for now
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we look at the <code>lib</code> compile classpath, it will not include any Micronaut dependency for now:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Our goal is to add a dependency which is <em>derived from</em> the version defined in our Micronaut extension, so let&#8217;s do this.
+Edit our <code>build-logic</code> plugin:</p>
+</div>
+<div class="listingblock">
+<div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create("micronaut", MicronautExtension)
+micronautExtension.version.convention("3.3.0")
+
+dependencies {
+    implementation micronautExtension.version.map {
+        v -&gt; "io.micronaut:micronaut-core:$v"
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s run our dependencies report again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.0
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Victory! Now we can see our <code>micronaut-core</code> dependency.
+How did we do this?</p>
+</div>
+<div class="paragraph">
+<p>Note that instead of using <code>afterEvaluate</code>, what we did is <em>adding a dependency</em>, but instead of using the traditional dependency notation, we used a <em>provider</em>: the actual dependency string is computed <em>only when we need it</em>.
+We can check that we can actually configure the version via our extension by editing our build file:</p>
+</div>
+<div class="listingblock">
+<div class="title">lib/build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+   version = "3.3.1" // override the convention
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_maybe_add_maybe_not">Maybe add, maybe not!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the previous example, we have <em>systematically added</em> a dependency, based on the version defined in the extension.
+What if we want to add a dependency if a property is set to a particular value?
+For this purpose, let&#8217;s say that we define a <code>runtime</code> property which will tell what runtime to use.
+Let&#8217;s add this property to our extension:</p>
+</div>
+<div class="listingblock">
+<div class="title">build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package my.plugin
+
+import org.gradle.api.provider.Property
+
+interface MicronautExtension {
+    Property&lt;String&gt; getVersion()
+    Property&lt;String&gt; getRuntime()
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s update our plugin to use that property, and add a dependency based on the value of the <em>runtime</em> property:</p>
+</div>
+<div class="listingblock">
+<div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+
+def micronautExtension = extensions.create("micronaut", MicronautExtension)
+micronautExtension.version.convention("3.3.0")
+
+dependencies {
+    implementation micronautExtension.version.map { v -&gt;
+        "io.micronaut:micronaut-core:$v"
+    }
+
+    implementation micronautExtension.runtime.map { r -&gt;
+        switch(r) {
+            case 'netty':                                                   <i class="conum" data-value="1"></i><b>(1)</b>
+                return "io.netty:netty-buffer:4.1.75.Final"
+            case 'tomcat':
+                return "org.apache.tomcat.embed:tomcat-embed-core:10.0.18"  <i class="conum" data-value="2"></i><b>(2)</b>
+            default:
+                return null                                                 <i class="conum" data-value="3"></i><b>(3)</b>
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Add a dependency if the runtime is set to netty</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add a dependency if the runtime is set to tomcat</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>But do nothing if the runtime isn&#8217;t set</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The trick, therefore, is to <em>return null</em> in the provider in case no dependency needs to be added.
+So let&#8217;s check first that without declaring anything, we don&#8217;t have any dependency added:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s switch to use <code>tomcat</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">lib/build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+   version = "3.3.1"
+   runtime = "tomcat"
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+
+&gt; Task :lib:dependencies
+
+------------------------------------------------------------
+Project ':lib'
+------------------------------------------------------------
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.apache.commons:commons-math3:3.6.1
++--- io.micronaut:micronaut-core:3.3.1
+|    \--- org.slf4j:slf4j-api:1.7.29
++--- org.apache.tomcat.embed:tomcat-embed-core:10.0.18
+|    \--- org.apache.tomcat:tomcat-annotations-api:10.0.18
+\--- com.google.guava:guava:30.1.1-jre
+     +--- com.google.guava:failureaccess:1.0.1
+     +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- org.checkerframework:checker-qual:3.8.0
+     +--- com.google.errorprone:error_prone_annotations:2.5.1
+     \--- com.google.j2objc:j2objc-annotations:1.3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note how the dependency on Tomcat is added!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_more_complex_use_cases_are_supported">More complex use cases are supported!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We&#8217;ve shown how to add a dependency and derive the dependency notation from the version defined in our extension.
+We&#8217;ve then seen how we could add a dependency, or not, based on the value of an extension: either return a <em>supported dependency notation</em>, or <em>null</em> if nothing needs to be added.</p>
+</div>
+<div class="paragraph">
+<p>Gradle actually supports more complex cases, that I will let as an exercise to the reader.
+For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>adding a dependency provider and configure its rich version (see <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/dsl/DependencyHandler.html#addProvider-java.lang.String-org.gradle.api.provider.Provider-org.gradle.api.Action-">DependencyHandler#addProvider</a>).</p>
+</li>
+<li>
+<p>adding a <em>list</em> of dependencies, instead of a <em>single</em> dependence (see <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/Configuration.html#getDependencies--">Configuration#getDependencies</a> and <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/DomainObjectCollection.html#addAllLater-org.gradle.api.provider.Provider-">DependencySet#addAllLater</a>).</p>
+</li>
+<li>
+<p>computing a dependency from two or more providers (see <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Provider.html#zip-org.gradle.api.provider.Provider-java.util.function.BiFunction-">Provider#zip</a>).</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this post, we&#8217;ve seen how to leverage Gradle&#8217;s provider API to properly implement plugins which need to add dependencies conditionally.
+This can either mean that they need to add dependencies which version depend on some user configuration, or even full dependency notations which depend on configuration.
+The interest of using the provider API again lies in the fact that it is <em>lazy</em> and therefore is (largely) immune to ordering issues: instead of relying on hooks like <code>afterEvaluate</code> which come with a number of drawbacks (reliability, ordering, interaction with other plugins), we rely on the fact that it&#8217;s only when a value is <em>needed</em> that it is computed.
+At this moment, we know that the configuration is complete, so we can guarantee that our dependencies will be correct.</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'conditional-dependencies-gradle';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
