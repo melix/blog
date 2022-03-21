@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 21 Mar 2022 23:06:46 +0100</pubDate>
-    <lastBuildDate>Mon, 21 Mar 2022 23:06:46 +0100</lastBuildDate>
+    <pubDate>Mon, 21 Mar 2022 23:09:31 +0100</pubDate>
+    <lastBuildDate>Mon, 21 Mar 2022 23:09:31 +0100</lastBuildDate>
 
     <item>
       <title>Conditional dependencies with Gradle</title>
@@ -19,7 +19,7 @@
 &lt;h2 id=&quot;_introduction&quot;&gt;Introduction&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;If you ever wrote a Gradle plugin for a framework (e.g &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut&lt;/a&gt;_ or a plugin which needs to add dependencies if the user configures a particular flag, then it is likely that you&amp;#8217;ve faced some ordering issues.&lt;/p&gt;
+&lt;p&gt;If you ever wrote a Gradle plugin for a framework (e.g &lt;a href=&quot;https://micronaut.io&quot;&gt;Micronaut&lt;/a&gt;) or a plugin which needs to add dependencies if the user configures a particular flag, then it is likely that you&amp;#8217;ve faced some ordering issues.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;For example, imagine that you have this DSL:&lt;/p&gt;
