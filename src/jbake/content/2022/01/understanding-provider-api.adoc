@@ -438,7 +438,7 @@ GreetingExtension extension = project.getExtensions().create("greeting", Greetin
 extension.getOutro().convention("!");
 ----
 
-It's interesting to see that our DSL will only expose "user" and "outro", but not the intro, which is actually dependent on the languag. 
+It's interesting to see that our DSL will only expose "user" and "outro", but not the intro, which is actually dependent on the language. 
 We can also set a conventional value on the extension itself.
 The plugin can then register both tasks for us:
 
