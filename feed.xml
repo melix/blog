@@ -6,9 +6,437 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Fri, 13 May 2022 08:43:30 +0200</pubDate>
-    <lastBuildDate>Fri, 13 May 2022 08:43:30 +0200</lastBuildDate>
+    <pubDate>Tue, 24 May 2022 09:49:05 +0200</pubDate>
+    <lastBuildDate>Tue, 24 May 2022 09:49:05 +0200</lastBuildDate>
 
+    <item>
+      <title>Gradle quickie: laziness</title>
+      <link>https://melix.github.io/blog//2022/05/gradle-laziness.html</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2022/05/gradle-laziness.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yesterday, I wrote this tweet:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/2022-05-24-tweet.png&quot; alt=&quot;2022 05 24 tweet&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I got a surprisingly high number of answers, so I thought it would be a good idea to expand a bit on the topic.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gradle &lt;a href=&quot;https://docs.gradle.org/current/userguide/lazy_configuration.html&quot;&gt;introduced lazy APIs several years ago&lt;/a&gt;.
+Those APIs are mostly directed at plugin authors but some build authors may have to deal with them too.
+Lazy APIs are designed to improve performance, by avoiding to create tasks which would never be invoked during a build.
+While lots of users wouldn&amp;#8217;t notice the difference between a build using lazy APIs and a build which doesn&amp;#8217;t, in some ecosystems like Android or with large projects, this makes a dramatic difference.
+In other words, while Gradle&amp;#8217;s performance is often praised, it&amp;#8217;s easy to break performance by unintentionally trigerring configuration of tasks which shouldn&amp;#8217;t.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_task_configuration&quot;&gt;Task configuration&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The discussion was trigerred when I was doing a code review yesterday.
+I saw the following block:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.withType(Test) {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = &apos;full&apos;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This block configures logging for all test tasks of the project.
+At first glance, this seems appropriate, but there&amp;#8217;s this gotcha: you should use &lt;code&gt;.configureEach&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.withType(Test).configureEach {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = &apos;full&apos;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you don&amp;#8217;t, then &lt;em&gt;all tasks of type Test will always be configured&lt;/em&gt;, even if you don&amp;#8217;t call them in a build.
+In other words, lazy configuration is about only configuring tasks which are going to be invoked.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unfortunately, there are no warnings about eager configuration, or &quot;unnecessary&quot; configuration in a build.
+If you use &lt;a href=&quot;https://ge.micronaut.io&quot;&gt;Build Scans&lt;/a&gt;, you can have insights about configuration and realize that, but casual users wouldn&amp;#8217;t.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Similarly, this code:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;test {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = &apos;full&apos;
+    }
+}
+----&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Will configure the &lt;code&gt;test&lt;/code&gt; task (not &lt;em&gt;all&lt;/em&gt; test tasks) eagerly: even if the &lt;code&gt;test&lt;/code&gt; task isn&amp;#8217;t executed in a build, it would be configured.
+Now you see the problem: this configuration pattern has been there basically forever, so it&amp;#8217;s hard to remove.
+To do lazy configuration, you have to write:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.named(&apos;test&apos;) {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = &apos;full&apos;
+    }
+}
+----&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Obviously, this isn&amp;#8217;t as nice, DSL-wise.
+One thing you may wonder is why Gradle&amp;#8217;s DSL default to the lazy version?
+In other words, why doesn&amp;#8217;t it call the lazy version instead of the eager one?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s because of backwards compatiblity: because this pattern has been present since day one in Gradle, eager configuration is everywhere in older builds.
+If you search for configuration blocks in Stack Overflow, it&amp;#8217;s very likely that you&amp;#8217;ll end up copy and pasting &lt;em&gt;eager configuration&lt;/em&gt; samples.
+But, as the name implies, &lt;em&gt;lazy&lt;/em&gt; configuration has a different behavior than &lt;em&gt;eager&lt;/em&gt;: in the lazy case, the configuration block is invoked &lt;em&gt;only when the task is needed&lt;/em&gt;, either because it&amp;#8217;s going to be executed, or that another task depends on its configuration to configure itself.
+In the eager case, configuration is executed immediately: unfortunately there are lots of builds which accidentally depend on this order of execution, so changing from eager to lazy could result in breaking changes!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_what_should_you_use&quot;&gt;What should you use?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The consequence is that there&amp;#8217;s a mix of lazy and eager APIs in Gradle, and making the difference between what is going to trigger configuration or not isn&amp;#8217;t obvious, even for Gradle experts.
+Let&amp;#8217;s summarize a few patterns:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;If you want to configure &lt;em&gt;one particular task&lt;/em&gt; by name, you should write:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.named(&quot;myTask&quot;) {
+   // configure the task
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;or&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.named(&quot;myTask&quot;, SomeType) {
+   // configure the task
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;If you want to all tasks of a particular type, you should write:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.withType(SomeType).configureEach {
+   // configure the task
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;If you want to create a new task, &lt;em&gt;don&amp;#8217;t use create&lt;/em&gt;, but &lt;em&gt;register&lt;/em&gt; instead:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.register(&quot;myTask&quot;, SomeType) {
+    ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the DSL, the following code that you find in many tutorials would &lt;em&gt;immediately create a task&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;task hello {
+   doLast {
+       println &quot;Hello!&quot;
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So the correct way to do this is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.register(&quot;hello&quot;) {
+    doLast {
+         println &quot;Hello!&quot;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that the return type of both calls is &lt;em&gt;different&lt;/em&gt;: the eager version will return a &lt;code&gt;Task&lt;/code&gt;, while the 2d one returns a &lt;code&gt;TaskProvider&lt;/code&gt;.
+This is the reason why upgrading plugins isn&amp;#8217;t that trivial, since it&amp;#8217;s a binary breaking change!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_task_collections_and_implicit_dependencies&quot;&gt;Task collections and implicit dependencies&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In &lt;a href=&quot;https://melix.github.io/blog/2022/01/understanding-provider-api.html&quot;&gt;a previous blog post&lt;/a&gt; I explained that the provider API is the right way to handle implicit inputs.
+For example, you can pass directly a &lt;code&gt;TaskProvider&lt;/code&gt; as an element of a file collection: Gradle would automatically resolve dependencies and trigger the configuration of that task, include it in the task graph and use its output as an input of the task you&amp;#8217;re invoking.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, understanding lazy APIs means that you should understand &lt;em&gt;when&lt;/em&gt; things are executed.
+In the example above, the call &lt;code&gt;tasks.withType(Test)&lt;/code&gt; by itself does &lt;em&gt;not&lt;/em&gt; configure anything.
+You can see it as a lazy predicate: it returns a &lt;em&gt;live task collection&lt;/em&gt;, it&amp;#8217;s a declaration of intent: &quot;this models all tasks of type `Test`&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, the following blocks of code are strictly equivalent:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.withType(Test) {
+   // configure
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;or&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.withType(Test).each {
+    // configure
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;or&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;def testTasks = tasks.withType(Test)
+testTasks.each {
+    // configure
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In other words, the last version explains the &quot;magic&quot; behind the traditional Gradle DSL.
+The first line is lazy, returns a task collection, and it&amp;#8217;s the fact of calling &lt;code&gt;.each&lt;/code&gt; which triggers configuration of all tasks!
+Replace &lt;code&gt;.each&lt;/code&gt; with &lt;code&gt;.configureEach&lt;/code&gt; and you are now lazy!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Newer APIs like &lt;code&gt;named&lt;/code&gt; are lazy from day one, but are not necessarily user friendly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_a_gradle_puzzle&quot;&gt;A Gradle puzzle&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In effect, &lt;code&gt;named&lt;/code&gt; is lazy in terms of &lt;em&gt;configuration&lt;/em&gt;, but &lt;em&gt;eager&lt;/em&gt; in terms of lookup: it will &lt;strong&gt;fail&lt;/strong&gt; if the task that you&amp;#8217;re looking for doesn&amp;#8217;t exist.
+It&amp;#8217;s a bit strange, since in Gradle everything is now supposed to be lazy, so you can&amp;#8217;t know &lt;em&gt;when&lt;/em&gt; a task is going to be available or not.
+As an illustration, let&amp;#8217;s explore the following script (don&amp;#8217;t write this in your own builds, this is for demonstration purposes!):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.register(&quot;hello&quot;) {
+   doLast {
+       println &quot;Hello,&quot;
+   }
+}
+
+tasks.named(&quot;hello&quot;) {
+   doLast {
+        println &quot;World!&quot;
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you run &lt;code&gt;gradle hello&lt;/code&gt;, then the output is what you expect:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-none hljs&quot;&gt;&amp;gt; Task :hello
+Hello,
+World!&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, &lt;em&gt;invert&lt;/em&gt; the position of the 2 tasks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.named(&quot;hello&quot;) {
+   doLast {
+        println &quot;World!&quot;
+   }
+}
+
+tasks.register(&quot;hello&quot;) {
+   doLast {
+       println &quot;Hello,&quot;
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and run again. Boom!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-none hljs&quot;&gt;* Where:
+Build file &apos;/tmp/ouudfd/build.gradle&apos; line: 1
+
+* What went wrong:
+A problem occurred evaluating root project &apos;ohnoes&apos;.
+&amp;gt; Task with name &apos;hello&apos; not found in root project &apos;ohnoes&apos;.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That is very unexpected: I think what most people would expect is, if any change, that the &lt;code&gt;World!&lt;/code&gt; and &lt;code&gt;Hello&lt;/code&gt; outputs would be exchanged.
+But because &lt;code&gt;named&lt;/code&gt; &lt;em&gt;eagerly&lt;/em&gt; searches for a task registed with a particular name, it &lt;em&gt;fails&lt;/em&gt; if not found.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a consequence, plugin authors who want to react to other plugins, or react to tasks which &lt;em&gt;may&lt;/em&gt; be present or not, tend to use the following API instead:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.matching { it.name == &apos;hello&apos; }.configureEach {
+    doLast {
+        println &quot;World!&quot;
+   }
+}
+
+tasks.register(&quot;hello&quot;) {
+   doLast {
+       println &quot;Hello,&quot;
+   }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s run our &lt;code&gt;hello&lt;/code&gt; task:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-none hljs&quot;&gt;&amp;gt; Task :hello
+World!
+Hello,&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yay! No failure anymore, and the output is in the order we expected. Problem solved, right?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well, not so fast.
+You&amp;#8217;ve used &lt;code&gt;configureEach&lt;/code&gt;, so everything should be lazy.
+Expect that not: the &lt;code&gt;matching&lt;/code&gt; API is an &lt;em&gt;old&lt;/em&gt;, eager API!
+Actually, if you look at what the predicate uses, it becomes obvious:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-java hljs&quot; data-lang=&quot;java&quot;&gt;// T is a Task!
+TaskCollection&amp;lt;T&amp;gt; matching(Spec&amp;lt;? super T&amp;gt; var1)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because it works on &lt;code&gt;Task&lt;/code&gt; instances, it needs to &lt;em&gt;create and configure the tasks&lt;/em&gt; so that you can run an arbitrary predicate on them!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s why if you have to write things like this, you &lt;strong&gt;must&lt;/strong&gt; guard calls to &lt;code&gt;matching&lt;/code&gt; with a &lt;code&gt;withType&lt;/code&gt; before, which will restrict the set of tasks which will be configured.
+For example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.withType(Greeter).matching { it.name == &apos;hello&apos; }.configureEach {
+   messages.add(&quot;World!&quot;)
+}
+
+tasks.register(&quot;hello&quot;, Greeter) {
+   messages.add(&quot;Hello,&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course the example is a bit stupid, but it makes sense when you&amp;#8217;re not the one in control of &lt;em&gt;when&lt;/em&gt; a task is configured or even if you don&amp;#8217;t know if it will ever be.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unfortunately, Gradle doesn&amp;#8217;t provide an API which is &lt;em&gt;fully lazy&lt;/em&gt; and lenient to tasks being present or not.
+If you simply want to &lt;em&gt;configure&lt;/em&gt; a task, that is not a big deal since you can simply use &lt;code&gt;configureEach&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.configureEach {
+    if (it.name == &apos;hello&apos;) { ... }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is fine because the configuration block will be called for each task being configured.
+However, this &lt;code&gt;configureEach&lt;/code&gt; block is a &lt;em&gt;configurer&lt;/em&gt;, not a &lt;em&gt;predicate&lt;/em&gt;, so you can&amp;#8217;t use it as an input to another task:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-groovy hljs&quot; data-lang=&quot;groovy&quot;&gt;tasks.named(&quot;md5&quot;) {
+    inputFiles.from(tasks.named(&quot;userguide&quot;))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The code above would &lt;em&gt;fail&lt;/em&gt; if the &lt;code&gt;userguide&lt;/code&gt; task doesn&amp;#8217;t exist &lt;em&gt;before&lt;/em&gt; the &lt;code&gt;md5&lt;/code&gt; task is configured&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post, I have explained why you should use the new lazy APIs instead of their eager counterparts.
+I have also described that while they are more verbose, they make it possible to have faster builds by avoiding configuration of tasks which would not be executed.
+However, Gradle doesn&amp;#8217;t warn you if you eagerly configure tasks, and it&amp;#8217;s easy to shoot yourself in the foot.
+Some would blame the docs, some would blame the APIs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a former Gradler, I would blame none of those: the &lt;a href=&quot;https://docs.gradle.org/current/userguide/lazy_configuration.html&quot;&gt;docs are here&lt;/a&gt;, and changing the APIs to be lazy everywhere is either a binary breaking change (return type of methods which &lt;em&gt;create&lt;/em&gt; instead of &lt;em&gt;register&lt;/em&gt;), or a behavior change (deferred configuration vs immediate configuration).
+This makes it particularly complicated to upgrade builds without pissing off a number of users!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Astrophotographie: rendez-vous sur Twitch !</title>
       <link>https://melix.github.io/blog//2022/05/astro-twitch.html</link>

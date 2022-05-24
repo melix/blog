@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Gradle quickie: laziness</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Gradle quickie: laziness</h1>
+	</div>
+
+	<p><em>24 May 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/laziness.html">laziness</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yesterday, I wrote this tweet:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/2022-05-24-tweet.png" alt="2022 05 24 tweet">
+</div>
+</div>
+<div class="paragraph">
+<p>I got a surprisingly high number of answers, so I thought it would be a good idea to expand a bit on the topic.</p>
+</div>
+<div class="paragraph">
+<p>Gradle <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">introduced lazy APIs several years ago</a>.
+Those APIs are mostly directed at plugin authors but some build authors may have to deal with them too.
+Lazy APIs are designed to improve performance, by avoiding to create tasks which would never be invoked during a build.
+While lots of users wouldn&#8217;t notice the difference between a build using lazy APIs and a build which doesn&#8217;t, in some ecosystems like Android or with large projects, this makes a dramatic difference.
+In other words, while Gradle&#8217;s performance is often praised, it&#8217;s easy to break performance by unintentionally trigerring configuration of tasks which shouldn&#8217;t.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_task_configuration">Task configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The discussion was trigerred when I was doing a code review yesterday.
+I saw the following block:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test) {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This block configures logging for all test tasks of the project.
+At first glance, this seems appropriate, but there&#8217;s this gotcha: you should use <code>.configureEach</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test).configureEach {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t, then <em>all tasks of type Test will always be configured</em>, even if you don&#8217;t call them in a build.
+In other words, lazy configuration is about only configuring tasks which are going to be invoked.</p>
+</div>
+<div class="paragraph">
+<p>Unfortunately, there are no warnings about eager configuration, or "unnecessary" configuration in a build.
+If you use <a href="https://ge.micronaut.io">Build Scans</a>, you can have insights about configuration and realize that, but casual users wouldn&#8217;t.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">test {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+----</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Will configure the <code>test</code> task (not <em>all</em> test tasks) eagerly: even if the <code>test</code> task isn&#8217;t executed in a build, it would be configured.
+Now you see the problem: this configuration pattern has been there basically forever, so it&#8217;s hard to remove.
+To do lazy configuration, you have to write:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named('test') {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+----</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obviously, this isn&#8217;t as nice, DSL-wise.
+One thing you may wonder is why Gradle&#8217;s DSL default to the lazy version?
+In other words, why doesn&#8217;t it call the lazy version instead of the eager one?</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s because of backwards compatiblity: because this pattern has been present since day one in Gradle, eager configuration is everywhere in older builds.
+If you search for configuration blocks in Stack Overflow, it&#8217;s very likely that you&#8217;ll end up copy and pasting <em>eager configuration</em> samples.
+But, as the name implies, <em>lazy</em> configuration has a different behavior than <em>eager</em>: in the lazy case, the configuration block is invoked <em>only when the task is needed</em>, either because it&#8217;s going to be executed, or that another task depends on its configuration to configure itself.
+In the eager case, configuration is executed immediately: unfortunately there are lots of builds which accidentally depend on this order of execution, so changing from eager to lazy could result in breaking changes!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_should_you_use">What should you use?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The consequence is that there&#8217;s a mix of lazy and eager APIs in Gradle, and making the difference between what is going to trigger configuration or not isn&#8217;t obvious, even for Gradle experts.
+Let&#8217;s summarize a few patterns:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you want to configure <em>one particular task</em> by name, you should write:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("myTask") {
+   // configure the task
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("myTask", SomeType) {
+   // configure the task
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you want to all tasks of a particular type, you should write:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(SomeType).configureEach {
+   // configure the task
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you want to create a new task, <em>don&#8217;t use create</em>, but <em>register</em> instead:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("myTask", SomeType) {
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the DSL, the following code that you find in many tutorials would <em>immediately create a task</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task hello {
+   doLast {
+       println "Hello!"
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So the correct way to do this is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("hello") {
+    doLast {
+         println "Hello!"
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that the return type of both calls is <em>different</em>: the eager version will return a <code>Task</code>, while the 2d one returns a <code>TaskProvider</code>.
+This is the reason why upgrading plugins isn&#8217;t that trivial, since it&#8217;s a binary breaking change!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_task_collections_and_implicit_dependencies">Task collections and implicit dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In <a href="https://melix.github.io/blog/2022/01/understanding-provider-api.html">a previous blog post</a> I explained that the provider API is the right way to handle implicit inputs.
+For example, you can pass directly a <code>TaskProvider</code> as an element of a file collection: Gradle would automatically resolve dependencies and trigger the configuration of that task, include it in the task graph and use its output as an input of the task you&#8217;re invoking.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, understanding lazy APIs means that you should understand <em>when</em> things are executed.
+In the example above, the call <code>tasks.withType(Test)</code> by itself does <em>not</em> configure anything.
+You can see it as a lazy predicate: it returns a <em>live task collection</em>, it&#8217;s a declaration of intent: "this models all tasks of type `Test`".</p>
+</div>
+<div class="paragraph">
+<p>Therefore, the following blocks of code are strictly equivalent:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test) {
+   // configure
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test).each {
+    // configure
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def testTasks = tasks.withType(Test)
+testTasks.each {
+    // configure
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In other words, the last version explains the "magic" behind the traditional Gradle DSL.
+The first line is lazy, returns a task collection, and it&#8217;s the fact of calling <code>.each</code> which triggers configuration of all tasks!
+Replace <code>.each</code> with <code>.configureEach</code> and you are now lazy!</p>
+</div>
+<div class="paragraph">
+<p>Newer APIs like <code>named</code> are lazy from day one, but are not necessarily user friendly.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_gradle_puzzle">A Gradle puzzle</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In effect, <code>named</code> is lazy in terms of <em>configuration</em>, but <em>eager</em> in terms of lookup: it will <strong>fail</strong> if the task that you&#8217;re looking for doesn&#8217;t exist.
+It&#8217;s a bit strange, since in Gradle everything is now supposed to be lazy, so you can&#8217;t know <em>when</em> a task is going to be available or not.
+As an illustration, let&#8217;s explore the following script (don&#8217;t write this in your own builds, this is for demonstration purposes!):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("hello") {
+   doLast {
+       println "Hello,"
+   }
+}
+
+tasks.named("hello") {
+   doLast {
+        println "World!"
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you run <code>gradle hello</code>, then the output is what you expect:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">&gt; Task :hello
+Hello,
+World!</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, <em>invert</em> the position of the 2 tasks:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("hello") {
+   doLast {
+        println "World!"
+   }
+}
+
+tasks.register("hello") {
+   doLast {
+       println "Hello,"
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and run again. Boom!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">* Where:
+Build file '/tmp/ouudfd/build.gradle' line: 1
+
+* What went wrong:
+A problem occurred evaluating root project 'ohnoes'.
+&gt; Task with name 'hello' not found in root project 'ohnoes'.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is very unexpected: I think what most people would expect is, if any change, that the <code>World!</code> and <code>Hello</code> outputs would be exchanged.
+But because <code>named</code> <em>eagerly</em> searches for a task registed with a particular name, it <em>fails</em> if not found.</p>
+</div>
+<div class="paragraph">
+<p>As a consequence, plugin authors who want to react to other plugins, or react to tasks which <em>may</em> be present or not, tend to use the following API instead:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.matching { it.name == 'hello' }.configureEach {
+    doLast {
+        println "World!"
+   }
+}
+
+tasks.register("hello") {
+   doLast {
+       println "Hello,"
+   }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s run our <code>hello</code> task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">&gt; Task :hello
+World!
+Hello,</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Yay! No failure anymore, and the output is in the order we expected. Problem solved, right?</p>
+</div>
+<div class="paragraph">
+<p>Well, not so fast.
+You&#8217;ve used <code>configureEach</code>, so everything should be lazy.
+Expect that not: the <code>matching</code> API is an <em>old</em>, eager API!
+Actually, if you look at what the predicate uses, it becomes obvious:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// T is a Task!
+TaskCollection&lt;T&gt; matching(Spec&lt;? super T&gt; var1)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because it works on <code>Task</code> instances, it needs to <em>create and configure the tasks</em> so that you can run an arbitrary predicate on them!</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s why if you have to write things like this, you <strong>must</strong> guard calls to <code>matching</code> with a <code>withType</code> before, which will restrict the set of tasks which will be configured.
+For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Greeter).matching { it.name == 'hello' }.configureEach {
+   messages.add("World!")
+}
+
+tasks.register("hello", Greeter) {
+   messages.add("Hello,")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Of course the example is a bit stupid, but it makes sense when you&#8217;re not the one in control of <em>when</em> a task is configured or even if you don&#8217;t know if it will ever be.</p>
+</div>
+<div class="paragraph">
+<p>Unfortunately, Gradle doesn&#8217;t provide an API which is <em>fully lazy</em> and lenient to tasks being present or not.
+If you simply want to <em>configure</em> a task, that is not a big deal since you can simply use <code>configureEach</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.configureEach {
+    if (it.name == 'hello') { ... }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is fine because the configuration block will be called for each task being configured.
+However, this <code>configureEach</code> block is a <em>configurer</em>, not a <em>predicate</em>, so you can&#8217;t use it as an input to another task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("md5") {
+    inputFiles.from(tasks.named("userguide"))
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The code above would <em>fail</em> if the <code>userguide</code> task doesn&#8217;t exist <em>before</em> the <code>md5</code> task is configured&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this blog post, I have explained why you should use the new lazy APIs instead of their eager counterparts.
+I have also described that while they are more verbose, they make it possible to have faster builds by avoiding configuration of tasks which would not be executed.
+However, Gradle doesn&#8217;t warn you if you eagerly configure tasks, and it&#8217;s easy to shoot yourself in the foot.
+Some would blame the docs, some would blame the APIs.</p>
+</div>
+<div class="paragraph">
+<p>As a former Gradler, I would blame none of those: the <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html">docs are here</a>, and changing the APIs to be lazy everywhere is either a binary breaking change (return type of methods which <em>create</em> instead of <em>register</em>), or a behavior change (deferred configuration vs immediate configuration).
+This makes it particularly complicated to upgrade builds without pissing off a number of users!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'gradle-lazy-apis';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
