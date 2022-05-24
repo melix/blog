@@ -457,7 +457,7 @@ tasks.register("hello", Greeter) {
 <p>Of course the example is a bit stupid, but it makes sense when you&#8217;re not the one in control of <em>when</em> a task is configured or even if you don&#8217;t know if it will ever be.</p>
 </div>
 <div class="paragraph">
-<p>Unfortunately, Gradle doesn&#8217;t provide an API which is <em>fully lazy</em> and lenient to tasks being present or not.
+<p>Unfortunately, <a href="https://github.com/gradle/gradle/issues/16543">Gradle doesn&#8217;t provide an API which is <em>fully lazy</em> and lenient to tasks being present or not</a>.
 If you simply want to <em>configure</em> a task, that is not a big deal since you can simply use <code>configureEach</code>:</p>
 </div>
 <div class="listingblock">
