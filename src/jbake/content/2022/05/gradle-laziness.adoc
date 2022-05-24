@@ -316,7 +316,7 @@ tasks.register("hello", Greeter) {
 
 Of course the example is a bit stupid, but it makes sense when you're not the one in control of _when_ a task is configured or even if you don't know if it will ever be.
 
-Unfortunately, Gradle doesn't provide an API which is _fully lazy_ and lenient to tasks being present or not.
+Unfortunately, https://github.com/gradle/gradle/issues/16543[Gradle doesn't provide an API which is _fully lazy_ and lenient to tasks being present or not].
 If you simply want to _configure_ a task, that is not a big deal since you can simply use `configureEach`:
 
 [source,groovy]
