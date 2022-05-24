@@ -1,0 +1,351 @@
+= Gradle quickie: laziness
+Cédric Champeau
+2022-05-24
+:jbake-type: post
+:jbake-tags: gradle, laziness
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-lazy-apis
+:linkattrs:
+
+
+Yesterday, I wrote this tweet:
+
+image::/blog/img/2022-05-24-tweet.png[]
+
+
+I got a surprisingly high number of answers, so I thought it would be a good idea to expand a bit on the topic.
+
+Gradle https://docs.gradle.org/current/userguide/lazy_configuration.html[introduced lazy APIs several years ago].
+Those APIs are mostly directed at plugin authors but some build authors may have to deal with them too.
+Lazy APIs are designed to improve performance, by avoiding to create tasks which would never be invoked during a build.
+While lots of users wouldn't notice the difference between a build using lazy APIs and a build which doesn't, in some ecosystems like Android or with large projects, this makes a dramatic difference.
+In other words, while Gradle's performance is often praised, it's easy to break performance by unintentionally trigerring configuration of tasks which shouldn't.
+
+
+== Task configuration
+
+The discussion was trigerred when I was doing a code review yesterday.
+I saw the following block:
+
+[source,groovy]
+----
+tasks.withType(Test) {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+----
+
+This block configures logging for all test tasks of the project.
+At first glance, this seems appropriate, but there's this gotcha: you should use `.configureEach`:
+
+[source,groovy]
+----
+tasks.withType(Test).configureEach {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+----
+
+If you don't, then _all tasks of type Test will always be configured_, even if you don't call them in a build.
+In other words, lazy configuration is about only configuring tasks which are going to be invoked.
+
+Unfortunately, there are no warnings about eager configuration, or "unnecessary" configuration in a build.
+If you use https://ge.micronaut.io[Build Scans], you can have insights about configuration and realize that, but casual users wouldn't.
+
+Similarly, this code:
+
+[source,groovy]
+test {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+----
+
+Will configure the `test` task (not _all_ test tasks) eagerly: even if the `test` task isn't executed in a build, it would be configured.
+Now you see the problem: this configuration pattern has been there basically forever, so it's hard to remove.
+To do lazy configuration, you have to write:
+
+[source,groovy]
+tasks.named('test') {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+----
+
+Obviously, this isn't as nice, DSL-wise.
+One thing you may wonder is why Gradle's DSL default to the lazy version?
+In other words, why doesn't it call the lazy version instead of the eager one?
+
+It's because of backwards compatiblity: because this pattern has been present since day one in Gradle, eager configuration is everywhere in older builds.
+If you search for configuration blocks in Stack Overflow, it's very likely that you'll end up copy and pasting _eager configuration_ samples.
+But, as the name implies, _lazy_ configuration has a different behavior than _eager_: in the lazy case, the configuration block is invoked _only when the task is needed_, either because it's going to be executed, or that another task depends on its configuration to configure itself.
+In the eager case, configuration is executed immediately: unfortunately there are lots of builds which accidentally depend on this order of execution, so changing from eager to lazy could result in breaking changes!
+
+== What should you use?
+
+The consequence is that there's a mix of lazy and eager APIs in Gradle, and making the difference between what is going to trigger configuration or not isn't obvious, even for Gradle experts.
+Let's summarize a few patterns:
+
+- If you want to configure _one particular task_ by name, you should write:
+
+[source,groovy]
+----
+tasks.named("myTask") {
+   // configure the task
+}
+----
+
+or
+
+[source,groovy]
+----
+tasks.named("myTask", SomeType) {
+   // configure the task
+}
+----
+
+- If you want to all tasks of a particular type, you should write:
+
+[source,groovy]
+----
+tasks.withType(SomeType).configureEach {
+   // configure the task
+}
+----
+
+- If you want to create a new task, _don't use create_, but _register_ instead:
+
+[source,groovy]
+----
+tasks.register("myTask", SomeType) {
+    ...
+}
+----
+
+In the DSL, the following code that you find in many tutorials would _immediately create a task_:
+
+[source,groovy]
+----
+task hello {
+   doLast {
+       println "Hello!"
+   }
+}
+----
+
+So the correct way to do this is:
+
+[source,groovy]
+----
+tasks.register("hello") {
+    doLast {
+         println "Hello!"
+    }
+}
+----
+
+Note that the return type of both calls is _different_: the eager version will return a `Task`, while the 2d one returns a `TaskProvider`.
+This is the reason why upgrading plugins isn't that trivial, since it's a binary breaking change!
+
+== Task collections and implicit dependencies
+
+In https://melix.github.io/blog/2022/01/understanding-provider-api.html[a previous blog post] I explained that the provider API is the right way to handle implicit inputs.
+For example, you can pass directly a `TaskProvider` as an element of a file collection: Gradle would automatically resolve dependencies and trigger the configuration of that task, include it in the task graph and use its output as an input of the task you're invoking.
+
+Therefore, understanding lazy APIs means that you should understand _when_ things are executed.
+In the example above, the call `tasks.withType(Test)` by itself does _not_ configure anything.
+You can see it as a lazy predicate: it returns a _live task collection_, it's a declaration of intent: "this models all tasks of type `Test`".
+
+Therefore, the following blocks of code are strictly equivalent:
+
+[source,groovy]
+----
+tasks.withType(Test) {
+   // configure
+}
+----
+
+or
+
+[source,groovy]
+----
+tasks.withType(Test).each {
+    // configure
+}
+----
+
+
+or
+
+[source,groovy]
+----
+def testTasks = tasks.withType(Test)
+testTasks.each {
+    // configure
+}
+----
+
+In other words, the last version explains the "magic" behind the traditional Gradle DSL.
+The first line is lazy, returns a task collection, and it's the fact of calling `.each` which triggers configuration of all tasks!
+Replace `.each` with `.configureEach` and you are now lazy!
+
+Newer APIs like `named` are lazy from day one, but are not necessarily user friendly.
+
+== A Gradle puzzle
+
+In effect, `named` is lazy in terms of _configuration_, but _eager_ in terms of lookup: it will **fail** if the task that you're looking for doesn't exist.
+It's a bit strange, since in Gradle everything is now supposed to be lazy, so you can't know _when_ a task is going to be available or not.
+As an illustration, let's explore the following script (don't write this in your own builds, this is for demonstration purposes!):
+
+[source,groovy]
+----
+tasks.register("hello") {
+   doLast {
+       println "Hello,"
+   }
+}
+
+tasks.named("hello") {
+   doLast {
+        println "World!"
+   }
+}
+----
+
+If you run `gradle hello`, then the output is what you expect:
+
+```
+> Task :hello
+Hello,
+World!
+```
+
+Now, _invert_ the position of the 2 tasks:
+
+[source,groovy]
+----
+tasks.named("hello") {
+   doLast {
+        println "World!"
+   }
+}
+
+tasks.register("hello") {
+   doLast {
+       println "Hello,"
+   }
+}
+----
+
+and run again. Boom!
+
+```
+* Where:
+Build file '/tmp/ouudfd/build.gradle' line: 1
+
+* What went wrong:
+A problem occurred evaluating root project 'ohnoes'.
+> Task with name 'hello' not found in root project 'ohnoes'.
+```
+
+That is very unexpected: I think what most people would expect is, if any change, that the `World!` and `Hello` outputs would be exchanged.
+But because `named` _eagerly_ searches for a task registed with a particular name, it _fails_ if not found.
+
+As a consequence, plugin authors who want to react to other plugins, or react to tasks which _may_ be present or not, tend to use the following API instead:
+
+[source,groovy]
+----
+tasks.matching { it.name == 'hello' }.configureEach {
+    doLast {
+        println "World!"
+   }
+}
+
+tasks.register("hello") {
+   doLast {
+       println "Hello,"
+   }
+}
+----
+
+Now let's run our `hello` task:
+
+```
+> Task :hello
+World!
+Hello,
+```
+
+Yay! No failure anymore, and the output is in the order we expected. Problem solved, right?
+
+Well, not so fast.
+You've used `configureEach`, so everything should be lazy.
+Expect that not: the `matching` API is an _old_, eager API!
+Actually, if you look at what the predicate uses, it becomes obvious:
+
+[source,java]
+----
+// T is a Task!
+TaskCollection<T> matching(Spec<? super T> var1)
+----
+
+Because it works on `Task` instances, it needs to _create and configure the tasks_ so that you can run an arbitrary predicate on them!
+
+That's why if you have to write things like this, you **must** guard calls to `matching` with a `withType` before, which will restrict the set of tasks which will be configured.
+For example:
+
+[source,groovy]
+----
+tasks.withType(Greeter).matching { it.name == 'hello' }.configureEach {
+   messages.add("World!")
+}
+
+tasks.register("hello", Greeter) {
+   messages.add("Hello,")
+}
+----
+
+Of course the example is a bit stupid, but it makes sense when you're not the one in control of _when_ a task is configured or even if you don't know if it will ever be.
+
+Unfortunately, Gradle doesn't provide an API which is _fully lazy_ and lenient to tasks being present or not.
+If you simply want to _configure_ a task, that is not a big deal since you can simply use `configureEach`:
+
+[source,groovy]
+----
+tasks.configureEach {
+    if (it.name == 'hello') { ... }
+}
+----
+
+This is fine because the configuration block will be called for each task being configured.
+However, this `configureEach` block is a _configurer_, not a _predicate_, so you can't use it as an input to another task:
+
+[source,groovy]
+----
+tasks.named("md5") {
+    inputFiles.from(tasks.named("userguide"))
+}
+----
+
+The code above would _fail_ if the `userguide` task doesn't exist _before_ the `md5` task is configured...
+
+== Conclusion
+
+In this blog post, I have explained why you should use the new lazy APIs instead of their eager counterparts.
+I have also described that while they are more verbose, they make it possible to have faster builds by avoiding configuration of tasks which would not be executed.
+However, Gradle doesn't warn you if you eagerly configure tasks, and it's easy to shoot yourself in the foot.
+Some would blame the docs, some would blame the APIs.
+
+As a former Gradler, I would blame none of those: the https://docs.gradle.org/current/userguide/lazy_configuration.html[docs are here], and changing the APIs to be lazy everywhere is either a binary breaking change (return type of methods which _create_ instead of _register_), or a behavior change (deferred configuration vs immediate configuration).
+This makes it particularly complicated to upgrade builds without pissing off a number of users!
+
+
