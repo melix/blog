@@ -98,7 +98,7 @@ For example, let&#8217;s imagine that you have a multi-project build with this l
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">root
+<pre class="pygments highlight"><code>root
  |---- client
  |---- server</code></pre>
 </div>
@@ -110,7 +110,7 @@ For example, both of them would need Guava as an implementation detail and JUnit
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
+<pre class="pygments highlight"><code data-lang="groovy">dependencies {
     implementation("com.google.guava:guava:30.0-jre")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -148,7 +148,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">gradle.properties</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">guavaVersion=30.0-jre</code></pre>
+<pre class="pygments highlight"><code>guavaVersion=30.0-jre</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -156,7 +156,7 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">dependencies {
+<pre class="pygments highlight"><code>dependencies {
     implementation("com.google.guava:guava:${guavaVersion}")
 }</code></pre>
 </div>
@@ -167,7 +167,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">extra properties</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">ext {
+<pre class="pygments highlight"><code data-lang="groovy">ext {
    guavaVersion = '30.0-jre'
 }
 
@@ -187,7 +187,7 @@ dependencies {
 <div class="listingblock">
 <div class="title">buildSrc/src/main/kotlin/Libs.kt</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">object Libs {
+<pre class="pygments highlight"><code data-lang="kotlin">object Libs {
    val guava = "com.google.guava:guava:30.0-jre"
 }</code></pre>
 </div>
@@ -198,7 +198,7 @@ dependencies {
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">dependencies {
+<pre class="pygments highlight"><code>dependencies {
     implementation(Libs.guava)
 }</code></pre>
 </div>
@@ -220,7 +220,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">enableFeaturePreview("VERSION_CATALOGS")</code></pre>
+<pre class="pygments highlight"><code data-lang="groovy">enableFeaturePreview("VERSION_CATALOGS")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -229,7 +229,7 @@ To add support for version catalogs, you need to enable the experimental feature
 <div class="listingblock">
 <div class="title">gradle/libs.versions.toml</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[libraries]
+<pre class="pygments highlight"><code data-lang="toml">[libraries]
 guava = "com.google.guava:guava:30.0-jre"
 junit-jupiter = "org.junit.jupiter:junit-jupiter-api:5.7.1"
 junit-engine = { module="org.junit.jupiter:junit-jupiter-engine" }
@@ -245,7 +245,7 @@ You still have to declare your dependencies, but this now can be done using a <e
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
+<pre class="pygments highlight"><code data-lang="groovy">dependencies {
     implementation(libs.guava)
     testImplementation(libs.testDependencies)
 }</code></pre>
@@ -266,7 +266,7 @@ For example:</p>
 <div class="listingblock">
 <div class="title">gradle/libs.versions.toml</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[versions]
+<pre class="pygments highlight"><code data-lang="toml">[versions]
 groovy = "2.5.14"
 guava = "30.0-jre"
 jupiter = "5.7.1"
@@ -301,7 +301,7 @@ The TOML format also provides us with the ability to declare <a href="https://do
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencyResolutionManagement {
+<pre class="pygments highlight"><code data-lang="groovy">dependencyResolutionManagement {
    versionCatalogs {
       libs {
            alias("guava").to("com.google.guava", "guava").versionRef("guava")
@@ -329,7 +329,7 @@ For example, let&#8217;s imagine that the Spring Boot team <a href="https://docs
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencyResolutionManagement {
+<pre class="pygments highlight"><code data-lang="groovy">dependencyResolutionManagement {
    versionCatalogs {
        spring {
            from("org.springframework:spring-catalog:1.0')
@@ -345,7 +345,7 @@ Therefore, you&#8217;d be able to use whatever version of SLF4J the Spring team 
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
+<pre class="pygments highlight"><code data-lang="groovy">dependencies {
     implementation(spring.slf4j)
 }</code></pre>
 </div>

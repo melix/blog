@@ -100,7 +100,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import org.codehaus.groovy.control.customizers.ImportCustomizer
+<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 ...
 
@@ -118,7 +118,7 @@ importCustomizer.addStaticStar('java.lang.Math')</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(importCustomizer)
 def shell = new GroovyShell(configuration)
 shell.evaluate """
@@ -142,7 +142,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
+<pre class="prettyprint highlight"><code>final ImportCustomizer imports = new ImportCustomizer().addStaticStars('java.lang.Math') // add static import of java.lang.Math
 final SecureASTCustomizer secure = new SecureASTCustomizer()
 secure.with {
     closuresAllowed = false
@@ -231,7 +231,7 @@ GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader, config)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">1+1
+<pre class="prettyprint highlight"><code>1+1
 ---
 
 will run perfectly, while this one :
@@ -281,7 +281,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+<pre class="prettyprint highlight"><code>import org.codehaus.groovy.control.customizers.SecureASTCustomizer
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
@@ -321,7 +321,7 @@ shell.evaluate """
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(Log))
 def shell = new GroovyShell(configuration)</code></pre>
 </div>
@@ -347,7 +347,7 @@ def shell = new GroovyShell(configuration)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def configuration = new CompilerConfiguration()
+<pre class="prettyprint highlight"><code>def configuration = new CompilerConfiguration()
 configuration.addCompilationCustomizers(new ASTTransformationCustomizer(MyASTTransformationClass))
 def shell = new GroovyShell(configuration)</code></pre>
 </div>

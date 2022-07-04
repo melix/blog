@@ -197,7 +197,7 @@ of the website.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">menu {
+<pre class="prettyprint highlight"><code data-lang="groovy">menu {
     group('Groovy') {
         item 'Learn',                       'learn.html'
         item 'Documentation',               'documentation.html'
@@ -230,7 +230,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">downloads {
+<pre class="prettyprint highlight"><code data-lang="groovy">downloads {
     // ...
     distribution('Groovy 2.3') {
         description {
@@ -254,7 +254,7 @@ which is hardcoded and reduce the risks of forgetting to update the footer, for 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">books {
+<pre class="prettyprint highlight"><code data-lang="groovy">books {
     book('Groovy in Action, 2nd edition') {
         authors "Dierk König, Guillaume Laforge, Paul King, Cédric Champeau, Hamlet D'Arcy, Erik Pragt, and Jon Skeet"
         cover 'img/books/regina.png'
@@ -285,7 +285,7 @@ of templates (even if the model is dynamic), layouts and of course a human reada
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">html {
+<pre class="prettyprint highlight"><code data-lang="groovy">html {
    head {
     title 'Groovy markup template engine in action!'
    }
@@ -332,7 +332,7 @@ the <a href="https://beta.groovy-lang.org/ecosystem.html">Ecosystem</a> page is 
 <div class="listingblock">
 <div class="title">ecosystem.groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">layout 'layouts/main.groovy', true,                                             <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">layout 'layouts/main.groovy', true,                                             <i class="conum" data-value="1"></i><b>(1)</b>
     pageTitle: 'The Groovy programming language - Ecosystem',                   <i class="conum" data-value="2"></i><b>(2)</b>
     mainContent: contents {                                                     <i class="conum" data-value="3"></i><b>(3)</b>
       div(id: 'content', class: 'page-1') {

@@ -88,7 +88,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+<pre class="pygments highlight"><code data-lang="groovy">micronaut {
     useNetty = true
 }</code></pre>
 </div>
@@ -100,7 +100,7 @@ Many plugins do this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">afterEvaluate {
+<pre class="pygments highlight"><code data-lang="groovy">afterEvaluate {
     dependencies {
         if (micronaut.useNetty.get()) {
             implementation("io.netty:netty-buffer:4.1.75.Final")
@@ -131,7 +131,7 @@ For example, the <code>checkstyle</code> plugin would, by default, use version o
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">micronaut {
+<pre class="pygments highlight"><code data-lang="gradle">micronaut {
     version = "3.3.1"
 }</code></pre>
 </div>
@@ -143,7 +143,7 @@ Let&#8217;s create our Gradle project (we&#8217;re assuming that you have Gradle
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir conditional-deps &amp;&amp; cd conditional-deps
+<pre class="pygments highlight"><code data-lang="bash">$ mkdir conditional-deps &amp;&amp; cd conditional-deps
 $ gradle init --dsl groovy \
    --type java-library \
    --package me.champeau.demo \
@@ -156,7 +156,7 @@ $ gradle init --dsl groovy \
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir -p build-logic/src/main/groovy/my/plugin</code></pre>
+<pre class="pygments highlight"><code data-lang="bash">$ mkdir -p build-logic/src/main/groovy/my/plugin</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -165,7 +165,7 @@ $ gradle init --dsl groovy \
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">pluginManagement {
+<pre class="pygments highlight"><code data-lang="groovy">pluginManagement {
     // include our plugin
     includeBuild "build-logic"
 }
@@ -179,7 +179,7 @@ include('lib')</code></pre>
 <div class="listingblock">
 <div class="title">build-logic/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     id 'groovy-gradle-plugin'
 }</code></pre>
 </div>
@@ -190,7 +190,7 @@ include('lib')</code></pre>
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package my.plugin
+<pre class="pygments highlight"><code data-lang="groovy">package my.plugin
 
 import org.gradle.api.provider.Property
 
@@ -205,23 +205,21 @@ interface MicronautExtension {
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+<pre class="pygments highlight"><code data-lang="groovy">import my.plugin.MicronautExtension
 
-def micronautExtension = extensions.create("micronaut", MicronautExtension) <i class="conum" data-value="1"></i><b>(1)</b>
-micronautExtension.version.convention("3.3.0")                              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+def micronautExtension = extensions.create("micronaut", MicronautExtension) <b class="conum">(1)</b>
+micronautExtension.version.convention("3.3.0")                              <b class="conum">(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create our extension, named "micronaut"</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Assign a default value to the "version" property</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Create our extension, named "micronaut"</p>
+</li>
+<li>
+<p>Assign a default value to the "version" property</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>By convention, our plugin id will be <code>my.plugin</code> (it&#8217;s derived from the file name).
@@ -233,7 +231,7 @@ Our plugin is responsible for creating the extension, and it assigns a <em>conve
 <div class="listingblock">
 <div class="title">lib/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     // And now apply our plugin
@@ -250,7 +248,7 @@ micronaut {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 ------------------------------------------------------------
 Project ':lib'
@@ -274,7 +272,7 @@ Edit our <code>build-logic</code> plugin:</p>
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+<pre class="pygments highlight"><code data-lang="groovy">import my.plugin.MicronautExtension
 
 def micronautExtension = extensions.create("micronaut", MicronautExtension)
 micronautExtension.version.convention("3.3.0")
@@ -291,7 +289,7 @@ dependencies {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -323,14 +321,14 @@ We can check that we can actually configure the version via our extension by edi
 <div class="listingblock">
 <div class="title">lib/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+<pre class="pygments highlight"><code data-lang="groovy">micronaut {
    version = "3.3.1" // override the convention
 }</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -365,7 +363,7 @@ Let&#8217;s add this property to our extension:</p>
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package my.plugin
+<pre class="pygments highlight"><code data-lang="groovy">package my.plugin
 
 import org.gradle.api.provider.Property
 
@@ -381,7 +379,7 @@ interface MicronautExtension {
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+<pre class="pygments highlight"><code data-lang="groovy">import my.plugin.MicronautExtension
 
 def micronautExtension = extensions.create("micronaut", MicronautExtension)
 micronautExtension.version.convention("3.3.0")
@@ -393,32 +391,29 @@ dependencies {
 
     implementation micronautExtension.runtime.map { r -&gt;
         switch(r) {
-            case 'netty':                                                   <i class="conum" data-value="1"></i><b>(1)</b>
+            case 'netty':                                                   <b class="conum">(1)</b>
                 return "io.netty:netty-buffer:4.1.75.Final"
             case 'tomcat':
-                return "org.apache.tomcat.embed:tomcat-embed-core:10.0.18"  <i class="conum" data-value="2"></i><b>(2)</b>
+                return "org.apache.tomcat.embed:tomcat-embed-core:10.0.18"  <b class="conum">(2)</b>
             default:
-                return null                                                 <i class="conum" data-value="3"></i><b>(3)</b>
+                return null                                                 <b class="conum">(3)</b>
         }
     }
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Add a dependency if the runtime is set to netty</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Add a dependency if the runtime is set to tomcat</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>But do nothing if the runtime isn&#8217;t set</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Add a dependency if the runtime is set to netty</p>
+</li>
+<li>
+<p>Add a dependency if the runtime is set to tomcat</p>
+</li>
+<li>
+<p>But do nothing if the runtime isn&#8217;t set</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>The trick, therefore, is to <em>return null</em> in the provider in case no dependency needs to be added.
@@ -426,7 +421,7 @@ So let&#8217;s check first that without declaring anything, we don&#8217;t have 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -453,7 +448,7 @@ compileClasspath - Compile classpath for source set 'main'.
 <div class="listingblock">
 <div class="title">lib/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+<pre class="pygments highlight"><code data-lang="groovy">micronaut {
    version = "3.3.1"
    runtime = "tomcat"
 }</code></pre>
@@ -461,7 +456,7 @@ compileClasspath - Compile classpath for source set 'main'.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 

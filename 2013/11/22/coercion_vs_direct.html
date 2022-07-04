@@ -106,20 +106,19 @@ need for casting in Groovy.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">String pretty(Object o) {
+<pre class="prettyprint highlight"><code data-lang="java">String pretty(Object o) {
     if (o instanceof Person) {
-	return ((Person)o).getName(); <i class="conum" data-value="1"></i><b>(1)</b>
+	return ((Person)o).getName(); // <b class="conum">(1)</b>
     }
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>(Person) is an explicit cast</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>(Person) is an explicit cast</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>in Groovy, casting is not necessary because we rely on runtime types and dynamic invocation. This means that this code is
@@ -127,18 +126,17 @@ equivalent to this in Groovy:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">String pretty(o) {
-    o.name <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">String pretty(o) {
+    o.name // <b class="conum">(1)</b>
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>casting isn&#8217;t required</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>casting isn&#8217;t required</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>Casting is only possible within the type hierarchy. That is, you can cast any object to any subtype (or interface) and it&#8217;s
@@ -157,7 +155,7 @@ handy because it basically allows you to convert an object of some type into an 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def lines = file as String[]</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def lines = file as String[]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -165,7 +163,7 @@ handy because it basically allows you to convert an object of some type into an 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def lines = (String[]) file</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def lines = (String[]) file</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -174,7 +172,7 @@ treatment. It is also possible to implement your own coercion rules, by implemen
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class Person {
+<pre class="prettyprint highlight"><code data-lang="groovy">class Person {
    String name
    int age
    def asType(Class target) {
@@ -196,7 +194,7 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">interface Predicate {
+<pre class="prettyprint highlight"><code data-lang="groovy">interface Predicate {
     boolean apply(Object target)
 }</code></pre>
 </div>
@@ -206,7 +204,7 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">Predicate filter = { it.length() &gt; 3 } as Predicate</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">Predicate filter = { it.length() &gt; 3 } as Predicate</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -214,25 +212,24 @@ the following interface:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">List filter(List source, Predicate predicate) {
-   source.findAll { predicate.apply(it) } <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">List filter(List source, Predicate predicate) {
+   source.findAll { predicate.apply(it) } // <b class="conum">(1)</b>
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>note that this example doesn&#8217;t really make sense since it&#8217;s the role of findAll to apply a closure as predicate!</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>note that this example doesn&#8217;t really make sense since it&#8217;s the role of findAll to apply a closure as predicate!</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>So you can call the method without having to create an anonymous abstract class:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def items = filter(['foo','bar', 'foobar'], {
+<pre class="prettyprint highlight"><code data-lang="groovy">def items = filter(['foo','bar', 'foobar'], {
     it.length()&gt;3
 } as Predicate)
 assert items == ['foobar']</code></pre>
@@ -246,24 +243,23 @@ assert items == ['foobar']</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def items = filter(source) { it.length()&gt;3 } <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">def items = filter(source) { it.length()&gt;3 } // <b class="conum">(1)</b>
 assert items == ['foobar']</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>note that <code>as Predicate</code> is not needed anymore!</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>note that <code>as Predicate</code> is not needed anymore!</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>Can it be easier? Probably not, but maybe you noticed that this is close to what Java 8 will allow with lambdas:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">List&lt;String&gt; items = filter(source, String str -&gt; str.length()&gt;3)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">List&lt;String&gt; items = filter(source, String str -&gt; str.length()&gt;3)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -271,7 +267,7 @@ assert items == ['foobar']</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def method(Closure c) { ... }
+<pre class="prettyprint highlight"><code data-lang="groovy">def method(Closure c) { ... }
 def method(SAMType arg) { ... }</code></pre>
 </div>
 </div>
@@ -280,7 +276,7 @@ def method(SAMType arg) { ... }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">method { ...do something... }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">method { ...do something... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -288,7 +284,7 @@ def method(SAMType arg) { ... }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def method(Runnable c) { ... }
+<pre class="prettyprint highlight"><code data-lang="groovy">def method(Runnable c) { ... }
 def method(SAMType arg) { ... }
 method { ...do something... } // will call method(Runnable)</code></pre>
 </div>
@@ -298,7 +294,7 @@ method { ...do something... } // will call method(Runnable)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">method { ...do something... } as SAMType</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">method { ...do something... } as SAMType</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -358,7 +354,7 @@ method { ...do something... } // will call method(Runnable)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">interface SAMType {
+<pre class="prettyprint highlight"><code data-lang="groovy">interface SAMType {
     void apply()
 }
 
@@ -374,7 +370,7 @@ void coercion(SAMType s) { s.apply() }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">Closure cachedClosure = { 'do something' }
+<pre class="prettyprint highlight"><code data-lang="groovy">Closure cachedClosure = { 'do something' }
 SAMType cachedSAMType = { 'do something' }
 
 @Grab(group='org.gperfutils', module='gbench', version='0.4.2-groovy-2.1')
@@ -425,7 +421,7 @@ def r = benchmark {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">SAMType cachedSAMType = { 'do something' }
+<pre class="prettyprint highlight"><code data-lang="groovy">SAMType cachedSAMType = { 'do something' }
 // ...
 'cached SAM type' {
     coercion cachedSAMType
@@ -437,7 +433,7 @@ def r = benchmark {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">SAMType cachedSAMType = { 'do something' }
+<pre class="prettyprint highlight"><code data-lang="groovy">SAMType cachedSAMType = { 'do something' }
 // ...
 10000.times {
     coercion cachedSAMType
@@ -496,7 +492,7 @@ cached closure      259       0   259   261</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">interface SAMType {
+<pre class="prettyprint highlight"><code data-lang="groovy">interface SAMType {
     void apply()
 }
 
@@ -562,7 +558,7 @@ cached closure          0  160848  160848  100214197</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">// real method
+<pre class="prettyprint highlight"><code data-lang="groovy">// real method
 void addListener(Listener listener) { ... }
 // convenience method to avoid explicit coercion from user code
 void addListener(Closure cl) { addListener(cl as Listener) }</code></pre>
@@ -576,7 +572,7 @@ void addListener(Closure cl) { addListener(cl as Listener) }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">void doSomething(SAMType arg) { ... }
+<pre class="prettyprint highlight"><code data-lang="groovy">void doSomething(SAMType arg) { ... }
 void doSomething(Closure cl) {
    def clone = cl.rehydrate(delegate,this,this)
    doSomething(clone as SAMType)</code></pre>

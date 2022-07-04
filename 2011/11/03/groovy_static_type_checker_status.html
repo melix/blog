@@ -100,7 +100,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">String.metaClass.foo = { -&gt; 1 }
+<pre class="prettyprint highlight"><code>String.metaClass.foo = { -&gt; 1 }
 assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 </div>
@@ -112,7 +112,7 @@ assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">void method(String message) {
+<pre class="prettyprint highlight"><code>void method(String message) {
    if (rareCondition) {
  println "Did you spot the error in this ${message.toUppercase()}?"
    }
@@ -134,7 +134,7 @@ assert 'Hello, World!'.foo() == 1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.transform.TypeChecked
+<pre class="prettyprint highlight"><code>import groovy.transform.TypeChecked
 
 @TypeChecked
 void method(String message) {
@@ -210,7 +210,7 @@ void method(String message) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">Dimension d = [100] // wrong number of arguments
+<pre class="prettyprint highlight"><code>Dimension d = [100] // wrong number of arguments
 Dimension d = ['100','200'] // wrong argument types
 
 class A {
@@ -225,7 +225,7 @@ A a = [x:100, y:200, z: 300] // missing property</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def myname = 'Cedric'
+<pre class="prettyprint highlight"><code>def myname = 'Cedric'
 "My upper case name is ${myname.toUpperCase()}"
 println "My upper case name is ${myname}".toUpperCase()</code></pre>
 </div>
@@ -235,7 +235,7 @@ println "My upper case name is ${myname}".toUpperCase()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def keys = [x:1,y:2,z:3]*.key
+<pre class="prettyprint highlight"><code>def keys = [x:1,y:2,z:3]*.key
 def values = [x:'1',y:'2',z:'3']*.value
 keys*.toUpperCase()
 values*.toUpperCase()</code></pre>
@@ -249,7 +249,7 @@ values*.toUpperCase()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">Object o
+<pre class="prettyprint highlight"><code>Object o
 if (o instanceof String) o.toUpperCase()</code></pre>
 </div>
 </div>
@@ -261,7 +261,7 @@ if (o instanceof String) o.toUpperCase()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">class A {
+<pre class="prettyprint highlight"><code>class A {
  void foo() {}
 }
 def name = new A()
@@ -276,7 +276,7 @@ name.toInteger() // no need to cast, and toInteger() is defined by DGM</code></p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">class A {
+<pre class="prettyprint highlight"><code>class A {
  void foo() {}
 }
 def name = new A()
@@ -322,7 +322,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each {
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each {
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -335,7 +335,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">private static  Iterator each(Iterator iter, Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code>private static  Iterator each(Iterator iter, Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -343,7 +343,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public static  Iterator each(Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code>public static  Iterator each(Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -373,7 +373,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each { String it -&gt;
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each { String it -&gt;
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -383,7 +383,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }</code></pre>
+<pre class="prettyprint highlight"><code>void myMethod(@ClosureTypeInfo(argTypes=[String,Set]) Closure strategy) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -404,7 +404,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">class MyClass {
+<pre class="prettyprint highlight"><code>class MyClass {
    void myMethod(@ClosureTypeInfo(argTypes=[T]) Closure strategy) { ... } // this is not allowed because of type erasure
 }</code></pre>
 </div>
@@ -414,7 +414,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public static</code></pre>
+<pre class="prettyprint highlight"><code>public static</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -425,7 +425,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }</code></pre>
+<pre class="prettyprint highlight"><code>public static  Iterator each(@ClosureTypeInfo(useGenerics=true) Closure closure) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -433,7 +433,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each {
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each {
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -459,7 +459,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">['I','feel','grumpy'].each { String it -&gt;
+<pre class="prettyprint highlight"><code>['I','feel','grumpy'].each { String it -&gt;
    println it.toUpperCase()
 }</code></pre>
 </div>
@@ -469,7 +469,7 @@ name = '123'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">class StringList extends LinkedList {}
+<pre class="prettyprint highlight"><code>class StringList extends LinkedList {}
 def list = new StringList()
 ...
 list.each {
@@ -482,7 +482,7 @@ list.each {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">class Foo {
+<pre class="prettyprint highlight"><code>class Foo {
     T foo(Closure cl) {
         cl.call(1)
     }
@@ -511,7 +511,7 @@ assert foo.bar {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def strategy = { println it.toUpperCase() }
+<pre class="prettyprint highlight"><code>def strategy = { println it.toUpperCase() }
 list.each(strategy)</code></pre>
 </div>
 </div>
@@ -520,7 +520,7 @@ list.each(strategy)</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def strategy = { String it -&gt; println it.toUpperCase() }
+<pre class="prettyprint highlight"><code>def strategy = { String it -&gt; println it.toUpperCase() }
 list.each(strategy)</code></pre>
 </div>
 </div>

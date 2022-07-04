@@ -117,7 +117,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public int fib(int i) {
+<pre class="prettyprint highlight"><code>public int fib(int i) {
    return i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
 }</code></pre>
 </div>
@@ -127,7 +127,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">int fib(int i) {
+<pre class="prettyprint highlight"><code>int fib(int i) {
    i &lt; 2 ? 1 : fib(i - 2) + fib(i - 1);
 }</code></pre>
 </div>
@@ -153,7 +153,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@ast.Bytecode
+<pre class="prettyprint highlight"><code>@ast.Bytecode
 int fib(int i) {
  l0
     iload 1
@@ -196,7 +196,7 @@ println "Computed in ${(System.currentTimeMillis()-sd)}ms"</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">Pure Groovy
+<pre class="prettyprint highlight"><code>Pure Groovy
 165580141
 Computed in 18465ms
 Bytecode Groovy
@@ -215,7 +215,7 @@ Computed in 576ms</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">package ast
+<pre class="prettyprint highlight"><code>package ast
 
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention
@@ -236,7 +236,7 @@ public @interface Bytecode {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">package ast
+<pre class="prettyprint highlight"><code>package ast
 
 import groovyjarjarasm.asm.Label
 import groovyjarjarasm.asm.MethodVisitor

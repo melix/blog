@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: There is no single dependency graph</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>There is no single dependency graph</h1>
+	</div>
+
+	<p><em>04 July 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/dependency-management.html">dependency-management</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>What are the dependencies of Micronaut?
+While the question may seem obvious, the answer is not.
+I realized, over the years, that many developers tend to ignore the complexity of dependency management in the Java ecosystem.
+In particular, I faced several occasions when discussing dependency upgrades (in particular in the context of security updates) when it became obvious that there was a big gap between the mental model that some people have, and the reality.
+In this blog post I want to address some misconceptions around dependencies in the Java ecosystem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_libraries_vs_applications">Libraries vs applications</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_applications_are_easier">Applications are easier</h3>
+<div class="paragraph">
+<p>First and foremost, we have to make a difference between a <em>library</em> and an <em>application</em>.
+If I install, say, a desktop application, then the notion of "dependencies of the application" seem quite obvious: they are often bundled with the application in a <code>libs</code> directory, so all we have to do is look into that.
+Therefore, the question "what are the dependencies of X" can be conflated to a simpler question: "what are the dependencies that application X requires at runtime to run properly".</p>
+</div>
+<div class="paragraph">
+<p>This is already a simplfication, though: nothing prevents the application from using a plugin system.
+This would make the answer to that question more complicated, but let&#8217;s focus on the simplest case.
+Because we have that file list at hand, answering questions like "is X vulnerable to log4shell" is easy: we can look into the <code>libs</code> directory, and if we find a vulnerable version of log4j in there, then we know for sure if the application uses a vulnerable dependency.</p>
+</div>
+<div class="paragraph">
+<p>This model, the "Windows installer" one, is what lots of developers have in mind.
+The problem is often that they assume that the <em>libraries</em> work the same, but they don&#8217;t.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_library_dependencies">Library dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For libraries (and frameworks, which can be seen as "super libraries") the answer is indeed more complex.
+A library is intended to be consumed by an application, or another library.
+Therefore, when we ask the question "what are the dependencies of library L", then the answer is "it depends".</p>
+</div>
+<div class="paragraph">
+<p>In particular, libraries will introduce us to the world of <em>transitive dependencies</em>: an application will depend on libraries, which themselves have dependencies on other libraries.</p>
+</div>
+<div class="paragraph">
+<p>For example, you can have the following dependency graph:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/simple-dependency-graph.svg" alt="simple dependency graph" width="178" height="345">
+</div>
+</div>
+<div class="paragraph">
+<p>We can already see that we have a pelicular situation, where 2 libraries depend on the same module <code>c</code>.
+If they require the same version of <code>c</code>, then we are lucky.
+If they don&#8217;t, then we run in a situation called a <em>version conflict</em>, where different tools will use different strategies to solve them (no, Maven and Gradle, in particular, don&#8217;t have the same way of dealing with dependency conflicts).</p>
+</div>
+<div class="paragraph">
+<p>Say that <code>a</code> requires <code>c 1.0</code> and that <code>d</code> requires <code>c 1.1</code>: a reasonable strategy is to do <em>optimistic upgrades</em> and to choose <code>c 1.1</code> because it&#8217;s the highest version.
+This is the default strategy that Gradle uses, for example.
+Maven, on the other hand, takes a simpler, but non prectictable strategy of "closest first", where "closest" actually means "first seen wins".
+In other words, if <code>a</code> is seen first, then <code>c 1.0</code> will be used.
+Reverse the order of dependencies and <code>c</code> will use version <code>1.1</code>.
+Gradle&#8217;s strategy is immune to those problems, but we can already see that there can be a difference between the dependencies which are <em>declared in a build file</em> and the ones which will <em>effectively be used</em>.</p>
+</div>
+<div class="paragraph">
+<p>As a consequence, <strong>it&#8217;s a mistake to look at the declared dependencies to determine what are the effective dependencies of a project</strong>.
+You must always look at the resolved dependency graphs.
+This is why I wrote, a few months ago, that <a href="http://localhost:8820/blog/2020/10/about-dependabot.html">Dependabot gave a false sense of security</a> (hopefully, now, they provide <a href="https://github.blog/2022-07-01-extend-your-dependency-information-in-the-github-dependency-graph-with-new-github-actions/">an API which can be used to mitigate that problem</a>).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_from_sources">Building from sources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that we understand that the declared dependencies can be different from the <em>resolved</em> dependencies, and that we reckon that it&#8217;s the build tool&#8217;s responsibility to solve those conflicts, let&#8217;s address an elephant in the room: building a proejct <em>entirely</em> from sources (including transitive dependencies).</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s imagine that, for legal reasons, you don&#8217;t want to use Maven Central.
+Instead you want to build your project against the <em>sources</em> of your dependencies and build themselves from dependencies, and so on.
+Obviously, if your build tool doesn&#8217;t support resolving a dependency graph first (which implies having metadata available for transitive dependencies in some form) <em>then</em> replacing the dependencies with their sources instead of the binaries, then you have a problem: you&#8217;re going to have to figure out yourself what libraries to build, in which versions, and do everything by hand.
+Spoiler alert: no build tool supports that (in the Java ecosystem, some ecosystems like Rust <em>always</em> use source dependencies, which come with a number of other issues I won&#8217;t address in this blog post).</p>
+</div>
+<div class="paragraph">
+<p>This means that in order to build your project, you must:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>resolve all dependencies, including transitive dependencies, to figure out what <em>version</em> they need</p>
+</li>
+<li>
+<p>find a way to fetch the sources for the particular version of each dependency that is used</p>
+</li>
+<li>
+<p>update the build scripts of that project to use <em>source dependencies</em></p>
+</li>
+<li>
+<p>compile each project independently, and recurse to 1.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>But hey, don&#8217;t you see the problem already (except from the fact you&#8217;d have to rewrite all build files, and figure out how to build each project according to their CI specification)?
+Because resolved dependency graphs only depend on the <em>top level</em> project being compiled, you have absolutely no guarantee that you&#8217;ll use the same, resolved versions everywhere.
+In the dependency graph above, if you resolve the dependency graph for <code>app</code>, then you will determine that you need to build <code>c</code> in version <code>1.1</code> from sources.
+Alright, but to build <code>a</code>, we will need to build <code>c</code>&#8230;&#8203; with version <code>1.0</code>!
+In other words, there&#8217;s no way you can <em>consistently</em> build such a dependency graph from source without having a <em>single, globally resolved</em> dependency graph, and a <em>single build</em>.
+The only alternative to that is basically to go down the tree, build some artifacts, then replace transitive dependencies with <em>file</em> dependencies and cross fingers that everything compiles up to the top.
+Of course this is completely unrealistic in the real world, unless you have millions of dollars to spend on rebuilding artifacts (and yes, some organizations do that, that&#8217;s the strategy for debian, for example, which has the "nice" side effect of having applications which have bugs which are not in the initial release, because all applications need to use the <em>same</em> dependency version).</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s why I think the preferred solution, for security, is still to use precompiled binaries (which also would make builds faster in any case), but combine that with <a href="https://docs.gradle.org/current/userguide/dependency_verification.html">dependency verification</a>: it&#8217;s a good tradeoff, which offers the right level of security, while not having to spend incredible amounts of money in rebuilding the entire world (also, it&#8217;s better for the planet).
+Note that this also guarantees trust, as your "custom built" binaries will clearly use different signatures, and possibly checksums, than what the users normally expect.</p>
+</div>
+<div class="paragraph">
+<p>While we were talking about building from sources, we <em>also</em> forgot about one extremely important bit: <em>there is no single dependency graph</em>, even in a single project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_requires_multiple_dependency_graphs">Building requires multiple dependency graphs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The most obvious way to illustrate that there&#8217;s no single dependency graph in a project is to thing about <em>tests</em>.
+When you compile your application, there shouldn&#8217;t be any test dependency on the compile classpath.
+When you compile your <em>tests</em>, then you&#8217;d get the dependencies of the application, plus the dependencies of your test framework, plus your additional test dependencies.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, you have at least 2 distinct dependency graphs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the application compile classpath (in Gradle, it&#8217;s the <code>compileClasspath</code> configuration which represents that dependency graph)</p>
+</li>
+<li>
+<p>the application test compile classpath (in Gradle, it&#8217;s the <code>testCompileClasspath</code> configuration which represents that dependency graph)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Maven itself makes a difference, with dependency <em>scopes</em> (<code>compile</code>, <code>runtime</code>, <code>test</code>, &#8230;&#8203;).
+You can already see that in practice, we have <em>many more</em> dependency graphs: compile classpath, runtime classpath, test compile classpath, test runtime classpath, annotation processing path, functional tests compile/runtime classpath, etc.
+A project can literally have dozens of different dependency graphs.</p>
+</div>
+<div class="paragraph">
+<p>More importantly, there can be conflicts in those graphs: for example, when you compile your tests, you may introduce a dependency which will accidentally trigger an <em>upgrade</em> of a dependency, so you would get a different dependency version during testing and actual run time!
+Similarly, your runtime dependencies can introduce transitive dependencies which would have the consequence of having different versions of dependencies at compile time and run time.
+Note that Gradle offers different ways to mitigate those real world problems, for example <a href="https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html#resolution_consistency">consistent resolution</a> or <a href="https://docs.gradle.org/6.2.1/userguide/dependency_version_alignment.html">version alignment</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I hope that after reading this, it becomes quite clear that <em>there is no single dependency graph</em>.
+Therefore, it&#8217;s a mistake to ask for "what are the dependencies of Micronaut", because the answer <em>depends on the consumer</em>.
+Not only does it depend on the consumer, but it also depends on either the order of dependencies (Maven for example), or the strategies being used to "force" dependency versions (which are also consumer dependent), or the kind of dependency graph which is resolved (runtime dependencies, compile dependencies).
+Of course, we didn&#8217;t mention more advanced features like optional dependencies, for which I like to remind that <a href="https://blog.gradle.org/optional-dependencies">they are not optional</a>, nor did we talk about more advanced, runtime based systems like OSGi which add another layer of complexity to the problem.</p>
+</div>
+<div class="paragraph">
+<p>If you can take away one thing from this blog post, it&#8217;s to never ask "what are the dependencies of X" anymore: minimally, the question should be more targetted:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>what are the dependencies that X need to compile?</p>
+</li>
+<li>
+<p>what are the dependencies that X uses at runtime to run its test suite?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The question "what are the dependencies that X uses at runtime" is only valid for <em>some</em> applications (for example those which are not subject to platform dependent dependencies), not for <em>libraries</em>.</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'there-is-no-single-dep-graph';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

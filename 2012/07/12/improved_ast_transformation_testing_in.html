@@ -161,7 +161,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    for (int i in 1..n) {
+<pre class="prettyprint highlight"><code>    for (int i in 1..n) {
         @ASTTest(phase=INSTRUCTION_SELECTION, value= {
             assert node.getNodeMetaData(DECLARATION_INFERRED_TYPE) == int_TYPE
         })
@@ -205,7 +205,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">void foo() {
+<pre class="prettyprint highlight"><code>void foo() {
     def x = 1
     x++
     forLoop:

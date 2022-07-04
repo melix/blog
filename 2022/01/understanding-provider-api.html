@@ -133,7 +133,7 @@ We&#8217;re also going to create 2 files in that directory:</p>
 <div class="listingblock">
 <div class="title">flex-plugin/settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">rootProject.name = 'jflex-plugin'</code></pre>
+<pre class="pygments highlight"><code data-lang="groovy">rootProject.name = 'jflex-plugin'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -142,7 +142,7 @@ We&#8217;re also going to create 2 files in that directory:</p>
 <div class="listingblock">
 <div class="title">flex-plugin/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     id 'java-gradle-plugin'
 }
 
@@ -179,7 +179,7 @@ This is all the boilerplate you have to write to create a plugin, really.</p>
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">includeBuild "jflex-plugin"</code></pre>
+<pre class="pygments highlight"><code data-lang="groovy">includeBuild "jflex-plugin"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -188,7 +188,7 @@ This is all the boilerplate you have to write to create a plugin, really.</p>
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     id 'java-library'
     id 'io.micronaut.internal.jflex'
 }</code></pre>
@@ -202,7 +202,7 @@ This is how Gradle knows how to wire things together: by using this plugin reque
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 It wouldn&#8217;t bother building the plugin if it wasn&#8217;t used at all, which would be the case, for example, if we had multiple subprojects and that only one of them uses the plugin: depending on what we build, we may need to build the plugin or not.
@@ -222,17 +222,17 @@ Here&#8217;s its skeleton:</p>
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@CacheableTask                                                  <i class="conum" data-value="1"></i><b>(1)</b>
-public abstract class JFlexTask extends DefaultTask {           <i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="pygments highlight"><code data-lang="java">@CacheableTask                                                  // <b class="conum">(1)</b>
+public abstract class JFlexTask extends DefaultTask {           // <b class="conum">(2)</b>
 
-    @InputDirectory                                             <i class="conum" data-value="3"></i><b>(3)</b>
+    @InputDirectory                                             // <b class="conum">(3)</b>
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract DirectoryProperty getSourceDirectory();
 
-    @OutputDirectory                                            <i class="conum" data-value="4"></i><b>(4)</b>
+    @OutputDirectory                                            // <b class="conum">(4)</b>
     public abstract DirectoryProperty getOutputDirectory();
 
-    @TaskAction                                                 <i class="conum" data-value="5"></i><b>(5)</b>
+    @TaskAction                                                 // <b class="conum">(5)</b>
     public void generateSources() {
       // call JFlex library
     }
@@ -240,28 +240,23 @@ public abstract class JFlexTask extends DefaultTask {           <i class="conum"
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>This annotation tells Gradle that the result of executing this task can be cached</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>every Gradle task needs to extend the <code>DefaultTask</code> type</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>the <em>input</em> of our task is a directory containing JFlex files</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>the <em>output</em> of our task is going to be a directory containing generated Java files</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>this is the main task action, which is going to call JFlex</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>This annotation tells Gradle that the result of executing this task can be cached</p>
+</li>
+<li>
+<p>every Gradle task needs to extend the <code>DefaultTask</code> type</p>
+</li>
+<li>
+<p>the <em>input</em> of our task is a directory containing JFlex files</p>
+</li>
+<li>
+<p>the <em>output</em> of our task is going to be a directory containing generated Java files</p>
+</li>
+<li>
+<p>this is the main task action, which is going to call JFlex</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s explore a bit how this task is defined.</p>
@@ -284,23 +279,21 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
-    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) <i class="conum" data-value="1"></i><b>(1)</b>
-    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  <i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
+    sourceDirectory.set(layout.projectDirectory.dir('src/main/jflex')) // <b class="conum">(1)</b>
+    outputDirectory.set(layout.buildDirectory.dir('generated/jflex'))  // <b class="conum">(2)</b>
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>set the input directory to <code>src/main/jflex</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>set the output directory to <code>build/generated/jflex</code></td>
-</tr>
-</table>
+<ol>
+<li>
+<p>set the input directory to <code>src/main/jflex</code></p>
+</li>
+<li>
+<p>set the output directory to <code>build/generated/jflex</code></p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>It may sound a bit complicated to declare, especially if you were used to the following syntax:</p>
@@ -308,7 +301,7 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("generateLexer", JFlexTask) {
     sourceDirectory = file("src/main/jflex")
     outputDirectory = file("build/generated/jflex')
 }</code></pre>
@@ -318,7 +311,7 @@ Most of the ordering problems that earlier versions of Gradle had are fixed by t
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 <code>register</code> is the new <code>create</code>: you should never use <em>create</em> anymore, as it eagerly creates tasks, which means configuring them <em>even if they won&#8217;t participate in the task graph</em>, while <em>register</em> is lazy: if a task needs to be executed, and only if, it&#8217;s going to be configured.
@@ -356,63 +349,56 @@ It&#8217;s time to create our plugin class:</p>
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexPlugin.java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="java">public class JFlexPlugin implements Plugin&lt;Project&gt; {                                  // <b class="conum">(1)</b>
     @Override
     public void apply(Project project) {
-        project.getPluginManager().apply(JavaPlugin.class);                            <i class="conum" data-value="2"></i><b>(2)</b>
+        project.getPluginManager().apply(JavaPlugin.class);                            // <b class="conum">(2)</b>
         JavaPluginExtension javaExt = project.getExtensions()
-           .getByType(JavaPluginExtension.class);                                      <i class="conum" data-value="3"></i><b>(3)</b>
+           .getByType(JavaPluginExtension.class);                                      // <b class="conum">(3)</b>
         TaskProvider&lt;JFlexTask&gt; generateLexer = project.getTasks()
-            .register("generateLexer", JFlexTask.class, task -&gt; {                      <i class="conum" data-value="4"></i><b>(4)</b>
+            .register("generateLexer", JFlexTask.class, task -&gt; {                      // <b class="conum">(4)</b>
                task.setGroup(LifecycleBasePlugin.BUILD_GROUP);
                task.setDescription("Generates lexer files from JFlex grammar files.");
                task.getSourceDirectory().convention(
-                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    <i class="conum" data-value="5"></i><b>(5)</b>
+                    project.getLayout().getProjectDirectory().dir("src/main/jflex")    // <b class="conum">(5)</b>
                );
                task.getOutputDirectory().convention(
-                    project.getLayout().getBuildDirectory().dir("generated/jflex")     <i class="conum" data-value="6"></i><b>(6)</b>
+                    project.getLayout().getBuildDirectory().dir("generated/jflex")     // <b class="conum">(6)</b>
                );
         });
         // Register the output of the JFlex task as generated sources
         javaExt.getSourceSets()
                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                 .getJava()
-                .srcDir(generateLexer);                                                <i class="conum" data-value="7"></i><b>(7)</b>
+                .srcDir(generateLexer);                                                // <b class="conum">(7)</b>
     }
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Declare a <em>project scoped</em> plugin</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>This plugin will contribute Java sources, so it <em>depends on</em> the Java plugin, let&#8217;s apply it</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The Java plugin defines a Java extension that we&#8217;re going to need</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Registers our <code>generateLexer</code> task</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Defines the conventional (<em>default</em>) location of JFlex source files</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Defines the conventional (<em>default</em>) location of generated sources</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Defines that the output of the task are Java files which need to be compiled</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Declare a <em>project scoped</em> plugin</p>
+</li>
+<li>
+<p>This plugin will contribute Java sources, so it <em>depends on</em> the Java plugin, let&#8217;s apply it</p>
+</li>
+<li>
+<p>The Java plugin defines a Java extension that we&#8217;re going to need</p>
+</li>
+<li>
+<p>Registers our <code>generateLexer</code> task</p>
+</li>
+<li>
+<p>Defines the conventional (<em>default</em>) location of JFlex source files</p>
+</li>
+<li>
+<p>Defines the conventional (<em>default</em>) location of generated sources</p>
+</li>
+<li>
+<p>Defines that the output of the task are Java files which need to be compiled</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>I recommend writing plugins in plain Java, but you could use Groovy or Kotlin.
@@ -446,7 +432,7 @@ In particular, it defines the Java source sets (<code>main</code> and <code>test
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">javaExt.getSourceSets()
+<pre class="pygments highlight"><code data-lang="java">javaExt.getSourceSets()
     .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     .getJava()
     .srcDir(generateLexer);</code></pre>
@@ -492,7 +478,7 @@ Instead of having our task directly invoke JFlex, we need to create a class whic
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexTask.java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@CacheableTask
+<pre class="pygments highlight"><code data-lang="java">@CacheableTask
 public abstract class JFlexTask extends DefaultTask {
 
     @InputDirectory
@@ -531,7 +517,7 @@ In this case, we declare <em>classloader isolation</em>, as well as the inputs o
 <div class="listingblock">
 <div class="title">jflex-plugin/src/main/java/io/micronaut/internal/jflex/JFlexAction.java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
+<pre class="pygments highlight"><code data-lang="java">public abstract class JFlexAction implements WorkAction&lt;JFlexAction.Parameters&gt; {
     public interface Parameters extends WorkParameters {
         DirectoryProperty getSourceDirectory();
         ConfigurableFileCollection getSourceFiles();
@@ -582,7 +568,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">abstract class Greeter extends DefaultTask {
+<pre class="pygments highlight"><code data-lang="java">abstract class Greeter extends DefaultTask {
     @Input
     public abstract Property&lt;String&gt; getUser()
 
@@ -607,7 +593,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("sayHello", Greeter) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("sayHello", Greeter) {
    intro = "Hello, "
    user = "Cédric"
    outro = "!"
@@ -619,7 +605,7 @@ To understand this concept, let&#8217;s imagine a <em>Greeter</em> task which is
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("direBonjour", Greeter) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("direBonjour", Greeter) {
    intro = "Bonjour "
    user = "Cédric"
    outro = " !"
@@ -635,7 +621,7 @@ To avoid this redundancy, we&#8217;re going to write a plugin which makes all th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">interface GreetingExtension {
+<pre class="pygments highlight"><code data-lang="java">interface GreetingExtension {
     Property&lt;String&gt; getUser()
     Property&lt;String&gt; getOutro()
 }</code></pre>
@@ -646,7 +632,7 @@ To avoid this redundancy, we&#8217;re going to write a plugin which makes all th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
+<pre class="pygments highlight"><code data-lang="java">GreetingExtension extension = project.getExtensions().create("greeting", GreetingExtension.class);
 extension.getOutro().convention("!");</code></pre>
 </div>
 </div>
@@ -657,7 +643,7 @@ The plugin can then register both tasks for us:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">tasks.register("sayHello", Greeter.class, task -&gt; {
+<pre class="pygments highlight"><code data-lang="java">tasks.register("sayHello", Greeter.class, task -&gt; {
    task.getIntro().convention("Hello, ");
    task.getUser().convention(extension.getUser());
    task.getOutro().convention(extension.getOutro());
@@ -677,7 +663,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">greeting {
+<pre class="pygments highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
 }</code></pre>
 </div>
@@ -707,7 +693,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">greeting {
+<pre class="pygments highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
     outro = "!!!"
 }</code></pre>
@@ -738,7 +724,7 @@ tasks.register("direBonjour", Greeter.class, task -&gt; {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">greeting {
+<pre class="pygments highlight"><code data-lang="groovy">greeting {
     user = "Cédric"
     outro = "!!!"
 }
@@ -797,7 +783,7 @@ We&#8217;ve also hinted at how plugins can expose configuration mechanisms which
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     id "io.micronaut.internal.jflex"
 }</code></pre>
 </div>

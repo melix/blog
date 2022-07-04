@@ -121,7 +121,7 @@ This blog post will be updated as I&#8217;m seeing more questions.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[plugins]
+<pre class="pygments highlight"><code data-lang="toml">[plugins]
 id.of.my.awesome.plugin="1.2.3"</code></pre>
 </div>
 </div>
@@ -132,7 +132,7 @@ This means that <em>currently</em>, you have to use the <code>pluginManagement</
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">pluginManagement {
+<pre class="pygments highlight"><code>pluginManagement {
     plugins {
         id("me.champeau.jmh") version("0.6.3")
     }
@@ -154,7 +154,7 @@ This means that <em>currently</em>, you have to use the <code>pluginManagement</
 <div class="listingblock">
 <div class="title">buildSrc/settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencyResolutionManagement {
+<pre class="pygments highlight"><code data-lang="groovy">dependencyResolutionManagement {
     versionCatalogs {
         lib {
             from(files("../gradle/libs.versions.toml"))
@@ -175,7 +175,7 @@ Long story short, currently, you can do it using a <em>type unsafe</em> API only
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def catalogs = project.extensions.getByType(VersionCatalogsExtension)</code></pre>
+<pre class="pygments highlight"><code data-lang="groovy">def catalogs = project.extensions.getByType(VersionCatalogsExtension)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -183,7 +183,7 @@ Long story short, currently, you can do it using a <em>type unsafe</em> API only
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val catalogs = extensions.getByType&lt;VersionCatalogsExtension&gt;()</code></pre>
+<pre class="pygments highlight"><code data-lang="kotlin">val catalogs = extensions.getByType&lt;VersionCatalogsExtension&gt;()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -191,7 +191,7 @@ Long story short, currently, you can do it using a <em>type unsafe</em> API only
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">pluginManager.withPlugin("java") {
+<pre class="pygments highlight"><code data-lang="kotlin">pluginManager.withPlugin("java") {
     val libs = catalogs.named("libs")
     dependencies.addProvider("implementation", libs.findDependency("lib").get())
 }</code></pre>
@@ -248,7 +248,7 @@ A potential workaround for this would be to support, in the future, an explicit 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">dependencies {
+<pre class="pygments highlight"><code>dependencies {
     testImplementation(libs.junit.get())
     // or
     testImplemementation(libs.junit.peek()) // because `get()` might be confusing as it would return a `Provider` on which you can call `get()` itself
@@ -266,7 +266,7 @@ A potential workaround for this would be to support, in the future, an explicit 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[libraries]
+<pre class="pygments highlight"><code data-lang="toml">[libraries]
 junit-jupiter = "..."</code></pre>
 </div>
 </div>
@@ -276,7 +276,7 @@ The question is, why can&#8217;t we just write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[libraries]
+<pre class="pygments highlight"><code data-lang="toml">[libraries]
 junit.jupiter = "..."</code></pre>
 </div>
 </div>
@@ -285,7 +285,7 @@ junit.jupiter = "..."</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[libraries]
+<pre class="pygments highlight"><code data-lang="toml">[libraries]
    [junit]
    jupiter = "..."</code></pre>
 </div>
@@ -312,7 +312,7 @@ The question then is, does that <code>commons</code> group make sense? It&#8217;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[libraries]
+<pre class="pygments highlight"><code data-lang="toml">[libraries]
 commonsLang = { module="org.apache.commons:commons-lang3:3.3.1" }</code></pre>
 </div>
 </div>
@@ -340,7 +340,7 @@ Therefore, classifiers need to be declared on the <em>dependency declaration sit
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">dependencies {
+<pre class="pygments highlight"><code>dependencies {
    implementation(variantOf(libs.myLib) { classifier('test-fixtures') })
 }</code></pre>
 </div>
@@ -358,7 +358,7 @@ We want to encourage this model, rather than supporting <em>adhoc</em> classifie
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">dependencies {
+<pre class="pygments highlight"><code data-lang="groovy">dependencies {
     implementation(libs.myLib) {
         artifact {
             name = 'my-lib' // note that ideally this will go away, see https://github.com/gradle/gradle/issues/16768

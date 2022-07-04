@@ -108,7 +108,7 @@ I saw the following block:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test) {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -122,7 +122,7 @@ At first glance, this seems appropriate, but there&#8217;s this gotcha: you shou
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test).configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test).configureEach {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -143,7 +143,7 @@ If you use <a href="https://ge.micronaut.io">Build Scans</a>, you can have insig
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">test {
+<pre class="pygments highlight"><code data-lang="groovy">test {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -159,7 +159,7 @@ To do lazy configuration, you have to write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named('test') {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named('test') {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -197,7 +197,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("myTask") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("myTask") {
    // configure the task
 }</code></pre>
 </div>
@@ -207,7 +207,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("myTask", SomeType) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("myTask", SomeType) {
    // configure the task
 }</code></pre>
 </div>
@@ -221,7 +221,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(SomeType).configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(SomeType).configureEach {
    // configure the task
 }</code></pre>
 </div>
@@ -235,7 +235,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("myTask", SomeType) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("myTask", SomeType) {
     ...
 }</code></pre>
 </div>
@@ -245,7 +245,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task hello {
+<pre class="pygments highlight"><code data-lang="groovy">task hello {
    doLast {
        println "Hello!"
    }
@@ -257,7 +257,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("hello") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("hello") {
     doLast {
          println "Hello!"
     }
@@ -287,7 +287,7 @@ You can see it as a lazy predicate: it returns a <em>live task collection</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test) {
    // configure
 }</code></pre>
 </div>
@@ -297,7 +297,7 @@ You can see it as a lazy predicate: it returns a <em>live task collection</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test).each {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test).each {
     // configure
 }</code></pre>
 </div>
@@ -307,7 +307,7 @@ You can see it as a lazy predicate: it returns a <em>live task collection</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def testTasks = tasks.withType(Test)
+<pre class="pygments highlight"><code data-lang="groovy">def testTasks = tasks.withType(Test)
 testTasks.each {
     // configure
 }</code></pre>
@@ -333,7 +333,7 @@ As an illustration, let&#8217;s explore the following script (don&#8217;t write 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("hello") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("hello") {
    doLast {
        println "Hello,"
    }
@@ -351,7 +351,7 @@ tasks.named("hello") {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">&gt; Task :hello
+<pre class="pygments highlight"><code>&gt; Task :hello
 Hello,
 World!</code></pre>
 </div>
@@ -361,7 +361,7 @@ World!</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("hello") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("hello") {
    doLast {
         println "World!"
    }
@@ -379,7 +379,7 @@ tasks.register("hello") {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">* Where:
+<pre class="pygments highlight"><code>* Where:
 Build file '/tmp/ouudfd/build.gradle' line: 1
 
 * What went wrong:
@@ -396,7 +396,7 @@ But because <code>named</code> <em>eagerly</em> searches for a task registed wit
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.matching { it.name == 'hello' }.configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.matching { it.name == 'hello' }.configureEach {
     doLast {
         println "World!"
    }
@@ -414,7 +414,7 @@ tasks.register("hello") {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">&gt; Task :hello
+<pre class="pygments highlight"><code>&gt; Task :hello
 World!
 Hello,</code></pre>
 </div>
@@ -430,7 +430,7 @@ Actually, if you look at what the predicate uses, it becomes obvious:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// T is a Task!
+<pre class="pygments highlight"><code data-lang="java">// T is a Task!
 TaskCollection&lt;T&gt; matching(Spec&lt;? super T&gt; var1)</code></pre>
 </div>
 </div>
@@ -443,7 +443,7 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Greeter).matching { it.name == 'hello' }.configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Greeter).matching { it.name == 'hello' }.configureEach {
    messages.add("World!")
 }
 
@@ -461,7 +461,7 @@ If you simply want to <em>configure</em> a task, that is not a big deal since yo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.configureEach {
     if (it.name == 'hello') { ... }
 }</code></pre>
 </div>
@@ -472,7 +472,7 @@ However, this <code>configureEach</code> block is a <em>configurer</em>, not a <
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("md5") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("md5") {
     inputFiles.from(tasks.named("userguide"))
 }</code></pre>
 </div>

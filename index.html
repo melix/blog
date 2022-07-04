@@ -70,6 +70,196 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2022/07/there-is-no-single-dependency-graph.html"><h1>There is no single dependency graph</h1></a>
+  			<p>04 July 2022</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/dependency-management.html">dependency-management</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>What are the dependencies of Micronaut?
+While the question may seem obvious, the answer is not.
+I realized, over the years, that many developers tend to ignore the complexity of dependency management in the Java ecosystem.
+In particular, I faced several occasions when discussing dependency upgrades (in particular in the context of security updates) when it became obvious that there was a big gap between the mental model that some people have, and the reality.
+In this blog post I want to address some misconceptions around dependencies in the Java ecosystem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_libraries_vs_applications">Libraries vs applications</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_applications_are_easier">Applications are easier</h3>
+<div class="paragraph">
+<p>First and foremost, we have to make a difference between a <em>library</em> and an <em>application</em>.
+If I install, say, a desktop application, then the notion of "dependencies of the application" seem quite obvious: they are often bundled with the application in a <code>libs</code> directory, so all we have to do is look into that.
+Therefore, the question "what are the dependencies of X" can be conflated to a simpler question: "what are the dependencies that application X requires at runtime to run properly".</p>
+</div>
+<div class="paragraph">
+<p>This is already a simplfication, though: nothing prevents the application from using a plugin system.
+This would make the answer to that question more complicated, but let&#8217;s focus on the simplest case.
+Because we have that file list at hand, answering questions like "is X vulnerable to log4shell" is easy: we can look into the <code>libs</code> directory, and if we find a vulnerable version of log4j in there, then we know for sure if the application uses a vulnerable dependency.</p>
+</div>
+<div class="paragraph">
+<p>This model, the "Windows installer" one, is what lots of developers have in mind.
+The problem is often that they assume that the <em>libraries</em> work the same, but they don&#8217;t.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_library_dependencies">Library dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For libraries (and frameworks, which can be seen as "super libraries") the answer is indeed more complex.
+A library is intended to be consumed by an application, or another library.
+Therefore, when we ask the question "what are the dependencies of library L", then the answer is "it depends".</p>
+</div>
+<div class="paragraph">
+<p>In particular, libraries will introduce us to the world of <em>transitive dependencies</em>: an application will depend on libraries, which themselves have dependencies on other libraries.</p>
+</div>
+<div class="paragraph">
+<p>For example, you can have the following dependency graph:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/simple-dependency-graph.svg" alt="simple dependency graph" width="178" height="345">
+</div>
+</div>
+<div class="paragraph">
+<p>We can already see that we have a pelicular situation, where 2 libraries depend on the same module <code>c</code>.
+If they require the same version of <code>c</code>, then we are lucky.
+If they don&#8217;t, then we run in a situation called a <em>version conflict</em>, where different tools will use different strategies to solve them (no, Maven and Gradle, in particular, don&#8217;t have the same way of dealing with dependency conflicts).</p>
+</div>
+<div class="paragraph">
+<p>Say that <code>a</code> requires <code>c 1.0</code> and that <code>d</code> requires <code>c 1.1</code>: a reasonable strategy is to do <em>optimistic upgrades</em> and to choose <code>c 1.1</code> because it&#8217;s the highest version.
+This is the default strategy that Gradle uses, for example.
+Maven, on the other hand, takes a simpler, but non prectictable strategy of "closest first", where "closest" actually means "first seen wins".
+In other words, if <code>a</code> is seen first, then <code>c 1.0</code> will be used.
+Reverse the order of dependencies and <code>c</code> will use version <code>1.1</code>.
+Gradle&#8217;s strategy is immune to those problems, but we can already see that there can be a difference between the dependencies which are <em>declared in a build file</em> and the ones which will <em>effectively be used</em>.</p>
+</div>
+<div class="paragraph">
+<p>As a consequence, <strong>it&#8217;s a mistake to look at the declared dependencies to determine what are the effective dependencies of a project</strong>.
+You must always look at the resolved dependency graphs.
+This is why I wrote, a few months ago, that <a href="http://localhost:8820/blog/2020/10/about-dependabot.html">Dependabot gave a false sense of security</a> (hopefully, now, they provide <a href="https://github.blog/2022-07-01-extend-your-dependency-information-in-the-github-dependency-graph-with-new-github-actions/">an API which can be used to mitigate that problem</a>).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_from_sources">Building from sources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that we understand that the declared dependencies can be different from the <em>resolved</em> dependencies, and that we reckon that it&#8217;s the build tool&#8217;s responsibility to solve those conflicts, let&#8217;s address an elephant in the room: building a proejct <em>entirely</em> from sources (including transitive dependencies).</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s imagine that, for legal reasons, you don&#8217;t want to use Maven Central.
+Instead you want to build your project against the <em>sources</em> of your dependencies and build themselves from dependencies, and so on.
+Obviously, if your build tool doesn&#8217;t support resolving a dependency graph first (which implies having metadata available for transitive dependencies in some form) <em>then</em> replacing the dependencies with their sources instead of the binaries, then you have a problem: you&#8217;re going to have to figure out yourself what libraries to build, in which versions, and do everything by hand.
+Spoiler alert: no build tool supports that (in the Java ecosystem, some ecosystems like Rust <em>always</em> use source dependencies, which come with a number of other issues I won&#8217;t address in this blog post).</p>
+</div>
+<div class="paragraph">
+<p>This means that in order to build your project, you must:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>resolve all dependencies, including transitive dependencies, to figure out what <em>version</em> they need</p>
+</li>
+<li>
+<p>find a way to fetch the sources for the particular version of each dependency that is used</p>
+</li>
+<li>
+<p>update the build scripts of that project to use <em>source dependencies</em></p>
+</li>
+<li>
+<p>compile each project independently, and recurse to 1.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>But hey, don&#8217;t you see the problem already (except from the fact you&#8217;d have to rewrite all build files, and figure out how to build each project according to their CI specification)?
+Because resolved dependency graphs only depend on the <em>top level</em> project being compiled, you have absolutely no guarantee that you&#8217;ll use the same, resolved versions everywhere.
+In the dependency graph above, if you resolve the dependency graph for <code>app</code>, then you will determine that you need to build <code>c</code> in version <code>1.1</code> from sources.
+Alright, but to build <code>a</code>, we will need to build <code>c</code>&#8230;&#8203; with version <code>1.0</code>!
+In other words, there&#8217;s no way you can <em>consistently</em> build such a dependency graph from source without having a <em>single, globally resolved</em> dependency graph, and a <em>single build</em>.
+The only alternative to that is basically to go down the tree, build some artifacts, then replace transitive dependencies with <em>file</em> dependencies and cross fingers that everything compiles up to the top.
+Of course this is completely unrealistic in the real world, unless you have millions of dollars to spend on rebuilding artifacts (and yes, some organizations do that, that&#8217;s the strategy for debian, for example, which has the "nice" side effect of having applications which have bugs which are not in the initial release, because all applications need to use the <em>same</em> dependency version).</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s why I think the preferred solution, for security, is still to use precompiled binaries (which also would make builds faster in any case), but combine that with <a href="https://docs.gradle.org/current/userguide/dependency_verification.html">dependency verification</a>: it&#8217;s a good tradeoff, which offers the right level of security, while not having to spend incredible amounts of money in rebuilding the entire world (also, it&#8217;s better for the planet).
+Note that this also guarantees trust, as your "custom built" binaries will clearly use different signatures, and possibly checksums, than what the users normally expect.</p>
+</div>
+<div class="paragraph">
+<p>While we were talking about building from sources, we <em>also</em> forgot about one extremely important bit: <em>there is no single dependency graph</em>, even in a single project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_requires_multiple_dependency_graphs">Building requires multiple dependency graphs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The most obvious way to illustrate that there&#8217;s no single dependency graph in a project is to thing about <em>tests</em>.
+When you compile your application, there shouldn&#8217;t be any test dependency on the compile classpath.
+When you compile your <em>tests</em>, then you&#8217;d get the dependencies of the application, plus the dependencies of your test framework, plus your additional test dependencies.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, you have at least 2 distinct dependency graphs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the application compile classpath (in Gradle, it&#8217;s the <code>compileClasspath</code> configuration which represents that dependency graph)</p>
+</li>
+<li>
+<p>the application test compile classpath (in Gradle, it&#8217;s the <code>testCompileClasspath</code> configuration which represents that dependency graph)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Maven itself makes a difference, with dependency <em>scopes</em> (<code>compile</code>, <code>runtime</code>, <code>test</code>, &#8230;&#8203;).
+You can already see that in practice, we have <em>many more</em> dependency graphs: compile classpath, runtime classpath, test compile classpath, test runtime classpath, annotation processing path, functional tests compile/runtime classpath, etc.
+A project can literally have dozens of different dependency graphs.</p>
+</div>
+<div class="paragraph">
+<p>More importantly, there can be conflicts in those graphs: for example, when you compile your tests, you may introduce a dependency which will accidentally trigger an <em>upgrade</em> of a dependency, so you would get a different dependency version during testing and actual run time!
+Similarly, your runtime dependencies can introduce transitive dependencies which would have the consequence of having different versions of dependencies at compile time and run time.
+Note that Gradle offers different ways to mitigate those real world problems, for example <a href="https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html#resolution_consistency">consistent resolution</a> or <a href="https://docs.gradle.org/6.2.1/userguide/dependency_version_alignment.html">version alignment</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I hope that after reading this, it becomes quite clear that <em>there is no single dependency graph</em>.
+Therefore, it&#8217;s a mistake to ask for "what are the dependencies of Micronaut", because the answer <em>depends on the consumer</em>.
+Not only does it depend on the consumer, but it also depends on either the order of dependencies (Maven for example), or the strategies being used to "force" dependency versions (which are also consumer dependent), or the kind of dependency graph which is resolved (runtime dependencies, compile dependencies).
+Of course, we didn&#8217;t mention more advanced features like optional dependencies, for which I like to remind that <a href="https://blog.gradle.org/optional-dependencies">they are not optional</a>, nor did we talk about more advanced, runtime based systems like OSGi which add another layer of complexity to the problem.</p>
+</div>
+<div class="paragraph">
+<p>If you can take away one thing from this blog post, it&#8217;s to never ask "what are the dependencies of X" anymore: minimally, the question should be more targetted:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>what are the dependencies that X need to compile?</p>
+</li>
+<li>
+<p>what are the dependencies that X uses at runtime to run its test suite?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The question "what are the dependencies that X uses at runtime" is only valid for <em>some</em> applications (for example those which are not subject to platform dependent dependencies), not for <em>libraries</em>.</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2022/07/there-is-no-single-dependency-graph.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2022/05/gradle-laziness.html"><h1>Gradle quickie: laziness</h1></a>
   			<p>24 May 2022</p>
 			<p><em>Tags: </em>
@@ -109,7 +299,7 @@ I saw the following block:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test) {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -123,7 +313,7 @@ At first glance, this seems appropriate, but there&#8217;s this gotcha: you shou
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test).configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test).configureEach {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -144,7 +334,7 @@ If you use <a href="https://ge.micronaut.io">Build Scans</a>, you can have insig
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">test {
+<pre class="pygments highlight"><code data-lang="groovy">test {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -160,7 +350,7 @@ To do lazy configuration, you have to write:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named('test') {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named('test') {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
@@ -198,7 +388,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("myTask") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("myTask") {
    // configure the task
 }</code></pre>
 </div>
@@ -208,7 +398,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("myTask", SomeType) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("myTask", SomeType) {
    // configure the task
 }</code></pre>
 </div>
@@ -222,7 +412,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(SomeType).configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(SomeType).configureEach {
    // configure the task
 }</code></pre>
 </div>
@@ -236,7 +426,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("myTask", SomeType) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("myTask", SomeType) {
     ...
 }</code></pre>
 </div>
@@ -246,7 +436,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task hello {
+<pre class="pygments highlight"><code data-lang="groovy">task hello {
    doLast {
        println "Hello!"
    }
@@ -258,7 +448,7 @@ Let&#8217;s summarize a few patterns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("hello") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("hello") {
     doLast {
          println "Hello!"
     }
@@ -288,7 +478,7 @@ You can see it as a lazy predicate: it returns a <em>live task collection</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test) {
    // configure
 }</code></pre>
 </div>
@@ -298,7 +488,7 @@ You can see it as a lazy predicate: it returns a <em>live task collection</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Test).each {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Test).each {
     // configure
 }</code></pre>
 </div>
@@ -308,7 +498,7 @@ You can see it as a lazy predicate: it returns a <em>live task collection</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def testTasks = tasks.withType(Test)
+<pre class="pygments highlight"><code data-lang="groovy">def testTasks = tasks.withType(Test)
 testTasks.each {
     // configure
 }</code></pre>
@@ -334,7 +524,7 @@ As an illustration, let&#8217;s explore the following script (don&#8217;t write 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register("hello") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register("hello") {
    doLast {
        println "Hello,"
    }
@@ -352,7 +542,7 @@ tasks.named("hello") {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">&gt; Task :hello
+<pre class="pygments highlight"><code>&gt; Task :hello
 Hello,
 World!</code></pre>
 </div>
@@ -362,7 +552,7 @@ World!</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("hello") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("hello") {
    doLast {
         println "World!"
    }
@@ -380,7 +570,7 @@ tasks.register("hello") {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">* Where:
+<pre class="pygments highlight"><code>* Where:
 Build file '/tmp/ouudfd/build.gradle' line: 1
 
 * What went wrong:
@@ -397,7 +587,7 @@ But because <code>named</code> <em>eagerly</em> searches for a task registed wit
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.matching { it.name == 'hello' }.configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.matching { it.name == 'hello' }.configureEach {
     doLast {
         println "World!"
    }
@@ -415,7 +605,7 @@ tasks.register("hello") {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">&gt; Task :hello
+<pre class="pygments highlight"><code>&gt; Task :hello
 World!
 Hello,</code></pre>
 </div>
@@ -431,7 +621,7 @@ Actually, if you look at what the predicate uses, it becomes obvious:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// T is a Task!
+<pre class="pygments highlight"><code data-lang="java">// T is a Task!
 TaskCollection&lt;T&gt; matching(Spec&lt;? super T&gt; var1)</code></pre>
 </div>
 </div>
@@ -444,7 +634,7 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.withType(Greeter).matching { it.name == 'hello' }.configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.withType(Greeter).matching { it.name == 'hello' }.configureEach {
    messages.add("World!")
 }
 
@@ -462,7 +652,7 @@ If you simply want to <em>configure</em> a task, that is not a big deal since yo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.configureEach {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.configureEach {
     if (it.name == 'hello') { ... }
 }</code></pre>
 </div>
@@ -473,7 +663,7 @@ However, this <code>configureEach</code> block is a <em>configurer</em>, not a <
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.named("md5") {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.named("md5") {
     inputFiles.from(tasks.named("userguide"))
 }</code></pre>
 </div>
@@ -604,7 +794,7 @@ Attention, il ne s&#8217;agira pas d&#8217;une présentation générique sur l&#
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+<pre class="pygments highlight"><code data-lang="groovy">micronaut {
     useNetty = true
 }</code></pre>
 </div>
@@ -616,7 +806,7 @@ Many plugins do this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">afterEvaluate {
+<pre class="pygments highlight"><code data-lang="groovy">afterEvaluate {
     dependencies {
         if (micronaut.useNetty.get()) {
             implementation("io.netty:netty-buffer:4.1.75.Final")
@@ -647,7 +837,7 @@ For example, the <code>checkstyle</code> plugin would, by default, use version o
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">micronaut {
+<pre class="pygments highlight"><code data-lang="gradle">micronaut {
     version = "3.3.1"
 }</code></pre>
 </div>
@@ -659,7 +849,7 @@ Let&#8217;s create our Gradle project (we&#8217;re assuming that you have Gradle
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir conditional-deps &amp;&amp; cd conditional-deps
+<pre class="pygments highlight"><code data-lang="bash">$ mkdir conditional-deps &amp;&amp; cd conditional-deps
 $ gradle init --dsl groovy \
    --type java-library \
    --package me.champeau.demo \
@@ -672,7 +862,7 @@ $ gradle init --dsl groovy \
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir -p build-logic/src/main/groovy/my/plugin</code></pre>
+<pre class="pygments highlight"><code data-lang="bash">$ mkdir -p build-logic/src/main/groovy/my/plugin</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -681,7 +871,7 @@ $ gradle init --dsl groovy \
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">pluginManagement {
+<pre class="pygments highlight"><code data-lang="groovy">pluginManagement {
     // include our plugin
     includeBuild "build-logic"
 }
@@ -695,7 +885,7 @@ include('lib')</code></pre>
 <div class="listingblock">
 <div class="title">build-logic/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     id 'groovy-gradle-plugin'
 }</code></pre>
 </div>
@@ -706,7 +896,7 @@ include('lib')</code></pre>
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package my.plugin
+<pre class="pygments highlight"><code data-lang="groovy">package my.plugin
 
 import org.gradle.api.provider.Property
 
@@ -721,23 +911,21 @@ interface MicronautExtension {
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+<pre class="pygments highlight"><code data-lang="groovy">import my.plugin.MicronautExtension
 
-def micronautExtension = extensions.create("micronaut", MicronautExtension) <i class="conum" data-value="1"></i><b>(1)</b>
-micronautExtension.version.convention("3.3.0")                              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+def micronautExtension = extensions.create("micronaut", MicronautExtension) <b class="conum">(1)</b>
+micronautExtension.version.convention("3.3.0")                              <b class="conum">(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create our extension, named "micronaut"</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Assign a default value to the "version" property</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Create our extension, named "micronaut"</p>
+</li>
+<li>
+<p>Assign a default value to the "version" property</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>By convention, our plugin id will be <code>my.plugin</code> (it&#8217;s derived from the file name).
@@ -749,7 +937,7 @@ Our plugin is responsible for creating the extension, and it assigns a <em>conve
 <div class="listingblock">
 <div class="title">lib/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     // And now apply our plugin
@@ -766,7 +954,7 @@ micronaut {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 ------------------------------------------------------------
 Project ':lib'
@@ -790,7 +978,7 @@ Edit our <code>build-logic</code> plugin:</p>
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+<pre class="pygments highlight"><code data-lang="groovy">import my.plugin.MicronautExtension
 
 def micronautExtension = extensions.create("micronaut", MicronautExtension)
 micronautExtension.version.convention("3.3.0")
@@ -807,7 +995,7 @@ dependencies {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -839,14 +1027,14 @@ We can check that we can actually configure the version via our extension by edi
 <div class="listingblock">
 <div class="title">lib/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+<pre class="pygments highlight"><code data-lang="groovy">micronaut {
    version = "3.3.1" // override the convention
 }</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -881,7 +1069,7 @@ Let&#8217;s add this property to our extension:</p>
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my/plugin/MicronautExtension.groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package my.plugin
+<pre class="pygments highlight"><code data-lang="groovy">package my.plugin
 
 import org.gradle.api.provider.Property
 
@@ -897,7 +1085,7 @@ interface MicronautExtension {
 <div class="listingblock">
 <div class="title">build-logic/src/main/groovy/my.plugin.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import my.plugin.MicronautExtension
+<pre class="pygments highlight"><code data-lang="groovy">import my.plugin.MicronautExtension
 
 def micronautExtension = extensions.create("micronaut", MicronautExtension)
 micronautExtension.version.convention("3.3.0")
@@ -909,32 +1097,29 @@ dependencies {
 
     implementation micronautExtension.runtime.map { r -&gt;
         switch(r) {
-            case 'netty':                                                   <i class="conum" data-value="1"></i><b>(1)</b>
+            case 'netty':                                                   <b class="conum">(1)</b>
                 return "io.netty:netty-buffer:4.1.75.Final"
             case 'tomcat':
-                return "org.apache.tomcat.embed:tomcat-embed-core:10.0.18"  <i class="conum" data-value="2"></i><b>(2)</b>
+                return "org.apache.tomcat.embed:tomcat-embed-core:10.0.18"  <b class="conum">(2)</b>
             default:
-                return null                                                 <i class="conum" data-value="3"></i><b>(3)</b>
+                return null                                                 <b class="conum">(3)</b>
         }
     }
 }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Add a dependency if the runtime is set to netty</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Add a dependency if the runtime is set to tomcat</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>But do nothing if the runtime isn&#8217;t set</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Add a dependency if the runtime is set to netty</p>
+</li>
+<li>
+<p>Add a dependency if the runtime is set to tomcat</p>
+</li>
+<li>
+<p>But do nothing if the runtime isn&#8217;t set</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>The trick, therefore, is to <em>return null</em> in the provider in case no dependency needs to be added.
@@ -942,7 +1127,7 @@ So let&#8217;s check first that without declaring anything, we don&#8217;t have 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -969,7 +1154,7 @@ compileClasspath - Compile classpath for source set 'main'.
 <div class="listingblock">
 <div class="title">lib/build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">micronaut {
+<pre class="pygments highlight"><code data-lang="groovy">micronaut {
    version = "3.3.1"
    runtime = "tomcat"
 }</code></pre>
@@ -977,7 +1162,7 @@ compileClasspath - Compile classpath for source set 'main'.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew lib:dependencies --configuration compileClasspath
 
 &gt; Task :lib:dependencies
 
@@ -1043,188 +1228,6 @@ At this moment, we know that the configuration is complete, so we can guarantee 
 </div>
 </div></p>
 			<p><a href="/blog/2022/03/gradle-conditional-dependencies.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2022/02/micronaut-version-catalog.html"><h1>Using the Micronaut Version Catalog</h1></a>
-  			<p>08 February 2022</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/micronaut.html">micronaut</a> 
-	
-		<a href="/blog/tags/version-catalog.html">version catalog</a> 
-	</p>
-			
-  			<p><div class="sect1">
-<h2 id="_introduction">Introduction</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>With the <a href="https://docs.gradle.org/7.4/release-notes.html">release of Gradle 7.4</a>, Micronaut users now have an interesting option to manage their dependencies: using Gradle&#8217;s <a href="https://docs.gradle.org/current/userguide/platforms.html#sub:central-declaration-of-dependencies">version catalogs</a>.
-Indeed, for a few releases already, Micronaut has shipped its own version catalog alongside its BOM.</p>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s explore how to use it and what&#8217;s the benefit.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_what_is_a_version_catalog">What is a version catalog?</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In a nutshell, a version catalog allows centralizing dependency versions in a single place.
-Instead a build script, a typical dependency declaration looks like this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
-    implementation("org.apache.slf4j:slf4j-api:1.7.25")
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>With a version catalog, the declaration looks like this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
-    implementation(libs.slf4j)
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>And the dependency coordinates are defined in the <code>gradle/libs.versions.toml</code> file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[versions]
-slf4j = "1.7.25"
-
-[libraries]
-slf4j = { module = "org.apache.slf4j", version.ref = "slf4j" }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>There are a couple of advantages in doing so:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>dependency versions are centralized in this TOML file</p>
-</li>
-<li>
-<p>the catalogs create "type safe accessors" which are completed by the IDE (although to my knowledge completion is only supported by IntelliJ IDEA with the Kotlin DSL)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>You can read a more complete description about version catalogs in <a href="https://melix.github.io/blog/2021/03/version-catalogs.html">this blog post I wrote a few months ago</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_micronaut_version_catalog">The Micronaut version catalog</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In addition, frameworks like Micronaut can <em>publish</em> version catalogs, which are then usable in your projects.
-You can then think of the Micronaut version catalog as a list of dependencies to pick up from: you don&#8217;t have to think about a version to choose, you can simply use the "recommendation" from Micronaut, but you don&#8217;t have to remember the dependency coordinates either.</p>
-</div>
-<div class="sect2">
-<h3 id="_importing_the_micronaut_version_catalog">Importing the Micronaut version catalog</h3>
-<div class="paragraph">
-<p>Let&#8217;s start with a project that you can generate using the Micronaut CLI:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">mn create-app catalog</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>(alternatively, download the project using <a href="https://launch.micronaut.io/">Micronaut Launch</a>)</p>
-</div>
-<div class="paragraph">
-<p>Open the generated project and update the Gradle version by changing the <code>gradle/gradle-wrapper.properties</code> file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now, in order to import the Micronaut version catalog, add this to your <code>settings.gradle</code> file:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-    }
-    versionCatalogs {
-        create("mn") {
-            from("io.micronaut:micronaut-bom:${micronautVersion}")
-        }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Here, we&#8217;re creating a new version catalog called <code>mn</code>.
-Internally, Gradle will automatically download the catalog which is <a href="https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/">published at the same GAV coordinates as its BOM</a> as a <a href="https://repo1.maven.org/maven2/io/micronaut/micronaut-bom/3.3.1/">TOML file</a> and expose it to your build scripts.</p>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s open our <code>build.gradle</code> file.
-By default it defines the following dependencies:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut:micronaut-runtime")
-    implementation("jakarta.annotation:jakarta.annotation-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    implementation("io.micronaut:micronaut-validation")
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now, we can replace this with the following:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
-    annotationProcessor(mn.micronaut.http.validation)
-    implementation(mn.micronaut.http.client)
-    implementation(mn.micronaut.jackson.databind)
-    implementation(mn.micronaut.runtime)
-    implementation(mn.jakarta.annotation.api)
-    runtimeOnly(mn.logback)
-    implementation(mn.micronaut.validation)
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>What happened here?
-Basically, we replaced hardcoded dependency coordinates with references to the <code>mn</code> version catalog.
-It&#8217;s particularly interesting if you are using the Kotlin DSL as I mentioned earlier, because in this case, the dependency notations are <em>type-safe</em>: you <em>can&#8217;t</em> make a typo in dependency coordinates, and you get completion:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/catalog/catalog-completion.gif" alt="catalog completion">
-</div>
-</div>
-<div class="paragraph">
-<p>Nice!</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_future_work">Future work</h3>
-<div class="paragraph">
-<p>Version catalogs will probably be enabled by default in future releases of Micronaut, which means that projects created via <a href="https://launch.micronaut.io/">Micronaut Launch</a> or the CLI tool would automatically use the catalog, so you don&#8217;t have to do the conversion described in this blog post. Stay tuned!</p>
-</div>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2022/02/micronaut-version-catalog.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	

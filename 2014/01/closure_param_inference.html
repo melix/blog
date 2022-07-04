@@ -97,7 +97,7 @@ Before we start, let me wish you a happy new year and a lot of open source contr
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">void test() {
+<pre class="prettyprint highlight"><code data-lang="groovy">void test() {
     assert ['foo','bar','baz'].collect { it.toUpperCase() } == ['FOO','BAR','BAZ']
 }
 test()</code></pre>
@@ -108,7 +108,7 @@ test()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.transform.TypeChecked
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.TypeChecked
 
 @TypeChecked
 void test() {
@@ -131,7 +131,7 @@ test()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.transform.TypeChecked
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.transform.TypeChecked
 
 @TypeChecked
 void test() {
@@ -148,45 +148,42 @@ this, let&#8217;s compare the signatures of <em>collect</em> (in Groovy) and <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>items of the source list are of type T and converted to type U using the closure</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>items of the source list are of type T and converted to type U using the closure</p>
+</li>
+</ol>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T, ? extends R&gt; mapper); <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T, ? extends R&gt; mapper); <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Function is an interface, the lambda expression will be converted into this target interface</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Function is an interface, the lambda expression will be converted into this target interface</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>The Java 8 equivalent would therefore be:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">list.stream().map((it)-&gt;it.toUpperCase()).collect(Collectors.toList()); <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">list.stream().map((it)-&gt;it.toUpperCase()).collect(Collectors.toList()); <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>we&#8217;re not using the smarter method reference notation here, to illustrate the concept</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>we&#8217;re not using the smarter method reference notation here, to illustrate the concept</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>As you can see, Java allows the same thing as Groovy but doesn&#8217;t require an explicit type. The reason is that for Java, there&#8217;s no ambiguity:
@@ -212,7 +209,7 @@ key for nice builder like DSLs. The delegate is used whenever a method call in a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">mail {
+<pre class="prettyprint highlight"><code data-lang="groovy">mail {
    from 'austin.powers@groovy.baby'
    to 'mini.me@evil.com'
    subject 'Attention please!'
@@ -226,7 +223,7 @@ key for nice builder like DSLs. The delegate is used whenever a method call in a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class EmailSpecification {
+<pre class="prettyprint highlight"><code data-lang="groovy">class EmailSpecification {
     void from(String sender) { ... }
     void to(String to) { ... }
     void subject(String subject) { ... }
@@ -245,32 +242,30 @@ system (which is the same), isn&#8217;t expressive enough to let you define them
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>We could like to say that Closure returns a U, but also that it consumes a T</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>We could like to say that Closure returns a U, but also that it consumes a T</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>Of course the first option that was studied was defining lots of <code>Closure</code> interfaces, corresponding to the various number of arguments (up to some arbitrary limit):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure1&lt;T,U&gt; closure) <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure1&lt;T,U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Closure1 is a kind of closure which accepts a single argument and returns a value</td>
-</tr>
-</table>
+<ol>
+<li>
+<p>Closure1 is a kind of closure which accepts a single argument and returns a value</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>While this works, it has several drawbacks:</p>
@@ -295,34 +290,31 @@ system (which is the same), isn&#8217;t expressive enough to let you define them
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def map = [key1: 'value 1', key2: 'value2']
-map.each { k,v -&gt; println "Key is $k, value is $v" } <i class="conum" data-value="1"></i><b>(1)</b>
-map.each { e -&gt; println "Key is ${e.key], value is ${e.value}" } <i class="conum" data-value="2"></i><b>(2)</b>
-map.each { println "Key is ${it.key], value is ${it.value}" } <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def map = [key1: 'value 1', key2: 'value2']
+map.each { k,v -&gt; println "Key is $k, value is $v" } <b class="conum">(1)</b>
+map.each { e -&gt; println "Key is ${e.key], value is ${e.value}" } <b class="conum">(2)</b>
+map.each { println "Key is ${it.key], value is ${it.value}" } <b class="conum">(3)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>version where the map entry is automatically converted into a key and value arguments</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>version where the closure takes a single, <code>Map.Entry</code> argument</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>version with an implicit argument, it, is a <code>Map.Entry</code></td>
-</tr>
-</table>
+<ol>
+<li>
+<p>version where the map entry is automatically converted into a key and value arguments</p>
+</li>
+<li>
+<p>version where the closure takes a single, <code>Map.Entry</code> argument</p>
+</li>
+<li>
+<p>version with an implicit argument, it, is a <code>Map.Entry</code></p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>In all cases, it is always the <strong>same</strong> method which is called, that is to say <em>each(Closure)</em> on a <code>Map</code>. The signature of this method is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;K,V&gt; each(Map&lt;K,V&gt; self, Closure&lt;?&gt; onEachEntry)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;K,V&gt; each(Map&lt;K,V&gt; self, Closure&lt;?&gt; onEachEntry)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -335,7 +327,7 @@ exactly why the compiler fails, and also why so many people think it&#8217;s <a 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;Dead,Pool&gt; magneto(Map&lt;Dead,Pool&gt; self, Closure&lt;?&gt; professorX)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;Dead,Pool&gt; magneto(Map&lt;Dead,Pool&gt; self, Closure&lt;?&gt; professorX)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -361,7 +353,7 @@ accepting a closure, a simple annotation could do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">void doSomething(String src, @ClosureParams(String.class) Closure cl) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -369,7 +361,7 @@ accepting a closure, a simple annotation could do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">doSomething {
+<pre class="prettyprint highlight"><code data-lang="groovy">doSomething {
    it.toUpperCase()
 }</code></pre>
 </div>
@@ -400,7 +392,7 @@ and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -421,7 +413,7 @@ and help reduce the amount of boilerplate (think of vectors/maps before Java 1.5
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, @ClosureParams(T) Closure&lt;U&gt; closure) <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T,U&gt; List&lt;U&gt; collect(List&lt;T&gt; source, @ClosureParams(T) Closure&lt;U&gt; closure) <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -439,7 +431,7 @@ which is used as a hint to compute the types <strong>at compile time</strong>. I
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static &lt;T,E&gt; List&lt;T&gt; collect(List&lt;E&gt; self, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T,E&gt; List&lt;T&gt; collect(List&lt;E&gt; self, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -461,7 +453,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static void downto(BigInteger self, Number to, @ClosureParams(FirstParam.class) Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -475,7 +467,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static &lt;T,E&gt; Collection&lt;T&gt; collect(Collection&lt;E&gt; self, Collection&lt;T&gt; collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T,E&gt; Collection&lt;T&gt; collect(Collection&lt;E&gt; self, Collection&lt;T&gt; collector, @ClosureParams(FirstParam.FirstGenericType.class) Closure&lt;? extends T&gt; transform)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -483,7 +475,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class PersonList extends LinkedList&lt;Person&gt; {}</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">class PersonList extends LinkedList&lt;Person&gt; {}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -491,7 +483,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">list.collect { it.name }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">list.collect { it.name }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -508,7 +500,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static &lt;K, V&gt; Map&lt;K, V&gt; each(Map&lt;K, V&gt; self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;K, V&gt; Map&lt;K, V&gt; each(Map&lt;K, V&gt; self, @ClosureParams(MapEntryOrKeyValue.class) Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -522,7 +514,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options="byte") Closure closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static void eachByte(InputStream is, @ClosureParams(value=SimpleType.class, options="byte") Closure closure)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -530,7 +522,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options="java.lang.String") Closure predicate)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static Writable filterLine(InputStream self, @ClosureParams(value=SimpleType.class, options="java.lang.String") Closure predicate)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -538,7 +530,7 @@ the use cases. Let&#8217;s go through the list:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static &lt;T&gt; T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={"java.io.ObjectInputStream","java.io.ObjectOutputStream"}) Closure&lt;T&gt; closure)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T&gt; T withObjectStreams(Socket socket, @ClosureParams(value=SimpleType.class, options={"java.io.ObjectInputStream","java.io.ObjectOutputStream"}) Closure&lt;T&gt; closure)</code></pre>
 </div>
 </div>
 </div>
@@ -550,7 +542,7 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, @ClosureParams(value=FromString.class, options={"T","T,T"} Closure c)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="java">public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, @ClosureParams(value=FromString.class, options={"T","T,T"} Closure c)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -568,7 +560,7 @@ parameter of type <code>T</code> (where <code>T</code> is the component type) or
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, Closure&lt;T or T,T -&gt; ?&gt; c)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">public static &lt;T&gt; List&lt;T&gt; sort(Collection&lt;T&gt; self, Closure&lt;T or T,T -&gt; ?&gt; c)</code></pre>
 </div>
 </div>
 <div class="paragraph">

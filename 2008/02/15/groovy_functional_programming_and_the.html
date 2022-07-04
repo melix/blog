@@ -97,7 +97,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def reduce
+<pre class="prettyprint highlight"><code>def reduce
 reduce = { fn, params -&gt;
     if (params.size()==1) return params[0]
  fn(params[0], reduce(fn,params[1..
@@ -114,7 +114,7 @@ def sum = reduce.curry({ x,y -&gt; x+y })</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">println sum((1..10))
+<pre class="prettyprint highlight"><code>println sum((1..10))
 
 --&gt; 55</code></pre>
 </div>
@@ -124,7 +124,7 @@ def sum = reduce.curry({ x,y -&gt; x+y })</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">println sum(("a".."z"))
+<pre class="prettyprint highlight"><code>println sum(("a".."z"))
 
 --&gt; abcdefghijklmnopqrstuvwxyz
 

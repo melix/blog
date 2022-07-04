@@ -270,7 +270,7 @@ jbake -i                                                            <i class="co
 <div class="listingblock">
 <div class="title">build.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">buildscript {
+<pre class="prettyprint highlight"><code data-lang="groovy">buildscript {
   repositories {
       mavenLocal() // needed to use the local JBake 2.3.0 build
       jcenter()
@@ -343,7 +343,7 @@ to our build.</p>
 <div class="listingblock">
 <div class="title">publish.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">buildscript {
+<pre class="prettyprint highlight"><code data-lang="groovy">buildscript {
   repositories {
       jcenter()
   }
@@ -390,7 +390,7 @@ githubPages {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task publish(type: GradleBuild) {           <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">task publish(type: GradleBuild) {           <i class="conum" data-value="1"></i><b>(1)</b>
     buildFile = 'publish.gradle'
     tasks = ['publishGhPages']
 }</code></pre>

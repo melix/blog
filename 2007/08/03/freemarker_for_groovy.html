@@ -123,7 +123,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form</code></pre>
+<pre class="prettyprint highlight"><code>&lt;@groovy plugin="urlencoder"&gt;this is an expression that will be converted to its URL Encoding form</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -131,7 +131,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form</code></pre>
+<pre class="prettyprint highlight"><code>&lt;@groovy plugin="urlencoder"&gt;this is an ${expression} that will be converted to its URL Encoding form</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -139,7 +139,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.text.freemarker.IGroovyFreeMarkerPlugin
+<pre class="prettyprint highlight"><code>import groovy.text.freemarker.IGroovyFreeMarkerPlugin
 
 class urlencoder implements IGroovyFreeMarkerPlugin {
  String transform(Map params, String content) {
@@ -153,7 +153,7 @@ class urlencoder implements IGroovyFreeMarkerPlugin {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.text.freemarker.FreeMarkerTemplateEngine
+<pre class="prettyprint highlight"><code>import groovy.text.freemarker.FreeMarkerTemplateEngine
 
 def tpl = '''
 Hello, ${user.name}

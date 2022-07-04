@@ -92,7 +92,7 @@ Using it is as easy as running:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">python -m SimpleHTTPServer 8000</code></pre>
+<pre class="pygments highlight"><code>python -m SimpleHTTPServer 8000</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -129,7 +129,7 @@ Knowing that Kotlin is a statically compiled language from the ground up and tha
 <div class="listingblock">
 <div class="title">HttpServer.kt</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-ruby hljs" data-lang="ruby">fun main(args: Array&lt;String&gt;) {
+<pre class="pygments highlight"><code data-lang="ruby">fun main(args: Array&lt;String&gt;) {
     val port = if (args.size &gt; 0) args[0].toInt() else 8080
     val baseDir = if (args.size &gt; 1) File(args[1]).canonicalFile else File(".").canonicalFile
 
@@ -170,7 +170,7 @@ Knowing that Kotlin is a statically compiled language from the ground up and tha
 <div class="listingblock">
 <div class="title">build.gradle.kts</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
    kotlin("jvm") version "1.3.21"
    id("com.palantir.graal") version "0.3.0-6-g0b828af"
 }
@@ -199,7 +199,7 @@ graal {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">./gradlew http-kotlin:nativeImage</code></pre>
+<pre class="pygments highlight"><code>./gradlew http-kotlin:nativeImage</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -209,7 +209,7 @@ Then you can try to serve files running:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
+<pre class="pygments highlight"><code>http-kotlin/build/graal/httpserv-kt 9090 /path/to/files</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -232,7 +232,7 @@ At some point, I even thought of abandoning, however, using perseverance, I mana
 <div class="listingblock">
 <div class="title">HttpServerGroovy.groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@CompileStatic
+<pre class="pygments highlight"><code data-lang="groovy">@CompileStatic
 abstract class HttpServerGroovy {
 
     // VERY dirty trick to avoid the creation of a groovy.lang.Reference
@@ -291,7 +291,7 @@ The resulting file is both a consequence of limitations of GraalVM, and historic
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
+<pre class="pygments highlight"><code>com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MutableCallSite.&lt;init&gt;(MethodHandle)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -315,7 +315,7 @@ For example, I had this innocent looking code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def baseDir = args[0]
+<pre class="pygments highlight"><code data-lang="groovy">def baseDir = args[0]
 server.createContext("/", new HttpHandler() {
     @Override
     void handle(HttpExchange exchange) throws IOException {
@@ -339,7 +339,7 @@ And, initializing the <code>Reference</code> class would cause an additional pat
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
+<pre class="pygments highlight"><code>Error: substitution target for com.oracle.svm.polyglot.groovy.Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints is not loaded. Use field `onlyWith` in the `TargetClass` annotation to make substitution only active when needed.</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -381,7 +381,7 @@ And, initializing the <code>Reference</code> class would cause an additional pat
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">./gradlew http-groovy:nativeImage</code></pre>
+<pre class="pygments highlight"><code>./gradlew http-groovy:nativeImage</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -390,7 +390,7 @@ Running it is as easy:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
+<pre class="pygments highlight"><code>http-groovy/build/graal/httpserv-groovy 9090 /path/to/files</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -422,7 +422,7 @@ I&#8217;m not saying either that you should avoid Groovy: I just think it&#8217;
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 After this blog post was published, I received a <a href="https://github.com/melix/graal-simple-httpserver/pull/1">pull request from Szymon Stepniak</a> improving the Groovy code a lot. The resulting file is, however, twice as big (23MB!). It does <em>not</em> change my vision on this either, because it took 2 men to reach this point, in a significant amount of time.

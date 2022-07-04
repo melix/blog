@@ -113,7 +113,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">checkInitalised();
+<pre class="prettyprint highlight"><code>checkInitalised();
         if (object == null) {
             throw new NullPointerException("Cannot invoke method: " + methodName + " on null object");
         }
@@ -288,7 +288,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def myObject = new MySuperFastJavaObject()
+<pre class="prettyprint highlight"><code>def myObject = new MySuperFastJavaObject()
 myObject.mySuperFastMethod()</code></pre>
 </div>
 </div>
@@ -297,7 +297,7 @@ myObject.mySuperFastMethod()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">package groovy.runtime.metaclass.com.mypackage;
+<pre class="prettyprint highlight"><code>package groovy.runtime.metaclass.com.mypackage;
 
 public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
  ...
@@ -342,7 +342,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">package groovy.runtime.metaclass.com.mypackage;
+<pre class="prettyprint highlight"><code>package groovy.runtime.metaclass.com.mypackage;
 
 public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
  ...
@@ -371,7 +371,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@Override
+<pre class="prettyprint highlight"><code>@Override
  public Object invokeMissingProperty(final Object instance, final String propertyName, final Object optionalValue, final boolean isGetter) {
   Layer layer = (Layer) instance; // Layer metaclass, it's ALWAYS a Layer
          return layer.java_propertyMissing(propertyName);

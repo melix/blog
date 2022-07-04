@@ -140,7 +140,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ git clone https://github.com/melix/groovy-bytecode-ast.git
+<pre class="prettyprint highlight"><code>$ git clone https://github.com/melix/groovy-bytecode-ast.git
 $ cd groovy-bytecode-ast
 $ ./gradlew jar</code></pre>
 </div>
@@ -153,7 +153,7 @@ $ ./gradlew jar</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ cd ..
+<pre class="prettyprint highlight"><code>$ cd ..
 $ mkdir bytecodetest; cd bytecodetest
 $ cp -Rp ../groovy-bytecode-ast/gradle* .</code></pre>
 </div>
@@ -163,7 +163,7 @@ $ cp -Rp ../groovy-bytecode-ast/gradle* .</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">apply plugin: 'groovy'
+<pre class="prettyprint highlight"><code>apply plugin: 'groovy'
 apply plugin:'application'
 
 repositories {
@@ -196,7 +196,7 @@ mainClassName = 'Main'</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ mkdir -p src/main/groovy
+<pre class="prettyprint highlight"><code>$ mkdir -p src/main/groovy
 $ mkdir lib
 $ cp ../groovy-bytecode-ast/build/libs/*.jar lib</code></pre>
 </div>
@@ -206,7 +206,7 @@ $ cp ../groovy-bytecode-ast/build/libs/*.jar lib</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">println 'Hello, indy Groovy!'</code></pre>
+<pre class="prettyprint highlight"><code>println 'Hello, indy Groovy!'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -214,7 +214,7 @@ $ cp ../groovy-bytecode-ast/build/libs/*.jar lib</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ gradlew run
+<pre class="prettyprint highlight"><code>$ gradlew run
 :compileJava UP-TO-DATE
 :compileGroovy
 :processResources UP-TO-DATE
@@ -232,7 +232,7 @@ Total time: 5.291 secs</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ javap -v build/classes/main/Main.class
+<pre class="prettyprint highlight"><code>$ javap -v build/classes/main/Main.class
 public java.lang.Object run();
     flags: ACC_PUBLIC
     Code:
@@ -250,7 +250,7 @@ public java.lang.Object run();
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">int bar() { 666 }
+<pre class="prettyprint highlight"><code>int bar() { 666 }
 
 int foo() { bar() }
 
@@ -267,7 +267,7 @@ int foo() { bar() }
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
+<pre class="prettyprint highlight"><code>public static CallSite bootstrap(Lookup lookup, String callType, MethodType type) {
     new ConstantCallSite(lookup.findVirtual(Main, 'bar', MethodType.methodType(int)))
 }</code></pre>
 </div>
@@ -280,7 +280,7 @@ int foo() { bar() }
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@Bytecode
+<pre class="prettyprint highlight"><code>@Bytecode
 int foo() {
     aload 0
     invokedynamic 'experiment', '(LMain;)I', [H_INVOKESTATIC, 'Main', 'bootstrap', [CallSite, Lookup, String, MethodType]]
@@ -296,7 +296,7 @@ int foo() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import groovyx.ast.bytecode.Bytecode
+<pre class="prettyprint highlight"><code>import groovyx.ast.bytecode.Bytecode
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 import static groovyjarjarasm.asm.Opcodes.*
@@ -325,7 +325,7 @@ int foo() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ ./gradlew run
+<pre class="prettyprint highlight"><code>$ ./gradlew run
 :run
 666
 666
@@ -348,7 +348,7 @@ Total time: 5.762 secs</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">int baz() { 123 }</code></pre>
+<pre class="prettyprint highlight"><code>int baz() { 123 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -356,7 +356,7 @@ Total time: 5.762 secs</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">$ ./gradlew run
+<pre class="prettyprint highlight"><code>$ ./gradlew run
 :run
 123
 123
@@ -379,7 +379,7 @@ Total time: 5.693 secs</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.transform.CompileStatic
+<pre class="prettyprint highlight"><code>import groovy.transform.CompileStatic
 import groovyx.ast.bytecode.Bytecode
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -429,7 +429,7 @@ int foo() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">./gradlew run
+<pre class="prettyprint highlight"><code>./gradlew run
 :run
 666
 123

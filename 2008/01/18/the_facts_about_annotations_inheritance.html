@@ -87,7 +87,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@WebService(serviceName="myService")
+<pre class="prettyprint highlight"><code>@WebService(serviceName="myService")
 public class MyService {
     @WebMethod
     public int sum(int x, int y) { return x+y; }
@@ -99,7 +99,7 @@ public class MyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public interface IMyService {
+<pre class="prettyprint highlight"><code>public interface IMyService {
    void sum(int x, int y);
 }
 
@@ -116,7 +116,7 @@ public class MyService implements IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@WebService
+<pre class="prettyprint highlight"><code>@WebService
 public interface IMyService {
   @WebMethod void sum(@WebParam(name="x") int x, @WebParam(name="y") int y);
 }</code></pre>
@@ -127,7 +127,7 @@ public interface IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@WebService(serviceName="myService")
+<pre class="prettyprint highlight"><code>@WebService(serviceName="myService")
 public class MyService implements IMyService {
    public int sum(int x, int y) { return x+y; }
 }</code></pre>
@@ -151,7 +151,7 @@ public class MyService implements IMyService {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">package javax.jws;
+<pre class="prettyprint highlight"><code>package javax.jws;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

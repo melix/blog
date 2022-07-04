@@ -118,7 +118,7 @@ Determining the <em>task dependencies</em>, that is to say what other tasks need
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+<pre class="pygments highlight"><code data-lang="gradle">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
     from "src/main/template"
@@ -202,7 +202,7 @@ So, what are the inputs of our <code>docsFileJar</code>? The resources we want t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
+<pre class="pygments highlight"><code data-lang="groovy">task docFilesJar(type: Jar, description: 'Package up files used for generating documentation.') {
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"
     from "src/main/template"
@@ -248,7 +248,7 @@ jar {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">tasks.register('docFilesJar', Jar) {
+<pre class="pygments highlight"><code data-lang="groovy">tasks.register('docFilesJar', Jar) {
     description = 'Package up files used for generating documentation.'
     archiveVersion = null
     archiveFileName = "grails-doc-files.jar"

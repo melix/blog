@@ -101,7 +101,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">while (true) {
+<pre class="prettyprint highlight"><code>while (true) {
  // eat cpu
 }</code></pre>
 </div>
@@ -124,7 +124,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@ThreadInterrupt
+<pre class="prettyprint highlight"><code>@ThreadInterrupt
 import groovy.transform.ThreadInterrupt
 
 while (true) {
@@ -137,7 +137,7 @@ while (true) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">java.lang.InterruptedException: Execution Interrupted
+<pre class="prettyprint highlight"><code>java.lang.InterruptedException: Execution Interrupted
  at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
  at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:39)
  at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:27)</code></pre>
@@ -148,7 +148,7 @@ while (true) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">while (true) {
+<pre class="prettyprint highlight"><code>while (true) {
   if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Execution Interrupted");
 // eat cpu
 }</code></pre>
@@ -178,7 +178,7 @@ while (true) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@TimedInterrupt(10)
+<pre class="prettyprint highlight"><code>@TimedInterrupt(10)
 import groovy.transform.TimedInterrupt
 
 while (true) {
@@ -207,7 +207,7 @@ while (true) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@ConditionalInterrupt({counter++&gt;1})
+<pre class="prettyprint highlight"><code>@ConditionalInterrupt({counter++&gt;1})
 import groovy.transform.ConditionalInterrupt
 
 counter=0
@@ -225,7 +225,7 @@ scriptMethod()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">counter=0</code></pre>
+<pre class="prettyprint highlight"><code>counter=0</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -233,7 +233,7 @@ scriptMethod()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def counter=0</code></pre>
+<pre class="prettyprint highlight"><code>def counter=0</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -244,7 +244,7 @@ scriptMethod()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public class script1291150384631 extends groovy.lang.Script {
+<pre class="prettyprint highlight"><code>public class script1291150384631 extends groovy.lang.Script {
 
     public java.lang.Object run() {
         counter = 0
@@ -278,7 +278,7 @@ scriptMethod()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import groovy.transform.ConditionalInterrupt
+<pre class="prettyprint highlight"><code>import groovy.transform.ConditionalInterrupt
 
 class Helper {
   static int i=0

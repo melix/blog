@@ -84,7 +84,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def doInParallel(Closure... closures) {
+<pre class="prettyprint highlight"><code>def doInParallel(Closure... closures) {
  def service = java.util.concurrent.Executors.newFixedThreadPool(closures.length)
  def latch = new java.util.concurrent.CountDownLatch(closures.length)
  closures.each { cl -&gt; service.execute({
@@ -106,7 +106,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">doInParallel(
+<pre class="prettyprint highlight"><code>doInParallel(
    { println 1+1 },
    { callVeryLongProcess() },
    { throw Exception() } // demonstrates the correct handling of exceptions

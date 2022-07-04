@@ -167,7 +167,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">Map inputMap = new HashMap()
+<pre class="prettyprint highlight"><code>Map inputMap = new HashMap()
 inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Title, "Hello, World !");
 inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Body,"Groovy is cool !");
 inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,com.lingway.lkm.db.corpus.bean.languages.LanguageKind.ENGLISH);</code></pre>
@@ -178,7 +178,7 @@ inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">inputMap = [
+<pre class="prettyprint highlight"><code>inputMap = [
    title: "Hello, World !"
    body: "Groovy is cool !"
    language: "en"
@@ -190,7 +190,7 @@ inputMap.put(com.lingway.lkm.db.corpus.bean.fields.DublinExtendedKind.Language,c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">File file = new File("/tmp/data.txt");
+<pre class="prettyprint highlight"><code>File file = new File("/tmp/data.txt");
 int total = 0;
 try {
  BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
@@ -210,7 +210,7 @@ System.out.println("total = " + total);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def total = 0
+<pre class="prettyprint highlight"><code>def total = 0
 new File("/tmp/data.txt").eachLine("utf-8") { line -&gt;
    if (line) total += line as int
 }
@@ -222,7 +222,7 @@ println "Total : $total"</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">mail.send sender: "app-admin-email-AT-gmail-DOT-com",
+<pre class="prettyprint highlight"><code>mail.send sender: "app-admin-email-AT-gmail-DOT-com",
    to: "recipient-AT-somecompany-DOT-com",
    subject: "Hello",
    textBody: "Hello, how are you doing? -- MrG",
@@ -295,7 +295,7 @@ println "Total : $total"</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def num = 1.1</code></pre>
+<pre class="prettyprint highlight"><code>def num = 1.1</code></pre>
 </div>
 </div>
 <div class="paragraph">

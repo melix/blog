@@ -200,7 +200,7 @@ of the same name accepting different parameters. Let&#8217;s illustrate this wit
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static int foo(String o) { return 1; }
+<pre class="prettyprint highlight"><code data-lang="java">public static int foo(String o) { return 1; }
 public static int foo(Date o) { return 2; }
 public static int foo(Object o) { return 3; }</code></pre>
 </div>
@@ -210,7 +210,7 @@ public static int foo(Object o) { return 3; }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static void main(String[] args) {
+<pre class="prettyprint highlight"><code data-lang="java">public static void main(String[] args) {
     Object[] array = new Object[] { "a string", new Date(), 666 };
     for (Object o : array) {
         System.out.println(foo(o));
@@ -256,7 +256,7 @@ public static int foo(Object o) { return 3; }</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static int foo(String o) { return 1; }
+<pre class="prettyprint highlight"><code data-lang="java">public static int foo(String o) { return 1; }
 public static int foo(Date o) { return 2; }
 
 public static void main(String[] args) {
@@ -280,7 +280,7 @@ public static void main(String[] args) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class Duck {
+<pre class="prettyprint highlight"><code data-lang="groovy">class Duck {
    String getName() { 'Duck' }
 }
 class Cat {
@@ -293,7 +293,7 @@ class Cat {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def list = [cat, dog, human, hal]
+<pre class="prettyprint highlight"><code data-lang="groovy">def list = [cat, dog, human, hal]
 list.each { obj -&gt;
    println obj.getName()
 }</code></pre>
@@ -304,7 +304,7 @@ list.each { obj -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">if (obj instanceof Cat) {
+<pre class="prettyprint highlight"><code data-lang="java">if (obj instanceof Cat) {
    return ((Cat)obj).getName();
 }
 if (obj instanceof Duck) {
@@ -323,7 +323,7 @@ if (obj instanceof Computer) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public abstract class Something {} // should define getName, but does not for some obscure reason
+<pre class="prettyprint highlight"><code data-lang="java">public abstract class Something {} // should define getName, but does not for some obscure reason
 public class Cat extends Something {
    public String getName() { return "Cat"; }
 }
@@ -387,7 +387,7 @@ me with a way to call some methods.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class Person {
+<pre class="prettyprint highlight"><code data-lang="groovy">class Person {
    String firstName
    String lastName
    int age
@@ -399,7 +399,7 @@ me with a way to call some methods.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def adults = Person.findByAge { it&gt;= 18 }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">def adults = Person.findByAge { it&gt;= 18 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -411,7 +411,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">catalog {
+<pre class="prettyprint highlight"><code data-lang="groovy">catalog {
    book {
    	isbn 123
 	name 'Awesome dynamic languages'
@@ -430,7 +430,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">builder.catalog( (el) -&gt; {
+<pre class="prettyprint highlight"><code data-lang="java">builder.catalog( (el) -&gt; {
   el.book ( (p) -&gt; {
      p.setISBN("123");
      p.setName("Awesome dynamic languages");
@@ -450,7 +450,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class VulnerableService {
+<pre class="prettyprint highlight"><code data-lang="java">public class VulnerableService {
    public void vulnerableMethod() {
       FileUtils.recurseDeleteWithRootPrivileges("/");
    }
@@ -462,7 +462,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">VulnerableService.metaClass.vulnerableMethod = {
+<pre class="prettyprint highlight"><code data-lang="groovy">VulnerableService.metaClass.vulnerableMethod = {
    println "Well tried, but you have been logged to Santa's naughty guys list!"
 }</code></pre>
 </div>
@@ -483,7 +483,7 @@ a new query, it is not necessary. One could say that they prefer safety at compi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">def p = new Expando()
+<pre class="prettyprint highlight"><code data-lang="groovy">def p = new Expando()
 p.name = 'Cédric'
 p.sayHello = { println "Hello $name" }
 
@@ -522,7 +522,7 @@ p.sayHello()</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.json.JsonSlurper
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.json.JsonSlurper
 
 def json = new JsonSlurper().parse('https://api.github.com/repos/groovy/groovy-core/issues?state=closed'.toURL())
 json.user.collectEntries { u -&gt;
@@ -561,7 +561,7 @@ json.user.collectEntries { u -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
+<pre class="prettyprint highlight"><code data-lang="groovy">Point p = [1,2] // coercion of a list literal into an object of class Point thanks to constructor injection
 Point p = [x:1, y:2] // coercion of a map literal into an object of class Point thanks to setter injection</code></pre>
 </div>
 </div>
@@ -570,7 +570,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class A {
+<pre class="prettyprint highlight"><code data-lang="groovy">class A {
    Object asType(Class&lt;?&gt; clazz) { new B(...) }
 }</code></pre>
 </div>
@@ -588,7 +588,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">a+b</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">a+b</code></pre>
 </div>
 </div>
 <div class="paragraph">

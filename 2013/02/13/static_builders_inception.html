@@ -105,7 +105,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">@groovy.transform.CompileStatic
+<pre class="prettyprint highlight"><code>@groovy.transform.CompileStatic
 String build() {
     def builder = new HTMLBuilder()
     builder.html {
@@ -156,7 +156,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    $ ./gradlew test</code></pre>
+<pre class="prettyprint highlight"><code>    $ ./gradlew test</code></pre>
 </div>
 </div>
 </div>
@@ -167,7 +167,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    import groovyx.transform.StaticMarkupBuilder
+<pre class="prettyprint highlight"><code>    import groovyx.transform.StaticMarkupBuilder
 
     @StaticMarkupBuilder
     class HTMLBuilder {
@@ -210,7 +210,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    @CompileStatic
+<pre class="prettyprint highlight"><code>    @CompileStatic
     void test() { // using a method to ensure that the builder will be statically compiled!
         def out = new ByteArrayOutputStream()
         def builder = new Builder3(out)
@@ -228,7 +228,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    Hello, Groovy!</code></pre>
+<pre class="prettyprint highlight"><code>    Hello, Groovy!</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -236,7 +236,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    @CompileStatic
+<pre class="prettyprint highlight"><code>    @CompileStatic
     void test() { // using a method to ensure that the builder will be statically compiled!
         def out = new ByteArrayOutputStream()
         def builder = new Builder3(out)
@@ -281,7 +281,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    static schema = {
+<pre class="prettyprint highlight"><code>    static schema = {
         html {}
     }</code></pre>
 </div>
@@ -291,7 +291,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }</code></pre>
+<pre class="prettyprint highlight"><code>    void html(@DelegatesTo(HTMLBuilder$HtmlTag) Closure body) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -348,7 +348,7 @@ String build() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }</code></pre>
+<pre class="prettyprint highlight"><code>    void a(@CheckedAttributes(['href','target']) Map attributes, @DelegatesTo(...) Closure code) { ... }</code></pre>
 </div>
 </div>
 <div class="paragraph">

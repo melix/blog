@@ -100,7 +100,7 @@ Instead a build script, a typical dependency declaration looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
     implementation("org.apache.slf4j:slf4j-api:1.7.25")
 }</code></pre>
 </div>
@@ -110,7 +110,7 @@ Instead a build script, a typical dependency declaration looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
     implementation(libs.slf4j)
 }</code></pre>
 </div>
@@ -120,7 +120,7 @@ Instead a build script, a typical dependency declaration looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[versions]
+<pre class="pygments highlight"><code data-lang="toml">[versions]
 slf4j = "1.7.25"
 
 [libraries]
@@ -159,7 +159,7 @@ You can then think of the Micronaut version catalog as a list of dependencies to
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">mn create-app catalog</code></pre>
+<pre class="pygments highlight"><code>mn create-app catalog</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -170,7 +170,7 @@ You can then think of the Micronaut version catalog as a list of dependencies to
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip</code></pre>
+<pre class="pygments highlight"><code>distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -179,7 +179,7 @@ You can then think of the Micronaut version catalog as a list of dependencies to
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencyResolutionManagement {
+<pre class="pygments highlight"><code data-lang="gradle">dependencyResolutionManagement {
     repositories {
         mavenCentral()
     }
@@ -201,7 +201,7 @@ By default it defines the following dependencies:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
@@ -217,7 +217,7 @@ By default it defines the following dependencies:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">dependencies {
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
     annotationProcessor(mn.micronaut.http.validation)
     implementation(mn.micronaut.http.client)
     implementation(mn.micronaut.jackson.databind)

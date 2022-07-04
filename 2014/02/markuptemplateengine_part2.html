@@ -176,7 +176,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Override
+<pre class="prettyprint highlight"><code data-lang="groovy">@Override
     public void call(final SourceUnit source, final GeneratorContext context, final ClassNode classNode) throws CompilationFailedException {
         if (classNode.isScriptBody()) {							<i class="conum" data-value="1"></i><b>(1)</b>
             classNode.setSuperClass(MarkupTemplateEngine.BASETEMPLATE_CLASSNODE);	<i class="conum" data-value="2"></i><b>(2)</b>
@@ -217,7 +217,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">p(text)</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -225,7 +225,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">p(getModel().get("text"))</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(getModel().get("text"))</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -237,7 +237,7 @@
 <div class="listingblock">
 <div class="title">BaseTemplate.java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    public Object methodMissing(String tagName, Object args) throws IOException {
+<pre class="prettyprint highlight"><code data-lang="groovy">    public Object methodMissing(String tagName, Object args) throws IOException {
         Object o = model.get(tagName);
         if (args instanceof Object[]) {
             final Writer wrt = out;
@@ -273,7 +273,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -295,7 +295,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">text</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">text</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -303,7 +303,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">getModel().get("text")</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">getModel().get("text")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -311,7 +311,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">yield(getModel().get("text"))</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">yield(getModel().get("text"))</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -342,7 +342,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">methodMissing("p", new Object[]{getModel().get("text")})</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">methodMissing("p", new Object[]{getModel().get("text")})</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -350,7 +350,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">compilerConfiguration.addCompilationCustomizers(new TemplateASTTransformer(tplConfig)); 		<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">compilerConfiguration.addCompilationCustomizers(new TemplateASTTransformer(tplConfig)); 		<i class="conum" data-value="1"></i><b>(1)</b>
 compilerConfiguration.addCompilationCustomizers(
                 new ASTTransformationCustomizer(CompileStatic.class));					<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -372,7 +372,7 @@ compilerConfiguration.addCompilationCustomizers(
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -394,7 +394,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">yield 'Some text'</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">yield 'Some text'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -402,7 +402,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">methodMissing("yield", new Object[] {"Some &lt;text to escape&gt;"})</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">methodMissing("yield", new Object[] {"Some &lt;text to escape&gt;"})</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -410,7 +410,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;yield&gt;Some &lt;text to escape&gt;&lt;/yield&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;yield&gt;Some &lt;text to escape&gt;&lt;/yield&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -424,7 +424,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -476,7 +476,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;	<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;	<i class="conum" data-value="1"></i><b>(1)</b>
     if (call.lineNumber &gt; 0) {					<i class="conum" data-value="2"></i><b>(2)</b>
         if (call.implicitThis) {				<i class="conum" data-value="3"></i><b>(3)</b>
             return makeDynamic(call, OBJECT_TYPE)		<i class="conum" data-value="4"></i><b>(4)</b>
@@ -513,7 +513,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">class MarkupTemplateTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
+<pre class="prettyprint highlight"><code data-lang="groovy">class MarkupTemplateTypeCheckingExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
 
     @Override
     Object run() {
@@ -529,7 +529,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">compilerConfiguration.addCompilationCustomizers(
+<pre class="prettyprint highlight"><code data-lang="groovy">compilerConfiguration.addCompilationCustomizers(
         new ASTTransformationCustomizer(
             Collections.singletonMap("extensions","groovy.text.markup.MarkupTemplateTypeCheckingExtension"), <i class="conum" data-value="1"></i><b>(1)</b>
             CompileStatic.class));									     <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
@@ -589,7 +589,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">beforeVisitMethod {		<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">beforeVisitMethod {		<i class="conum" data-value="1"></i><b>(1)</b>
    newScope {			<i class="conum" data-value="2"></i><b>(2)</b>
       builderCalls = []		<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -617,7 +617,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;
+<pre class="prettyprint highlight"><code data-lang="groovy">methodNotFound { receiver, name, argList, argTypes, call -&gt;
     if (call.lineNumber &gt; 0) {
         if (call.implicitThis) {
             currentScope.builderCalls &lt;&lt; call
@@ -632,7 +632,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">afterVisitMethod { mn -&gt;							<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">afterVisitMethod { mn -&gt;							<i class="conum" data-value="1"></i><b>(1)</b>
    scopeExit {									<i class="conum" data-value="2"></i><b>(2)</b>
       new BuilderMethodReplacer(context.source, builderCalls).visitMethod(mn)	<i class="conum" data-value="3"></i><b>(3)</b>
    }
@@ -660,7 +660,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    private static class BuilderMethodReplacer extends ClassCodeExpressionTransformer {
+<pre class="prettyprint highlight"><code data-lang="groovy">    private static class BuilderMethodReplacer extends ClassCodeExpressionTransformer {
 
         private static final MethodNode METHOD_MISSING = ClassHelper.make(BaseTemplate).getMethods('methodMissing')[0]		<i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -751,7 +751,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">p(text.toUpperCase())</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(text.toUpperCase())</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -759,7 +759,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">Cannot find matching method java.lang.Object#toUpperCase(). Please check if the declared type is right and if the method exists.</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -773,7 +773,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">p(((String)text).toUpperCase())</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">p(((String)text).toUpperCase())</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -784,7 +784,7 @@ Before going further, you have to be warned. What I am going to show you is thin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
+<pre class="prettyprint highlight"><code data-lang="groovy">import groovy.text.markup.MarkupTemplateEngine
 import groovy.text.markup.TemplateConfiguration
 
 def tplConf = new TemplateConfiguration()
@@ -820,7 +820,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">[text:'String']</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">[text:'String']</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -828,7 +828,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">[text:'Integer']</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">[text:'Integer']</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -844,7 +844,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">[persons:'List&lt;Person&gt;', posts:[List&lt;Post&gt;]]</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">[persons:'List&lt;Person&gt;', posts:[List&lt;Post&gt;]]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -860,7 +860,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">div {
+<pre class="prettyprint highlight"><code data-lang="groovy">div {
   p('text')
 }</code></pre>
 </div>
@@ -870,7 +870,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div&gt;
+<pre class="prettyprint highlight"><code data-lang="html">&lt;div&gt;
     &lt;p&gt;Text&lt;/p&gt;
 &lt;/div&gt;</code></pre>
 </div>
@@ -880,7 +880,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">div {  p('text') }</code></pre>
+<pre class="prettyprint highlight"><code data-lang="groovy">div {  p('text') }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -888,7 +888,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/div&gt;</code></pre>
+<pre class="prettyprint highlight"><code data-lang="html">&lt;div&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -896,7 +896,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">div {
+<pre class="prettyprint highlight"><code data-lang="groovy">div {
   newLine()
   p('text')
   newLine()

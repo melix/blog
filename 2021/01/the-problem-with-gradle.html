@@ -244,7 +244,7 @@ The surface is a DSL, a language, but what you do, what you <em>should do</em>, 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">plugins {
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
    id 'java-library'
 }
 
@@ -259,7 +259,7 @@ dependencies {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">plugins {
+<pre class="pygments highlight"><code data-lang="kotlin">plugins {
     id("org.gradle.presentation.asciidoctor")
 }
 
@@ -334,7 +334,7 @@ I think it&#8217;s a mistake to consider that you need a programming language to
 <div class="listingblock">
 <div class="title">indexed loop</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">for (int i=0; i&lt;items.length(); i++) {
+<pre class="pygments highlight"><code>for (int i=0; i&lt;items.length(); i++) {
    ...
 }</code></pre>
 </div>
@@ -342,7 +342,7 @@ I think it&#8217;s a mistake to consider that you need a programming language to
 <div class="listingblock">
 <div class="title">foreach loop</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">for (String item: items) {
+<pre class="pygments highlight"><code>for (String item: items) {
 ...
 }</code></pre>
 </div>
@@ -350,7 +350,7 @@ I think it&#8217;s a mistake to consider that you need a programming language to
 <div class="listingblock">
 <div class="title">while loop</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">Iterator&lt;String&gt; it = items.iterator();
+<pre class="pygments highlight"><code>Iterator&lt;String&gt; it = items.iterator();
 while (it.hasNext()) {
   ...
 }</code></pre>
@@ -362,14 +362,14 @@ while (it.hasNext()) {
 <div class="listingblock">
 <div class="title">streams</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">items.stream()
+<pre class="pygments highlight"><code>items.stream()
    .map(...)</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="title">streams again</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">items.forEach(...)</code></pre>
+<pre class="pygments highlight"><code>items.forEach(...)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -421,7 +421,7 @@ There will be a blog post from the team about this project, in the meantime you 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public abstract class ProcessTemplates extends DefaultTask {
+<pre class="pygments highlight"><code data-lang="java">public abstract class ProcessTemplates extends DefaultTask {
 
     @Input
     public abstract Property&lt;TemplateEngineType&gt; getTemplateEngine();

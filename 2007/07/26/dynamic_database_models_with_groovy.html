@@ -111,7 +111,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs"> public class Document {
+<pre class="prettyprint highlight"><code> public class Document {
     private int theID;
     private Map theCustomFields;
     /* ...  here comes the getters/setters */
@@ -174,7 +174,7 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public class MetaClass {
+<pre class="prettyprint highlight"><code>public class MetaClass {
  private boolean isEntity = true;
  private String theParentClass;
  private String theName;
@@ -187,7 +187,7 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public class MetaField {
+<pre class="prettyprint highlight"><code>public class MetaField {
  private String theName;
  private boolean isPK;
  private MetaType theType;
@@ -234,7 +234,7 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public enum MetaType {
+<pre class="prettyprint highlight"><code>public enum MetaType {
  STRING("String"),
  INT("Integer"),
  LONG("Long"),
@@ -260,7 +260,7 @@ There are two problems with this model :</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">MetaClass meta = new MetaClass(cl);
+<pre class="prettyprint highlight"><code>MetaClass meta = new MetaClass(cl);
 meta.setName('test');
 meta.addField(new MetaField("title", false, MetaType.STRING));
 meta.addField(new MetaField("date", false, MetaType.DATE));</code></pre>
@@ -278,7 +278,7 @@ meta.addField(new MetaField("date", false, MetaType.DATE));</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">import MetaClass
+<pre class="prettyprint highlight"><code>import MetaClass
 import groovy.text.Template
 import groovy.text.SimpleTemplateEngine
 class GroovyBeanGenerator {
@@ -316,7 +316,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public class GroovybernateUtil {
+<pre class="prettyprint highlight"><code>public class GroovybernateUtil {
  private String theApplicationName;
  private AnnotationConfiguration theConfiguration;
  private boolean isModelUpdated;
@@ -389,7 +389,7 @@ class ${meta.name} &lt;% if (meta.parentClass!=null) { %&gt; extends ${meta.pare
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">public class Groovybernate {
+<pre class="prettyprint highlight"><code>public class Groovybernate {
  public static void main(String[] args) throws IllegalAccessException, InstantiationException {
 
   GroovyClassLoader cl = new GroovyClassLoader(Groovybernate.class.getClassLoader());

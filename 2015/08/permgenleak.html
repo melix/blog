@@ -118,7 +118,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @TaskAction
+<pre class="prettyprint highlight"><code data-lang="groovy">    @TaskAction
     void run() {
         logging.captureStandardOutput(LogLevel.INFO)
         def classpath = new DefaultClassPath(getCodenarcClasspath())
@@ -133,7 +133,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">int i = 0;
+<pre class="prettyprint highlight"><code data-lang="java">int i = 0;
 try {
     while (true) {
         i++;
@@ -187,7 +187,7 @@ try {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    static void removeClassFromGlobalClassSet(Class&lt;?&gt; classInfoClass) throws Exception {
+<pre class="prettyprint highlight"><code data-lang="java">    static void removeClassFromGlobalClassSet(Class&lt;?&gt; classInfoClass) throws Exception {
         Field globalClassValueField = classInfoClass.getDeclaredField("globalClassValue");
         globalClassValueField.setAccessible(true);
         Object globalClassValue = globalClassValueField.get(null);
@@ -270,7 +270,7 @@ try {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">task check &lt;&lt; {
+<pre class="prettyprint highlight"><code data-lang="groovy">task check &lt;&lt; {
     ant.taskdef(name: 'pmd',
                 classname: 'net.sourceforge.pmd.ant.PMDTask',
                 classpath: configurations.pmd.asPath)
@@ -288,7 +288,7 @@ try {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">antBuilder.withClasspath(classpath.asFiles).execute {
+<pre class="prettyprint highlight"><code data-lang="groovy">antBuilder.withClasspath(classpath.asFiles).execute {
 }</code></pre>
 </div>
 </div>

@@ -88,7 +88,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">/**
+<pre class="prettyprint highlight"><code>/**
  * Convertit un nombre en lettres.
  * Les règles d'écriture sont celles décrites sur https://www.miakinen.net/vrac/nombres
  *
@@ -136,7 +136,7 @@ asLetters = { number -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">def asLetters = { (..&lt;0) -&gt; "moins ${asLetters(-it}"
+<pre class="prettyprint highlight"><code>def asLetters = { (..&lt;0) -&gt; "moins ${asLetters(-it}"
  | (0..10) -&gt; digits[it]
  | it&lt;17 -&gt; specials[number-10]
  | ...</code></pre>
