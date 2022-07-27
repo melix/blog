@@ -1,0 +1,130 @@
+= There is no single dependency graph
+Cédric Champeau
+2022-07-04
+:jbake-type: post
+:jbake-tags: gradle, dependency-management
+:jbake-status: published
+:source-highlighter: pygments
+:id: there-is-no-single-dep-graph
+:linkattrs:
+
+
+What are the dependencies of Micronaut?
+While the question may seem obvious, the answer is not.
+I realized, over the years, that many developers tend to ignore the complexity of dependency management in the Java ecosystem.
+In particular, I faced several occasions when discussing dependency upgrades (in particular in the context of security updates) when it became obvious that there was a big gap between the mental model that some people have, and the reality.
+In this blog post I want to address some misconceptions around dependencies in the Java ecosystem.
+
+
+== Libraries vs applications
+=== Applications are easier
+
+First and foremost, we have to make a difference between a _library_ and an _application_.
+If I install, say, a desktop application, then the notion of "dependencies of the application" seem quite obvious: they are often bundled with the application in a `libs` directory, so all we have to do is look into that.
+Therefore, the question "what are the dependencies of X" can be conflated to a simpler question: "what are the dependencies that application X requires at runtime to run properly".
+
+This is already a simplfication, though: nothing prevents the application from using a plugin system. 
+This would make the answer to that question more complicated, but let's focus on the simplest case.
+Because we have that file list at hand, answering questions like "is X vulnerable to log4shell" is easy: we can look into the `libs` directory, and if we find a vulnerable version of log4j in there, then we know for sure if the application uses a vulnerable dependency.
+
+This model, the "Windows installer" one, is what lots of developers have in mind.
+The problem is often that they assume that the _libraries_ work the same, but they don't.
+
+== Library dependencies
+
+For libraries (and frameworks, which can be seen as "super libraries") the answer is indeed more complex.
+A library is intended to be consumed by an application, or another library.
+Therefore, when we ask the question "what are the dependencies of library L", then the answer is "it depends".
+
+In particular, libraries will introduce us to the world of _transitive dependencies_: an application will depend on libraries, which themselves have dependencies on other libraries.
+
+For example, you can have the following dependency graph:
+
+[graphviz, "simple-dependency-graph", svg]
+----
+digraph g {
+    app -> a
+    app -> b
+    a -> c
+    b -> d
+    d -> c
+}
+----
+
+We can already see that we have a pelicular situation, where 2 libraries depend on the same module `c`.
+If they require the same version of `c`, then we are lucky.
+If they don't, then we run in a situation called a _version conflict_, where different tools will use different strategies to solve them (no, Maven and Gradle, in particular, don't have the same way of dealing with dependency conflicts).
+
+Say that `a` requires `c 1.0` and that `d` requires `c 1.1`: a reasonable strategy is to do _optimistic upgrades_ and to choose `c 1.1` because it's the highest version.
+This is the default strategy that Gradle uses, for example.
+Maven, on the other hand, takes a simpler, but non prectictable strategy of "closest first", where "closest" actually means "first seen wins".
+In other words, if `a` is seen first, then `c 1.0` will be used.
+Reverse the order of dependencies and `c` will use version `1.1`.
+Gradle's strategy is immune to those problems, but we can already see that there can be a difference between the dependencies which are _declared in a build file_ and the ones which will _effectively be used_.
+
+As a consequence, **it's a mistake to look at the declared dependencies to determine what are the effective dependencies of a project**.
+You must always look at the resolved dependency graphs.
+This is why I wrote, a few months ago, that http://localhost:8820/blog/2020/10/about-dependabot.html[Dependabot gave a false sense of security] (hopefully, now, they provide https://github.blog/2022-07-01-extend-your-dependency-information-in-the-github-dependency-graph-with-new-github-actions/[an API which can be used to mitigate that problem]).
+
+== Building from sources
+
+Now that we understand that the declared dependencies can be different from the _resolved_ dependencies, and that we reckon that it's the build tool's responsibility to solve those conflicts, let's address an elephant in the room: building a proejct _entirely_ from sources (including transitive dependencies).
+
+Let's imagine that, for legal reasons, you don't want to use Maven Central.
+Instead you want to build your project against the _sources_ of your dependencies and build themselves from dependencies, and so on.
+Obviously, if your build tool doesn't support resolving a dependency graph first (which implies having metadata available for transitive dependencies in some form) _then_ replacing the dependencies with their sources instead of the binaries, then you have a problem: you're going to have to figure out yourself what libraries to build, in which versions, and do everything by hand.
+Spoiler alert: no build tool supports that (in the Java ecosystem, some ecosystems like Rust _always_ use source dependencies, which come with a number of other issues I won't address in this blog post).
+
+This means that in order to build your project, you must:
+
+1. resolve all dependencies, including transitive dependencies, to figure out what _version_ they need
+2. find a way to fetch the sources for the particular version of each dependency that is used
+3. update the build scripts of that project to use _source dependencies_
+3. compile each project independently, and recurse to 1.
+
+But hey, don't you see the problem already (except from the fact you'd have to rewrite all build files, and figure out how to build each project according to their CI specification)?
+Because resolved dependency graphs only depend on the _top level_ project being compiled, you have absolutely no guarantee that you'll use the same, resolved versions everywhere.
+In the dependency graph above, if you resolve the dependency graph for `app`, then you will determine that you need to build `c` in version `1.1` from sources.
+Alright, but to build `a`, we will need to build `c`... with version `1.0`!
+In other words, there's no way you can _consistently_ build such a dependency graph from source without having a _single, globally resolved_ dependency graph, and a _single build_.
+The only alternative to that is basically to go down the tree, build some artifacts, then replace transitive dependencies with _file_ dependencies and cross fingers that everything compiles up to the top.
+Of course this is completely unrealistic in the real world, unless you have millions of dollars to spend on rebuilding artifacts (and yes, some organizations do that, that's the strategy for debian, for example, which has the "nice" side effect of having applications which have bugs which are not in the initial release, because all applications need to use the _same_ dependency version).
+
+That's why I think the preferred solution, for security, is still to use precompiled binaries (which also would make builds faster in any case), but combine that with https://docs.gradle.org/current/userguide/dependency_verification.html[dependency verification]: it's a good tradeoff, which offers the right level of security, while not having to spend incredible amounts of money in rebuilding the entire world (also, it's better for the planet).
+Note that this also guarantees trust, as your "custom built" binaries will clearly use different signatures, and possibly checksums, than what the users normally expect.
+
+While we were talking about building from sources, we _also_ forgot about one extremely important bit: _there is no single dependency graph_, even in a single project.
+
+== Building requires multiple dependency graphs
+
+The most obvious way to illustrate that there's no single dependency graph in a project is to thing about _tests_.
+When you compile your application, there shouldn't be any test dependency on the compile classpath.
+When you compile your _tests_, then you'd get the dependencies of the application, plus the dependencies of your test framework, plus your additional test dependencies.
+
+Therefore, you have at least 2 distinct dependency graphs:
+
+- the application compile classpath (in Gradle, it's the `compileClasspath` configuration which represents that dependency graph)
+- the application test compile classpath (in Gradle, it's the `testCompileClasspath` configuration which represents that dependency graph)
+
+Maven itself makes a difference, with dependency _scopes_ (`compile`, `runtime`, `test`, ...).
+You can already see that in practice, we have _many more_ dependency graphs: compile classpath, runtime classpath, test compile classpath, test runtime classpath, annotation processing path, functional tests compile/runtime classpath, etc.
+A project can literally have dozens of different dependency graphs.
+
+More importantly, there can be conflicts in those graphs: for example, when you compile your tests, you may introduce a dependency which will accidentally trigger an _upgrade_ of a dependency, so you would get a different dependency version during testing and actual run time!
+Similarly, your runtime dependencies can introduce transitive dependencies which would have the consequence of having different versions of dependencies at compile time and run time.
+Note that Gradle offers different ways to mitigate those real world problems, for example https://docs.gradle.org/current/userguide/resolution_strategy_tuning.html#resolution_consistency[consistent resolution] or https://docs.gradle.org/6.2.1/userguide/dependency_version_alignment.html[version alignment].
+
+== Conclusion
+
+I hope that after reading this, it becomes quite clear that _there is no single dependency graph_.
+Therefore, it's a mistake to ask for "what are the dependencies of Micronaut", because the answer _depends on the consumer_.
+Not only does it depend on the consumer, but it also depends on either the order of dependencies (Maven for example), or the strategies being used to "force" dependency versions (which are also consumer dependent), or the kind of dependency graph which is resolved (runtime dependencies, compile dependencies).
+Of course, we didn't mention more advanced features like optional dependencies, for which I like to remind that https://blog.gradle.org/optional-dependencies[they are not optional], nor did we talk about more advanced, runtime based systems like OSGi which add another layer of complexity to the problem.
+
+If you can take away one thing from this blog post, it's to never ask "what are the dependencies of X" anymore: minimally, the question should be more targetted:
+
+- what are the dependencies that X need to compile?
+- what are the dependencies that X uses at runtime to run its test suite?
+
+The question "what are the dependencies that X uses at runtime" is only valid for _some_ applications (for example those which are not subject to platform dependent dependencies), not for _libraries_.
+

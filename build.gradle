@@ -4,10 +4,20 @@ plugins {
 }
 
 
+dependencies {
+   jbake "org.asciidoctor:asciidoctorj-diagram:2.2.3"
+}
+
+
 jbake {
    srcDirName = 'src/jbake'
    destDirName = 'jbake'
    clearCache = true
+   configuration['asciidoctor.option.requires'] = "asciidoctor-diagram" 
+   configuration['asciidoctor.attributes'] = [
+    "imagesoutdir=${bake.input}/assets/img",
+    "imagesdir=/blog/img"
+   ]
 }
 
 gitPublish {

@@ -288,8 +288,8 @@ Hello,
 Yay! No failure anymore, and the output is in the order we expected. Problem solved, right?
 
 Well, not so fast.
-You've used `configureEach`, so everything should be lazy.
-Expect that not: the `matching` API is an _old_, eager API!
+You've used `configureEach`, so everything should be lazy, right?
+Sorry, nope: the `matching` API is an _old_, eager API!
 Actually, if you look at what the predicate uses, it becomes obvious:
 
 [source,java]
