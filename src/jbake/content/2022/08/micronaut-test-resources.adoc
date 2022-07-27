@@ -1,15 +1,15 @@
 = Introducing Micronaut Test Resources
 Cédric Champeau
-2022-07-28
+2022-08-04
 :jbake-type: post
 :jbake-tags: micronaut, testcontainers, docker, test, testing
 :jbake-status: published
 :source-highlighter: pygments
-:id: micronaut-test-resources-draft
+:id: micronaut-test-resources
 :linkattrs:
 :mtr: https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/
 
-The new https://micronaut.io/2022/05/26/micronaut-framework-3-5-0/[release of Micronaut 3.6] introduces a new feature which I worked on for the past couple of months, called {mtr}[Micronaut Test Resources].
+The new https://micronaut.io/2022/08/04/micronaut-framework-3-6-0-released[release of Micronaut 3.6] introduces a new feature which I worked on for the past couple of months, called {mtr}[Micronaut Test Resources].
 This feature, which is inspired from https://quarkus.io/guides/dev-services[Quarkus' Dev Services], will greatly simplify testing of Micronaut applications, both on the JVM and using GraalVM native images.
 Let's see how.
 
@@ -17,8 +17,8 @@ Let's see how.
 
 {mtr}[Micronaut Test Resources] simplifies testing of applications which depend on external resources, by handling the provisioning and lifecycle of such resources automatically.
 For example, if your application requires a MySQL server, in order to test the application, you need a MySQL database to be installed and configured, which includes a database name, a username and a password.
-In general, those are only relevant for production, where those are fixed.
-During development, all you care about is to have _one_ database available.
+In general, those are only relevant for production, where they are fixed.
+During development, all you care about is having _one_ database available.
 
 Here are a couple of traditional solutions to this problem:
 
@@ -371,7 +371,7 @@ However there's a gotcha if you do this: what happens if we run tests?
 
 [source,bash]
 ----
-$ gw test
+$ ./gradlew test
 
 > Task :compileTestJava
 Note: Creating bean classes for 1 type elements
