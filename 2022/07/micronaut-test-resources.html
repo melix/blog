@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Introducing Micronaut Test Resources</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Introducing Micronaut Test Resources</h1>
+	</div>
+
+	<p><em>28 July 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
+	</em>
+		<a href="/blog/tags/testcontainers.html">testcontainers</a> 
+	</em>
+		<a href="/blog/tags/docker.html">docker</a> 
+	</em>
+		<a href="/blog/tags/test.html">test</a> 
+	</em>
+		<a href="/blog/tags/testing.html">testing</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The new <a href="https://micronaut.io/2022/05/26/micronaut-framework-3-5-0/">release of Micronaut 3.6</a> introduces a new feature which I worked on for the past couple of months, called <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a>.
+This feature, which is inspired from <a href="https://quarkus.io/guides/dev-services">Quarkus' Dev Services</a>, will greatly simplify testing of Micronaut applications, both on the JVM and using GraalVM native images.
+Let&#8217;s see how.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_test_resources_in_a_nutshell">Test resources in a nutshell</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> simplifies testing of applications which depend on external resources, by handling the provisioning and lifecycle of such resources automatically.
+For example, if your application requires a MySQL server, in order to test the application, you need a MySQL database to be installed and configured, which includes a database name, a username and a password.
+In general, those are only relevant for production, where those are fixed.
+During development, all you care about is to have <em>one</em> database available.</p>
+</div>
+<div class="paragraph">
+<p>Here are a couple of traditional solutions to this problem:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>document that a MySQL server is a pre-requisite, and give instructions about the database to create, credentials, etc. This can be simplified by using Docker containers, but there&#8217;s still manual setup involved.</p>
+</li>
+<li>
+<p>Use a library like <a href="https://www.testcontainers.org/">Testcontainers</a> in order to simplify the setup</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In general, using <a href="https://www.testcontainers.org/">Testcontainers</a> is preferred, because it integrates well with the JVM and provides an API which can be used in tests to spawn containers and interact with them.
+There are, however, a few issues with using such a library:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>tests need to deal with the container lifecycle, which involves things like static initializers, test setup and cleanup, etc.</p>
+</li>
+<li>
+<p>Testcontainers APIs "leak" to the test classpath, making it impossible to <a href="https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support">run tests in native mode</a></p>
+</li>
+<li>
+<p>You need to figure out the specific test containers dependencies you need for your application and those dependencies may have transitive dependencies which conflict with the ones you use (both in production or tests)</p>
+</li>
+<li>
+<p>It&#8217;s difficult, or even impossible, to share containers between distinct projects (for example, an MQTT client and a server may want to use the same container)</p>
+</li>
+<li>
+<p>It simply doesn&#8217;t work for "development mode", when you run the application locally (not tests, but really running the application)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The goal of <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> is to get rid of those obstacles:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>zero-configuration</strong>: without adding any configuration, test resources should be spawned and the application configured to use them. Configuration is only required for advanced use cases.</p>
+</li>
+<li>
+<p><strong>classpath isolation</strong>: use of test resources shouldn&#8217;t leak into your application classpath, nor your test classpath</p>
+</li>
+<li>
+<p><strong>compatible with GraalVM native</strong>: if you build a native binary, or run tests in native mode, test resources should be available</p>
+</li>
+<li>
+<p><strong>easy to use</strong>: the Micronaut build plugins for Gradle and Maven should handle the complexity of figuring out the dependencies for you</p>
+</li>
+<li>
+<p><strong>extensible</strong>: you can implement your own test resources, in case the built-in ones do not cover your use case</p>
+</li>
+<li>
+<p><strong>technology agnostic</strong>: while lots of test resources use <a href="https://www.testcontainers.org/">Testcontainers</a> under the hood, you can use any other technology to create resources</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In addition, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> support advanced development patterns, which are useful in the microservices era.
+As an example, it is capable of sharing containers between submodules of a single build, or even between independent projects, from different Git repositories!
+Say that you have 2 projects, one built with Gradle, the other with Maven, both needing to communicate using the same message bus: Micronaut is capable of handling this use case for you, making it extremely easy to test components interacting with each other!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_micronaut_test_resources">Using Micronaut Test Resources</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enabling_test_resources_support">Enabling test resources support</h3>
+<div class="paragraph">
+<p><a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> integrates with build tools.
+In both Maven and Gradle, you need to enable test resources support.
+If you create a new project using <a href="https://micronaut.io/launch">Micronaut Launch</a> or the Micronaut CLI, test resources will be configured for you, but if you migrate an existing application to test resources, here&#8217;s what you need to do:</p>
+</div>
+<div class="paragraph">
+<p>If you are using Maven, you will need to upgrade to the Micronaut 3.6 parent POM and add the following property:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml">&lt;properties&gt;
+   &lt;micronaut.test.resources.enabled&gt;true&lt;/micronaut.test.resources.enabled&gt;
+&lt;/properties&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For Gradle, you can use test resources with Micronaut 3.5+ and you simply need to use the test resources plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
+    id 'io.micronaut.application' version '3.5.1'
+    id 'io.micronaut.test-resources' version '3.5.1'
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_our_first_test_resources_contact">Our first test resources contact</h3>
+<div class="paragraph">
+<p>In this blog post we will write an application which makes use of Micronaut Data and connects to a MySQL server to list books.
+The whole application code is <a href="https://github.com/melix/micronaut-test-resources-demo/">available on GitHub</a>, so I&#8217;m only going to show the relevant parts for clarity.</p>
+</div>
+<div class="paragraph">
+<p>In such an application, we typically need a repository:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">@JdbcRepository(dialect = Dialect.MYSQL)
+public interface BookRepository extends CrudRepository&lt;Book, Long&gt; {
+    @Override
+    List&lt;Book&gt; findAll();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And this repository makes use of the <code>Book</code> class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">@MappedEntity
+public class Book {
+    @Id
+    @GeneratedValue(GeneratedValue.Type.AUTO)
+    private Long id;
+
+    private String title;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order for Micronaut to use the database, we need to add some configuration to our <code>application.yml</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="yaml">datasources:
+  default:
+    schema-generate: CREATE
+    db-type: mysql</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The most important thing to see is that <strong>we don&#8217;t</strong> specify any username, password or URL to connect to our database: the only thing we have to specify is the database type of our datasource.
+We can then write the following test:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">@MicronautTest
+class DemoTest {
+
+    @Inject
+    BookRepository bookRepository;
+
+    @Test
+    @DisplayName("A MySQL test container is required to run this test")
+    void testItWorks() {
+        Book book = new Book();
+        book.setTitle("Yet Another Book " + UUID.randomUUID());
+        Book saved = bookRepository.save(book);
+        assertNotNull(saved.getId());
+        List&lt;Book&gt; books = bookRepository.findAll();
+        assertEquals(1, books.size());
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The test creates a new book, stores it in the database, then checks that we get the expected number of books when reading the repository.
+Note, again, that we didn&#8217;t have to specify any container whatsoever.
+In this blog post I&#8217;m using Gradle, so we can verify the behavior by running:</p>
+</div>
+<div class="paragraph">
+<p><code>./gradlew test</code></p>
+</div>
+<div class="paragraph">
+<p>Then you will see the following output (cleaned up for clarity of this blog post):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>i.m.testresources.server.Application - A Micronaut Test Resources server is listening on port 46739, started in 128ms
+i.m.t.e.TestResourcesResolverLoader - Loaded 2 test resources resolvers: io.micronaut.testresources.mysql.MySQLTestResourceProvider, io.micronaut.testresources.testcontainers.GenericTestContainerProvidereted
+o.testcontainers.DockerClientFactory - Connected to docker:
+  Server Version: 20.10.17
+  API Version: 1.41
+  Operating System: Linux Mint 20.3
+  Total Memory: 31308 MB
+🐳 [testcontainers/ryuk:0.3.3] - Creating container for image: testcontainers/ryuk:0.3.3
+🐳 [testcontainers/ryuk:0.3.3] - Container testcontainers/ryuk:0.3.3 is starting: 1f5286fa728aca74a7d6d4c0eb2148a3bc81f5c028027496d7aabda7b7ed45e8
+🐳 [testcontainers/ryuk:0.3.3] - Container testcontainers/ryuk:0.3.3 started in PT0.655476S
+o.t.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+🐳 [mysql:latest] - Creating container for image: mysql:latest
+🐳 [mysql:latest] - Container mysql:latest is starting: d796c7a1ce10f393a4181f12967ee77ac9864f45595f97967c700f022e86ac7d
+🐳 [mysql:latest] - Waiting for database connection to become available at jdbc:mysql://localhost:49209/test using query 'SELECT 1'
+🐳 [mysql:latest] - Container is started (JDBC URL: jdbc:mysql://localhost:49209/test)
+🐳 [mysql:latest] - Container mysql:latest started in PT7.573915S
+
+BUILD SUCCESSFUL in 11s
+7 actionable tasks: 2 executed, 5 up-to-date</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What does this tell us? First, that a "Micronaut Test Resources server" was spawned, for the lifetime of the build.
+When the test was executed, this service was used to start a MySQL test container, which was then used during tests.
+We didn&#8217;t have to configure anything, test resources did it for us!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_running_the_application">Running the application</h3>
+<div class="paragraph">
+<p>What is also interesting is that this also works if you run the application in development mode.
+Using Gradle, you do this by invoking <code>./gradlew run</code> (<code>mvn mn:run</code> with Maven): as soon as a bean requires access to the database, a container will be spawned, and automatically shut down when you stop the application.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Of course, in production, there won&#8217;t be any server automatically spawned for you: Micronaut will rely on whatever you have configured, for example in an <code>application-prod.yml</code> file. In particular, the URL and credentials to use.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>What is even nicer is that you can use this in combination with Gradle&#8217;s continuous mode!</p>
+</div>
+<div class="paragraph">
+<p>To illustrate this, let&#8217;s create a controller for our books:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">@Controller("/")
+public class BookController {
+    private final BookRepository bookRepository;
+
+    public BookController(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+
+    @Get("/books")
+    public List&lt;Book&gt; list() {
+        return bookRepository.findAll();
+    }
+
+    @Get("/books/{id}")
+    public Book get(Long id) {
+        return bookRepository.findById(id).orElse(null);
+    }
+
+    @Delete("/books/{id}")
+    public void delete(Long id) {
+        bookRepository.deleteById(id);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now start the application in <em>continuous mode</em>: <code>./gradlew -t run</code></p>
+</div>
+<div class="paragraph">
+<p>You will see that the application starts a container as expected:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>INFO  io.micronaut.runtime.Micronaut - Startup completed in 9166ms. Server Running: http://localhost:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice how it took about 10 seconds to start the application, most it it spent in starting the MySQL test container itself.
+You definitely don&#8217;t want to pay this price for every change you make, so this is where the continuous mode is helpful.
+If we ask for the list of books, we&#8217;ll get an empty list:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ http :8080/books
+HTTP/1.1 200 OK
+Content-Type: application/json
+connection: keep-alive
+content-length: 2
+date: Tue, 26 Jul 2022 16:59:51 GMT
+
+[]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is expected, but notice how we didn&#8217;t have a method to actually add a book to our store.
+Let&#8217;s fix this by editing the <code>BookController.java</code> class <em>without stopping the server</em>.
+Add the following method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">    @Get("/books/add/{title}")
+    public Book add(String title) {
+        Book book = new Book();
+        book.setTitle(title);
+        return bookRepository.save(book);
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Save the file and notice how Gradle instantly reloads the application, but doesn&#8217;t restart the database: it&#8217;s already there so it&#8217;s going to reuse it!</p>
+</div>
+<div class="paragraph">
+<p>In the logs you will see something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>INFO  io.micronaut.runtime.Micronaut - Startup completed in 1086ms. Server Running: http://localhost:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This time the application started in just a second! Let&#8217;s add a book:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ http :8080/books/add/Micronaut%20in%20action
+HTTP/1.1 200 OK
+Content-Type: application/json
+connection: keep-alive
+content-length: 38
+date: Tue, 26 Jul 2022 17:03:57 GMT
+
+{
+    "id": 1,
+    "title": "Micronaut in action"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, if we stop the application (by hitting CTRL+C) and start again, you will see that the database will be destroyed when the application shuts down.
+Let&#8217;s see how we can "survive" different build invocations.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_keeping_the_service_alive">Keeping the service alive</h3>
+<div class="paragraph">
+<p>By default, the test resources service is <em>short lived</em>: it&#8217;s going to be started at the beginning of a build, and shutdown at the end of a build.
+This means, that it will live as long as you have tests running, or, if running in development mode, as long as the application is alive.
+However, you can make it survive the build, and reuse the containers in several, independent build invocations.</p>
+</div>
+<div class="paragraph">
+<p>To do this, you need to <em>explicitly start the test resources service</em>:</p>
+</div>
+<div class="paragraph">
+<p><code>./gradlew startTestResourcesService</code></p>
+</div>
+<div class="paragraph">
+<p>This starts the test resources service in the background: it did <em>not</em> start our application, nor did it run tests.
+This means that now, we can start our application:</p>
+</div>
+<div class="paragraph">
+<p><code>./gradlew run</code></p>
+</div>
+<div class="paragraph">
+<p>And, because it&#8217;s the first time the application is launched since we started the test resources service, it&#8217;s going to spawn a test container:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>INFO  io.micronaut.runtime.Micronaut - Startup completed in 9211ms. Server Running: http://localhost:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can add our book:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ http :8080/books/add/Micronaut%20in%20action
+HTTP/1.1 200 OK
+Content-Type: application/json
+connection: keep-alive
+content-length: 38
+date: Tue, 26 Jul 2022 17:03:57 GMT
+
+{
+    "id": 1,
+    "title": "Micronaut in action"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The difference is now that if we stop the application (e.g hit CTRL+C) and start it again, it will <em>reuse the container</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>INFO  io.micronaut.runtime.Micronaut - Startup completed in 895ms. Server Running: http://localhost:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we list our books, the database wasn&#8217;t cleaned, so we&#8217;ll get the book we created from the previous time we started the app:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ http :8080/books
+HTTP/1.1 200 OK
+Content-Type: application/json
+connection: keep-alive
+content-length: 40
+date: Tue, 26 Jul 2022 17:14:40 GMT
+
+[
+    {
+        "id": 1,
+        "title": "Micronaut in action"
+    }
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nice, right?
+However there&#8217;s a gotcha if you do this: what happens if we run tests?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ gw test
+
+&gt; Task :compileTestJava
+Note: Creating bean classes for 1 type elements
+
+&gt; Task :test FAILED
+
+DemoTest &gt; A MySQL test container is required to run this test FAILED
+    org.opentest4j.AssertionFailedError at DemoTest.java:28</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Why is that? This is simply because our tests expect a <em>clean</em> database, and we had a book in it, so keep this in mind if you&#8217;re using this mode.</p>
+</div>
+<div class="paragraph">
+<p>At some point, you will want to close all open resources.
+You can do this by explicitly stopping the test resources service:</p>
+</div>
+<div class="paragraph">
+<p><code>./gradlew stopTestResourcesService</code></p>
+</div>
+<div class="paragraph">
+<p>Now, you can run the tests again and see them pass:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew test
+
+...
+INFO  🐳 [testcontainers/ryuk:0.3.3] - Creating container for image: testcontainers/ryuk:0.3.3
+INFO  🐳 [testcontainers/ryuk:0.3.3] - Container testcontainers/ryuk:0.3.3 is starting: ea2aa1c7f1e66a9c7306b00443e8a6693451f3f02bd780b3e2ed7b96ed59936a
+INFO  🐳 [testcontainers/ryuk:0.3.3] - Container testcontainers/ryuk:0.3.3 started in PT0.553559699S
+INFO  o.t.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+INFO  o.testcontainers.DockerClientFactory - Checking the system...
+INFO  o.testcontainers.DockerClientFactory - ✔︎ Docker server version should be at least 1.6.0
+INFO  🐳 [mysql:latest] - Creating container for image: mysql:latest
+INFO  🐳 [mysql:latest] - Container mysql:latest is starting: 1c6437a55b8f9e5668bcec4aef27087c889b8a77ca18d2ddf58809853482a422
+INFO  🐳 [mysql:latest] - Waiting for database connection to become available at jdbc:mysql://localhost:49227/test using query 'SELECT 1'
+INFO  🐳 [mysql:latest] - Container is started (JDBC URL: jdbc:mysql://localhost:49227/test)
+INFO  🐳 [mysql:latest] - Container mysql:latest started in PT7.469460173S
+
+BUILD SUCCESSFUL in 11s
+7 actionable tasks: 2 executed, 5 up-to-date</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_native_testing">Native testing</h3>
+<div class="paragraph">
+<p>Did you know that you can run your test suite in native mode?
+That is to say, that the test suite is going to be compiled into a native binary which runs tests?
+One issue with this approach is that it&#8217;s extremely complicated to make it work with Testcontainers, as it requires additional configuration.
+With <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a>, there is no such problem: you can simply invoke <code>./gradlew nativeTest</code> and the tests will properly run.
+This works because Testcontainers libraries do not leak into your test classpath: the process which is responsible for managing the lifecycle of test resources is isolated from your tests!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_under_the_hood">Under the hood</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_how_does_that_work">How does that work?</h3>
+<div class="paragraph">
+<p>In a nutshell, Micronaut is capable of reacting to the <em>absence</em> of a configured property.
+For example, a datasource, in order to be created, would need the value of the <code>datasources.default.url</code> property to be set.
+<a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> work by <em>injecting</em> those properties at runtime: when the property is read, it triggers the creation of test resources.
+For example, we can start a MySQL server, then inject the value of the JDBC url to the <code>datasources.default.url</code> property.
+This means that in order for test resources to work, you need to <em>remove</em> configuration (note that for production, you will need to provide an additional configuration file, for example <code>application-prod.yml</code>, which provides the actual values).</p>
+</div>
+<div class="paragraph">
+<p>The entity which is responsible for resolving missing properties is the "Test Resources Server": it&#8217;s a long lived process which is independent from your application and it is responsible for managing the lifecycle of test resources.
+Because it&#8217;s independent from the application, it means it can contain dependencies which are not required in your application such as, typically, the Testcontainers runtime.
+But it may also contain additional classes, like JDBC drivers, or even your custom test resources resolver!</p>
+</div>
+<div class="paragraph">
+<p>Because this test resources server is a separate process, it also means it can be shared by different applications, which is the reason why we can share the same containers between independent projects.</p>
+</div>
+<div class="paragraph">
+<p>Once you understand that <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> work by resolving <em>missing</em> properties, it becomes straightforward to configure.
+In particular, we offer configuration which makes it very easy to support scenarios which are not supported out of the box.
+For example, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> supports several JDBC or reactive databases (MySQL, PostgreSQL, MariaDB, SQL Server and Oracle XE), Kafka, Neo4j, MQTT, RabbitMQ, Redis, Hashicorp Vault and ElasticSearch, but what if you need a different container?</p>
+</div>
+<div class="paragraph">
+<p>In that case, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> offer a conventional way to create such containers, by simply adding some configuration lines: in the documentation <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/#modules-testcontainers">we demonstrate how to use the <code>fakesmtp</code> SMTP server with Micronaut Email</a> for example.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_custom_test_resources">Custom test resources</h3>
+<div class="paragraph">
+<p>If the configuration-based support isn&#8217;t sufficient, you also have, in addition, the ability to write your own test resources.
+If you use Gradle, which I of course recommend, this is made extremely easy by the test resources plugin, which creates an additional source set for this, named <code>testResources</code>.
+For Maven, you would have to create an independent project manually to support this scenario.</p>
+</div>
+<div class="paragraph">
+<p>As an illustration, let&#8217;s imagine that we have a bean which reads a configuration property:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">@Singleton
+public class Greeter {
+     private final String name;
+
+     public Greeter(@Value("${my.user.name}") String name) {
+         this.name = name;
+     }
+
+     public String getGreeting() {
+     	return "Hello, " + name + "!";
+     }
+
+     public void sayHello() {
+         System.out.println(getGreeting());
+     }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This bean requires the <code>my.user.name</code> property to be set.
+We could of course set it in an <code>application-test.yml</code> file, but for the sake of the exercise, let&#8217;s imagine that this value is <em>dynamic</em> and needs to be read from an external service.
+We will implement a <em>custom test resources resolver</em> for this purpose.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s create the <code>src/testResources/java/demo/MyTestResource.java</code> file with the following contents:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">package demo;
+
+import io.micronaut.testresources.core.TestResourcesResolver;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public class MyTestResource implements TestResourcesResolver {
+
+    public static final String MY_TEST_PROPERTY = "my.user.name";
+
+    @Override
+    public List&lt;String&gt; getResolvableProperties(Map&lt;String, Collection&lt;String&gt;&gt; propertyEntries, Map&lt;String, Object&gt; testResourcesConfig) {
+        return Collections.singletonList(MY_TEST_PROPERTY); // <b class="conum">(1)</b>
+    }
+
+    @Override
+    public Optional&lt;String&gt; resolve(String propertyName, Map&lt;String, Object&gt; properties, Map&lt;String, Object&gt; testResourcesConfiguration) {
+        if (MY_TEST_PROPERTY.equals(propertyName)) {
+            return Optional.of("world");                    // <b class="conum">(2)</b>
+        }
+        return Optional.empty();
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Tells that this resolver can resolve the <code>my.user.name</code> property</p>
+</li>
+<li>
+<p>Returns the value of the <code>my.user.name</code> property</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>And in order for the resolver to be discovered, we need to create the <code>src/testResources/resources/META-INF/services/io.micronaut.testresources.core.TestResourcesResolver</code> file with the following contents:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>demo.MyTestResource</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s write a test for this by adding the <code>src/test/java/demo/GreeterTest.java</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java">package demo;
+
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+@MicronautTest
+class GreeterTest {
+
+    @Inject
+    Greeter greeter;
+
+
+    @Test
+    @DisplayName("Says hello")
+    void saysHello() {
+        greeter.sayHello();
+        Assertions.assertEquals("Hello, world!", greeter.getGreeting());
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now if you run <code>./gradlew test</code>, you will notice that Gradle will compile your custom test resource resolver, and when the test starts, you will read the following line:</p>
+</div>
+<div class="paragraph">
+<p><code>Loaded 3 test resources resolvers: demo.MyTestResource, io.micronaut.testresources.mysql.MySQLTestResourceProvider, io.micronaut.testresources.testcontainers.GenericTestContainerProvider</code></p>
+</div>
+<div class="paragraph">
+<p>So when the <code>Greeter</code> bean is created, it will read the value of the <code>my.user.name</code> property by calling your custom test resolver!
+Of course this is a very simple example, and I recommend that you take a look at the <a href="https://github.com/micronaut-projects/micronaut-test-resources">Micronaut Test Resources sources</a> for more examples of implementing resolvers.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this blog post, we&#8217;ve explored the new <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> module, which will greatly simplify development of Micronaut applications which depend on external services like databases or messaging queues.
+It works by <em>simplifying</em> configuration, by removing lines which used to be present, but now are dynamically resolved, like <code>datasources.default.url</code>.
+Test resources are handled in a separate process, the test resources server, which is responsible for handling their lifecycle.
+This also makes it possible to share the resources (containers, databases, &#8230;&#8203;) between independent builds.
+For advanced use cases, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> provides <em>configuration based</em> resources creation.</p>
+</div>
+<div class="paragraph">
+<p>Last but not least, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> is an extensible framework which will let you implement your own test resources in case the built-in ones miss a feature.</p>
+</div>
+<div class="paragraph">
+<p>Special thanks to twitter.com/tim_yates/[Tim Yates] for his hard work on upgrading the Micronaut Guides to use test resources, and <a href="https://twitter.com/alvaro_sanchez">Álvaro Sanchez-Mariscal</a> for his support on the Maven plugin!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'micronaut-test-resources-draft';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
