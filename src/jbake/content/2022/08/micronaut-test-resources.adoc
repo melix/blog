@@ -26,15 +26,13 @@ Here are a couple of traditional solutions to this problem:
 2. Use a library like https://www.testcontainers.org/[Testcontainers] in order to simplify the setup
 
 In general, using https://www.testcontainers.org/[Testcontainers] is preferred, because it integrates well with the JVM and provides an API which can be used in tests to spawn containers and interact with them.
-There are, however, a few issues with using such a library:
+However, a better integration between Micronaut and https://www.testcontainers.org/[Testcontainers] can improve the developer experience in several ways: 
 
-- tests need to deal with the container lifecycle, which involves things like static initializers, test setup and cleanup, etc.
-- Testcontainers APIs "leak" to the test classpath, making it impossible to https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support[run tests in native mode]
-- You need to figure out the specific test containers dependencies you need for your application and those dependencies may have transitive dependencies which conflict with the ones you use (both in production or tests)
-- It's difficult, or even impossible, to share containers between distinct projects (for example, an MQTT client and a server may want to use the same container)
-- It simply doesn't work for "development mode", when you run the application locally (not tests, but really running the application)
+- simplify the container lifecycle configuration by providing an opinionated framework-specific default way, making you think less of how to setup it in the individual tests : tests shouldn't need to deal with the container lifecycle: we'd like to have test containers/resources management as _transparent_ as possible.
+- isolate it better from your application making it simpler to reason about dependencies (and transitive dependencies), not just for the developer, but for example tools enabling native mode as well: Testcontainers APIs "leak" to the test classpath, making it difficult to https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support[run tests in native mode]. This is not a problem specific to the Testcontainers library though: many libraries are not yet compatible with GraalVM. Our solution makes it possible to use Testcontainers in native tests without the hassle of configuring it!
+- enable support for "development mode", that is to say when you run the application locally (not the tests, the application itself) or even several distinct projects at once that can benefit from sharing access to the same running containers (for example, an MQTT client and a server may want to use the same container, even if they are individual projects living in distinct Git repositories).
 
-The goal of {mtr}[Micronaut Test Resources] is to get rid of those obstacles:
+The goal of {mtr}[Micronaut Test Resources] is to achieve all of these at once:
 
 - **zero-configuration**: without adding any configuration, test resources should be spawned and the application configured to use them. Configuration is only required for advanced use cases.
 - **classpath isolation**: use of test resources shouldn't leak into your application classpath, nor your test classpath
@@ -46,6 +44,9 @@ The goal of {mtr}[Micronaut Test Resources] is to get rid of those obstacles:
 In addition, {mtr}[Micronaut Test Resources] support advanced development patterns, which are useful in the microservices era.
 As an example, it is capable of sharing containers between submodules of a single build, or even between independent projects, from different Git repositories!
 Say that you have 2 projects, one built with Gradle, the other with Maven, both needing to communicate using the same message bus: Micronaut is capable of handling this use case for you, making it extremely easy to test components interacting with each other!
+
+Because of these constraints, we decided to use https://www.testcontainers.org/[Testcontainers], because the library is just perfect for the job, but in an _isolated_ process instead, as I'm going to describe below.
+Note that this solution is also 100% compatible with https://www.testcontainers.cloud/[Testcontainers Cloud], which makes container provisioning even easier!
 
 == Using Micronaut Test Resources
 
