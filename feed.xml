@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 4 Aug 2022 22:55:33 +0200</pubDate>
-    <lastBuildDate>Thu, 4 Aug 2022 22:55:33 +0200</lastBuildDate>
+    <pubDate>Fri, 5 Aug 2022 14:56:40 +0200</pubDate>
+    <lastBuildDate>Fri, 5 Aug 2022 14:56:40 +0200</lastBuildDate>
 
     <item>
       <title>Introducing Micronaut Test Resources</title>
@@ -48,29 +48,23 @@ During development, all you care about is having &lt;em&gt;one&lt;/em&gt; databa
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;In general, using &lt;a href=&quot;https://www.testcontainers.org/&quot;&gt;Testcontainers&lt;/a&gt; is preferred, because it integrates well with the JVM and provides an API which can be used in tests to spawn containers and interact with them.
-There are, however, a few issues with using such a library:&lt;/p&gt;
+However, a better integration between Micronaut and &lt;a href=&quot;https://www.testcontainers.org/&quot;&gt;Testcontainers&lt;/a&gt; can improve the developer experience in several ways:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;tests need to deal with the container lifecycle, which involves things like static initializers, test setup and cleanup, etc.&lt;/p&gt;
+&lt;p&gt;simplify the container lifecycle configuration by providing an opinionated framework-specific default way, making you think less of how to setup it in the individual tests : tests shouldn&amp;#8217;t need to deal with the container lifecycle: we&amp;#8217;d like to have test containers/resources management as &lt;em&gt;transparent&lt;/em&gt; as possible.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Testcontainers APIs &quot;leak&quot; to the test classpath, making it impossible to &lt;a href=&quot;https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support&quot;&gt;run tests in native mode&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;isolate it better from your application making it simpler to reason about dependencies (and transitive dependencies), not just for the developer, but for example tools enabling native mode as well: Testcontainers APIs &quot;leak&quot; to the test classpath, making it difficult to &lt;a href=&quot;https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support&quot;&gt;run tests in native mode&lt;/a&gt;. This is not a problem specific to the Testcontainers library though: many libraries are not yet compatible with GraalVM. Our solution makes it possible to use Testcontainers in native tests without the hassle of configuring it!&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;You need to figure out the specific test containers dependencies you need for your application and those dependencies may have transitive dependencies which conflict with the ones you use (both in production or tests)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;It&amp;#8217;s difficult, or even impossible, to share containers between distinct projects (for example, an MQTT client and a server may want to use the same container)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;It simply doesn&amp;#8217;t work for &quot;development mode&quot;, when you run the application locally (not tests, but really running the application)&lt;/p&gt;
+&lt;p&gt;enable support for &quot;development mode&quot;, that is to say when you run the application locally (not the tests, the application itself) or even several distinct projects at once that can benefit from sharing access to the same running containers (for example, an MQTT client and a server may want to use the same container, even if they are individual projects living in distinct Git repositories).&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The goal of &lt;a href=&quot;https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/&quot;&gt;Micronaut Test Resources&lt;/a&gt; is to get rid of those obstacles:&lt;/p&gt;
+&lt;p&gt;The goal of &lt;a href=&quot;https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/&quot;&gt;Micronaut Test Resources&lt;/a&gt; is to achieve all of these at once:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
@@ -98,6 +92,10 @@ There are, however, a few issues with using such a library:&lt;/p&gt;
 &lt;p&gt;In addition, &lt;a href=&quot;https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/&quot;&gt;Micronaut Test Resources&lt;/a&gt; support advanced development patterns, which are useful in the microservices era.
 As an example, it is capable of sharing containers between submodules of a single build, or even between independent projects, from different Git repositories!
 Say that you have 2 projects, one built with Gradle, the other with Maven, both needing to communicate using the same message bus: Micronaut is capable of handling this use case for you, making it extremely easy to test components interacting with each other!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because of these constraints, we decided to use &lt;a href=&quot;https://www.testcontainers.org/&quot;&gt;Testcontainers&lt;/a&gt;, because the library is just perfect for the job, but in an &lt;em&gt;isolated&lt;/em&gt; process instead, as I&amp;#8217;m going to describe below.
+Note that this solution is also 100% compatible with &lt;a href=&quot;https://www.testcontainers.cloud/&quot;&gt;Testcontainers Cloud&lt;/a&gt;, which makes container provisioning even easier!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -700,7 +698,7 @@ For advanced use cases, &lt;a href=&quot;https://micronaut-projects.github.io/mi
 &lt;p&gt;Last but not least, &lt;a href=&quot;https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/&quot;&gt;Micronaut Test Resources&lt;/a&gt; is an extensible framework which will let you implement your own test resources in case the built-in ones miss a feature.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Special thanks to &lt;a href=&quot;https://twitter.com/tim_yates/&quot;&gt;Tim Yates&lt;/a&gt; for his hard work on upgrading the Micronaut Guides to use test resources, and &lt;a href=&quot;https://twitter.com/alvaro_sanchez&quot;&gt;Álvaro Sanchez-Mariscal&lt;/a&gt; for his support on the Maven plugin!&lt;/p&gt;
+&lt;p&gt;Special thanks to twitter.com/tim_yates/[Tim Yates] for his hard work on upgrading the Micronaut Guides to use test resources, and &lt;a href=&quot;https://twitter.com/alvaro_sanchez&quot;&gt;Álvaro Sanchez-Mariscal&lt;/a&gt; for his support on the Maven plugin!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;

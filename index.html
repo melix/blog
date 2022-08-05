@@ -117,29 +117,23 @@ During development, all you care about is having <em>one</em> database available
 </div>
 <div class="paragraph">
 <p>In general, using <a href="https://www.testcontainers.org/">Testcontainers</a> is preferred, because it integrates well with the JVM and provides an API which can be used in tests to spawn containers and interact with them.
-There are, however, a few issues with using such a library:</p>
+However, a better integration between Micronaut and <a href="https://www.testcontainers.org/">Testcontainers</a> can improve the developer experience in several ways:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>tests need to deal with the container lifecycle, which involves things like static initializers, test setup and cleanup, etc.</p>
+<p>simplify the container lifecycle configuration by providing an opinionated framework-specific default way, making you think less of how to setup it in the individual tests : tests shouldn&#8217;t need to deal with the container lifecycle: we&#8217;d like to have test containers/resources management as <em>transparent</em> as possible.</p>
 </li>
 <li>
-<p>Testcontainers APIs "leak" to the test classpath, making it impossible to <a href="https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support">run tests in native mode</a></p>
+<p>isolate it better from your application making it simpler to reason about dependencies (and transitive dependencies), not just for the developer, but for example tools enabling native mode as well: Testcontainers APIs "leak" to the test classpath, making it difficult to <a href="https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#testing-support">run tests in native mode</a>. This is not a problem specific to the Testcontainers library though: many libraries are not yet compatible with GraalVM. Our solution makes it possible to use Testcontainers in native tests without the hassle of configuring it!</p>
 </li>
 <li>
-<p>You need to figure out the specific test containers dependencies you need for your application and those dependencies may have transitive dependencies which conflict with the ones you use (both in production or tests)</p>
-</li>
-<li>
-<p>It&#8217;s difficult, or even impossible, to share containers between distinct projects (for example, an MQTT client and a server may want to use the same container)</p>
-</li>
-<li>
-<p>It simply doesn&#8217;t work for "development mode", when you run the application locally (not tests, but really running the application)</p>
+<p>enable support for "development mode", that is to say when you run the application locally (not the tests, the application itself) or even several distinct projects at once that can benefit from sharing access to the same running containers (for example, an MQTT client and a server may want to use the same container, even if they are individual projects living in distinct Git repositories).</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The goal of <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> is to get rid of those obstacles:</p>
+<p>The goal of <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> is to achieve all of these at once:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -167,6 +161,10 @@ There are, however, a few issues with using such a library:</p>
 <p>In addition, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> support advanced development patterns, which are useful in the microservices era.
 As an example, it is capable of sharing containers between submodules of a single build, or even between independent projects, from different Git repositories!
 Say that you have 2 projects, one built with Gradle, the other with Maven, both needing to communicate using the same message bus: Micronaut is capable of handling this use case for you, making it extremely easy to test components interacting with each other!</p>
+</div>
+<div class="paragraph">
+<p>Because of these constraints, we decided to use <a href="https://www.testcontainers.org/">Testcontainers</a>, because the library is just perfect for the job, but in an <em>isolated</em> process instead, as I&#8217;m going to describe below.
+Note that this solution is also 100% compatible with <a href="https://www.testcontainers.cloud/">Testcontainers Cloud</a>, which makes container provisioning even easier!</p>
 </div>
 </div>
 </div>
@@ -769,7 +767,7 @@ For advanced use cases, <a href="https://micronaut-projects.github.io/micronaut-
 <p>Last but not least, <a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/">Micronaut Test Resources</a> is an extensible framework which will let you implement your own test resources in case the built-in ones miss a feature.</p>
 </div>
 <div class="paragraph">
-<p>Special thanks to <a href="https://twitter.com/tim_yates/">Tim Yates</a> for his hard work on upgrading the Micronaut Guides to use test resources, and <a href="https://twitter.com/alvaro_sanchez">Álvaro Sanchez-Mariscal</a> for his support on the Maven plugin!</p>
+<p>Special thanks to twitter.com/tim_yates/[Tim Yates] for his hard work on upgrading the Micronaut Guides to use test resources, and <a href="https://twitter.com/alvaro_sanchez">Álvaro Sanchez-Mariscal</a> for his support on the Maven plugin!</p>
 </div>
 </div>
 </div></p>
