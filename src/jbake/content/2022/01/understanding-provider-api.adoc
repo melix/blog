@@ -176,10 +176,10 @@ It's simpler, so why should you bother with the more complex syntax?
 To understand this, let's focus on the output directory, which makes it more obvious what is going on: compare `build/generated/jflex` with `layout.buildDirectory.dir('generated/jflex')`.
 
 In the 1st case, the output directory is _hardcoded_ to the `build/generated/jflex` directory.
-In the 2d case, the output directory is _derived from_ the location of the build directory.
+In the 2nd case, the output directory is _derived from_ the location of the build directory.
 It means that if, for some reason, your build is configured to use a different output directory than the conventional `build` directory, say `target` (as in Maven).
 In the 1st case, the output directory of the task would be `build/generated/jflex`, so it would be writing to the wrong directory.
-In the 2d case, the output would be correctly wired to `target/generated/jflex`.
+In the 2nd case, the output would be correctly wired to `target/generated/jflex`.
 
 Some smart Gradle users might think they could workaround the problem by using `file("$buildDir/generated/jflex")` instead.
 That's better, but not sufficient, because the result depends on _when_ this is called: if the build directory is changed _after_ the task is configured, then you'd get the wrong result, which is why lots of users start to randomly add `afterEvaluate` to workaround such problems.

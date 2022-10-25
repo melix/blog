@@ -153,7 +153,7 @@ tasks.register("hello") {
 }
 ----
 
-Note that the return type of both calls is _different_: the eager version will return a `Task`, while the 2d one returns a `TaskProvider`.
+Note that the return type of both calls is _different_: the eager version will return a `Task`, while the 2nd one returns a `TaskProvider`.
 This is the reason why upgrading plugins isn't that trivial, since it's a binary breaking change!
 
 == Task collections and implicit dependencies
