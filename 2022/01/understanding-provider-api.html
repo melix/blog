@@ -71,7 +71,7 @@
 		<h1>Understanding Gradle plugins: the provider API</h1>
 	</div>
 
-	<p><em>24 janvier 2022</em></p>
+	<p><em>24 January 2022</em></p>
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
@@ -326,10 +326,10 @@ To understand this, let&#8217;s focus on the output directory, which makes it mo
 </div>
 <div class="paragraph">
 <p>In the 1st case, the output directory is <em>hardcoded</em> to the <code>build/generated/jflex</code> directory.
-In the 2d case, the output directory is <em>derived from</em> the location of the build directory.
+In the 2nd case, the output directory is <em>derived from</em> the location of the build directory.
 It means that if, for some reason, your build is configured to use a different output directory than the conventional <code>build</code> directory, say <code>target</code> (as in Maven).
 In the 1st case, the output directory of the task would be <code>build/generated/jflex</code>, so it would be writing to the wrong directory.
-In the 2d case, the output would be correctly wired to <code>target/generated/jflex</code>.</p>
+In the 2nd case, the output would be correctly wired to <code>target/generated/jflex</code>.</p>
 </div>
 <div class="paragraph">
 <p>Some smart Gradle users might think they could workaround the problem by using <code>file("$buildDir/generated/jflex")</code> instead.
