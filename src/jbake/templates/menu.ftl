@@ -27,7 +27,8 @@
               </ul>
 	      <ul class="nav navbar-nav navbar-right">
 	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
-	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
 	      </ul>
             </div>
           </div>
