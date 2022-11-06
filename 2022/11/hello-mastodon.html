@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Hello, Mastodon (goodbye Twitter!)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Hello, Mastodon (goodbye Twitter!)</h1>
+	</div>
+
+	<p><em>06 November 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/twitter.html">twitter</a> 
+	</em>
+		<a href="/blog/tags/mastodon.html">mastodon</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>It should be no news to anyone that <a href="https://www.bbc.com/news/technology-63402338">Elon Musk finally took control of Twitter</a>.
+There were reasons to be worried about this move, but the <a href="https://www.reuters.com/technology/twitter-start-layoffs-friday-morning-internal-email-2022-11-04/">recent events at Twitter made it worse than most of us would have thought</a>.</p>
+</div>
+<div class="paragraph">
+<p>TL/DR: I am moving primarily to Mastodon. You can now follow me at <a href="https://mastodon.xyz/@melix"> @<a href="mailto:melix@mastodon.xyz">melix@mastodon.xyz</a></a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_twitter_as_a_self_promotion_tool">Twitter as a self-promotion tool</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Lots of people have a complicated story with Twitter, I am no different.
+I joined Twitter back in January 2010, and I&#8217;ve grown up to more 4800 followers nowadays, and from time to time, I suffered from being exhausted by the negativity of the network.
+Last year, I was even in the middle of an harassment story, because some trolls thought I was someone else.</p>
+</div>
+<div class="paragraph">
+<p>However, Twitter has been my main communication channel for professional work: this is where I explain what I work on, announce software updates, events I will attend or talk to, or publish blog posts links like this one.
+This is also my main feedback channel and where I do most of my technology intelligence.</p>
+</div>
+<div class="paragraph">
+<p>My community of followers doesn&#8217;t make me an "influencer" at large scale, like a rock star, but it definitely had an influence on my professional career.
+For example, different potential employers explicitly mentioned my "influence" and social media presence, for example, as a major reason why they&#8217;d like to work with me.
+I have no doubt that without Twitter, my career wouldn&#8217;t have been the one it is today.
+For that, I am forever grateful.</p>
+</div>
+<div class="paragraph">
+<p>I am also using my Twitter account for personal stuff.
+Most notably, some of you have seen my astronomy pictures.
+You may also have seen some political posts and point of views being expressed.
+While I&#8217;m using Twitter professionally, I always made it clear that the opinions I&#8217;m expressing are not representative of my employer&#8217;s point of view.
+Said differently, I see my Twitter account as a <em>tool</em>, but a tool which "survives" my different employers.
+To some extent, it&#8217;s part of my digital identity.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_then_came_elon_musk">Then came Elon Musk</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I was already very critical of Elon Musk, and not just because of the infamous Starlink project, for which I have so much to say.
+One can admire what he created with Tesla or SpaceX (and I do admire), but at the same time, we can recognize that he&#8217;s a terrible human being.
+This is all about business, all about money, and “freedom of speech” only when it suits his point of view.
+Elon is making people work as hard as they can until they burnout or simply get fired once they have "done their job".
+Elon is also a "special" view of free speech, where those who pay will have right for free speech, while those who don&#8217;t won&#8217;t be visible anymore.
+He&#8217;s also the one blocking anyone criticizing him.</p>
+</div>
+<div class="paragraph">
+<p>As a consequence, the head of Twitter, and therefore Twitter itself, now represents everything I fight against in my personal life.
+This is the world I don&#8217;t want for my children.
+This is the world which puts money before human beings, the world where power, masculinity, is emphasized.
+Elon doesn&#8217;t care that we exhaust resources, as long as part of the population can survive, be it on Mars (!).</p>
+</div>
+<div class="paragraph">
+<p>But now, he fired half of the company, by email, <a href="https://techcrunch.com/2022/11/04/twitter-faces-a-class-action-lawsuit-over-mass-employee-layoffs-with-proper-legal-notice/">ignoring the law</a>, because, you know, Musk does whatever he wants.
+It happens that I know people who got fired and I also know folks who used to work for Twitter before.
+I, for one, am respectful of what people produce.
+I am respectful of what efforts it takes to build a site like Twitter, and, in general, I am someone who puts <em>trust</em> in other people at the top of my hierarchy of beliefs.
+So I find it extremely annoying, or, to be clear, disgusting when someone who has absolutely no understanding of how to build such a large community over the years, decides to layoff half of a company, change the spirit of the website so that paying customers have more power than the others, so that it matches more his political point of view.
+Even if the company is losing $4M a day, compared to B44$, seriously, what would have it taken to show the people who built Twitter a bit of respect and simply build a plan, say, of volunteer departures.</p>
+</div>
+<div class="paragraph">
+<p>Elon Musk&#8217;s behavior is everything I hate: someone coming because they have power (understand, money), and then ruining other people lives just because he can, without any respect.</p>
+</div>
+<div class="paragraph">
+<p>This puts me in a difficult situation: at the same time, I <em>need</em> Twitter, because it&#8217;s a professional tool which can&#8217;t be easily replaced and I <em>have to go</em> because there&#8217;s no way I&#8217;m going to pay 8 dollars a month to a company who treats human beings like that, and simply to get more visibility over others just because I can afford it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hello_mastodon">Hello, Mastodon!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As a FOSS supporter, back in 2017, I had registered to <a href="https://joinmastodon.org">Mastodon</a>.
+My account was left more or less inactive for years, because, honestly, not many people used it so it was &#8230;&#8203; annoying.
+This was like talking in an echo chamber.
+Until the rumor of Elon Musk acquiring Twitter started: we&#8217;ve seen more and more people joining, and I&#8217;m super glad that this week alone, <em>many</em> other people, including from the Tech industry, decided to make the move.</p>
+</div>
+<div class="paragraph">
+<p>No more ads. No more recommendations. A clean timeline, as it should be.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s really refreshing to be on Mastodon, it feels like the Twitter from the early days.</p>
+</div>
+<div class="paragraph">
+<p>However, Mastodon has a number of key differences, which make it more "complicated" for users to understand.
+First of all, and that&#8217;s the biggest issue for joining, Mastodon is <em>not</em> a single site like Twitter: it&#8217;s a <em>federation</em> of servers.
+Just like you have a provider for your email (say GMail, Hotmail, etc.), you can choose your Mastodon server provider.
+As an OSS project, you can go even as far as hosting your own instance.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, Mastodon is, by nature, distributed, which makes it completely immune to what just happened to Twitter.
+But it also means that there are a few things you should be aware when you join a server:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>content moderation is the responsibility of the server administrator: they can block you, read your posts, private messages. They can block other providers too, which means, for example, that if you choose to go to an instance which has a Code of Conduct, you have to follow the rules.</p>
+</li>
+<li>
+<p>the good news is that you <em>own the content</em>: if you are not happy with your server moderation rules, you can <em>move to a different instance</em>, and you can move your data with it: toots, folks you follow, followers, &#8230;&#8203;</p>
+</li>
+<li>
+<p>the cost of maintenance is distributed on the community: there are lots of <em>free</em> servers out there, but you can choose to participate to the bills. You can even build your own server, for a price which wouldn&#8217;t exceed much what Elon wants us to pay to get a blue mark</p>
+</li>
+<li>
+<p>Hashtags are much more important in Mastodon than Twitter: there&#8217;s no <em>global search</em>: the only things which are indexed are hash tags. You won&#8217;t find contents which is not with a hash tag.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is the internet I remember of.
+It&#8217;s not suitable for everyone, but it&#8217;s what I call <em>open</em>.
+What I also like is that it respects freedom of speech, while preserving your freedom of not seeing assholes (there are instances which are full of alt-right folks, but at least, we can block the whole server and not have to suffer their nauseating posts).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So, for the time being, I&#8217;m transitioning to Mastodon.
+<strong>You can follow me at <a href="https://mastodon.xyz/@melix"> @<a href="mailto:melix@mastodon.xyz">melix@mastodon.xyz</a></a></strong>, and I strongly suggest that you do the same and find a server which suits you.
+I will <em>not</em> support a company which now represents the worst of human beings.
+I will <em>not</em> pay $8 a month to a company which shows no respect to its employees, content creators and business partners.</p>
+</div>
+<div class="paragraph">
+<p>Because it&#8217;s hard to say goodbye to a professional network just like that, I do not plan to shutdown my account on Twitter yet, though: I still didn&#8217;t find a way to solve this cognitive dissonance.</p>
+</div>
+<div class="paragraph">
+<p>So what I plan on doing is moving to Mastodon first.
+I have already updated my screen name in Twitter to give a link to my Mastodon account.
+I suggest you do the same.
+I will now limit my tweets to what is strictly required for my professional career (announcements, etc.) and use Mastodon for everything else, until I can completely get rid of Twitter.
+I am conscious that I may not be able to completely get rid of it, if too many people stay on Twitter.
+So be it.</p>
+</div>
+<div class="paragraph">
+<p>Congratulations M. Musk, you ruined Twitter!</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'twitter-migration';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
