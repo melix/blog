@@ -6,9 +6,279 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 10 Nov 2022 10:50:34 +0100</pubDate>
-    <lastBuildDate>Thu, 10 Nov 2022 10:50:34 +0100</lastBuildDate>
+    <pubDate>Sat, 26 Nov 2022 15:10:43 +0100</pubDate>
+    <lastBuildDate>Sat, 26 Nov 2022 15:10:43 +0100</lastBuildDate>
 
+    <item>
+      <title>Monitoring pour optimiser ma conso électrique</title>
+      <link>https://melix.github.io/blog//2022/11/monitoring-elec.html</link>
+      <pubDate>Sat, 26 Nov 2022 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2022/11/monitoring-elec.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En juillet dernier, j&amp;#8217;ai fais installer des panneaux solaires.
+Cette installation change considérablement nos habitudes de consommation: au lieu de consommer de préférence aux heures creuses, il est préférable de consommer lorsque la production locale le permet.
+Dans ce billet, je vous explique ce que j&amp;#8217;ai mis en place pour nous aider dans l&amp;#8217;optimisation de notre consommation, en particulier un outil de monitoring avec un Raspberry PI.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/elec/moniteur-sep.jpg&quot; alt=&quot;moniteur sep&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_installation_de_panneaux_solaires&quot;&gt;Installation de panneaux solaires&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il y a longtemps que l&amp;#8217;idée nous trottait dans la tête.
+En effet, ici, nous chauffions au fioul, ce qui avait un certain nombre d&amp;#8217;inconvénients: pollution (fort emetteur de CO₂), prix très variable (entre 800€ et 1400€ les 1000L selon les saisons), bruit (la chaudière), odeurs de combustion, etc.
+Cette chaudière au fioul nous servait à la fois à chauffer l&amp;#8217;eau chaude, mais aussi au chauffage domestique.
+La maison étant relativement bien isolée, nous arrivions cependant, à 4 personnes, à ne consommer qu&amp;#8217;environ 1000L de fioul par an.
+Une vieille chaudière à fioul était tombée en panne en plein hiver, il y a 5 ans, nous avions dù la changer en urgence, et, je me souviens très bien de celà, il se trouve que j&amp;#8217;étais à ce moment à l&amp;#8217;étranger pour le &quot;Gradle World Meeting&quot;, une semaine de travail avec l&amp;#8217;ensemble de l&amp;#8217;équipe.
+Nous n&amp;#8217;avions donc pas eu le temps de faire différents devis, notamment de chauffage alternatif.
+Mais en Mars dernier, patatras, nouvelle panne.
+Cette fois-ci, la chaudière elle-même n&amp;#8217;était pas en cause: c&amp;#8217;est le système d&amp;#8217;alimentation en fioul, entre la cuve et la chaudière, qui était encrassé.
+La chaudière se mettait constamment en défaut faute d&amp;#8217;avoir une arrivée de fioul propre.
+Nous avions alors le choix entre faire nettoyer la cuve et la tuyauterie, pour une facture de l&amp;#8217;ordre de 2k€, ou de changer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En même temps, mon épouse et moi-même sommes tous les 2 en télétravail 5j/5.
+Notre consommation électrique est donc importante, entre l&amp;#8217;alimentation des ordinateurs, des écrans, la cuisine le midi, le chauffage d&amp;#8217;appoint dans mon bureau, &amp;#8230;&amp;#8203;
+Certains de nos équipements consomment aussi régulièrement: n&amp;#8217;ayant pas le tout à l&amp;#8217;égoût, par exemple, nous avons une microstation de traitement des eaux usées, avec une pompte de recirculation et une pompe de relevage, qui ont des consommations non négligeables à l&amp;#8217;année.
+Nous possédons aussi une voiture électrique (une e-208) qui est chargée à domicile.
+Enfin, l&amp;#8217;été, nous avons une pompe de circulation pour la piscine qui consomme beaucoup.
+Au final, notre facture électrique est donc beaucoup plus importante que celle de fioul.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette dernière panne a donc été l&amp;#8217;occasion de revoir notre projet.
+Après divers devis, nous avons opté pour l&amp;#8217;installation de 16 panneaux solaires de la société française &lt;a href=&quot;https://dualsun.com/&quot;&gt;DualSun&lt;/a&gt; : 10 panneaux classiques &quot;Flash&quot; et 6 panneaux hybrides électricité/eau chaude, pour une production totale de 6kWC (6 kW crète).
+Les panneaux hybrides permettent de produire de l&amp;#8217;électricité &lt;strong&gt;et&lt;/strong&gt; de préchauffer l&amp;#8217;eau chaude.
+Le tout a été associé à une pompe à chaleur air-eau, une Alfea Extensa A.I de la marque française &lt;a href=&quot;https://www.atlantic.fr/Chauffer-le-logement/Pompe-a-chaleur/Aerothermie/Aerothermie-Air-Eau/Alfea-Extensa-A.I.-et-Alfea-Extensa-Duo-A.I&quot;&gt;Atlantic&lt;/a&gt;.
+Il s&amp;#8217;agit d&amp;#8217;une pompe à chaleur air-eau moyenne température (55⁰C) qui nous permet de conserver notre installation de chauffages en fonte, au prix (à déterminer) d&amp;#8217;une consommation supérieure lors des grands froids (ce qui n&amp;#8217;arrive pas souvent ici).
+La pompe est associée à un ballon d&amp;#8217;eau chaude qui exploite le circuit préchauffé par les panneaux.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les 6kWc nous permettent d&amp;#8217;être en auto-consommation totale en journée l&amp;#8217;été (et probablement une partie du printemps/automne, à confirmer avec le temps) et je devrais pouvoir revendre une partie de la surproduction à Enedis (mais pour des raisons admistratives, mon dossier est toujours en attente&amp;#8230;&amp;#8203;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mon calcul de retour sur investissement m&amp;#8217;a donné 12 ans, en prenant en compte une augmentation annuelle de 5% des prix de l&amp;#8217;électricité.
+Si les tarifs augmentent plus vite, alors ça sera rentabilisé plus vite, mais il est impossible de savoir si ça sera le cas&amp;#8230;&amp;#8203; a priori avec la crise énergétique, j&amp;#8217;ai tendance à croire que ça n&amp;#8217;est pas un mauvais calcul&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, nous n&amp;#8217;avons &lt;strong&gt;pas&lt;/strong&gt; fait installer de batteries: bien que celà serait extrêmement intéressant dans mon cas, pour récupérer la nuit le surplus de la production en journée, le prix des batteries est encore bien trop élevé (de l&amp;#8217;ordre de 7k€ pour 10kW).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_changer_ses_habitudes_de_consommation&quot;&gt;Changer ses habitudes de consommation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans mon cas, nos habitudes de consommation étaient assez simples, au final:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;en journée, nous n&amp;#8217;avions pas trop le choix: il faut bien alimenter les ordinateurs, etc.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;les machines à laver, lave-vaisselle, etc tournaient la nuit pour profiter des heures creuses&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Malheureusement, notre consommation en heures creuses était assez limitée comparée au reste.
+Tout à changé avec les panneaux solaires:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;cet été et même fin septembre, lorsque le ciel est dégagé, mes panneaux produisent jusqu&amp;#8217;à 5.5kW, ce qui dépasse largement ma consommation &quot;live&quot;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;nous chargeons la voiture en journée via la prise &quot;domestique&quot; (~2kW) lorsque c&amp;#8217;est possible, et la nuit en charge &quot;rapide&quot; (6kW) lorsque la batterie est trop basse&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;les machines tournent en journée au lieu de la nuit&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais optimiser tout celà est &lt;strong&gt;compliqué&lt;/strong&gt;, et je souhaitais un système qui permette à mon épouse et mes enfants de savoir si, par exemple, &quot;c&amp;#8217;est le moment&quot; de lancer une machine.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je me suis donc lancé dans un projet de &quot;bidouille&quot; pour faire un système de monitoring qui donnerait en direct ma production, ma consommation, et indiquerait de manière simple si on a de la marge ou pas.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_petite_complication&quot;&gt;Petite complication&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Evidemment, vous pourriez vous dire que ça devrait être simple, avec toutes les applications connectées qui existent.
+Oui et non.
+Chez moi, l&amp;#8217;installation est particulière: mes panneaux solaires sont sur le toit de ma maison, ainsi que les onduleurs et optimiseur.
+Ces appareils sont capables de vous donner en direct la production, et mesurent aussi la consommation instantannée, ce qui permet donc de mesurer directement son auto-consommation: on peut savoir si on produit plus qu&amp;#8217;on ne consomme, ou l&amp;#8217;inverse, en temps réel, c&amp;#8217;est parfait non ? Voici par exemple un graphique fournit par SolarEdge en été:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/elec/conso-aout.png&quot; alt=&quot;conso aout&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En rouge, nous avons la consommation.
+En vert, la production solaire, et en bleu, l&amp;#8217;autoconsommation.
+Vous noterez d&amp;#8217;ores et déja un problème, si, comme moi, vous êtes un tant soit peu curieux: lorsqu&amp;#8217;il y a production solaire, la &lt;em&gt;courbe de consommation&lt;/em&gt; se met à suivre celle de production.
+Elle monte lorsque la production augmente et diminue lorsqu&amp;#8217;elle baisse: ça n&amp;#8217;est pas logique et probablement un bug quelque par chez SolarEdge.
+J&amp;#8217;ai demandé via mon installateur des explications (ils ne comprennent pas non plus), mais SolarEdge n&amp;#8217;est pas revenu vers eux.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A titre de comparaison, voici un autre graphe ce mois-ci:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/elec/conso-nov.png&quot; alt=&quot;conso nov&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On note déja qu&amp;#8217;il y a des pics de consommation, correspondant à l&amp;#8217;enclenchement de la pompe à chaleur, ou des appareils de cuisson.
+On constate aussi que la période de production est plus resserée, mais qu&amp;#8217;il existe encore, en journée, de la surproduction par moment (ça n&amp;#8217;est pas toujours vrai, dès qu&amp;#8217;il pleut, la production est pour ainsi dire nulle).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Si on oublie la fausse valeur de consommation, c&amp;#8217;est parfait me direz-vous !
+Et bien oui mais non.
+Chez moi, il y a un hic: le capteur de consommation est au niveau de l&amp;#8217;onduleur, près de mon tableau électrique.
+Or ici, j&amp;#8217;ai &lt;em&gt;plusieurs&lt;/em&gt; tableaux électriques: un dans mon habitation principale, mais aussi un dans mon garage (bâtiment indépendant) et un autre dans un local technique du jardin.
+Lorsque j&amp;#8217;ai acheté cette maison, elle était installée en triphasé, il y avait donc les 3 phases, et de mon compteur EDF principal, dans mon allée, partent des lignes électriques vers 3 bâtiments distincts.
+Ces phases étaient particulièrement déséquilibrées, nous avions donc fait repasser en monophasé, mais ce qu&amp;#8217;il faut retenir, c&amp;#8217;est qu&amp;#8217;il aurait fallu que le capteur soit au niveau du compteur électrique, et non dans ma maison, pourqu&amp;#8217;on puisse mesurer correctement la consommation en live.
+Pour des raisons techniques, il n&amp;#8217;était pas possible de le faire: j&amp;#8217;ai donc une mesure imparfaite de ma consommation, qui ne donne que la consommation de mon habitation principale.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_ma_solution&quot;&gt;Ma solution&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Si on résume, je dispose pour l&amp;#8217;instant d&amp;#8217;un outil qui me donne la production (nous verrons plus loin comment l&amp;#8217;obtenir), mais pas la consommation.
+Mais mon fournisseur d&amp;#8217;électricité (Total Energies) propose une clé ATOME qui permet de connaître ce que je consomme du réseau en live, clé qui se branche sur le compteur Linky.
+Malheureusement, Enedis ne propose pas d&amp;#8217;APIs permettant de connaître sa consommation live, il n&amp;#8217;y a donc pas d&amp;#8217;autre choix que de louer la clé de Total Energies&amp;#8230;&amp;#8203;
+J&amp;#8217;ai donc fait l&amp;#8217;acquisition de cette clé, et je dispose donc des 2 mesures dont j&amp;#8217;ai besoin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;la consommation live donnée par ma clé ATOME: attention, il ne s&amp;#8217;agit donc pas de ma consommation totale, mais de ce que j&amp;#8217;ai besoin &lt;em&gt;en plus de ma production&lt;/em&gt;, du réseau EDF&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;la production live donnée par SolarEdge&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il suffit donc de faire la différence entre les 2 pour savoir de quelle marge on dispose, mais je ne peux jamais, en pratique, savoir combien je consomme.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mon idée a donc été d&amp;#8217;utiliser un vieux Rapsberry PI qui traînait dans mon armoire, combiné à un écran e-ink, pour afficher cette production et cette consommation, ainsi qu&amp;#8217;une &quot;note&quot; permettant de suggérer de lancer une machine à laver, par exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai donc fait l&amp;#8217;acquisition de &lt;a href=&quot;https://www.amazon.fr/gp/product/B075FRVC4L/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&amp;amp;psc=1&quot;&gt;cet écran&lt;/a&gt;, un écran e-ink dont la consommation en veille est nulle, ce qui, pour un outil de monitoring de consommation d&amp;#8217;énergie, me semblait le minimum.
+Nous verrons cependant que ça ne fut pas sans inconvénients.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_les_apis_toujours_le_point_faible&quot;&gt;Les APIs, toujours le point faible&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bien, maintenant que nous savons que les données sont disponibles, via le &lt;a href=&quot;https://monitoring.solaredge.com&quot;&gt;site de SolarEdge&lt;/a&gt; pour la production, et via l&amp;#8217;application Total Energies pour la clé live, il fallait disposer de ces donneés via des API que je puisse interroger via mon Raspberry.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Là, douche froide:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;SolarEdge propose bien une API pour développeurs, mais elle n&amp;#8217;est ni super bien documentée (il faut comprendre soit-même à quoi correspondent les champs retournés), ni illimitée : on ne peut effectuer que 300 requêtes par jour, soit un peu moins d&amp;#8217;une requête toutes les 5 minutes ! C&amp;#8217;est d&amp;#8217;autant plus regrettable que l&amp;#8217;information est disponible &lt;em&gt;en continu&lt;/em&gt; et en live via leur interface web!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;pour Total Energies, c&amp;#8217;est encore pire: il n&amp;#8217;y a pas d&amp;#8217;API officielle. Il faut donc &quot;hacker&quot; pour avoir accès, en simulant une connection via l&amp;#8217;application, qui donne la consommation live&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, ni SolarEdge, ni Total ne proposent d&amp;#8217;API de type push, ou d&amp;#8217;event bus qu&amp;#8217;on puisse écouter pour obtenir les informations.
+C&amp;#8217;est très décevant, à une heure où ce genre d&amp;#8217;optimisations devient critique pour une bonne gestion de notre consommation électrique: c&amp;#8217;est un outil pour le climat !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;autre problème, c&amp;#8217;est que même si j&amp;#8217;utilise l&amp;#8217;API officielle de SolarEdge et que je réussis à récupérer l&amp;#8217;information de Total Energies, ces APIs sont instables : elles tombent très souvent &quot;en panne&quot; et ne renvoient aucune info.
+Bref, lorsque ça marche, c&amp;#8217;est parfait, mais souvent, ça ne fonctionne tout simplement pas, par exemple en ce moment, ma production indique 0 alors que ça n&amp;#8217;est pas le cas:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/elec/moniteur-nov.jpg&quot; alt=&quot;moniteur nov&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ceci me permet au moins de savoir qu&amp;#8217;en ce moment, je demande 1135W du réseau, ce qui signifie que je consomme sensiblement plus (entre le chauffe-eau, l&amp;#8217;ordinateur de mon fils qui joue à Minecraft et la PS5 de mon autre garçon).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_un_peu_de_technique&quot;&gt;Un peu de technique&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alors comment récupérer en pratique ces informations ?
+En fait j&amp;#8217;ai adapté un script en Python qui, toutes les 5 minutes, se connecte à ces 2 APIs, récupère les informations et déclenche le raffraîchissement de l&amp;#8217;écran.
+Alors, Python, personnellement c&amp;#8217;est pas ma tasse de thé.
+J&amp;#8217;ai l&amp;#8217;impression de refaire du PHP, avec des scripts cracras et des variables globales de partout.
+Il y a sûrement possiblité de faire mieux, mais en bidouille en se connectant par SSH à mon Raspberry, c&amp;#8217;est pour l&amp;#8217;instant tout ce que j&amp;#8217;ai.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous trouverez donc le script &lt;a href=&quot;https://gist.github.com/melix/90dce1c44524a368f9186981ec16b475&quot;&gt;ici&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Parmi les problèmes, je vous mentionnait celui du choix de l&amp;#8217;écran.
+J&amp;#8217;avoue avoir été relativement naïf, parce qu&amp;#8217;à l&amp;#8217;utlisation, si l&amp;#8217;écran e-ink est très sympa à voir, son raffraîchissement prend&amp;#8230;&amp;#8203; jusqu&amp;#8217;à 30s !
+En effet, la façon de dessiner sur ces écrans est assez particulière: on écrit des modèles mémoire, puis on envoie des instructions à l&amp;#8217;écran pour effacer telle zone, etc.
+Ces instructions sont très lentes à s&amp;#8217;exécuter, mais surtout, elles provoquent systématiquement un effet bizarre à l&amp;#8217;écran, qui passe du blanc au noir plusieurs fois, commence à afficher des choses, puis la couleur, etc&amp;#8230;&amp;#8203;
+Bref, pas super sympa pour du &quot;live&quot;, mais, au final, suffisant pour mon usage.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Au final, j&amp;#8217;ai quand même un outil proche de ce que je souhaitais.
+Il nous a permis, d&amp;#8217;ores et déja, d&amp;#8217;adapter notre consommation: n&amp;#8217;importe qui peut regarder l&amp;#8217;écran et décider de lancer une machine si la production est importante, alors que cette info n&amp;#8217;était avant uniquement disponible que pour moi, via une application sur mobile: ici, l&amp;#8217;information est donnée en continu, de manière passive, via cet écran.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous avons, par exemple, pu adapter notre consommation en automne: la pompe à chaleur ne fonctionnait pas (pas besoin de chauffer) et donc nous avons pu mettre notre voiture à charger, plus travailler tous les 2 à domicile et lancer une machine à laver, sans consommer un seul kW du réseau EDF ! Lorsque le monitoring a indiqué que nous commencions à consommer du réseau, il a suffit de couper la charge de la voiture (malheureusement, l&amp;#8217;application MyPeugeot est extrêmement limitée et ne permet pas d&amp;#8217;interrompre une charge mais simplement de la différer, mais c&amp;#8217;est un autre problème).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Depuis Juillet, nous sommes à -70% de consommation électrique, ce qui est énorme.
+Cependant, les conditions météo ont, jusqu&amp;#8217;ici, été très favorables: beaucoup de soleil et des températures record en Octobre et Novembre (malheureusement pour le climat&amp;#8230;&amp;#8203;).
+Depuis une semaine, la pompe à chaleur se met régulièrement en route pour tenir les 19⁰C, mais j&amp;#8217;ai des résultats surprenants:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;90kWh consommés en Novembre pour chauffer l&amp;#8217;eau&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;et seulement 9kWh pour le chauffage !&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;avenir nous dira si le passage à une pompe à chaleur pour le chauffage était une bonne idée ou non (en même temps, ici nous n&amp;#8217;avions pas trop le choix).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Hello, Mastodon (goodbye Twitter!)</title>
       <link>https://melix.github.io/blog//2022/11/hello-mastodon.html</link>

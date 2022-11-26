@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Monitoring pour optimiser ma conso électrique</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	        <li><a rel="me" href="https://astrodon.social/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Monitoring pour optimiser ma conso électrique</h1>
+	</div>
+
+	<p><em>26 November 2022</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/solaire.html">solaire</a> 
+	</em>
+		<a href="/blog/tags/fioul.html">fioul</a> 
+	</em>
+		<a href="/blog/tags/électricité.html">électricité</a> 
+	</em>
+		<a href="/blog/tags/solaredge.html">solaredge</a> 
+	</em>
+		<a href="/blog/tags/dualsun.html">dualsun</a> 
+	</em>
+		<a href="/blog/tags/raspberry.html">raspberry</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>En juillet dernier, j&#8217;ai fais installer des panneaux solaires.
+Cette installation change considérablement nos habitudes de consommation: au lieu de consommer de préférence aux heures creuses, il est préférable de consommer lorsque la production locale le permet.
+Dans ce billet, je vous explique ce que j&#8217;ai mis en place pour nous aider dans l&#8217;optimisation de notre consommation, en particulier un outil de monitoring avec un Raspberry PI.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/moniteur-sep.jpg" alt="moniteur sep">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation_de_panneaux_solaires">Installation de panneaux solaires</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Il y a longtemps que l&#8217;idée nous trottait dans la tête.
+En effet, ici, nous chauffions au fioul, ce qui avait un certain nombre d&#8217;inconvénients: pollution (fort emetteur de CO₂), prix très variable (entre 800€ et 1400€ les 1000L selon les saisons), bruit (la chaudière), odeurs de combustion, etc.
+Cette chaudière au fioul nous servait à la fois à chauffer l&#8217;eau chaude, mais aussi au chauffage domestique.
+La maison étant relativement bien isolée, nous arrivions cependant, à 4 personnes, à ne consommer qu&#8217;environ 1000L de fioul par an.
+Une vieille chaudière à fioul était tombée en panne en plein hiver, il y a 5 ans, nous avions dù la changer en urgence, et, je me souviens très bien de celà, il se trouve que j&#8217;étais à ce moment à l&#8217;étranger pour le "Gradle World Meeting", une semaine de travail avec l&#8217;ensemble de l&#8217;équipe.
+Nous n&#8217;avions donc pas eu le temps de faire différents devis, notamment de chauffage alternatif.
+Mais en Mars dernier, patatras, nouvelle panne.
+Cette fois-ci, la chaudière elle-même n&#8217;était pas en cause: c&#8217;est le système d&#8217;alimentation en fioul, entre la cuve et la chaudière, qui était encrassé.
+La chaudière se mettait constamment en défaut faute d&#8217;avoir une arrivée de fioul propre.
+Nous avions alors le choix entre faire nettoyer la cuve et la tuyauterie, pour une facture de l&#8217;ordre de 2k€, ou de changer.</p>
+</div>
+<div class="paragraph">
+<p>En même temps, mon épouse et moi-même sommes tous les 2 en télétravail 5j/5.
+Notre consommation électrique est donc importante, entre l&#8217;alimentation des ordinateurs, des écrans, la cuisine le midi, le chauffage d&#8217;appoint dans mon bureau, &#8230;&#8203;
+Certains de nos équipements consomment aussi régulièrement: n&#8217;ayant pas le tout à l&#8217;égoût, par exemple, nous avons une microstation de traitement des eaux usées, avec une pompte de recirculation et une pompe de relevage, qui ont des consommations non négligeables à l&#8217;année.
+Nous possédons aussi une voiture électrique (une e-208) qui est chargée à domicile.
+Enfin, l&#8217;été, nous avons une pompe de circulation pour la piscine qui consomme beaucoup.
+Au final, notre facture électrique est donc beaucoup plus importante que celle de fioul.</p>
+</div>
+<div class="paragraph">
+<p>Cette dernière panne a donc été l&#8217;occasion de revoir notre projet.
+Après divers devis, nous avons opté pour l&#8217;installation de 16 panneaux solaires de la société française <a href="https://dualsun.com/">DualSun</a> : 10 panneaux classiques "Flash" et 6 panneaux hybrides électricité/eau chaude, pour une production totale de 6kWC (6 kW crète).
+Les panneaux hybrides permettent de produire de l&#8217;électricité <strong>et</strong> de préchauffer l&#8217;eau chaude.
+Le tout a été associé à une pompe à chaleur air-eau, une Alfea Extensa A.I de la marque française <a href="https://www.atlantic.fr/Chauffer-le-logement/Pompe-a-chaleur/Aerothermie/Aerothermie-Air-Eau/Alfea-Extensa-A.I.-et-Alfea-Extensa-Duo-A.I">Atlantic</a>.
+Il s&#8217;agit d&#8217;une pompe à chaleur air-eau moyenne température (55⁰C) qui nous permet de conserver notre installation de chauffages en fonte, au prix (à déterminer) d&#8217;une consommation supérieure lors des grands froids (ce qui n&#8217;arrive pas souvent ici).
+La pompe est associée à un ballon d&#8217;eau chaude qui exploite le circuit préchauffé par les panneaux.</p>
+</div>
+<div class="paragraph">
+<p>Les 6kWc nous permettent d&#8217;être en auto-consommation totale en journée l&#8217;été (et probablement une partie du printemps/automne, à confirmer avec le temps) et je devrais pouvoir revendre une partie de la surproduction à Enedis (mais pour des raisons admistratives, mon dossier est toujours en attente&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Mon calcul de retour sur investissement m&#8217;a donné 12 ans, en prenant en compte une augmentation annuelle de 5% des prix de l&#8217;électricité.
+Si les tarifs augmentent plus vite, alors ça sera rentabilisé plus vite, mais il est impossible de savoir si ça sera le cas&#8230;&#8203; a priori avec la crise énergétique, j&#8217;ai tendance à croire que ça n&#8217;est pas un mauvais calcul&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Enfin, nous n&#8217;avons <strong>pas</strong> fait installer de batteries: bien que celà serait extrêmement intéressant dans mon cas, pour récupérer la nuit le surplus de la production en journée, le prix des batteries est encore bien trop élevé (de l&#8217;ordre de 7k€ pour 10kW).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changer_ses_habitudes_de_consommation">Changer ses habitudes de consommation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Dans mon cas, nos habitudes de consommation étaient assez simples, au final:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>en journée, nous n&#8217;avions pas trop le choix: il faut bien alimenter les ordinateurs, etc.</p>
+</li>
+<li>
+<p>les machines à laver, lave-vaisselle, etc tournaient la nuit pour profiter des heures creuses</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Malheureusement, notre consommation en heures creuses était assez limitée comparée au reste.
+Tout à changé avec les panneaux solaires:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>cet été et même fin septembre, lorsque le ciel est dégagé, mes panneaux produisent jusqu&#8217;à 5.5kW, ce qui dépasse largement ma consommation "live"</p>
+</li>
+<li>
+<p>nous chargeons la voiture en journée via la prise "domestique" (~2kW) lorsque c&#8217;est possible, et la nuit en charge "rapide" (6kW) lorsque la batterie est trop basse</p>
+</li>
+<li>
+<p>les machines tournent en journée au lieu de la nuit</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Mais optimiser tout celà est <strong>compliqué</strong>, et je souhaitais un système qui permette à mon épouse et mes enfants de savoir si, par exemple, "c&#8217;est le moment" de lancer une machine.</p>
+</div>
+<div class="paragraph">
+<p>Je me suis donc lancé dans un projet de "bidouille" pour faire un système de monitoring qui donnerait en direct ma production, ma consommation, et indiquerait de manière simple si on a de la marge ou pas.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_petite_complication">Petite complication</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Evidemment, vous pourriez vous dire que ça devrait être simple, avec toutes les applications connectées qui existent.
+Oui et non.
+Chez moi, l&#8217;installation est particulière: mes panneaux solaires sont sur le toit de ma maison, ainsi que les onduleurs et optimiseur.
+Ces appareils sont capables de vous donner en direct la production, et mesurent aussi la consommation instantannée, ce qui permet donc de mesurer directement son auto-consommation: on peut savoir si on produit plus qu&#8217;on ne consomme, ou l&#8217;inverse, en temps réel, c&#8217;est parfait non ? Voici par exemple un graphique fournit par SolarEdge en été:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/conso-aout.png" alt="conso aout">
+</div>
+</div>
+<div class="paragraph">
+<p>En rouge, nous avons la consommation.
+En vert, la production solaire, et en bleu, l&#8217;autoconsommation.
+Vous noterez d&#8217;ores et déja un problème, si, comme moi, vous êtes un tant soit peu curieux: lorsqu&#8217;il y a production solaire, la <em>courbe de consommation</em> se met à suivre celle de production.
+Elle monte lorsque la production augmente et diminue lorsqu&#8217;elle baisse: ça n&#8217;est pas logique et probablement un bug quelque par chez SolarEdge.
+J&#8217;ai demandé via mon installateur des explications (ils ne comprennent pas non plus), mais SolarEdge n&#8217;est pas revenu vers eux.</p>
+</div>
+<div class="paragraph">
+<p>A titre de comparaison, voici un autre graphe ce mois-ci:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/conso-nov.png" alt="conso nov">
+</div>
+</div>
+<div class="paragraph">
+<p>On note déja qu&#8217;il y a des pics de consommation, correspondant à l&#8217;enclenchement de la pompe à chaleur, ou des appareils de cuisson.
+On constate aussi que la période de production est plus resserée, mais qu&#8217;il existe encore, en journée, de la surproduction par moment (ça n&#8217;est pas toujours vrai, dès qu&#8217;il pleut, la production est pour ainsi dire nulle).</p>
+</div>
+<div class="paragraph">
+<p>Si on oublie la fausse valeur de consommation, c&#8217;est parfait me direz-vous !
+Et bien oui mais non.
+Chez moi, il y a un hic: le capteur de consommation est au niveau de l&#8217;onduleur, près de mon tableau électrique.
+Or ici, j&#8217;ai <em>plusieurs</em> tableaux électriques: un dans mon habitation principale, mais aussi un dans mon garage (bâtiment indépendant) et un autre dans un local technique du jardin.
+Lorsque j&#8217;ai acheté cette maison, elle était installée en triphasé, il y avait donc les 3 phases, et de mon compteur EDF principal, dans mon allée, partent des lignes électriques vers 3 bâtiments distincts.
+Ces phases étaient particulièrement déséquilibrées, nous avions donc fait repasser en monophasé, mais ce qu&#8217;il faut retenir, c&#8217;est qu&#8217;il aurait fallu que le capteur soit au niveau du compteur électrique, et non dans ma maison, pourqu&#8217;on puisse mesurer correctement la consommation en live.
+Pour des raisons techniques, il n&#8217;était pas possible de le faire: j&#8217;ai donc une mesure imparfaite de ma consommation, qui ne donne que la consommation de mon habitation principale.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ma_solution">Ma solution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Si on résume, je dispose pour l&#8217;instant d&#8217;un outil qui me donne la production (nous verrons plus loin comment l&#8217;obtenir), mais pas la consommation.
+Mais mon fournisseur d&#8217;électricité (Total Energies) propose une clé ATOME qui permet de connaître ce que je consomme du réseau en live, clé qui se branche sur le compteur Linky.
+Malheureusement, Enedis ne propose pas d&#8217;APIs permettant de connaître sa consommation live, il n&#8217;y a donc pas d&#8217;autre choix que de louer la clé de Total Energies&#8230;&#8203;
+J&#8217;ai donc fait l&#8217;acquisition de cette clé, et je dispose donc des 2 mesures dont j&#8217;ai besoin:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>la consommation live donnée par ma clé ATOME: attention, il ne s&#8217;agit donc pas de ma consommation totale, mais de ce que j&#8217;ai besoin <em>en plus de ma production</em>, du réseau EDF</p>
+</li>
+<li>
+<p>la production live donnée par SolarEdge</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Il suffit donc de faire la différence entre les 2 pour savoir de quelle marge on dispose, mais je ne peux jamais, en pratique, savoir combien je consomme.</p>
+</div>
+<div class="paragraph">
+<p>Mon idée a donc été d&#8217;utiliser un vieux Rapsberry PI qui traînait dans mon armoire, combiné à un écran e-ink, pour afficher cette production et cette consommation, ainsi qu&#8217;une "note" permettant de suggérer de lancer une machine à laver, par exemple.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai donc fait l&#8217;acquisition de <a href="https://www.amazon.fr/gp/product/B075FRVC4L/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&amp;psc=1">cet écran</a>, un écran e-ink dont la consommation en veille est nulle, ce qui, pour un outil de monitoring de consommation d&#8217;énergie, me semblait le minimum.
+Nous verrons cependant que ça ne fut pas sans inconvénients.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_apis_toujours_le_point_faible">Les APIs, toujours le point faible</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bien, maintenant que nous savons que les données sont disponibles, via le <a href="https://monitoring.solaredge.com">site de SolarEdge</a> pour la production, et via l&#8217;application Total Energies pour la clé live, il fallait disposer de ces donneés via des API que je puisse interroger via mon Raspberry.</p>
+</div>
+<div class="paragraph">
+<p>Là, douche froide:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>SolarEdge propose bien une API pour développeurs, mais elle n&#8217;est ni super bien documentée (il faut comprendre soit-même à quoi correspondent les champs retournés), ni illimitée : on ne peut effectuer que 300 requêtes par jour, soit un peu moins d&#8217;une requête toutes les 5 minutes ! C&#8217;est d&#8217;autant plus regrettable que l&#8217;information est disponible <em>en continu</em> et en live via leur interface web!</p>
+</li>
+<li>
+<p>pour Total Energies, c&#8217;est encore pire: il n&#8217;y a pas d&#8217;API officielle. Il faut donc "hacker" pour avoir accès, en simulant une connection via l&#8217;application, qui donne la consommation live</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Bref, ni SolarEdge, ni Total ne proposent d&#8217;API de type push, ou d&#8217;event bus qu&#8217;on puisse écouter pour obtenir les informations.
+C&#8217;est très décevant, à une heure où ce genre d&#8217;optimisations devient critique pour une bonne gestion de notre consommation électrique: c&#8217;est un outil pour le climat !</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;autre problème, c&#8217;est que même si j&#8217;utilise l&#8217;API officielle de SolarEdge et que je réussis à récupérer l&#8217;information de Total Energies, ces APIs sont instables : elles tombent très souvent "en panne" et ne renvoient aucune info.
+Bref, lorsque ça marche, c&#8217;est parfait, mais souvent, ça ne fonctionne tout simplement pas, par exemple en ce moment, ma production indique 0 alors que ça n&#8217;est pas le cas:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/moniteur-nov.jpg" alt="moniteur nov">
+</div>
+</div>
+<div class="paragraph">
+<p>Ceci me permet au moins de savoir qu&#8217;en ce moment, je demande 1135W du réseau, ce qui signifie que je consomme sensiblement plus (entre le chauffe-eau, l&#8217;ordinateur de mon fils qui joue à Minecraft et la PS5 de mon autre garçon).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_un_peu_de_technique">Un peu de technique</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Alors comment récupérer en pratique ces informations ?
+En fait j&#8217;ai adapté un script en Python qui, toutes les 5 minutes, se connecte à ces 2 APIs, récupère les informations et déclenche le raffraîchissement de l&#8217;écran.
+Alors, Python, personnellement c&#8217;est pas ma tasse de thé.
+J&#8217;ai l&#8217;impression de refaire du PHP, avec des scripts cracras et des variables globales de partout.
+Il y a sûrement possiblité de faire mieux, mais en bidouille en se connectant par SSH à mon Raspberry, c&#8217;est pour l&#8217;instant tout ce que j&#8217;ai.</p>
+</div>
+<div class="paragraph">
+<p>Vous trouverez donc le script <a href="https://gist.github.com/melix/90dce1c44524a368f9186981ec16b475">ici</a>.</p>
+</div>
+<div class="paragraph">
+<p>Parmi les problèmes, je vous mentionnait celui du choix de l&#8217;écran.
+J&#8217;avoue avoir été relativement naïf, parce qu&#8217;à l&#8217;utlisation, si l&#8217;écran e-ink est très sympa à voir, son raffraîchissement prend&#8230;&#8203; jusqu&#8217;à 30s !
+En effet, la façon de dessiner sur ces écrans est assez particulière: on écrit des modèles mémoire, puis on envoie des instructions à l&#8217;écran pour effacer telle zone, etc.
+Ces instructions sont très lentes à s&#8217;exécuter, mais surtout, elles provoquent systématiquement un effet bizarre à l&#8217;écran, qui passe du blanc au noir plusieurs fois, commence à afficher des choses, puis la couleur, etc&#8230;&#8203;
+Bref, pas super sympa pour du "live", mais, au final, suffisant pour mon usage.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Au final, j&#8217;ai quand même un outil proche de ce que je souhaitais.
+Il nous a permis, d&#8217;ores et déja, d&#8217;adapter notre consommation: n&#8217;importe qui peut regarder l&#8217;écran et décider de lancer une machine si la production est importante, alors que cette info n&#8217;était avant uniquement disponible que pour moi, via une application sur mobile: ici, l&#8217;information est donnée en continu, de manière passive, via cet écran.</p>
+</div>
+<div class="paragraph">
+<p>Nous avons, par exemple, pu adapter notre consommation en automne: la pompe à chaleur ne fonctionnait pas (pas besoin de chauffer) et donc nous avons pu mettre notre voiture à charger, plus travailler tous les 2 à domicile et lancer une machine à laver, sans consommer un seul kW du réseau EDF ! Lorsque le monitoring a indiqué que nous commencions à consommer du réseau, il a suffit de couper la charge de la voiture (malheureusement, l&#8217;application MyPeugeot est extrêmement limitée et ne permet pas d&#8217;interrompre une charge mais simplement de la différer, mais c&#8217;est un autre problème).</p>
+</div>
+<div class="paragraph">
+<p>Depuis Juillet, nous sommes à -70% de consommation électrique, ce qui est énorme.
+Cependant, les conditions météo ont, jusqu&#8217;ici, été très favorables: beaucoup de soleil et des températures record en Octobre et Novembre (malheureusement pour le climat&#8230;&#8203;).
+Depuis une semaine, la pompe à chaleur se met régulièrement en route pour tenir les 19⁰C, mais j&#8217;ai des résultats surprenants:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>90kWh consommés en Novembre pour chauffer l&#8217;eau</p>
+</li>
+<li>
+<p>et seulement 9kWh pour le chauffage !</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>L&#8217;avenir nous dira si le passage à une pompe à chaleur pour le chauffage était une bonne idée ou non (en même temps, ici nous n&#8217;avions pas trop le choix).</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'monitoring-raspi';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

@@ -73,6 +73,285 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2022/11/monitoring-elec.html"><h1>Monitoring pour optimiser ma conso électrique</h1></a>
+  			<p>26 November 2022</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solaire.html">solaire</a> 
+	
+		<a href="/blog/tags/fioul.html">fioul</a> 
+	
+		<a href="/blog/tags/électricité.html">électricité</a> 
+	
+		<a href="/blog/tags/solaredge.html">solaredge</a> 
+	
+		<a href="/blog/tags/dualsun.html">dualsun</a> 
+	
+		<a href="/blog/tags/raspberry.html">raspberry</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>En juillet dernier, j&#8217;ai fais installer des panneaux solaires.
+Cette installation change considérablement nos habitudes de consommation: au lieu de consommer de préférence aux heures creuses, il est préférable de consommer lorsque la production locale le permet.
+Dans ce billet, je vous explique ce que j&#8217;ai mis en place pour nous aider dans l&#8217;optimisation de notre consommation, en particulier un outil de monitoring avec un Raspberry PI.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/moniteur-sep.jpg" alt="moniteur sep">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation_de_panneaux_solaires">Installation de panneaux solaires</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Il y a longtemps que l&#8217;idée nous trottait dans la tête.
+En effet, ici, nous chauffions au fioul, ce qui avait un certain nombre d&#8217;inconvénients: pollution (fort emetteur de CO₂), prix très variable (entre 800€ et 1400€ les 1000L selon les saisons), bruit (la chaudière), odeurs de combustion, etc.
+Cette chaudière au fioul nous servait à la fois à chauffer l&#8217;eau chaude, mais aussi au chauffage domestique.
+La maison étant relativement bien isolée, nous arrivions cependant, à 4 personnes, à ne consommer qu&#8217;environ 1000L de fioul par an.
+Une vieille chaudière à fioul était tombée en panne en plein hiver, il y a 5 ans, nous avions dù la changer en urgence, et, je me souviens très bien de celà, il se trouve que j&#8217;étais à ce moment à l&#8217;étranger pour le "Gradle World Meeting", une semaine de travail avec l&#8217;ensemble de l&#8217;équipe.
+Nous n&#8217;avions donc pas eu le temps de faire différents devis, notamment de chauffage alternatif.
+Mais en Mars dernier, patatras, nouvelle panne.
+Cette fois-ci, la chaudière elle-même n&#8217;était pas en cause: c&#8217;est le système d&#8217;alimentation en fioul, entre la cuve et la chaudière, qui était encrassé.
+La chaudière se mettait constamment en défaut faute d&#8217;avoir une arrivée de fioul propre.
+Nous avions alors le choix entre faire nettoyer la cuve et la tuyauterie, pour une facture de l&#8217;ordre de 2k€, ou de changer.</p>
+</div>
+<div class="paragraph">
+<p>En même temps, mon épouse et moi-même sommes tous les 2 en télétravail 5j/5.
+Notre consommation électrique est donc importante, entre l&#8217;alimentation des ordinateurs, des écrans, la cuisine le midi, le chauffage d&#8217;appoint dans mon bureau, &#8230;&#8203;
+Certains de nos équipements consomment aussi régulièrement: n&#8217;ayant pas le tout à l&#8217;égoût, par exemple, nous avons une microstation de traitement des eaux usées, avec une pompte de recirculation et une pompe de relevage, qui ont des consommations non négligeables à l&#8217;année.
+Nous possédons aussi une voiture électrique (une e-208) qui est chargée à domicile.
+Enfin, l&#8217;été, nous avons une pompe de circulation pour la piscine qui consomme beaucoup.
+Au final, notre facture électrique est donc beaucoup plus importante que celle de fioul.</p>
+</div>
+<div class="paragraph">
+<p>Cette dernière panne a donc été l&#8217;occasion de revoir notre projet.
+Après divers devis, nous avons opté pour l&#8217;installation de 16 panneaux solaires de la société française <a href="https://dualsun.com/">DualSun</a> : 10 panneaux classiques "Flash" et 6 panneaux hybrides électricité/eau chaude, pour une production totale de 6kWC (6 kW crète).
+Les panneaux hybrides permettent de produire de l&#8217;électricité <strong>et</strong> de préchauffer l&#8217;eau chaude.
+Le tout a été associé à une pompe à chaleur air-eau, une Alfea Extensa A.I de la marque française <a href="https://www.atlantic.fr/Chauffer-le-logement/Pompe-a-chaleur/Aerothermie/Aerothermie-Air-Eau/Alfea-Extensa-A.I.-et-Alfea-Extensa-Duo-A.I">Atlantic</a>.
+Il s&#8217;agit d&#8217;une pompe à chaleur air-eau moyenne température (55⁰C) qui nous permet de conserver notre installation de chauffages en fonte, au prix (à déterminer) d&#8217;une consommation supérieure lors des grands froids (ce qui n&#8217;arrive pas souvent ici).
+La pompe est associée à un ballon d&#8217;eau chaude qui exploite le circuit préchauffé par les panneaux.</p>
+</div>
+<div class="paragraph">
+<p>Les 6kWc nous permettent d&#8217;être en auto-consommation totale en journée l&#8217;été (et probablement une partie du printemps/automne, à confirmer avec le temps) et je devrais pouvoir revendre une partie de la surproduction à Enedis (mais pour des raisons admistratives, mon dossier est toujours en attente&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Mon calcul de retour sur investissement m&#8217;a donné 12 ans, en prenant en compte une augmentation annuelle de 5% des prix de l&#8217;électricité.
+Si les tarifs augmentent plus vite, alors ça sera rentabilisé plus vite, mais il est impossible de savoir si ça sera le cas&#8230;&#8203; a priori avec la crise énergétique, j&#8217;ai tendance à croire que ça n&#8217;est pas un mauvais calcul&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Enfin, nous n&#8217;avons <strong>pas</strong> fait installer de batteries: bien que celà serait extrêmement intéressant dans mon cas, pour récupérer la nuit le surplus de la production en journée, le prix des batteries est encore bien trop élevé (de l&#8217;ordre de 7k€ pour 10kW).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changer_ses_habitudes_de_consommation">Changer ses habitudes de consommation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Dans mon cas, nos habitudes de consommation étaient assez simples, au final:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>en journée, nous n&#8217;avions pas trop le choix: il faut bien alimenter les ordinateurs, etc.</p>
+</li>
+<li>
+<p>les machines à laver, lave-vaisselle, etc tournaient la nuit pour profiter des heures creuses</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Malheureusement, notre consommation en heures creuses était assez limitée comparée au reste.
+Tout à changé avec les panneaux solaires:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>cet été et même fin septembre, lorsque le ciel est dégagé, mes panneaux produisent jusqu&#8217;à 5.5kW, ce qui dépasse largement ma consommation "live"</p>
+</li>
+<li>
+<p>nous chargeons la voiture en journée via la prise "domestique" (~2kW) lorsque c&#8217;est possible, et la nuit en charge "rapide" (6kW) lorsque la batterie est trop basse</p>
+</li>
+<li>
+<p>les machines tournent en journée au lieu de la nuit</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Mais optimiser tout celà est <strong>compliqué</strong>, et je souhaitais un système qui permette à mon épouse et mes enfants de savoir si, par exemple, "c&#8217;est le moment" de lancer une machine.</p>
+</div>
+<div class="paragraph">
+<p>Je me suis donc lancé dans un projet de "bidouille" pour faire un système de monitoring qui donnerait en direct ma production, ma consommation, et indiquerait de manière simple si on a de la marge ou pas.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_petite_complication">Petite complication</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Evidemment, vous pourriez vous dire que ça devrait être simple, avec toutes les applications connectées qui existent.
+Oui et non.
+Chez moi, l&#8217;installation est particulière: mes panneaux solaires sont sur le toit de ma maison, ainsi que les onduleurs et optimiseur.
+Ces appareils sont capables de vous donner en direct la production, et mesurent aussi la consommation instantannée, ce qui permet donc de mesurer directement son auto-consommation: on peut savoir si on produit plus qu&#8217;on ne consomme, ou l&#8217;inverse, en temps réel, c&#8217;est parfait non ? Voici par exemple un graphique fournit par SolarEdge en été:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/conso-aout.png" alt="conso aout">
+</div>
+</div>
+<div class="paragraph">
+<p>En rouge, nous avons la consommation.
+En vert, la production solaire, et en bleu, l&#8217;autoconsommation.
+Vous noterez d&#8217;ores et déja un problème, si, comme moi, vous êtes un tant soit peu curieux: lorsqu&#8217;il y a production solaire, la <em>courbe de consommation</em> se met à suivre celle de production.
+Elle monte lorsque la production augmente et diminue lorsqu&#8217;elle baisse: ça n&#8217;est pas logique et probablement un bug quelque par chez SolarEdge.
+J&#8217;ai demandé via mon installateur des explications (ils ne comprennent pas non plus), mais SolarEdge n&#8217;est pas revenu vers eux.</p>
+</div>
+<div class="paragraph">
+<p>A titre de comparaison, voici un autre graphe ce mois-ci:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/conso-nov.png" alt="conso nov">
+</div>
+</div>
+<div class="paragraph">
+<p>On note déja qu&#8217;il y a des pics de consommation, correspondant à l&#8217;enclenchement de la pompe à chaleur, ou des appareils de cuisson.
+On constate aussi que la période de production est plus resserée, mais qu&#8217;il existe encore, en journée, de la surproduction par moment (ça n&#8217;est pas toujours vrai, dès qu&#8217;il pleut, la production est pour ainsi dire nulle).</p>
+</div>
+<div class="paragraph">
+<p>Si on oublie la fausse valeur de consommation, c&#8217;est parfait me direz-vous !
+Et bien oui mais non.
+Chez moi, il y a un hic: le capteur de consommation est au niveau de l&#8217;onduleur, près de mon tableau électrique.
+Or ici, j&#8217;ai <em>plusieurs</em> tableaux électriques: un dans mon habitation principale, mais aussi un dans mon garage (bâtiment indépendant) et un autre dans un local technique du jardin.
+Lorsque j&#8217;ai acheté cette maison, elle était installée en triphasé, il y avait donc les 3 phases, et de mon compteur EDF principal, dans mon allée, partent des lignes électriques vers 3 bâtiments distincts.
+Ces phases étaient particulièrement déséquilibrées, nous avions donc fait repasser en monophasé, mais ce qu&#8217;il faut retenir, c&#8217;est qu&#8217;il aurait fallu que le capteur soit au niveau du compteur électrique, et non dans ma maison, pourqu&#8217;on puisse mesurer correctement la consommation en live.
+Pour des raisons techniques, il n&#8217;était pas possible de le faire: j&#8217;ai donc une mesure imparfaite de ma consommation, qui ne donne que la consommation de mon habitation principale.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ma_solution">Ma solution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Si on résume, je dispose pour l&#8217;instant d&#8217;un outil qui me donne la production (nous verrons plus loin comment l&#8217;obtenir), mais pas la consommation.
+Mais mon fournisseur d&#8217;électricité (Total Energies) propose une clé ATOME qui permet de connaître ce que je consomme du réseau en live, clé qui se branche sur le compteur Linky.
+Malheureusement, Enedis ne propose pas d&#8217;APIs permettant de connaître sa consommation live, il n&#8217;y a donc pas d&#8217;autre choix que de louer la clé de Total Energies&#8230;&#8203;
+J&#8217;ai donc fait l&#8217;acquisition de cette clé, et je dispose donc des 2 mesures dont j&#8217;ai besoin:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>la consommation live donnée par ma clé ATOME: attention, il ne s&#8217;agit donc pas de ma consommation totale, mais de ce que j&#8217;ai besoin <em>en plus de ma production</em>, du réseau EDF</p>
+</li>
+<li>
+<p>la production live donnée par SolarEdge</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Il suffit donc de faire la différence entre les 2 pour savoir de quelle marge on dispose, mais je ne peux jamais, en pratique, savoir combien je consomme.</p>
+</div>
+<div class="paragraph">
+<p>Mon idée a donc été d&#8217;utiliser un vieux Rapsberry PI qui traînait dans mon armoire, combiné à un écran e-ink, pour afficher cette production et cette consommation, ainsi qu&#8217;une "note" permettant de suggérer de lancer une machine à laver, par exemple.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai donc fait l&#8217;acquisition de <a href="https://www.amazon.fr/gp/product/B075FRVC4L/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&amp;psc=1">cet écran</a>, un écran e-ink dont la consommation en veille est nulle, ce qui, pour un outil de monitoring de consommation d&#8217;énergie, me semblait le minimum.
+Nous verrons cependant que ça ne fut pas sans inconvénients.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_apis_toujours_le_point_faible">Les APIs, toujours le point faible</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bien, maintenant que nous savons que les données sont disponibles, via le <a href="https://monitoring.solaredge.com">site de SolarEdge</a> pour la production, et via l&#8217;application Total Energies pour la clé live, il fallait disposer de ces donneés via des API que je puisse interroger via mon Raspberry.</p>
+</div>
+<div class="paragraph">
+<p>Là, douche froide:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>SolarEdge propose bien une API pour développeurs, mais elle n&#8217;est ni super bien documentée (il faut comprendre soit-même à quoi correspondent les champs retournés), ni illimitée : on ne peut effectuer que 300 requêtes par jour, soit un peu moins d&#8217;une requête toutes les 5 minutes ! C&#8217;est d&#8217;autant plus regrettable que l&#8217;information est disponible <em>en continu</em> et en live via leur interface web!</p>
+</li>
+<li>
+<p>pour Total Energies, c&#8217;est encore pire: il n&#8217;y a pas d&#8217;API officielle. Il faut donc "hacker" pour avoir accès, en simulant une connection via l&#8217;application, qui donne la consommation live</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Bref, ni SolarEdge, ni Total ne proposent d&#8217;API de type push, ou d&#8217;event bus qu&#8217;on puisse écouter pour obtenir les informations.
+C&#8217;est très décevant, à une heure où ce genre d&#8217;optimisations devient critique pour une bonne gestion de notre consommation électrique: c&#8217;est un outil pour le climat !</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;autre problème, c&#8217;est que même si j&#8217;utilise l&#8217;API officielle de SolarEdge et que je réussis à récupérer l&#8217;information de Total Energies, ces APIs sont instables : elles tombent très souvent "en panne" et ne renvoient aucune info.
+Bref, lorsque ça marche, c&#8217;est parfait, mais souvent, ça ne fonctionne tout simplement pas, par exemple en ce moment, ma production indique 0 alors que ça n&#8217;est pas le cas:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/elec/moniteur-nov.jpg" alt="moniteur nov">
+</div>
+</div>
+<div class="paragraph">
+<p>Ceci me permet au moins de savoir qu&#8217;en ce moment, je demande 1135W du réseau, ce qui signifie que je consomme sensiblement plus (entre le chauffe-eau, l&#8217;ordinateur de mon fils qui joue à Minecraft et la PS5 de mon autre garçon).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_un_peu_de_technique">Un peu de technique</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Alors comment récupérer en pratique ces informations ?
+En fait j&#8217;ai adapté un script en Python qui, toutes les 5 minutes, se connecte à ces 2 APIs, récupère les informations et déclenche le raffraîchissement de l&#8217;écran.
+Alors, Python, personnellement c&#8217;est pas ma tasse de thé.
+J&#8217;ai l&#8217;impression de refaire du PHP, avec des scripts cracras et des variables globales de partout.
+Il y a sûrement possiblité de faire mieux, mais en bidouille en se connectant par SSH à mon Raspberry, c&#8217;est pour l&#8217;instant tout ce que j&#8217;ai.</p>
+</div>
+<div class="paragraph">
+<p>Vous trouverez donc le script <a href="https://gist.github.com/melix/90dce1c44524a368f9186981ec16b475">ici</a>.</p>
+</div>
+<div class="paragraph">
+<p>Parmi les problèmes, je vous mentionnait celui du choix de l&#8217;écran.
+J&#8217;avoue avoir été relativement naïf, parce qu&#8217;à l&#8217;utlisation, si l&#8217;écran e-ink est très sympa à voir, son raffraîchissement prend&#8230;&#8203; jusqu&#8217;à 30s !
+En effet, la façon de dessiner sur ces écrans est assez particulière: on écrit des modèles mémoire, puis on envoie des instructions à l&#8217;écran pour effacer telle zone, etc.
+Ces instructions sont très lentes à s&#8217;exécuter, mais surtout, elles provoquent systématiquement un effet bizarre à l&#8217;écran, qui passe du blanc au noir plusieurs fois, commence à afficher des choses, puis la couleur, etc&#8230;&#8203;
+Bref, pas super sympa pour du "live", mais, au final, suffisant pour mon usage.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Au final, j&#8217;ai quand même un outil proche de ce que je souhaitais.
+Il nous a permis, d&#8217;ores et déja, d&#8217;adapter notre consommation: n&#8217;importe qui peut regarder l&#8217;écran et décider de lancer une machine si la production est importante, alors que cette info n&#8217;était avant uniquement disponible que pour moi, via une application sur mobile: ici, l&#8217;information est donnée en continu, de manière passive, via cet écran.</p>
+</div>
+<div class="paragraph">
+<p>Nous avons, par exemple, pu adapter notre consommation en automne: la pompe à chaleur ne fonctionnait pas (pas besoin de chauffer) et donc nous avons pu mettre notre voiture à charger, plus travailler tous les 2 à domicile et lancer une machine à laver, sans consommer un seul kW du réseau EDF ! Lorsque le monitoring a indiqué que nous commencions à consommer du réseau, il a suffit de couper la charge de la voiture (malheureusement, l&#8217;application MyPeugeot est extrêmement limitée et ne permet pas d&#8217;interrompre une charge mais simplement de la différer, mais c&#8217;est un autre problème).</p>
+</div>
+<div class="paragraph">
+<p>Depuis Juillet, nous sommes à -70% de consommation électrique, ce qui est énorme.
+Cependant, les conditions météo ont, jusqu&#8217;ici, été très favorables: beaucoup de soleil et des températures record en Octobre et Novembre (malheureusement pour le climat&#8230;&#8203;).
+Depuis une semaine, la pompe à chaleur se met régulièrement en route pour tenir les 19⁰C, mais j&#8217;ai des résultats surprenants:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>90kWh consommés en Novembre pour chauffer l&#8217;eau</p>
+</li>
+<li>
+<p>et seulement 9kWh pour le chauffage !</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>L&#8217;avenir nous dira si le passage à une pompe à chaleur pour le chauffage était une bonne idée ou non (en même temps, ici nous n&#8217;avions pas trop le choix).</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2022/11/monitoring-elec.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2022/11/hello-mastodon.html"><h1>Hello, Mastodon (goodbye Twitter!)</h1></a>
   			<p>06 November 2022</p>
 			<p><em>Tags: </em>
@@ -956,114 +1235,6 @@ For advanced use cases, <a href="https://micronaut-projects.github.io/micronaut-
 </div>
 </div></p>
 			<p><a href="/blog/2022/08/micronaut-test-resources.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2022/07/je-suis-le-gars-chiant.html"><h1>Je suis le gars chiant</h1></a>
-  			<p>28 July 2022</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/science.html">science</a> 
-	
-		<a href="/blog/tags/naturopathie.html">naturopathie</a> 
-	
-		<a href="/blog/tags/homéopathie.html">homéopathie</a> 
-	
-		<a href="/blog/tags/biais-cognitifs.html">biais cognitifs</a> 
-	
-		<a href="/blog/tags/zététique.html">zététique</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>La science. Si j&#8217;avais eu les capacités pour comprendre les abstractions mathématiques nécessaires (j&#8217;essaie encore, de temps en temps), je serais, peut-être, aujourd&#8217;hui assis dans un laboratoire de recherche en astrophysique. J&#8217;ai toujours trouvé fascinant la capacité à émettre des hypothèses, puis les vérifier expérimentalement, pour en faire des théories, théories qui, constamment, peuvent être remises en cause lorsque de nouvelles observations les contredisent. Je suis assis derrière un bureau, mais dans le développement informatique. Ma passion, mon loisir, c&#8217;est l&#8217;astronomie.</p>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_alors_oui_mais_non">Alors oui, mais non</h3>
-<div class="paragraph">
-<p>J&#8217;ai grandi dans un monde empli de graphologie, de magnétisme, d&#8217;ufologie, de pyramidologie, d&#8217;expériences de mort imminente, qui m&#8217;ont aussi profondément marqué. J&#8217;ai entendu des témoignages, j&#8217;ai constaté des guérisons, j&#8217;ai <em>cru</em> à des beaucoup de choses. Mais pendant une grande partie de mon enfance, je n&#8217;avais pas le bagage intellectuel suffisant pour <em>comprendre</em>. En un mot, ma fascination pour les sciences se mélait allègrement à celle pour les pseudo-sciences. Parce que j&#8217;ai toujours cherché des explications, j&#8217;en suis revenu et je pense que cette expérience a renforcé mon sens critique si tant est que je me sens, de nos jours, extrêmement proche du mouvement <a href="https://fr.wikipedia.org/wiki/Z%C3%A9t%C3%A9tique">zététique</a> et combats fermement l&#8217;anti-science.</p>
-</div>
-<div class="paragraph">
-<p>En soirée, je suis le gars chiant qui ne supporte pas qu&#8217;on introduise du surnaturel là où il existe des explications rationnelles, celui qui soulève un sourcil amusé lorsqu&#8217;on lui parle de <a href="https://fr.wikipedia.org/wiki/S%C5%93urs_Fox">séances de spiritisme</a>.</p>
-</div>
-<div class="paragraph">
-<p>Celui qui vous explique que <a href="https://www.lequotidiendumedecin.fr/archives/pr-edzard-ernst-si-lhomeopathie-est-presentee-comme-une-panacee-il-faudra-quelle-prouve-son">l&#8217;homéopathie ne fonctionne pas</a> et qui vous rappelle que s&#8217;il <a href="https://www.monvoisin.xyz/wp-content/uploads/2020/07/Monvoisin-Pinsault-Diplo-avril19_p21.pdf">existe un effet placébo, il est moralement discutable de le rembourser</a>.</p>
-</div>
-<div class="paragraph">
-<p>Je suis le gars chiant qui, il y a déja des années, avertissait mes amis sur la montée du <a href="https://www.ladn.eu/nouveaux-usages/antivax-histoire-mouvement/">mouvement antivax</a>.
-Je suis le gars chiant qui, en tant qu&#8217;astronome amateur, vous démontre que <a href="https://www.afis.org/L-astrologie-a-l-epreuve-ca-ne-marche-pas-ca-n-a-jamais-marche">l&#8217;astrologie n&#8217;a aucun sens</a>.
-Je suis le gars chiant qui s&#8217;indigne qu&#8217;on puisse vous vendre des absurdités comme des colliers en ambre pour les douleurs dentaires des bébés ou des <a href="https://menace-theoriste.fr/lithotherapie-1/">pierres à recharger sous la lumière de la lune</a>.</p>
-</div>
-<div class="paragraph">
-<p>Je suis le gars chiant qui vous invite à douter de la médecine chinoise, responsable du <a href="https://dragondubled.fr/medecine-chinoise/rhinoceros-medecine-chinoise/">massacre des rhinocéros</a> et de la <a href="https://fr.wikipedia.org/wiki/Bile_d%27ours">maltraitance d&#8217;ours</a> pour des produits dont il est démontré qu&#8217;il n&#8217;ont aucun effet.
-Je suis le gars chiant qui, lorsqu&#8217;on lui parle de produits naturels, vous rappelle que <a href="https://fr.wikipedia.org/wiki/Appel_%C3%A0_la_nature">naturel ne veut pas nécessairement dire bon pour la santé</a>.
-Je suis le gars chiant qui vous explique que si les électrosensibles sont réellement malades, <a href="https://www.contrepoints.org/2021/11/22/227498-electrosensibilite-la-maladie-imaginaire-du-xxieme-siecle">ça n&#8217;est pas à cause des ondes mais de mécanismes psychologiques proches des phobies</a>.
-Je suis le gars chiant qui s&#8217;insurge contre <a href="https://www.radiofrance.fr/franceinter/podcasts/antidote/antidote-du-vendredi-22-octobre-2021-5726804">la naturopathie et ses tendances complotistes</a> et invite à prendre connaissance <a href="https://www.la-croix.com/Famille/Ecole-meditation-pleine-conscience-accusee-derive-sectaire-2022-02-14-1201200267">des dérives sectaires de la méditation pleine conscience</a>.</p>
-</div>
-<div class="paragraph">
-<p>Je suis le gars chiant qui se dit écolo, mais aussi pro-nucléaire: je suis effondré lorsque les <a href="https://www.latribune.fr/economie/union-europeenne/l-allemagne-pourrait-prolonger-des-centrales-a-charbon-pour-reduire-sa-dependance-au-gaz-russe-906817.html">écolos incitent à relancer des centrales à charbon</a> alors que <a href="https://bonpote.com/nouveau-rapport-du-giec-agir-coutera-moins-cher-que-le-business-as-usual/">les rapports du GIEC nous disent que chaque tonne de CO2 compte</a>.
-Je suis le gars chiant qui choque ses amis écolos lorsqu&#8217;il affirme que <a href="https://doseequivalentbanana.home.blog/2021/05/08/dechets-8-on-ne-sait-pas-gerer-les-dechets-nucleaires/">le stockage géologique des déchets nucléaire n&#8217;est pas un problème pour les générations futures</a>.</p>
-</div>
-<div class="paragraph">
-<p>Je me sens écologiste et je suis convaincu que nous devons aller vers la sobriété: je recherche des modes de vie alternatifs, moins impactants pour l&#8217;environnement, moins industriels et à ce titre j&#8217;ai été attiré par les concepts des <a href="https://fr.wikipedia.org/wiki/Mouvement_Colibris">colibris</a> et ses nombreuses variantes.
-Mais je vérifie, je confronte mes croyances. Je suis le gars chiant qui découvre que presque tous les mouvements écologistes sont infiltrés par des groupes anti-science, au premier rang desquels on trouve la <a href="https://blogs.mediapart.fr/mathieu-repiquet/blog/090520/qu-est-ce-que-l-anthroposophie-entretien-avec-gregoire-perra">secte anthroposophique</a>. Je suis le gars chiant qui vous fait remarquer que <a href="https://www.reussir.fr/ce-celebre-youtubeur-radicalement-change-sa-vision-de-lagriculture">la permaculture ne permet pas d&#8217;être auto-suffisant</a>, que la plupart de ces mouvements dits alternatifs ne survivent que grâce à des "formations" qui s&#8217;auto-entretiennent et/ou financent des sectes.</p>
-</div>
-<div class="paragraph">
-<p>Je suis l&#8217;écolo qui vous déculpabilise de ne pas <a href="https://www.youtube.com/watch?v=rtG77t9kshE">effacer vos emails car celà ne réduira pas votre emprunte carbone</a>, mais en profite pour vous faire remarquer que ne pas utiliser votre sèche-linge, oui.</p>
-</div>
-<div class="paragraph">
-<p>Je suis le gars chiant qui s&#8217;inquiète lorsque des proches suivent des formations de développement personnel ou aux <a href="https://fr.wikipedia.org/wiki/Enn%C3%A9agramme">ennéagrammes</a>, parce qu&#8217;il cherche <a href="https://www.unadfi.org/actualites/domaines-dinfiltration/sante-et-bien-etre/psychotherapie-et-developpement-personnel/alerte-sur-les-formations-a-l-enneagramme/">qui sont ceux derrière ces mouvements</a> et se rend compte qu&#8217;il est très facile de tomber dans des dérives sectaires et ne pas s&#8217;en rendre compte.</p>
-</div>
-<div class="paragraph">
-<p>Je suis aussi le gars chiant qui fait confiance aux autorités sanitaires, y compris quand elles concluent qu&#8217;<a href="https://france3-regions.francetvinfo.fr/pays-de-la-loire/loire-atlantique/nantes/cancers-pediatriques-du-pays-de-retz-retour-sur-six-annees-de-combat-1990363.html">il n&#8217;y a statistiquement pas de surnombre de cancers pédiatriques au Sud de Nantes</a> alors qu&#8217;on était en <a href="https://www.ouest-france.fr/pays-de-la-loire/sainte-pazanne-44680/cancers-pediatriques-un-22-sup-e-sup-cas-confirme-autour-de-sainte-pazanne-da95a8e2-f7fc-11ea-86be-f690571173ca">droit de s&#8217;inquiéter</a>, mais aussi prêt à revoir ma position si de nouvelles données étaient disponibles.</p>
-</div>
-<div class="paragraph">
-<p>Je suis celui qui heurte la sensibilité de ses amis, les choque, les énerve parfois (souvent), parce que j&#8217;apparais comme ne croyant en rien.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_triste_vie_que_celle_de_celui_qui_ne_croît_en_rien">Triste vie que celle de celui qui ne croît en rien</h3>
-<div class="paragraph">
-<p>Est-ce vrai ? Est-ce que je ne crois réellement en rien ?
-Bien évidemment non.
-J&#8217;ai mes propres croyances.
-Par exemple, je <em>crois</em> qu&#8217;il existe une vie extra-terrestre. Sous quelle forme, je n&#8217;en sais rien, mais j&#8217;en suis intimement convaincu. Mais il s&#8217;agit d&#8217;une croyance, et en tant que tel, je n&#8217;essaierai pas de vous l&#8217;imposer. Je peux vous donner des idées sur le <em>pourquoi</em> j&#8217;y crois, mais il n&#8217;existe aucune <em>preuve</em>.
-J&#8217;ai cru à beaucoup de choses aussi: gamin j&#8217;ai cru au bisou magique, j&#8217;ai cru au Père Noël, j&#8217;ai cru que la graphologie fonctionnait (alors que je suis horrifié de constater que cet outil est toujours utilisé de nos jours !).
-Je crois qu&#8217;il n&#8217;existe pas de vie après la mort, mais je ne peux pas vous en apporter la preuve.
-Je crois aussi qu&#8217;on n&#8217;a pas besoin de revenir 200 ans en arrière en agriculture pour "sauver la planète".</p>
-</div>
-<div class="paragraph">
-<p>Alors on pourrait dire "mais c&#8217;est pas bien grave", "mais les plantes c&#8217;est quand même bien, c&#8217;est mieux que les produits chimiques", "la science n&#8217;explique pas tout", "faut il se fâcher pour ça ?".
-Tant de lieux communs, qui n&#8217;apportent rien, mais qui, en revanche, cachent de tristes réalités: <a href="https://www.leparisien.fr/faits-divers/miguel-b-le-naturopathe-qui-pretend-guerir-le-cancer-aurait-fait-au-moins-deux-autres-victimes-14-10-2021-XMQKFRJHGFFDLJQRZZ4DWW4E5E.php">des morts</a>, souvent <a href="https://www.midilibre.fr/2021/11/23/covid-19-quest-ce-que-lanthroposophie-possible-frein-a-la-vaccination-dans-les-pays-germanophones-9945410.php">par milliers</a>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_dur_dêtre_celui_qui_gâche_la_fête">Dur d&#8217;être celui qui gâche la fête</h3>
-<div class="paragraph">
-<p>Alors je si je suis suis le gars chiant, je ne cache pas que c&#8217;est parfois fatigant, moralement: si j&#8217;écris ce billet, c&#8217;est aussi pour exprimer cette fatigue.
-C&#8217;est fatigant parce que je vais contre les idées reçues, je "casse l&#8217;ambiance" mais surtout je peux me fâcher avec des personnes que j&#8217;apprécie énormément.
-C&#8217;est fatigant parce qu&#8217;on me regarde en sachant d&#8217;avance que je vais intervenir, mais on ne croira pas ce que je dis, même preuves à l&#8217;appui.
-C&#8217;est fatigant parce que je constate la montée de l&#8217;obscurantisme, du complotisme et que je me sens impuissant.
-C&#8217;est fatigant parce qu&#8217;il est urgent d&#8217;agir pour sauver notre avenir (je ne parlerai pas de sauver la planète, c&#8217;est l&#8217;espèce humaine, et les espèces actuelles en général qui est en jeu) et que les décisions prises ne sont pas à la hauteur.
-C&#8217;est fatigant parce que j&#8217;aspire à plus d&#8217;écologie, plus de simplicité, mais que tous les mouvements que je trouve sont plombés par de l&#8217;anti-science et des sectes déguisées en "spiritualité".
-C&#8217;est fatigant parce qu&#8217;on me caricature: je suis le "rationnel" qui ne comprend rien aux sciences humaines ou à l&#8217;humain en général.
-C&#8217;est fatigant parce qu&#8217;on se bat constamment contre l&#8217;intolérance.
-Tout ce que je vous raconte est présent partout: famille, amis, collègues, politiques, mais chez moi y compris.</p>
-</div>
-<div class="paragraph">
-<p>Alors, parfois, parce que je ne veux pas me fâcher ou faire honte à madame, je me tais et je deviens d&#8217;humeur sombre, ne m&#8217;en voulez pas.</p>
-</div>
-<div class="paragraph">
-<p>Nous sommes tous pleins de croyances: la question est de savoir si nous sommes prêts à les remettre en question, pour le bien de tous, et si ces croyances doivent influencer les décisions que nous prenons pour la communauté.
-Et parce que nous sommes tous susceptibles de faire des erreurs, je ne porte aucun jugement moral à celles et ceux qui croient ceci ou celà: nous sommes tous pleins de contradictions et je ne suis pas mieux qu&#8217;un autre.
-Je n&#8217;en veux pas à ceux qui croient, je ne doute pas qu&#8217;ils aient de bonnes intentions.
-Je pourrais en vouloir à ceux qui continuent de croire lorsqu&#8217;on leur montre qu&#8217;il y a de quoi douter, ou mieux qu&#8217;on leur apporte des preuves, mais <a href="https://fr.wikipedia.org/wiki/Biais_cognitif">notre cerveau est câblé pour rendre la remise en question difficile</a>.
-J&#8217;en veux, en revanche, à ceux qui utilisent <em>sciemment</em> l&#8217;ignorance des gens pour en tirer profit financièrement ou pour psychologiquement de personnes.</p>
-</div>
-<div class="paragraph">
-<p>Je n&#8217;ai pas de chiffres à vous donner, mais <em>je crois</em> que ces ordures sont nombreuses.</p>
-</div>
-</div></p>
-			<p><a href="/blog/2022/07/je-suis-le-gars-chiant.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
