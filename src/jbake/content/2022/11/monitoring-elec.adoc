@@ -1,0 +1,173 @@
+= Monitoring pour optimiser ma conso électrique
+Cédric Champeau
+2022-11-26
+:jbake-type: post
+:jbake-tags: solaire,fioul,électricité,solaredge,dualsun,raspberry
+:jbake-status: published
+:source-highlighter: pygments
+:id: monitoring-raspi
+:linkattrs:
+
+En juillet dernier, j'ai fait installer des panneaux solaires.
+Cette installation change considérablement nos habitudes de consommation: au lieu de consommer de préférence aux heures creuses, il est préférable de consommer lorsque la production locale le permet.
+Dans ce billet, je vous explique ce que j'ai mis en place pour nous aider dans l'optimisation de notre consommation, en particulier un outil de monitoring avec un Raspberry PI.
+L'objectif de mon projet est de réduire ma facture électrique en maximisant l'autoconsommation.
+Nous allons donc voir comment l'installation des panneaux peut changer nos habitudes.
+
+image::/blog/img/elec/moniteur-sep.jpg[]
+
+== Installation de panneaux solaires
+
+Il y a longtemps que l'idée nous trottait dans la tête.
+En effet, ici, nous chauffions au fioul, ce qui avait un certain nombre d'inconvénients: pollution (fort émetteur de CO₂), prix très variable (entre 800€ et 1400€ les 1000L selon les saisons), bruit (la chaudière), odeurs de combustion, etc.
+Cette chaudière au fioul nous servait à la fois à chauffer l'eau chaude, mais aussi au chauffage domestique.
+La maison étant relativement bien isolée, nous arrivions cependant, à 4 personnes, à ne consommer qu'environ 1000L de fioul par an.
+Une vieille chaudière à fioul était tombée en panne en plein hiver, il y a 5 ans, nous avions dû la changer en urgence, et, je me souviens très bien de cela, il se trouve que j'étais à ce moment à l'étranger pour le "Gradle World Meeting", une semaine de travail avec l'ensemble de l'équipe.
+Nous n'avions donc pas eu le temps de faire différents devis, notamment de chauffage alternatif.
+Mais en Mars dernier, patatras, nouvelle panne.
+Cette fois-ci, la chaudière elle-même n'était pas en cause: c'est le système d'alimentation en fioul, entre la cuve et la chaudière, qui était encrassé.
+La chaudière se mettait constamment en défaut faute d'avoir une arrivée de fioul propre.
+Nous avions alors le choix entre faire nettoyer la cuve et la tuyauterie, pour une facture de l'ordre de 2k€, ou de changer.
+
+En même temps, mon épouse et moi-même sommes tous les 2 en télétravail 5j/5.
+Notre consommation électrique est donc importante, entre l'alimentation des ordinateurs, des écrans, la cuisine le midi, le chauffage d'appoint dans mon bureau, ...
+Certains de nos équipements consomment aussi régulièrement: n'ayant pas le tout à l’égout, par exemple, nous avons une microstation de traitement des eaux usées, avec une pompe de recirculation et une pompe de relevage, qui ont des consommations non négligeables à l'année.
+Nous possédons aussi une voiture électrique (une e-208) qui est chargée à domicile.
+Enfin, l'été, nous avons une pompe de circulation pour la piscine qui consomme beaucoup.
+Au final, notre facture électrique est donc beaucoup plus importante que celle de fioul.
+
+Cette dernière panne a donc été l'occasion de revoir notre projet.
+Après divers devis, nous avons opté pour l'installation de 16 panneaux solaires de la société française https://dualsun.com/[DualSun] : 10 panneaux classiques "Flash" et 6 panneaux hybrides électricité/eau chaude, pour une production totale de 6kWC (6 kW crète).
+Les panneaux hybrides permettent de produire de l'électricité **et** de préchauffer l'eau chaude.
+Le tout a été associé à une pompe à chaleur air-eau, une Alfea Extensa A.I de la marque française https://www.atlantic.fr/Chauffer-le-logement/Pompe-a-chaleur/Aerothermie/Aerothermie-Air-Eau/Alfea-Extensa-A.I.-et-Alfea-Extensa-Duo-A.I[Atlantic].
+Il s'agit d'une pompe à chaleur air-eau moyenne température (55⁰C) qui nous permet de conserver notre installation de chauffages en fonte, au prix (à déterminer) d'une consommation supérieure lors des grands froids (ce qui n'arrive pas souvent ici).
+La pompe est associée à un ballon d'eau chaude qui exploite le circuit préchauffé par les panneaux.
+
+Les 6kWc nous permettent d'être en auto-consommation totale en journée l'été (et probablement une partie du printemps/automne, à confirmer avec le temps) et je devrais pouvoir revendre une partie de la surproduction à Enedis (mais pour des raisons administratives, mon dossier est toujours en attente...).
+
+Mon calcul de retour sur investissement m'a donné 12 ans, en prenant en compte une augmentation annuelle de 5% des prix de l'électricité.
+Si les tarifs augmentent plus vite, alors ça sera rentabilisé plus vite, mais il est impossible de savoir si ça sera le cas... a priori avec la crise énergétique, j'ai tendance à croire que ça n'est pas un mauvais calcul...
+
+Enfin, nous n'avons **pas** fait installer de batteries: bien que cela serait extrêmement intéressant dans mon cas, pour récupérer la nuit le surplus de la production en journée, le prix des batteries est encore bien trop élevé (de l'ordre de 7k€ pour 10kW).
+
+== Changer ses habitudes de consommation
+
+Dans mon cas, nos habitudes de consommation étaient assez simples, au final:
+
+- en journée, nous n'avions pas trop le choix: il faut bien alimenter les ordinateurs, etc.
+- les machines à laver, lave-vaisselle, etc tournaient la nuit pour profiter des heures creuses
+
+Malheureusement, notre consommation en heures creuses était assez limitée comparée au reste.
+Tout à changé avec les panneaux solaires:
+
+- cet été et même fin septembre, lorsque le ciel est dégagé, mes panneaux produisent jusqu'à 5.5kW, ce qui dépasse largement ma consommation "live"
+- nous chargeons la voiture en journée via la prise "domestique" (~2kW) lorsque c'est possible, et la nuit en charge "rapide" (6kW) lorsque la batterie est trop basse
+- les machines tournent en journée au lieu de la nuit
+
+Mais optimiser tout cela est **compliqué**, et je souhaitais un système qui permette à mon épouse et mes enfants de savoir si, par exemple, "c'est le moment" de lancer une machine.
+
+Je me suis donc lancé dans un projet de "bidouille" pour faire un système de monitoring qui donnerait en direct ma production, ma consommation, et indiquerait de manière simple si on a de la marge ou pas.
+
+== Petite complication
+
+Évidemment, vous pourriez vous dire que ça devrait être simple, avec toutes les applications connectées qui existent.
+Oui et non.
+Chez moi, l'installation est particulière: mes panneaux solaires sont sur le toit de ma maison, ainsi que les onduleurs et optimiseur.
+Ces appareils sont capables de vous donner en direct la production, et mesurent aussi la consommation instantanée, ce qui permet donc de mesurer directement son auto-consommation: on peut savoir si on produit plus qu'on ne consomme, ou l'inverse, en temps réel, c'est parfait non ? Voici par exemple un graphique fournit par SolarEdge en été:
+
+image::/blog/img/elec/conso-aout.png[]
+
+En rouge, nous avons la consommation.
+En vert, la production solaire, et en bleu, l'autoconsommation.
+Vous noterez d'ores et déja un problème, si, comme moi, vous êtes un tant soit peu curieux: lorsqu'il y a production solaire, la _courbe de consommation_ se met à suivre celle de production.
+Elle monte lorsque la production augmente et diminue lorsqu'elle baisse: ça n'est pas logique et probablement un bug quelque par chez SolarEdge.
+J'ai demandé via mon installateur des explications (ils ne comprennent pas non plus), mais SolarEdge n'est pas revenu vers eux.
+
+A titre de comparaison, voici un autre graphe ce mois-ci:
+
+image::/blog/img/elec/conso-nov.png[]
+
+On note déja qu'il y a des pics de consommation, correspondant à l'enclenchement de la pompe à chaleur, ou des appareils de cuisson.
+On constate aussi que la période de production est plus resserrée, mais qu'il existe encore, en journée, de la surproduction par moment (ça n'est pas toujours vrai, dès qu'il pleut, la production est pour ainsi dire nulle).
+
+Si on oublie la fausse valeur de consommation, c'est parfait me direz-vous !
+Et bien oui mais non.
+Chez moi, il y a un hic: le capteur de consommation est au niveau de l'onduleur, près de mon tableau électrique.
+Or ici, j'ai _plusieurs_ tableaux électriques: un dans mon habitation principale, mais aussi un dans mon garage (bâtiment indépendant) et un autre dans un local technique du jardin.
+Lorsque j'ai acheté cette maison, elle était installée en triphasé, il y avait donc les 3 phases, et de mon compteur EDF principal, dans mon allée, partent des lignes électriques vers 3 bâtiments distincts.
+Ces phases étaient particulièrement déséquilibrées, nous avions donc fait repasser en monophasé, mais ce qu'il faut retenir, c'est qu'il aurait fallu que le capteur soit au niveau du compteur électrique, et non dans ma maison, pour qu’on puisse mesurer correctement la consommation en live.
+Pour des raisons techniques, il n'était pas possible de le faire: j'ai donc une mesure imparfaite de ma consommation, qui ne donne que la consommation de mon habitation principale.
+
+== Ma solution
+
+Si on résume, je dispose pour l'instant d'un outil qui me donne la production (nous verrons plus loin comment l'obtenir), mais pas la consommation.
+Mais mon fournisseur d'électricité (Total Energies) propose une clé ATOME qui permet de connaître ce que je consomme du réseau en live, clé qui se branche sur le compteur Linky.
+Malheureusement, Enedis ne propose pas d'APIs permettant de connaître sa consommation live, il n'y a donc pas d'autre choix que de louer la clé de Total Energies...
+J'ai donc fait l'acquisition de cette clé, et je dispose donc des 2 mesures dont j'ai besoin:
+
+- la consommation live donnée par ma clé ATOME: attention, il ne s'agit donc pas de ma consommation totale, mais de ce que j'ai besoin _en plus de ma production_, du réseau EDF
+- la production live donnée par SolarEdge
+
+Il suffit donc de faire la différence entre les 2 pour savoir de quelle marge on dispose, mais je ne peux jamais, en pratique, savoir combien je consomme.
+
+Mon idée a donc été d'utiliser un vieux Rapsberry PI qui traînait dans mon armoire, combiné à un écran e-ink, pour afficher cette production et cette consommation, ainsi qu'une "note" permettant de suggérer de lancer une machine à laver, par exemple.
+
+J'ai donc fait l'acquisition de https://www.amazon.fr/gp/product/B075FRVC4L/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1[cet écran], un écran e-ink dont la consommation en veille est nulle, ce qui, pour un outil de monitoring de consommation d'énergie, me semblait le minimum.
+Nous verrons cependant que ça ne fut pas sans inconvénients.
+
+== Les APIs, toujours le point faible
+
+Bien, maintenant que nous savons que les données sont disponibles, via le https://monitoring.solaredge.com[site de SolarEdge] pour la production, et via l'application Total Energies pour la clé live, il fallait disposer de ces données via des API que je puisse interroger via mon Raspberry.
+
+Là, douche froide:
+
+- SolarEdge propose bien une API pour développeurs, mais elle n'est ni super bien documentée (il faut comprendre soit-même à quoi correspondent les champs retournés), ni illimitée : on ne peut effectuer que 300 requêtes par jour, soit un peu moins d'une requête toutes les 5 minutes ! C'est d'autant plus regrettable que l'information est disponible _en continu_ et en live via leur interface web!
+- pour Total Energies, c'est encore pire: il n'y a pas d'API officielle. Il faut donc "hacker" pour avoir accès, en simulant une connexion via l'application, qui donne la consommation live
+
+Bref, ni SolarEdge, ni Total ne proposent d'API de type push, ou d'event bus qu'on puisse écouter pour obtenir les informations.
+C'est très décevant, à une heure où ce genre d'optimisations devient critique pour une bonne gestion de notre consommation électrique: c'est un outil pour le climat !
+
+L'autre problème, c'est que même si j'utilise l'API officielle de SolarEdge et que je réussis à récupérer l'information de Total Energies, ces APIs sont instables : elles tombent très souvent "en panne" et ne renvoient aucune info.
+Bref, lorsque ça marche, c'est parfait, mais souvent, ça ne fonctionne tout simplement pas, par exemple en ce moment, ma production indique 0 alors que ça n'est pas le cas:
+
+image::/blog/img/elec/moniteur-nov.jpg[]
+
+Ceci me permet au moins de savoir qu'en ce moment, je demande 1135W du réseau, ce qui signifie que je consomme sensiblement plus (entre le chauffe-eau, l'ordinateur de mon fils qui joue à Minecraft et la PS5 de mon autre garçon).
+
+== Un peu de technique
+
+Alors comment récupérer en pratique ces informations ?
+En fait j'ai adapté un script en Python qui, toutes les 5 minutes, se connecte à ces 2 APIs, récupère les informations et déclenche le rafraîchissement de l'écran.
+Alors, Python, personnellement c'est pas ma tasse de thé.
+J'ai l'impression de refaire du PHP, avec des scripts cracras et des variables globales de partout.
+Il y a sûrement possibilité de faire mieux, mais en bidouille en se connectant par SSH à mon Raspberry, c'est pour l'instant tout ce que j'ai.
+
+Vous trouverez donc le script https://gist.github.com/melix/90dce1c44524a368f9186981ec16b475[ici].
+
+Parmi les problèmes, je vous mentionnait celui du choix de l'écran.
+J'avoue avoir été relativement naïf, parce qu'à l’utilisation, si l'écran e-ink est très sympa à voir, son rafraîchissement prend... jusqu'à 30s !
+En effet, la façon de dessiner sur ces écrans est assez particulière: on écrit des modèles mémoire, puis on envoie des instructions à l'écran pour effacer telle zone, etc.
+Ces instructions sont très lentes à s'exécuter, mais surtout, elles provoquent systématiquement un effet bizarre à l'écran, qui passe du blanc au noir plusieurs fois, commence à afficher des choses, puis la couleur, etc...
+Bref, pas super sympa pour du "live", mais, au final, suffisant pour mon usage.
+
+== Conclusion
+
+Au final, j'ai quand même un outil proche de ce que je souhaitais.
+Il nous a permis, d'ores et déjà, d'adapter notre consommation: n'importe qui peut regarder l'écran et décider de lancer une machine si la production est importante, alors que cette info n'était avant uniquement disponible que pour moi, via une application sur mobile: ici, l'information est donnée en continu, de manière passive, via cet écran.
+
+Nous avons, par exemple, pu adapter notre consommation en automne: la pompe à chaleur ne fonctionnait pas (pas besoin de chauffer) et donc nous avons pu mettre notre voiture à charger, plus travailler tous les 2 à domicile et lancer une machine à laver, sans consommer un seul kW du réseau EDF ! Lorsque le monitoring a indiqué que nous commencions à consommer du réseau, il a suffit de couper la charge de la voiture (malheureusement, l'application MyPeugeot est extrêmement limitée et ne permet pas d'interrompre une charge mais simplement de la différer, mais c'est un autre problème).
+
+Depuis Juillet, nous sommes à -70% de consommation électrique, ce qui est énorme.
+Cependant, les conditions météo ont, jusqu'ici, été très favorables: beaucoup de soleil et des températures record en Octobre et Novembre (malheureusement pour le climat...).
+Depuis une semaine, la pompe à chaleur se met régulièrement en route pour tenir les 19⁰C, mais j'ai des résultats surprenants:
+
+- 90kWh consommés en Novembre pour chauffer l'eau
+- et seulement 9kWh pour le chauffage !
+
+L'avenir nous dira si le passage à une pompe à chaleur pour le chauffage était une bonne idée ou non (en même temps, ici nous n'avions pas trop le choix).
+Il serait pertinent, compte tenu du surplus de production qui arrive souvent en journée, d'installer des batteries pour maximiser l'autoconsommation.
+Malheureusement comme je l'ai indiqué, le prix est à ce jour bien trop élevé.
+Je devrais donc me contenter de revendre ma production (au prix de 10cts le kWh, prix fixé pour 20 ans (!!) contre environ 15cts lorsque je consomme).
+Attention cependant, lorsqu'on revend et que notre installation, comme la nôtre, dépasse les 3kWc, alors nous devons déclarer celà en revenus.
+Cela rend la revente bien moins intéressante, puisque malgré le fait qu'on va "consommer" notre surplus, mais à des heures différentes, le tarif de rachat ansi que le fait de devoir déclarer réduit sensiblement la rentabilité.
+
