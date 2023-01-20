@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Petit voyage en électrique</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	        <li><a rel="me" href="https://astrodon.social/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Petit voyage en électrique</h1>
+	</div>
+
+	<p><em>20 January 2023</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	</em>
+		<a href="/blog/tags/plugins.html">plugins</a> 
+	</em>
+		<a href="/blog/tags/provider-api.html">provider api</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Hier, je me déplaçais sur Tours pour la conférence <a href="https://touraine.tech">Touraine Tech</a>, où j&#8217;ai donné un talk sur <a href="https://speakerdeck.com/melix/micronaut-test-resources-25fbfffd-adfe-4c93-aada-aa3a5538bcde">Micronaut Test Resources</a>.
+Je remercie encore l&#8217;organisation d&#8217;avoir accepté ce talk, qui, d&#8217;après les commentaires que j&#8217;ai reçu, a plutôt été bien reçu !
+Mais ça n&#8217;est pas le sujet de ce billet : je souhaite simplement vous parler de mon expérience avec ma voiture électrique, que j&#8217;ai utilisé pour me rendre à la conférence.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_le_déplacement">Le déplacement</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Tours, ça n&#8217;est pas si loin de chez moi, environ 200km.
+J&#8217;avais donc décidé de m&#8217;y rendre avec mon e-208, dont l&#8217;autonomie théorique, avec sa batterie de 50kW (disponible 46kW), est annoncée est de 340km.
+J&#8217;ai fais l&#8217;acquisition de cette voiture il y a 2 ans, et j&#8217;en suis globalement très content : j&#8217;habite en zone rurale, nous n&#8217;avons pas de transports en commun, et cette voiture sert donc pour tous les trajets du quotidien.
+Je peux la recharger à la maison sans problème.
+Jusqu&#8217;ici, les trajets les plus longs que j&#8217;avais effectué étaient <em>sans recharge</em> : des allez-retours à Pornic, où j&#8217;ai de la famille, soit environ 160 km aller/retour, et ça se passait très bien, en particulier l&#8217;été.</p>
+</div>
+<div class="paragraph">
+<p>Maintenant, entre l&#8217;autonomie théorique et la réalité, il y a un monde, en particulier en hiver.
+J&#8217;étais donc assez nerveux à l&#8217;idée de me retrouver "en rade" avant d&#8217;arriver sur Tours, et j&#8217;ai donc planifié mon déplacement avec l&#8217;application ChargeMap (j&#8217;ai une carte chez eux et l&#8217;application Peugeot est franchement pas top, impossible de planifier aussi bien).</p>
+</div>
+<div class="paragraph">
+<p>Je voulais faire l&#8217;aller-retour dans la journée, ce qui impliquait de pouvoir recharger en arrivant sur Tours.
+Un des problèmes, c&#8217;est que les bornes de recharge "rapides" ne sont pas si nombreuses.
+Autre problème : il est impossible de savoir si une borne va être occupée lorsqu&#8217;on y arrivera.
+La 208 dispose d&#8217;une prise combo CCS qui accepte une charge à 100kW.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;avais donc 2 choix:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>m&#8217;arrêter à une charge rapide (50kW et +) avant de me rendre à la conférence</p>
+</li>
+<li>
+<p>ou déposer ma voiture sur une borne lente à proximité de la conférence et revenir plus tard dans la journée pour libérer la borne</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai choisi la première option, parce que j&#8217;avais 2 le doute que la borne soit occupée en arrivant, et que je doive donc faire 10 min de route de plus pour me rendre à la borne rapide et donc perdre du temps.
+Par ailleurs, ça n&#8217;est pas super pratique que de devoir quitter la conférence et marcher 1km (potentiellement sous la pluie) dans la journée.</p>
+</div>
+<div class="paragraph">
+<p>En bref, j&#8217;ai planifié pour être <em>tranquille</em>. Voici les conditions du trajet:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>départ 5h32, tout le trajet en mode éco</p>
+</li>
+<li>
+<p>je suis parti avec une batterie chargée à 100% (je sais qu&#8217;il faut éviter, mais d&#8217;une, je n&#8217;allais pas risquer de devoir m&#8217;arrêter sur une borne lente en cours de trajet, je ne souhaitais pas me retrouver à moins de 10% de batterie à l&#8217;arrivée, trop stressant, et d&#8217;autre part, le logiciel Peugeot ne <em>permet pas</em> d&#8217;interrompre une charge lorsque la batterie atteint une certaine limite, par exemple 80% !)</p>
+</li>
+<li>
+<p>j&#8217;ai choisi un itinéraire <em>sans autoroute</em></p>
+</li>
+<li>
+<p>j&#8217;ai roulé à 80km sur les départementales (y compris celles limitées à 90km/h, en Maine et Loire), entre 90 et 100km/h sur les nationales</p>
+</li>
+<li>
+<p>je roule en conduite souple : pas d&#8217;accélérations brutales, utilisation du mode B pour freiner, etc&#8230;&#8203;</p>
+</li>
+<li>
+<p>la température extérieure oscillait entre 0 et 3 degrés, chauffage réglé à 18</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>L&#8217;application ChargeMap dispose d&#8217;une fonctionnalité qui lui permet d&#8217;envoyer le trajet planifié sur Google Maps, que j&#8217;ai utilisé pour le guidage.
+Ca se passait très bien, jusqu&#8217;à ce que j&#8217;arrive après Saumur où je me rends compte que le GPS avait décidé de me faire prendre l&#8217;autoroute !
+Problème, je n&#8217;avais clairement pas assez d&#8217;autonomie pour rouler à 130 km/h.
+Ne pouvant pas rouler à 90 km/h sur autoroute, trop dangereux, je suis donc monté à 110 km/h et autant dire que vu les conditions météo (froid, pluie), mon autonomie restante fondait comme neige au soleil.
+Je suis donc sorti un peu plus loin pour finir le trajet en passant par les bords de Loire, comme c&#8217;était initialement prévu.</p>
+</div>
+<div class="paragraph">
+<p>Au final, je suis arrivé sur ma borne de recharge Allego, au Casino de La Riche, à 8h08 : 180km en 2h36.
+De mémoire (l&#8217;appli Peugeot récupère les trajets, mais pas la consommation, incroyable ce retard du logiciel par rapport à la concurrence !), ma consommaton moyenne était de l&#8217;ordre de 16kWh/100km.
+Je me suis branché et j&#8217;ai chargé pendant 49 minutes pour atteindre 90% de batterie, soit 29kW, facture: 31,38€, pas franchement économique (1.082€ du kWh !).
+Je me suis arrêté à 90% parce que la recharge "ralentit" à mesure qu&#8217;on s&#8217;approche de la charge maximale : il m&#8217;aurait fallu rester encore une bonne demi-heure (voire plus) pour atteindre les 100%, et je souhaitais me rendre à la conférence.</p>
+</div>
+<div class="paragraph">
+<p>Je suis donc arrivé sur Polytech&#8217;Tours à 9h12, soit 3h40, à comparer aux 2h25 si j&#8217;étais parti avec ma 407 diesel, qui ferait l&#8217;aller-retour sans aucun pb sans faire le plein (autonomie environ 950km&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Pour le retour, je savais donc que je serai très juste et qu&#8217;il faudrait probablement que je fasse un arrêt supplémentaire pour recharger (à cause des 10% de batterie en moins au départ).
+Je ne suis <em>pas</em> passé par l&#8217;autoroute au retour, et donc suivi les bords de Loire.
+Les conditions météo étaient similaires, mais avec plus de pluie.
+J&#8217;ai surveillé mon autonomie, et si au départ, j&#8217;avais une marge de 100km entre l&#8217;autonomie annoncée par la voiture (c&#8217;est à dire qu&#8217;en suivant ses indications, je serais à la maison avec 100km d&#8217;autonomie restante), au fur et à mesure du trajet, cette estimation a sensiblement baissé. Arrivé à Cholet (environ 40km de chez moi), il ne restait plus que 60 km de marge, alors que j&#8217;avais baissé la température dans l&#8217;habitacle à 16 degrés.
+Encore une fois, je roulais en mode éco, souple, pas de bouchons, rien.
+En clair, l&#8217;estimation d&#8217;autonomie, c&#8217;est du grand n&#8217;importe quoi et complètement irréaliste (à noter, qu&#8217;en été, c&#8217;est bien plus proche de la réalité).</p>
+</div>
+<div class="paragraph">
+<p>Bref, j&#8217;avais aussi faim et n&#8217;étant pas très joueur, je me suis arrêté sur une borne rapide en chemin, à côté d&#8217;une pizzeria, au SIEML de l&#8217;Ecuyère.
+Comme je savais que quel que soit le temps de charge, j&#8217;aurais de quoi rentrer large, j&#8217;ai juste pris le temps de manger.
+Je récupère ma voiture, pas mal, 22,7kW de récupérés en 35 minutes de charge, pour 9.62€ : <strong>3 fois moins cher que la recharge à Tours</strong> (mais à comparer aux 0.14€/kWh quand je charge à la maison&#8230;&#8203;).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>En conclusion, l&#8217;expérience fut concluante : je sais que je peux faire ce genre de trajets, moyennant quelques concessions (heure d&#8217;arrivée tardive à cause de la recharge à l&#8217;arrivée, trajet sans autoroute, confort "limité", etc).
+En revanche, je reste très mitigé sur l&#8217;autonomie "réelle" : ici, j&#8217;étais plus proche des 200 km en faisant tout pour économiser.
+Même en conditions idéales, jamais, ô grand jamais, je n&#8217;atteindrais les 340 km (le mieux, c&#8217;est environ 300km).
+Le logiciel est aussi bien trop basique comparé à la concurrence (oui, Tesla) : l&#8217;application mobile manque de fonctionnalités de base (blocage de charge, récupération des consommations, &#8230;&#8203;) et le GPS pour planifier un trajet est franchement nul.
+L&#8217;estimation de l&#8217;autonomie restante est irréaliste et pire, on ne sait pas vraiment où on en est de charge: l&#8217;indicateur à la "jauge d&#8217;essence" n&#8217;est pas adapté à une batterie (dites moi le % restant, c&#8217;est plus parlant !).
+Enfin, un des gros soucis reste la recharge et les tarifs hallucinants qui sont pratiqués : il est pour ainsi dire impossible de savoir combien va vous coûter un trajet, puisqu&#8217;en fonction des conditions, vous allez devoir vous arrêter, ou non, et que les tarifs varient en fonction de la puissance de recharge, du fournisseur, etc.</p>
+</div>
+<div class="paragraph">
+<p>Lorsqu&#8217;on part en thermique, on sait que le carburant coûte environ 1.9€/L, à 25% près : en électrique, oubliez. Vous pouvez faire du simple au quadruple.
+Est-ce à dire que je ne recommande pas l&#8217;électrique ? Pas du tout ! Déja, je préfère 100 fois le confort de la conduite en électrique au thermique. La voiture est aussi super agréable à conduire et la puissance disponible immédiatement est un indéniable atout de l&#8217;électrique.</p>
+</div>
+<div class="paragraph">
+<p>Mon alternative, sur ce trajet, aurait été de prendre ma voiture thermique, mais ça aurait été la solution de facilité.
+Et compte-tenu de l&#8217;urgence climatique, j&#8217;ai fais le choix de perdre un peu de confort, pour le bien de ma conscience :)</p>
+</div>
+</div>
+</div></p>
+   
+
+
+<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'melixblog';
+	var disqus_identifier = 'touraine-tech-208';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">&copy; 2013 | Mixed with <a href="https://twitter.github.com/bootstrap/">Bootstrap v3.0.3</a> | Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+   <script>hljs.highlightAll();</script>
+    <script type="text/javascript">
+    var disqus_shortname = 'melixblog';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+<script type="text/javascript">
+  window.___gcfg = {lang: 'fr'};
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45962373-1', 'melix.github.io');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
