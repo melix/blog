@@ -1,0 +1,87 @@
+= Petit voyage en électrique
+Cédric Champeau
+2023-01-20
+:jbake-type: post
+:jbake-tags: gradle, plugins, provider api
+:jbake-status: published
+:source-highlighter: pygments
+:id: touraine-tech-208
+:linkattrs:
+
+Hier, je me déplaçais sur Tours pour la conférence https://touraine.tech[Touraine Tech], où j'ai donné un talk sur https://speakerdeck.com/melix/micronaut-test-resources-25fbfffd-adfe-4c93-aada-aa3a5538bcde[Micronaut Test Resources].
+Je remercie encore l'organisation d'avoir accepté ce talk, qui, d'après les commentaires que j'ai reçu, a plutôt été bien reçu !
+Mais ça n'est pas le sujet de ce billet : je souhaite simplement vous parler de mon expérience avec ma voiture électrique, que j'ai utilisé pour me rendre à la conférence.
+
+== Le déplacement
+
+Tours, ça n'est pas si loin de chez moi, environ 200km.
+J'avais donc décidé de m'y rendre avec mon e-208, dont l'autonomie théorique, avec sa batterie de 50kW (disponible 46kW), est annoncée est de 340km.
+J'ai fais l'acquisition de cette voiture il y a 2 ans, et j'en suis globalement très content : j'habite en zone rurale, nous n'avons pas de transports en commun, et cette voiture sert donc pour tous les trajets du quotidien.
+Je peux la recharger à la maison sans problème.
+Jusqu'ici, les trajets les plus longs que j'avais effectué étaient _sans recharge_ : des allez-retours à Pornic, où j'ai de la famille, soit environ 160 km aller/retour, et ça se passait très bien, en particulier l'été.
+
+Maintenant, entre l'autonomie théorique et la réalité, il y a un monde, en particulier en hiver.
+J'étais donc assez nerveux à l'idée de me retrouver "en rade" avant d'arriver sur Tours, et j'ai donc planifié mon déplacement avec l'application ChargeMap (j'ai une carte chez eux et l'application Peugeot est franchement pas top, impossible de planifier aussi bien).
+
+Je voulais faire l'aller-retour dans la journée, ce qui impliquait de pouvoir recharger en arrivant sur Tours.
+Un des problèmes, c'est que les bornes de recharge "rapides" ne sont pas si nombreuses.
+Autre problème : il est impossible de savoir si une borne va être occupée lorsqu'on y arrivera.
+La 208 dispose d'une prise combo CCS qui accepte une charge à 100kW.
+
+J'avais donc 2 choix:
+
+- m'arrêter à une charge rapide (50kW et +) avant de me rendre à la conférence
+- ou déposer ma voiture sur une borne lente à proximité de la conférence et revenir plus tard dans la journée pour libérer la borne
+
+J'ai choisi la première option, parce que j'avais 2 le doute que la borne soit occupée en arrivant, et que je doive donc faire 10 min de route de plus pour me rendre à la borne rapide et donc perdre du temps.
+Par ailleurs, ça n'est pas super pratique que de devoir quitter la conférence et marcher 1km (potentiellement sous la pluie) dans la journée.
+
+En bref, j'ai planifié pour être _tranquille_. Voici les conditions du trajet:
+
+- départ 5h32, tout le trajet en mode éco
+- je suis parti avec une batterie chargée à 100% (je sais qu'il faut éviter, mais d'une, je n'allais pas risquer de devoir m'arrêter sur une borne lente en cours de trajet, je ne souhaitais pas me retrouver à moins de 10% de batterie à l'arrivée, trop stressant, et d'autre part, le logiciel Peugeot ne _permet pas_ d'interrompre une charge lorsque la batterie atteint une certaine limite, par exemple 80% !)
+- j'ai choisi un itinéraire _sans autoroute_
+- j'ai roulé à 80km sur les départementales (y compris celles limitées à 90km/h, en Maine et Loire), entre 90 et 100km/h sur les nationales
+- je roule en conduite souple : pas d'accélérations brutales, utilisation du mode B pour freiner, etc...
+- la température extérieure oscillait entre 0 et 3 degrés, chauffage réglé à 18
+
+L'application ChargeMap dispose d'une fonctionnalité qui lui permet d'envoyer le trajet planifié sur Google Maps, que j'ai utilisé pour le guidage.
+Ca se passait très bien, jusqu'à ce que j'arrive après Saumur où je me rends compte que le GPS avait décidé de me faire prendre l'autoroute !
+Problème, je n'avais clairement pas assez d'autonomie pour rouler à 130 km/h.
+Ne pouvant pas rouler à 90 km/h sur autoroute, trop dangereux, je suis donc monté à 110 km/h et autant dire que vu les conditions météo (froid), mon autonomie restante fondait comme neige au soleil.
+Je suis donc sorti un peu plus loin pour finir le trajet en passant par les bords de Loire, comme c'était initialement prévu.
+
+Au final, je suis arrivé sur ma borne de recharge Allego, au Casino de La Riche, à 8h08 : 180km en 2h36.
+De mémoire (l'appli Peugeot récupère les trajets, mais pas la consommation, incroyable ce retard du logiciel par rapport à la concurrence !), ma consommaton moyenne était de l'ordre de 16kWh/100km.
+Je me suis branché et j'ai chargé pendant 49 minutes pour atteindre 90% de batterie, soit 29kW, facture: 31,38€, pas franchement économique (1.082€ du kWh !).
+Je me suis arrêté à 90% parce que la recharge "ralentit" à mesure qu'on s'approche de la charge maximale : il m'aurait fallu rester encore une bonne demi-heure (voire plus) pour atteindre les 100%, et je souhaitais me rendre à la conférence.
+
+Je suis donc arrivé sur Polytech'Tours à 9h12, soit 3h40, à comparer aux 2h25 si j'étais parti avec ma 407 diesel, qui ferait l'aller-retour sans aucun pb sans faire le plein (autonomie environ 950km...).
+
+Pour le retour, je savais donc que je serai très juste et qu'il faudrait probablement que je fasse un arrêt supplémentaire pour recharger (à cause des 10% de batterie en moins au départ).
+Je ne suis _pas_ passé par l'autoroute au retour, et donc suivi les bords de Loire.
+Les conditions météo étaient similaires, mais avec plus de pluie.
+J'ai surveillé mon autonomie, et si au départ, j'avais une marge de 100km entre l'autonomie annoncée par la voiture (c'est à dire qu'en suivant ses indications, je serais à la maison avec 100km d'autonomie restante), au fur et à mesure du trajet, cette estimation a sensiblement baissé. Arrivé à Cholet (environ 40km de chez moi), il ne restait plus que 60 km de marge, alors que j'avais baissé la température dans l'habitacle à 16 degrés.
+Encore une fois, je roulais en mode éco, souple, pas de bouchons, rien.
+En clair, l'estimation d'autonomie, c'est du grand n'importe quoi et complètement irréaliste (à noter, qu'en été, c'est bien plus proche de la réalité).
+
+Bref, j'avais aussi faim et n'étant pas très joueur, je me suis arrêté sur une borne rapide en chemin, à côté d'une pizzeria, au SIEML de l'Ecuyère.
+Comme je savais que quel que soit le temps de charge, j'aurais de quoi rentrer large, j'ai juste pris le temps de manger.
+Je récupère ma voiture, pas mal, 22,7kW de récupérés en 35 minutes de charge, pour 9.62€ : **3 fois moins cher que la recharge à Tours** (mais à comparer aux 0.14€/kWh quand je charge à la maison...).
+
+== Conclusion
+
+L'expérience fut concluante : je sais que je peux faire ce genre de trajets, moyennant quelques concessions (heure d'arrivée tardive à cause de la recharge à l'arrivée, trajet sans autoroute, confort "limité", etc), mais c'est à peu près la distance maximale que je puisse faire sans que ça ne devienne trop pénible.
+En revanche, je reste très mitigé sur l'autonomie "réelle" : ici, j'étais plus proche des 200 km en faisant tout pour économiser.
+Même en conditions idéales, jamais, ô grand jamais, je n'atteindrais les 340 km (le mieux, c'est environ 300km).
+Le logiciel est aussi bien trop basique comparé à la concurrence (oui, Tesla) : l'application mobile manque de fonctionnalités de base (blocage de charge, récupération des consommations, ...) et le GPS pour planifier un trajet est franchement nul.
+L'estimation de l'autonomie restante est irréaliste et pire, on ne sait pas vraiment où on en est de charge: l'indicateur à la "jauge d'essence" n'est pas adapté à une batterie (dites moi le % restant, c'est plus parlant !).
+Enfin, un des gros soucis reste la recharge et les tarifs hallucinants qui sont pratiqués : il est pour ainsi dire impossible de savoir combien va vous coûter un trajet, puisqu'en fonction des conditions, vous allez devoir vous arrêter, ou non, et que les tarifs varient en fonction de la puissance de recharge, du fournisseur, etc.
+
+Lorsqu'on part en thermique, on sait que le carburant coûte environ 1.9€/L, à 25% près : en électrique, oubliez. Vous pouvez faire du simple au quadruple.
+Est-ce à dire que je ne recommande pas l'électrique ? Pas du tout ! Déja, je préfère 100 fois le confort de la conduite en électrique au thermique. La voiture est aussi super agréable à conduire et la puissance disponible immédiatement est un indéniable atout de l'électrique.
+
+Mon alternative, sur ce trajet, aurait été de prendre ma voiture thermique, mais ça aurait été la solution de facilité.
+Et compte-tenu de l'urgence climatique, j'ai fais le choix de perdre un peu de confort, pour le bien de ma conscience :)
+
+
