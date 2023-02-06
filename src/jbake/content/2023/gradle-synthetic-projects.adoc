@@ -276,7 +276,7 @@ project.plugins.withId("java") {
         variantNames.forEach { variantName ->
             java.sourceSets.all {
                 this.java.srcDir("src/$name/variants/$variantName/java")
-                this.java.srcDir("src/$name/variants/$variantName/java")
+                this.resources.srcDir("src/$name/variants/$variantName/resources")
             }
         }
     }
