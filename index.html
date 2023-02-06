@@ -73,6 +73,468 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2023/gradle-synthetic-projects.html"><h1>Gradle&#8217;s flexibility in action</h1></a>
+  			<p>06 February 2023</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I often say that flexibility isn&#8217;t the reason why you should select Gradle to build your projects: reliability, performance, reproducibility, testability are better reasons.
+There are, however, cases were its flexibility come in handy, like last week, when a colleague of mine asked me how we could benchmark a Micronaut project using a variety of combination of features and Java versions.
+For example, he wanted to compare the performance of an application with and without epoll enabled, with and without Netty&#8217;s tcnative library, with and without loom support, building both the fat jar and native binary, etc.
+Depending on the combinations, the dependencies of the project may be a little different, or the build configuration may be a little different.</p>
+</div>
+<div class="paragraph">
+<p>It was an interesting challenge to pick up and the <a href="https://github.com/yawkat/micronaut-http-benchmarks">solution turned out to be quite elegant</a> and very powerful.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conceptual_design">Conceptual design</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I have tried several options before this one, which I&#8217;m going to explain below, but let&#8217;s focus with the <em>final design</em> (at least at the moment I write this blog post).
+The matrix of artifacts to be generated can be configured in the <code>settings.gradle</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="groovy">combinations {
+    dimension("tcnative") {   <i class="conum" data-value="1"></i><b>(1)</b>
+        variant("off")
+        variant("on")
+    }
+    dimension("epoll") {      <i class="conum" data-value="2"></i><b>(2)</b>
+        variant("off")
+        variant("on")
+    }
+    dimension("json") {       <i class="conum" data-value="3"></i><b>(3)</b>
+        variant("jackson")
+        variant("serde")
+    }
+    dimension("micronaut") {  <i class="conum" data-value="4"></i><b>(4)</b>
+        variant("3.8")
+        variant("4.0")
+    }
+    dimension("java") {       <i class="conum" data-value="5"></i><b>(5)</b>
+        variant("11")
+        variant("17")
+    }
+    exclude {                 <i class="conum" data-value="6"></i><b>(6)</b>
+        // Combination of Micronaut 4 and Java 11 is invalid
+        it.contains("micronaut-4.0") &amp;&amp; it.contains("java-11")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>a dimension called <code>tcnative</code> is defined with 2 variants, <code>on</code> and <code>off</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>another dimension called <code>epool</code> also has <code>on</code> and <code>off</code> variants</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the <code>json</code> dimension will let us choose 2 different serialization frameworks: Jackson or Micronaut Serde</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>we can also select the version of Micronaut we want to test</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>as well as the Java version!</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>some invalid combinations can be excluded</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The generates a number of <em>synthetic Gradle projects</em>, that is to say "projects" in the Gradle terminology, but without actually duplicating sources and directories on disk.
+With the example above, we generate the following projects:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-off:json-serde:micronaut-3.8:java-11</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-off:json-serde:micronaut-3.8:java-17</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-off:json-serde:micronaut-4.0:java-17</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-on:json-jackson:micronaut-3.8:java-11</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-on:json-jackson:micronaut-3.8:java-17</p>
+</li>
+<li>
+<p>:test-case:tcnative-off:epoll-on:json-jackson:micronaut-4.0:java-17</p>
+</li>
+<li>
+<p>&#8230;&#8203; and more</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To build the fat jar of the "tcnative on", "epoll on", "Jackson", "Micronaut 4.0" on Java 17 combination, you can invoke:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew :test-case:tcnative-on:epoll-on:json-jackson:micronaut-4.0:java-17:shadowJar</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And building the native image of the "tcnative off", "epoll on", "Micronaut Serde", "Micronaut 3.8" on Java 17 combination can be done with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash">$ ./gradlew :test-case:tcnative-off:epoll-on:json-serde:micronaut-3.8:java-17:nativeCompile</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cherry on the cake, all variants can be built in parallel by executing either <code>./gradlew shadowJar</code> (for the fat jars) or <code>./gradlew nativeCompile</code> (for the native binaries), which would copy all the artifacts under the root projects <code>build</code> directory so that they are easy to find in a single place.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_does_it_work">How does it work?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a typical project, say the Micronaut application we want to benchmark, you would have a project build which consists of a single Micronaut application module.
+For example, running <code>./gradlew build</code> would build that single project artifacts.
+In a multi-project build, you could have several modules, for example <code>core</code> and <code>app</code>, and running <code>:core:build</code> would only build the core library and <code>:app:build</code> would build both <code>core</code> and <code>app</code> (assuming <code>app</code> depends on <code>core</code>.
+In both cases, single or multi-project builds, for a typical Gradle project, there&#8217;s a <em>real</em> directory associated for each project <code>core</code>, <code>app</code>, etc, where we can find sources, resources, build scripts, etc.</p>
+</div>
+<div class="paragraph">
+<p>For <em>synthetic projects</em>, we actually generate Gradle projects (aka modules) programmatically.
+We have a skeleton directory, called <a href="https://github.com/yawkat/micronaut-http-benchmarks/tree/master/test-case-common"><code>test-case-common</code></a>, which actually defines our application sources, configuration files, etc.
+It also contains a build script which applies a <a href="https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.gradle.kts">single convention plugin</a>, named <code>io.micronaut.testcase</code>.
+This plugin basically corresponds to our "baseline" build: it applies the Micronaut plugin, adds a number of dependencies, configures native image building, etc.</p>
+</div>
+<div class="paragraph">
+<p>Then the "magic" is to use Gradle&#8217;s <a href="https://melix.github.io/blog/2021/12/composition-in-gradle.html">composition model</a> for the variant aspects.
+For example, when we define the <code>tcnative</code> dimension with 2 variants <code>on</code> and <code>off</code>, we&#8217;re modeling the fact that there are 2 possible outcomes for this dimension.
+In practice, enabling <code>tcnative</code> is just a matter of adding a single dependency at runtime:</p>
+</div>
+<div class="listingblock">
+<div class="title">io.micronaut.testcase.tcnative.on.gradle.kts</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">dependencies {
+    runtimeOnly("io.netty:netty-tcnative-boringssl-static::linux-x86_64")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The dimension which handles the version of Java (both to compile and run the application) makes use of Gradle&#8217;s toolchain support:</p>
+</div>
+<div class="listingblock">
+<div class="title">io.micronaut.testcase.java.17.gradle.kts</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be done in a <em>convention plugin</em> which is named against the dimension variant name: <code>io.micronaut.testcase.tcnative.on</code>.
+In other words, the project with path <code>:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11</code> will have a "synthetic" build script which only consists of applying the following plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="groovy">plugins {
+    id("io.micronaut.testcase")               <i class="conum" data-value="1"></i><b>(1)</b>
+    id("io.micronaut.testcase.tcnative.off")  <i class="conum" data-value="2"></i><b>(2)</b>
+    id("io.micronaut.testcase.epoll.off")     <i class="conum" data-value="3"></i><b>(3)</b>
+    id("io.micronaut.testcase.json.jackson")  <i class="conum" data-value="4"></i><b>(4)</b>
+    id("io.micronaut.testcase.micronaut.3.8") <i class="conum" data-value="5"></i><b>(5)</b>
+    id("io.micronaut.testcase.java.11")       <i class="conum" data-value="6"></i><b>(6)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Applies the common configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Configures <code>tcnative</code> off</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Configures <code>epoll</code> off</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Configures Jackson as the serialization framework</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Configures Micronaut 3.8</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Configures build for Java 11</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Each of these plugins can be found in our <a href="https://github.com/yawkat/micronaut-http-benchmarks/tree/master/build-logic/src/main/kotlin">build logic</a>.
+As you can see when browsing the build logic directory, there is actually one small optimization: it is not necessary to create a variant script if there&#8217;s nothign to do.
+For example, in practice, <code>tcnative</code> off doesn&#8217;t need any extra configuration, so there&#8217;s no need to write a <code>io.micronaut.testcase.tcnative.off</code> plugin which would be empty in any case.</p>
+</div>
+<div class="sect3">
+<h4 id="_variant_specific_code">Variant specific code</h4>
+<div class="paragraph">
+<p>The best case would have been that we only have to tweak the build process (for example to add dependencies, disable native image building, etc), but in some cases, we have to change the actual sources or resource files.
+Again, we leveraged Gradle&#8217;s flexibility to define custom conventions in our project layout.
+In a traditional Gradle (or Maven) project, the main sources are found in <code>src/main/java</code>.
+This is the case here, but we also support adding source directories based on the variants.
+For example in this project, some DTOs will make use of Java records on Java 17, but those are not available in Java 11, so we need to write 2 variants of the same classes: one with records, the other one with good old Java beans.
+This can be done by putting the Java 11 sources under <code>src/main/<strong>variants</strong>/java-11/java</code>, and their equivalent Java 17 sources under <code>src/main/<strong>variants</strong>/java-17/java</code>.
+This is actually generic: you can use any variant name in place of <code>java-11</code>: we <em>could</em>, for example, have a source directory for the <code>epoll-on</code> folder.
+The same behavior is available for resources (in <code>src/main/<strong>variants</strong>/java-11/resources</code>).</p>
+</div>
+<div class="paragraph">
+<p>This provides very good flexibility while being totally understandable and conventional.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_the_settings_plugin">The settings plugin</h4>
+<div class="paragraph">
+<p>So far, we explained how a user interacts with this build, for example by adding a dimension and a variant or adding specific sources, but we didn&#8217;t explain how the projects are actually generated.
+For this purpose, we have to explain that Gradle supports multiple types of plugins.
+The typical plugins, which we have used so far in this blog post, the <code>io.micronaut.testcase.xxx</code> plugins, are <em>project plugins</em>, because they apply on the <code>Project</code> of a Gradle build.
+There are other types of plugins, and the other one which we&#8217;re interested in here is the settings plugin.
+Unlike project plugins, these plugins are applied on the <code>Settings</code> object, that is to say thay they would be typically applied on the <code>settings.gradle(.kts</code>) file.
+This is what we have in this project:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle.kts</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">// ...
+
+plugins {
+    id("io.micronaut.bench.variants")
+}
+
+
+include("load-generator-gatling")
+
+configure&lt;io.micronaut.bench.AppVariants&gt; {
+    combinations {
+        dimension("tcnative") {
+            variant("off")
+            variant("on")
+        }
+        dimension("epoll") {
+            variant("off")
+            variant("on")
+        }
+        dimension("json") {
+            variant("jackson")
+            //variant("serde")
+        }
+        dimension("micronaut") {
+            variant("3.8")
+            //variant("4.0")
+        }
+        dimension("java") {
+            //variant("11")
+            variant("17")
+        }
+        exclude {
+            // Combination of Micronaut 4 and Java 11 is invalid
+            it.contains("micronaut-4.0") &amp;&amp; it.contains("java-11")
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>io.micronaut.bench.variants</code> is another convention plugin <a href="https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.bench.variants.settings.gradle.kts">defined in our build logic</a>.
+It doesn&#8217;t do much, except for creating an <em>extension</em>, which is what lets us configure the variants:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">import io.micronaut.bench.AppVariants
+
+val variants = extensions.create&lt;AppVariants&gt;("benchmarkVariants", settings)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The logic actually happens within that <code>AppVariants</code> class, for which <a href="https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io/micronaut/bench/AppVariants.kt">you can find the sources here</a>.
+This class handles both the <code>variants</code> extension DSL and the logic to generate the projects.</p>
+</div>
+<div class="paragraph">
+<p>The entry point is the <code>combinations</code> method which takes a configuration block.
+Each of the call to <code>dimension</code> registers a new dimension, which is itself configured via a variant configuration block, where each individual variant is declared.
+When we return from this call, we have built a model of dimension of variants, for which we need to compute the cartesian product.</p>
+</div>
+<div class="paragraph">
+<p>We can check each of the entry that we have generated against the excludes, and if the combination is valid, we can use the Gradle APIs which are available in settings script to generate our synthetic projects.</p>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">val projectPath = ":test-case:${path.replace('/', ':')}"
+settings.include(projectPath)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>computes the project path (with colons) and includes it, which is equivalent to writing this manually in the <code>settings.gradle</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="groovy">include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11")
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17")
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we stopped here, then we would have defined projects, but Gradle would expect the sources and build scripts for these projects to be found in <code>test-case/tcnative-off/epoll-off/json-jackson/micronaut-3.8/java-11</code>.
+This isn&#8217;t the case for us, since all projects will share the same project directory (<code>test-case-common</code>).
+However, if we configure all the projects to use the same directory, then things could go wrong at build time, in particular because we use parallel builds: all the projects would write their outputs in the same <code>build</code> directory, but as we have seen, they may have different sources, different dependencies, etc.
+So we need to set both the project directory to the common directory, but <em>also</em> change the build directory to a per-project specific directory.
+This way we make sure to reuse the same sources without having to copy everything manually, but we also make sure that up-to-date checking, build caching and parallel builds work perfectly fine:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">settings.project(projectPath).setProjectDir(File(settings.rootDir, "test-case-common"))
+gradle.beforeProject {
+    if (this.path == projectPath) {
+        setBuildDir(File(projectDir, "build/${path}"))
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that we have to use the <code>gradle.beforeProject</code> API for this: it basically provides us with the naked <code>Project</code> instance of our synthetic projects, before its configuration phase is triggered.</p>
+</div>
+<div class="paragraph">
+<p>The next step is to make sure that once the <code>java</code> plugin is applied on a project, we configure the additional source directories for each dimension.
+This is done via the <code>withPlugin</code> API which lets use react on the application of a plugin, and the <code>SourceSet</code> API:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">project.plugins.withId("java") {
+    project.extensions.findByType(JavaPluginExtension::class.java)?.let { java -&gt;
+        variantNames.forEach { variantName -&gt;
+            java.sourceSets.all {
+                this.java.srcDir("src/$name/variants/$variantName/java")
+                this.java.srcDir("src/$name/variants/$variantName/java")
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Last, we need to apply our convention plugins, the plugins which correspond to a specific combination variant, to our synthetic project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="kotlin">gradle.afterProject {
+    if (this.path == projectPath) {
+        variantSpecs.forEach {
+            val pluginId = "io.micronaut.testcase.${it.dimensionName}.${it.name}"
+            val plugin = File(settings.settingsDir, "build-logic/src/main/kotlin/$pluginId.gradle.kts")
+            if (plugin.exists()) {
+                plugins.apply(pluginId)
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see, for each variant, we basically compute the name of the plugin to apply, and if a corresponding file exists, we simply apply the plugin, that&#8217;s it!</p>
+</div>
+<div class="paragraph">
+<p>It only takes around 100 lines of code to implement both the DSL and logic to generate all this, which is all the power Gradle gives us!</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_limitations">Limitations</h4>
+<div class="paragraph">
+<p>Of course, there are limitations to this approach. While we could handle the Java version easily, we can&#8217;t, however, add a dimension we would have needed : GraalVM CE vs GraalVM EE.
+This is a <a href="https://github.com/gradle/gradle/pull/18028">limitation of Gradle&#8217;s toolchain support</a>, which cannot make a difference between those 2 toolchains.</p>
+</div>
+<div class="paragraph">
+<p>Another limitation is that this works well for a <em>single project build</em>, or a project like here where there&#8217;s a common application, a support library, but all modifications happen in a single project (the application).
+Supporting multi-project builds and variants <em>per module</em> would be possible in theory, but would add quite a lot of complexity.</p>
+</div>
+<div class="paragraph">
+<p>It was also lucky that I could support both Micronaut 3 and Micronaut 4: in practice, the Gradle plugin for Micronaut 4 isn&#8217;t compatible with Micronaut 3, so I would have to either use Micronaut 3 or Micronaut 4.
+However, we can use the Micronaut 4 plugin with Micronaut 3, provided <a href="https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.micronaut.3.8.gradle.kts#L9-L14">some small tweaks</a>.</p>
+</div>
+<div class="paragraph">
+<p>Last, there is one unknown to this, which is that building synthetic projects like that makes use of APIs which are stable in Gradle, but likely to be deprecated in the future (event based APIs).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_alternatives">Alternatives</h4>
+<div class="paragraph">
+<p>Before going to the "final" solution, I have actually tried a few things (which could be spiked in a couple hours or so).
+In particular, the first thing I did was actually to use a <em>single project</em>, but configure additional artifacts (e.g jar and native binary) for each variant.
+While I could make it work, the implementation turned out to be more complicated, because you have to understand how each of the plugins work (Micronaut, GraalVM, the Shadow plugin) and create exotic tasks to make things work.
+Also this had a number of drawbacks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>impossible to build variants in parallel (at least without the experimental configuration cache)</p>
+</li>
+<li>
+<p>configuring each of the variant specific build configuration (e.g adding dependencies) was more complicated. It was in particular only possible to add additional <em>runtime</em> dependencies. If something else was needed, for example compile time dependencies or additional resources, this wasn&#8217;t possible to do because a <em>single</em> main jar was produced.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this blog post, we have seen how we can leverage Gradle&#8217;s flexibility to support what seemed to be a complicated use case: given a common codebase and some "small tweaks", generate a matrix of builds which are used to build different artifacts, in order to benchmark them.</p>
+</div>
+<div class="paragraph">
+<p>The solution turned out to be quite simple to implement, and I hope pretty elegant, both in terms of user facing features (adding dimensions and configuring the build should be easy), maintenance (composition over inheritance makes it very simple to understand how things are combined) and implementation.</p>
+</div>
+<div class="paragraph">
+<p>Many thanks to <a href="https://infosec.exchange/@yawkat">Jonas Konrad</a> for the feature requests and for reviewing this blog post!</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2023/gradle-synthetic-projects.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2023/tourainetech-208.html"><h1>Petit voyage en électrique</h1></a>
   			<p>20 January 2023</p>
 			<p><em>Tags: </em>
@@ -1236,292 +1698,6 @@ This is why astrophotography is a lifetime hobby, after all!</p>
 </div>
 </div></p>
 			<p><a href="/blog/2022/12/astrophoto-2022.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2022/11/monitoring-elec.html"><h1>Monitoring pour optimiser ma conso électrique</h1></a>
-  			<p>26 November 2022</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/solaire.html">solaire</a> 
-	
-		<a href="/blog/tags/fioul.html">fioul</a> 
-	
-		<a href="/blog/tags/électricité.html">électricité</a> 
-	
-		<a href="/blog/tags/solaredge.html">solaredge</a> 
-	
-		<a href="/blog/tags/dualsun.html">dualsun</a> 
-	
-		<a href="/blog/tags/raspberry.html">raspberry</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>En juillet dernier, j&#8217;ai fait installer des panneaux solaires.
-Cette installation change considérablement nos habitudes de consommation: au lieu de consommer de préférence aux heures creuses, il est préférable de consommer lorsque la production locale le permet.
-Dans ce billet, je vous explique ce que j&#8217;ai mis en place pour nous aider dans l&#8217;optimisation de notre consommation, en particulier un outil de monitoring avec un Raspberry PI.
-L&#8217;objectif de mon projet est de réduire ma facture électrique en maximisant l&#8217;autoconsommation.
-Nous allons donc voir comment l&#8217;installation des panneaux peut changer nos habitudes.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/elec/moniteur-sep.jpg" alt="moniteur sep">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_installation_de_panneaux_solaires">Installation de panneaux solaires</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Il y a longtemps que l&#8217;idée nous trottait dans la tête.
-En effet, ici, nous chauffions au fioul, ce qui avait un certain nombre d&#8217;inconvénients: pollution (fort émetteur de CO₂), prix très variable (entre 800€ et 1400€ les 1000L selon les saisons), bruit (la chaudière), odeurs de combustion, etc.
-Cette chaudière au fioul nous servait à la fois à chauffer l&#8217;eau chaude, mais aussi au chauffage domestique.
-La maison étant relativement bien isolée, nous arrivions cependant, à 4 personnes, à ne consommer qu&#8217;environ 1000L de fioul par an.
-Une vieille chaudière à fioul était tombée en panne en plein hiver, il y a 5 ans, nous avions dû la changer en urgence, et, je me souviens très bien de cela, il se trouve que j&#8217;étais à ce moment à l&#8217;étranger pour le "Gradle World Meeting", une semaine de travail avec l&#8217;ensemble de l&#8217;équipe.
-Nous n&#8217;avions donc pas eu le temps de faire différents devis, notamment de chauffage alternatif.
-Mais en Mars dernier, patatras, nouvelle panne.
-Cette fois-ci, la chaudière elle-même n&#8217;était pas en cause: c&#8217;est le système d&#8217;alimentation en fioul, entre la cuve et la chaudière, qui était encrassé.
-La chaudière se mettait constamment en défaut faute d&#8217;avoir une arrivée de fioul propre.
-Nous avions alors le choix entre faire nettoyer la cuve et la tuyauterie, pour une facture de l&#8217;ordre de 2k€, ou de changer.</p>
-</div>
-<div class="paragraph">
-<p>En même temps, mon épouse et moi-même sommes tous les 2 en télétravail 5j/5.
-Notre consommation électrique est donc importante, entre l&#8217;alimentation des ordinateurs, des écrans, la cuisine le midi, le chauffage d&#8217;appoint dans mon bureau, &#8230;&#8203;
-Certains de nos équipements consomment aussi régulièrement: n&#8217;ayant pas le tout à l’égout, par exemple, nous avons une microstation de traitement des eaux usées, avec une pompe de recirculation et une pompe de relevage, qui ont des consommations non négligeables à l&#8217;année.
-Nous possédons aussi une voiture électrique (une e-208) qui est chargée à domicile.
-Enfin, l&#8217;été, nous avons une pompe de circulation pour la piscine qui consomme beaucoup.
-Au final, notre facture électrique est donc beaucoup plus importante que celle de fioul.</p>
-</div>
-<div class="paragraph">
-<p>Cette dernière panne a donc été l&#8217;occasion de revoir notre projet.
-Après divers devis, nous avons opté pour l&#8217;installation de 16 panneaux solaires de la société française <a href="https://dualsun.com/">DualSun</a> : 10 panneaux classiques "Flash" et 6 panneaux hybrides électricité/eau chaude, pour une production totale de 6kWC (6 kW crète).
-Les panneaux hybrides permettent de produire de l&#8217;électricité <strong>et</strong> de préchauffer l&#8217;eau chaude.
-Le tout a été associé à une pompe à chaleur air-eau, une Alfea Extensa A.I de la marque française <a href="https://www.atlantic.fr/Chauffer-le-logement/Pompe-a-chaleur/Aerothermie/Aerothermie-Air-Eau/Alfea-Extensa-A.I.-et-Alfea-Extensa-Duo-A.I">Atlantic</a>.
-Il s&#8217;agit d&#8217;une pompe à chaleur air-eau moyenne température (55⁰C) qui nous permet de conserver notre installation de chauffages en fonte, au prix (à déterminer) d&#8217;une consommation supérieure lors des grands froids (ce qui n&#8217;arrive pas souvent ici).
-La pompe est associée à un ballon d&#8217;eau chaude qui exploite le circuit préchauffé par les panneaux.</p>
-</div>
-<div class="paragraph">
-<p>Les 6kWc nous permettent d&#8217;être en auto-consommation totale en journée l&#8217;été (et probablement une partie du printemps/automne, à confirmer avec le temps) et je devrais pouvoir revendre une partie de la surproduction à Enedis (mais pour des raisons administratives, mon dossier est toujours en attente&#8230;&#8203;).</p>
-</div>
-<div class="paragraph">
-<p>Mon calcul de retour sur investissement m&#8217;a donné 12 ans, en prenant en compte une augmentation annuelle de 5% des prix de l&#8217;électricité.
-Si les tarifs augmentent plus vite, alors ça sera rentabilisé plus vite, mais il est impossible de savoir si ça sera le cas&#8230;&#8203; a priori avec la crise énergétique, j&#8217;ai tendance à croire que ça n&#8217;est pas un mauvais calcul&#8230;&#8203;</p>
-</div>
-<div class="paragraph">
-<p>Enfin, nous n&#8217;avons <strong>pas</strong> fait installer de batteries: bien que cela serait extrêmement intéressant dans mon cas, pour récupérer la nuit le surplus de la production en journée, le prix des batteries est encore bien trop élevé (de l&#8217;ordre de 7k€ pour 10kW).</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_changer_ses_habitudes_de_consommation">Changer ses habitudes de consommation</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Dans mon cas, nos habitudes de consommation étaient assez simples, au final:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>en journée, nous n&#8217;avions pas trop le choix: il faut bien alimenter les ordinateurs, etc.</p>
-</li>
-<li>
-<p>les machines à laver, lave-vaisselle, etc tournaient la nuit pour profiter des heures creuses</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Malheureusement, notre consommation en heures creuses était assez limitée comparée au reste.
-Tout à changé avec les panneaux solaires:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>cet été et même fin septembre, lorsque le ciel est dégagé, mes panneaux produisent jusqu&#8217;à 5.5kW, ce qui dépasse largement ma consommation "live"</p>
-</li>
-<li>
-<p>nous chargeons la voiture en journée via la prise "domestique" (~2kW) lorsque c&#8217;est possible, et la nuit en charge "rapide" (6kW) lorsque la batterie est trop basse</p>
-</li>
-<li>
-<p>les machines tournent en journée au lieu de la nuit</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Mais optimiser tout cela est <strong>compliqué</strong>, et je souhaitais un système qui permette à mon épouse et mes enfants de savoir si, par exemple, "c&#8217;est le moment" de lancer une machine.</p>
-</div>
-<div class="paragraph">
-<p>Je me suis donc lancé dans un projet de "bidouille" pour faire un système de monitoring qui donnerait en direct ma production, ma consommation, et indiquerait de manière simple si on a de la marge ou pas.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_petite_complication">Petite complication</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Évidemment, vous pourriez vous dire que ça devrait être simple, avec toutes les applications connectées qui existent.
-Oui et non.
-Chez moi, l&#8217;installation est particulière: mes panneaux solaires sont sur le toit de ma maison, ainsi que les onduleurs et optimiseur.
-Ces appareils sont capables de vous donner en direct la production, et mesurent aussi la consommation instantanée, ce qui permet donc de mesurer directement son auto-consommation: on peut savoir si on produit plus qu&#8217;on ne consomme, ou l&#8217;inverse, en temps réel, c&#8217;est parfait non ? Voici par exemple un graphique fournit par SolarEdge en été:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/elec/conso-aout.png" alt="conso aout">
-</div>
-</div>
-<div class="paragraph">
-<p>En rouge, nous avons la consommation.
-En vert, la production solaire, et en bleu, l&#8217;autoconsommation.
-Vous noterez d&#8217;ores et déja un problème, si, comme moi, vous êtes un tant soit peu curieux: lorsqu&#8217;il y a production solaire, la <em>courbe de consommation</em> se met à suivre celle de production.
-Elle monte lorsque la production augmente et diminue lorsqu&#8217;elle baisse: ça n&#8217;est pas logique et probablement un bug quelque par chez SolarEdge.
-J&#8217;ai demandé via mon installateur des explications (ils ne comprennent pas non plus), mais SolarEdge n&#8217;est pas revenu vers eux.</p>
-</div>
-<div class="paragraph">
-<p>A titre de comparaison, voici un autre graphe ce mois-ci:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/elec/conso-nov.png" alt="conso nov">
-</div>
-</div>
-<div class="paragraph">
-<p>On note déja qu&#8217;il y a des pics de consommation, correspondant à l&#8217;enclenchement de la pompe à chaleur, ou des appareils de cuisson.
-On constate aussi que la période de production est plus resserrée, mais qu&#8217;il existe encore, en journée, de la surproduction par moment (ça n&#8217;est pas toujours vrai, dès qu&#8217;il pleut, la production est pour ainsi dire nulle).</p>
-</div>
-<div class="paragraph">
-<p>Si on oublie la fausse valeur de consommation, c&#8217;est parfait me direz-vous !
-Et bien oui mais non.
-Chez moi, il y a un hic: le capteur de consommation est au niveau de l&#8217;onduleur, près de mon tableau électrique.
-Or ici, j&#8217;ai <em>plusieurs</em> tableaux électriques: un dans mon habitation principale, mais aussi un dans mon garage (bâtiment indépendant) et un autre dans un local technique du jardin.
-Lorsque j&#8217;ai acheté cette maison, elle était installée en triphasé, il y avait donc les 3 phases, et de mon compteur EDF principal, dans mon allée, partent des lignes électriques vers 3 bâtiments distincts.
-Ces phases étaient particulièrement déséquilibrées, nous avions donc fait repasser en monophasé, mais ce qu&#8217;il faut retenir, c&#8217;est qu&#8217;il aurait fallu que le capteur soit au niveau du compteur électrique, et non dans ma maison, pour qu’on puisse mesurer correctement la consommation en live.
-Pour des raisons techniques, il n&#8217;était pas possible de le faire: j&#8217;ai donc une mesure imparfaite de ma consommation, qui ne donne que la consommation de mon habitation principale.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_ma_solution">Ma solution</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Si on résume, je dispose pour l&#8217;instant d&#8217;un outil qui me donne la production (nous verrons plus loin comment l&#8217;obtenir), mais pas la consommation.
-Mais mon fournisseur d&#8217;électricité (Total Energies) propose une clé ATOME qui permet de connaître ce que je consomme du réseau en live, clé qui se branche sur le compteur Linky.
-Malheureusement, Enedis ne propose pas d&#8217;APIs permettant de connaître sa consommation live, il n&#8217;y a donc pas d&#8217;autre choix que de louer la clé de Total Energies&#8230;&#8203;
-J&#8217;ai donc fait l&#8217;acquisition de cette clé, et je dispose donc des 2 mesures dont j&#8217;ai besoin:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>la consommation live donnée par ma clé ATOME: attention, il ne s&#8217;agit donc pas de ma consommation totale, mais de ce que j&#8217;ai besoin <em>en plus de ma production</em>, du réseau EDF</p>
-</li>
-<li>
-<p>la production live donnée par SolarEdge</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Il suffit donc de faire la différence entre les 2 pour savoir de quelle marge on dispose, mais je ne peux jamais, en pratique, savoir combien je consomme.</p>
-</div>
-<div class="paragraph">
-<p>Mon idée a donc été d&#8217;utiliser un vieux Rapsberry PI qui traînait dans mon armoire, combiné à un écran e-ink, pour afficher cette production et cette consommation, ainsi qu&#8217;une "note" permettant de suggérer de lancer une machine à laver, par exemple.</p>
-</div>
-<div class="paragraph">
-<p>J&#8217;ai donc fait l&#8217;acquisition de <a href="https://www.amazon.fr/gp/product/B075FRVC4L/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&amp;psc=1">cet écran</a>, un écran e-ink dont la consommation en veille est nulle, ce qui, pour un outil de monitoring de consommation d&#8217;énergie, me semblait le minimum.
-Nous verrons cependant que ça ne fut pas sans inconvénients.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_les_apis_toujours_le_point_faible">Les APIs, toujours le point faible</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Bien, maintenant que nous savons que les données sont disponibles, via le <a href="https://monitoring.solaredge.com">site de SolarEdge</a> pour la production, et via l&#8217;application Total Energies pour la clé live, il fallait disposer de ces données via des API que je puisse interroger via mon Raspberry.</p>
-</div>
-<div class="paragraph">
-<p>Là, douche froide:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>SolarEdge propose bien une API pour développeurs, mais elle n&#8217;est ni super bien documentée (il faut comprendre soit-même à quoi correspondent les champs retournés), ni illimitée : on ne peut effectuer que 300 requêtes par jour, soit un peu moins d&#8217;une requête toutes les 5 minutes ! C&#8217;est d&#8217;autant plus regrettable que l&#8217;information est disponible <em>en continu</em> et en live via leur interface web!</p>
-</li>
-<li>
-<p>pour Total Energies, c&#8217;est encore pire: il n&#8217;y a pas d&#8217;API officielle. Il faut donc "hacker" pour avoir accès, en simulant une connexion via l&#8217;application, qui donne la consommation live</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Bref, ni SolarEdge, ni Total ne proposent d&#8217;API de type push, ou d&#8217;event bus qu&#8217;on puisse écouter pour obtenir les informations.
-C&#8217;est très décevant, à une heure où ce genre d&#8217;optimisations devient critique pour une bonne gestion de notre consommation électrique: c&#8217;est un outil pour le climat !</p>
-</div>
-<div class="paragraph">
-<p>L&#8217;autre problème, c&#8217;est que même si j&#8217;utilise l&#8217;API officielle de SolarEdge et que je réussis à récupérer l&#8217;information de Total Energies, ces APIs sont instables : elles tombent très souvent "en panne" et ne renvoient aucune info.
-Bref, lorsque ça marche, c&#8217;est parfait, mais souvent, ça ne fonctionne tout simplement pas, par exemple en ce moment, ma production indique 0 alors que ça n&#8217;est pas le cas:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/elec/moniteur-nov.jpg" alt="moniteur nov">
-</div>
-</div>
-<div class="paragraph">
-<p>Ceci me permet au moins de savoir qu&#8217;en ce moment, je demande 1135W du réseau, ce qui signifie que je consomme sensiblement plus (entre le chauffe-eau, l&#8217;ordinateur de mon fils qui joue à Minecraft et la PS5 de mon autre garçon).</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_un_peu_de_technique">Un peu de technique</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Alors comment récupérer en pratique ces informations ?
-En fait j&#8217;ai adapté un script en Python qui, toutes les 5 minutes, se connecte à ces 2 APIs, récupère les informations et déclenche le rafraîchissement de l&#8217;écran.
-Alors, Python, personnellement c&#8217;est pas ma tasse de thé.
-J&#8217;ai l&#8217;impression de refaire du PHP, avec des scripts cracras et des variables globales de partout.
-Il y a sûrement possibilité de faire mieux, mais en bidouille en se connectant par SSH à mon Raspberry, c&#8217;est pour l&#8217;instant tout ce que j&#8217;ai.</p>
-</div>
-<div class="paragraph">
-<p>Vous trouverez donc le script <a href="https://gist.github.com/melix/90dce1c44524a368f9186981ec16b475">ici</a>.</p>
-</div>
-<div class="paragraph">
-<p>Parmi les problèmes, je vous mentionnait celui du choix de l&#8217;écran.
-J&#8217;avoue avoir été relativement naïf, parce qu&#8217;à l’utilisation, si l&#8217;écran e-ink est très sympa à voir, son rafraîchissement prend&#8230;&#8203; jusqu&#8217;à 30s !
-En effet, la façon de dessiner sur ces écrans est assez particulière: on écrit des modèles mémoire, puis on envoie des instructions à l&#8217;écran pour effacer telle zone, etc.
-Ces instructions sont très lentes à s&#8217;exécuter, mais surtout, elles provoquent systématiquement un effet bizarre à l&#8217;écran, qui passe du blanc au noir plusieurs fois, commence à afficher des choses, puis la couleur, etc&#8230;&#8203;
-Bref, pas super sympa pour du "live", mais, au final, suffisant pour mon usage.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Au final, j&#8217;ai quand même un outil proche de ce que je souhaitais.
-Il nous a permis, d&#8217;ores et déjà, d&#8217;adapter notre consommation: n&#8217;importe qui peut regarder l&#8217;écran et décider de lancer une machine si la production est importante, alors que cette info n&#8217;était avant uniquement disponible que pour moi, via une application sur mobile: ici, l&#8217;information est donnée en continu, de manière passive, via cet écran.</p>
-</div>
-<div class="paragraph">
-<p>Nous avons, par exemple, pu adapter notre consommation en automne: la pompe à chaleur ne fonctionnait pas (pas besoin de chauffer) et donc nous avons pu mettre notre voiture à charger, plus travailler tous les 2 à domicile et lancer une machine à laver, sans consommer un seul kW du réseau EDF ! Lorsque le monitoring a indiqué que nous commencions à consommer du réseau, il a suffit de couper la charge de la voiture (malheureusement, l&#8217;application MyPeugeot est extrêmement limitée et ne permet pas d&#8217;interrompre une charge mais simplement de la différer, mais c&#8217;est un autre problème).</p>
-</div>
-<div class="paragraph">
-<p>Depuis Juillet, nous sommes à -70% de consommation électrique, ce qui est énorme.
-Cependant, les conditions météo ont, jusqu&#8217;ici, été très favorables: beaucoup de soleil et des températures record en Octobre et Novembre (malheureusement pour le climat&#8230;&#8203;).
-Depuis une semaine, la pompe à chaleur se met régulièrement en route pour tenir les 19⁰C, mais j&#8217;ai des résultats surprenants:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>90kWh consommés en Novembre pour chauffer l&#8217;eau</p>
-</li>
-<li>
-<p>et seulement 9kWh pour le chauffage !</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>L&#8217;avenir nous dira si le passage à une pompe à chaleur pour le chauffage était une bonne idée ou non (en même temps, ici nous n&#8217;avions pas trop le choix).
-Il serait pertinent, compte tenu du surplus de production qui arrive souvent en journée, d&#8217;installer des batteries pour maximiser l&#8217;autoconsommation.
-Malheureusement comme je l&#8217;ai indiqué, le prix est à ce jour bien trop élevé.
-Je devrais donc me contenter de revendre ma production (au prix de 10cts le kWh, prix fixé pour 20 ans (!!) contre environ 15cts lorsque je consomme).
-Attention cependant, lorsqu&#8217;on revend et que notre installation, comme la nôtre, dépasse les 3kWc, alors nous devons déclarer celà en revenus.
-Cela rend la revente bien moins intéressante, puisque malgré le fait qu&#8217;on va "consommer" notre surplus, mais à des heures différentes, le tarif de rachat ansi que le fait de devoir déclarer réduit sensiblement la rentabilité.</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2022/11/monitoring-elec.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	

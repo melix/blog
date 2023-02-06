@@ -6,9 +6,470 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Fri, 20 Jan 2023 13:32:11 +0100</pubDate>
-    <lastBuildDate>Fri, 20 Jan 2023 13:32:11 +0100</lastBuildDate>
+    <pubDate>Mon, 6 Feb 2023 18:05:58 +0100</pubDate>
+    <lastBuildDate>Mon, 6 Feb 2023 18:05:58 +0100</lastBuildDate>
 
+    <item>
+      <title>Gradle&amp;#8217;s flexibility in action</title>
+      <link>https://melix.github.io/blog//2023/gradle-synthetic-projects.html</link>
+      <pubDate>Mon, 6 Feb 2023 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2023/gradle-synthetic-projects.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I often say that flexibility isn&amp;#8217;t the reason why you should select Gradle to build your projects: reliability, performance, reproducibility, testability are better reasons.
+There are, however, cases were its flexibility come in handy, like last week, when a colleague of mine asked me how we could benchmark a Micronaut project using a variety of combination of features and Java versions.
+For example, he wanted to compare the performance of an application with and without epoll enabled, with and without Netty&amp;#8217;s tcnative library, with and without loom support, building both the fat jar and native binary, etc.
+Depending on the combinations, the dependencies of the project may be a little different, or the build configuration may be a little different.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It was an interesting challenge to pick up and the &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks&quot;&gt;solution turned out to be quite elegant&lt;/a&gt; and very powerful.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conceptual_design&quot;&gt;Conceptual design&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I have tried several options before this one, which I&amp;#8217;m going to explain below, but let&amp;#8217;s focus with the &lt;em&gt;final design&lt;/em&gt; (at least at the moment I write this blog post).
+The matrix of artifacts to be generated can be configured in the &lt;code&gt;settings.gradle&lt;/code&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;groovy&quot;&gt;combinations {
+    dimension(&quot;tcnative&quot;) {   &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+        variant(&quot;off&quot;)
+        variant(&quot;on&quot;)
+    }
+    dimension(&quot;epoll&quot;) {      &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+        variant(&quot;off&quot;)
+        variant(&quot;on&quot;)
+    }
+    dimension(&quot;json&quot;) {       &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+        variant(&quot;jackson&quot;)
+        variant(&quot;serde&quot;)
+    }
+    dimension(&quot;micronaut&quot;) {  &lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;(4)&lt;/b&gt;
+        variant(&quot;3.8&quot;)
+        variant(&quot;4.0&quot;)
+    }
+    dimension(&quot;java&quot;) {       &lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;(5)&lt;/b&gt;
+        variant(&quot;11&quot;)
+        variant(&quot;17&quot;)
+    }
+    exclude {                 &lt;i class=&quot;conum&quot; data-value=&quot;6&quot;&gt;&lt;/i&gt;&lt;b&gt;(6)&lt;/b&gt;
+        // Combination of Micronaut 4 and Java 11 is invalid
+        it.contains(&quot;micronaut-4.0&quot;) &amp;amp;&amp;amp; it.contains(&quot;java-11&quot;)
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;a dimension called &lt;code&gt;tcnative&lt;/code&gt; is defined with 2 variants, &lt;code&gt;on&lt;/code&gt; and &lt;code&gt;off&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;another dimension called &lt;code&gt;epool&lt;/code&gt; also has &lt;code&gt;on&lt;/code&gt; and &lt;code&gt;off&lt;/code&gt; variants&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;the &lt;code&gt;json&lt;/code&gt; dimension will let us choose 2 different serialization frameworks: Jackson or Micronaut Serde&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;4&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;we can also select the version of Micronaut we want to test&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;5&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;as well as the Java version!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;6&quot;&gt;&lt;/i&gt;&lt;b&gt;6&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;some invalid combinations can be excluded&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The generates a number of &lt;em&gt;synthetic Gradle projects&lt;/em&gt;, that is to say &quot;projects&quot; in the Gradle terminology, but without actually duplicating sources and directories on disk.
+With the example above, we generate the following projects:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-off:json-serde:micronaut-3.8:java-11&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-off:json-serde:micronaut-3.8:java-17&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-off:json-serde:micronaut-4.0:java-17&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-on:json-jackson:micronaut-3.8:java-11&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-on:json-jackson:micronaut-3.8:java-17&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;:test-case:tcnative-off:epoll-on:json-jackson:micronaut-4.0:java-17&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&amp;#8230;&amp;#8203; and more&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To build the fat jar of the &quot;tcnative on&quot;, &quot;epoll on&quot;, &quot;Jackson&quot;, &quot;Micronaut 4.0&quot; on Java 17 combination, you can invoke:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;bash&quot;&gt;$ ./gradlew :test-case:tcnative-on:epoll-on:json-jackson:micronaut-4.0:java-17:shadowJar&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And building the native image of the &quot;tcnative off&quot;, &quot;epoll on&quot;, &quot;Micronaut Serde&quot;, &quot;Micronaut 3.8&quot; on Java 17 combination can be done with:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;bash&quot;&gt;$ ./gradlew :test-case:tcnative-off:epoll-on:json-serde:micronaut-3.8:java-17:nativeCompile&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cherry on the cake, all variants can be built in parallel by executing either &lt;code&gt;./gradlew shadowJar&lt;/code&gt; (for the fat jars) or &lt;code&gt;./gradlew nativeCompile&lt;/code&gt; (for the native binaries), which would copy all the artifacts under the root projects &lt;code&gt;build&lt;/code&gt; directory so that they are easy to find in a single place.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_how_does_it_work&quot;&gt;How does it work?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a typical project, say the Micronaut application we want to benchmark, you would have a project build which consists of a single Micronaut application module.
+For example, running &lt;code&gt;./gradlew build&lt;/code&gt; would build that single project artifacts.
+In a multi-project build, you could have several modules, for example &lt;code&gt;core&lt;/code&gt; and &lt;code&gt;app&lt;/code&gt;, and running &lt;code&gt;:core:build&lt;/code&gt; would only build the core library and &lt;code&gt;:app:build&lt;/code&gt; would build both &lt;code&gt;core&lt;/code&gt; and &lt;code&gt;app&lt;/code&gt; (assuming &lt;code&gt;app&lt;/code&gt; depends on &lt;code&gt;core&lt;/code&gt;.
+In both cases, single or multi-project builds, for a typical Gradle project, there&amp;#8217;s a &lt;em&gt;real&lt;/em&gt; directory associated for each project &lt;code&gt;core&lt;/code&gt;, &lt;code&gt;app&lt;/code&gt;, etc, where we can find sources, resources, build scripts, etc.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For &lt;em&gt;synthetic projects&lt;/em&gt;, we actually generate Gradle projects (aka modules) programmatically.
+We have a skeleton directory, called &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks/tree/master/test-case-common&quot;&gt;&lt;code&gt;test-case-common&lt;/code&gt;&lt;/a&gt;, which actually defines our application sources, configuration files, etc.
+It also contains a build script which applies a &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.gradle.kts&quot;&gt;single convention plugin&lt;/a&gt;, named &lt;code&gt;io.micronaut.testcase&lt;/code&gt;.
+This plugin basically corresponds to our &quot;baseline&quot; build: it applies the Micronaut plugin, adds a number of dependencies, configures native image building, etc.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then the &quot;magic&quot; is to use Gradle&amp;#8217;s &lt;a href=&quot;https://melix.github.io/blog/2021/12/composition-in-gradle.html&quot;&gt;composition model&lt;/a&gt; for the variant aspects.
+For example, when we define the &lt;code&gt;tcnative&lt;/code&gt; dimension with 2 variants &lt;code&gt;on&lt;/code&gt; and &lt;code&gt;off&lt;/code&gt;, we&amp;#8217;re modeling the fact that there are 2 possible outcomes for this dimension.
+In practice, enabling &lt;code&gt;tcnative&lt;/code&gt; is just a matter of adding a single dependency at runtime:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;io.micronaut.testcase.tcnative.on.gradle.kts&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;dependencies {
+    runtimeOnly(&quot;io.netty:netty-tcnative-boringssl-static::linux-x86_64&quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The dimension which handles the version of Java (both to compile and run the application) makes use of Gradle&amp;#8217;s toolchain support:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;io.micronaut.testcase.java.17.gradle.kts&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This can be done in a &lt;em&gt;convention plugin&lt;/em&gt; which is named against the dimension variant name: &lt;code&gt;io.micronaut.testcase.tcnative.on&lt;/code&gt;.
+In other words, the project with path &lt;code&gt;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11&lt;/code&gt; will have a &quot;synthetic&quot; build script which only consists of applying the following plugins:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;groovy&quot;&gt;plugins {
+    id(&quot;io.micronaut.testcase&quot;)               &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+    id(&quot;io.micronaut.testcase.tcnative.off&quot;)  &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+    id(&quot;io.micronaut.testcase.epoll.off&quot;)     &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+    id(&quot;io.micronaut.testcase.json.jackson&quot;)  &lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;(4)&lt;/b&gt;
+    id(&quot;io.micronaut.testcase.micronaut.3.8&quot;) &lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;(5)&lt;/b&gt;
+    id(&quot;io.micronaut.testcase.java.11&quot;)       &lt;i class=&quot;conum&quot; data-value=&quot;6&quot;&gt;&lt;/i&gt;&lt;b&gt;(6)&lt;/b&gt;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Applies the common configuration&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Configures &lt;code&gt;tcnative&lt;/code&gt; off&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Configures &lt;code&gt;epoll&lt;/code&gt; off&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;4&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Configures Jackson as the serialization framework&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;5&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Configures Micronaut 3.8&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;6&quot;&gt;&lt;/i&gt;&lt;b&gt;6&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Configures build for Java 11&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Each of these plugins can be found in our &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks/tree/master/build-logic/src/main/kotlin&quot;&gt;build logic&lt;/a&gt;.
+As you can see when browsing the build logic directory, there is actually one small optimization: it is not necessary to create a variant script if there&amp;#8217;s nothign to do.
+For example, in practice, &lt;code&gt;tcnative&lt;/code&gt; off doesn&amp;#8217;t need any extra configuration, so there&amp;#8217;s no need to write a &lt;code&gt;io.micronaut.testcase.tcnative.off&lt;/code&gt; plugin which would be empty in any case.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_variant_specific_code&quot;&gt;Variant specific code&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The best case would have been that we only have to tweak the build process (for example to add dependencies, disable native image building, etc), but in some cases, we have to change the actual sources or resource files.
+Again, we leveraged Gradle&amp;#8217;s flexibility to define custom conventions in our project layout.
+In a traditional Gradle (or Maven) project, the main sources are found in &lt;code&gt;src/main/java&lt;/code&gt;.
+This is the case here, but we also support adding source directories based on the variants.
+For example in this project, some DTOs will make use of Java records on Java 17, but those are not available in Java 11, so we need to write 2 variants of the same classes: one with records, the other one with good old Java beans.
+This can be done by putting the Java 11 sources under &lt;code&gt;src/main/&lt;strong&gt;variants&lt;/strong&gt;/java-11/java&lt;/code&gt;, and their equivalent Java 17 sources under &lt;code&gt;src/main/&lt;strong&gt;variants&lt;/strong&gt;/java-17/java&lt;/code&gt;.
+This is actually generic: you can use any variant name in place of &lt;code&gt;java-11&lt;/code&gt;: we &lt;em&gt;could&lt;/em&gt;, for example, have a source directory for the &lt;code&gt;epoll-on&lt;/code&gt; folder.
+The same behavior is available for resources (in &lt;code&gt;src/main/&lt;strong&gt;variants&lt;/strong&gt;/java-11/resources&lt;/code&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This provides very good flexibility while being totally understandable and conventional.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_the_settings_plugin&quot;&gt;The settings plugin&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So far, we explained how a user interacts with this build, for example by adding a dimension and a variant or adding specific sources, but we didn&amp;#8217;t explain how the projects are actually generated.
+For this purpose, we have to explain that Gradle supports multiple types of plugins.
+The typical plugins, which we have used so far in this blog post, the &lt;code&gt;io.micronaut.testcase.xxx&lt;/code&gt; plugins, are &lt;em&gt;project plugins&lt;/em&gt;, because they apply on the &lt;code&gt;Project&lt;/code&gt; of a Gradle build.
+There are other types of plugins, and the other one which we&amp;#8217;re interested in here is the settings plugin.
+Unlike project plugins, these plugins are applied on the &lt;code&gt;Settings&lt;/code&gt; object, that is to say thay they would be typically applied on the &lt;code&gt;settings.gradle(.kts&lt;/code&gt;) file.
+This is what we have in this project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle.kts&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;// ...
+
+plugins {
+    id(&quot;io.micronaut.bench.variants&quot;)
+}
+
+
+include(&quot;load-generator-gatling&quot;)
+
+configure&amp;lt;io.micronaut.bench.AppVariants&amp;gt; {
+    combinations {
+        dimension(&quot;tcnative&quot;) {
+            variant(&quot;off&quot;)
+            variant(&quot;on&quot;)
+        }
+        dimension(&quot;epoll&quot;) {
+            variant(&quot;off&quot;)
+            variant(&quot;on&quot;)
+        }
+        dimension(&quot;json&quot;) {
+            variant(&quot;jackson&quot;)
+            //variant(&quot;serde&quot;)
+        }
+        dimension(&quot;micronaut&quot;) {
+            variant(&quot;3.8&quot;)
+            //variant(&quot;4.0&quot;)
+        }
+        dimension(&quot;java&quot;) {
+            //variant(&quot;11&quot;)
+            variant(&quot;17&quot;)
+        }
+        exclude {
+            // Combination of Micronaut 4 and Java 11 is invalid
+            it.contains(&quot;micronaut-4.0&quot;) &amp;amp;&amp;amp; it.contains(&quot;java-11&quot;)
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;code&gt;io.micronaut.bench.variants&lt;/code&gt; is another convention plugin &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.bench.variants.settings.gradle.kts&quot;&gt;defined in our build logic&lt;/a&gt;.
+It doesn&amp;#8217;t do much, except for creating an &lt;em&gt;extension&lt;/em&gt;, which is what lets us configure the variants:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;import io.micronaut.bench.AppVariants
+
+val variants = extensions.create&amp;lt;AppVariants&amp;gt;(&quot;benchmarkVariants&quot;, settings)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The logic actually happens within that &lt;code&gt;AppVariants&lt;/code&gt; class, for which &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io/micronaut/bench/AppVariants.kt&quot;&gt;you can find the sources here&lt;/a&gt;.
+This class handles both the &lt;code&gt;variants&lt;/code&gt; extension DSL and the logic to generate the projects.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The entry point is the &lt;code&gt;combinations&lt;/code&gt; method which takes a configuration block.
+Each of the call to &lt;code&gt;dimension&lt;/code&gt; registers a new dimension, which is itself configured via a variant configuration block, where each individual variant is declared.
+When we return from this call, we have built a model of dimension of variants, for which we need to compute the cartesian product.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can check each of the entry that we have generated against the excludes, and if the combination is valid, we can use the Gradle APIs which are available in settings script to generate our synthetic projects.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;val projectPath = &quot;:test-case:${path.replace(&apos;/&apos;, &apos;:&apos;)}&quot;
+settings.include(projectPath)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;computes the project path (with colons) and includes it, which is equivalent to writing this manually in the &lt;code&gt;settings.gradle&lt;/code&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;groovy&quot;&gt;include(&quot;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11&quot;)
+include(&quot;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17&quot;)
+include(&quot;:test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17&quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we stopped here, then we would have defined projects, but Gradle would expect the sources and build scripts for these projects to be found in &lt;code&gt;test-case/tcnative-off/epoll-off/json-jackson/micronaut-3.8/java-11&lt;/code&gt;.
+This isn&amp;#8217;t the case for us, since all projects will share the same project directory (&lt;code&gt;test-case-common&lt;/code&gt;).
+However, if we configure all the projects to use the same directory, then things could go wrong at build time, in particular because we use parallel builds: all the projects would write their outputs in the same &lt;code&gt;build&lt;/code&gt; directory, but as we have seen, they may have different sources, different dependencies, etc.
+So we need to set both the project directory to the common directory, but &lt;em&gt;also&lt;/em&gt; change the build directory to a per-project specific directory.
+This way we make sure to reuse the same sources without having to copy everything manually, but we also make sure that up-to-date checking, build caching and parallel builds work perfectly fine:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;settings.project(projectPath).setProjectDir(File(settings.rootDir, &quot;test-case-common&quot;))
+gradle.beforeProject {
+    if (this.path == projectPath) {
+        setBuildDir(File(projectDir, &quot;build/${path}&quot;))
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that we have to use the &lt;code&gt;gradle.beforeProject&lt;/code&gt; API for this: it basically provides us with the naked &lt;code&gt;Project&lt;/code&gt; instance of our synthetic projects, before its configuration phase is triggered.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The next step is to make sure that once the &lt;code&gt;java&lt;/code&gt; plugin is applied on a project, we configure the additional source directories for each dimension.
+This is done via the &lt;code&gt;withPlugin&lt;/code&gt; API which lets use react on the application of a plugin, and the &lt;code&gt;SourceSet&lt;/code&gt; API:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;project.plugins.withId(&quot;java&quot;) {
+    project.extensions.findByType(JavaPluginExtension::class.java)?.let { java -&amp;gt;
+        variantNames.forEach { variantName -&amp;gt;
+            java.sourceSets.all {
+                this.java.srcDir(&quot;src/$name/variants/$variantName/java&quot;)
+                this.java.srcDir(&quot;src/$name/variants/$variantName/java&quot;)
+            }
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last, we need to apply our convention plugins, the plugins which correspond to a specific combination variant, to our synthetic project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;kotlin&quot;&gt;gradle.afterProject {
+    if (this.path == projectPath) {
+        variantSpecs.forEach {
+            val pluginId = &quot;io.micronaut.testcase.${it.dimensionName}.${it.name}&quot;
+            val plugin = File(settings.settingsDir, &quot;build-logic/src/main/kotlin/$pluginId.gradle.kts&quot;)
+            if (plugin.exists()) {
+                plugins.apply(pluginId)
+            }
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, for each variant, we basically compute the name of the plugin to apply, and if a corresponding file exists, we simply apply the plugin, that&amp;#8217;s it!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It only takes around 100 lines of code to implement both the DSL and logic to generate all this, which is all the power Gradle gives us!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_limitations&quot;&gt;Limitations&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, there are limitations to this approach. While we could handle the Java version easily, we can&amp;#8217;t, however, add a dimension we would have needed : GraalVM CE vs GraalVM EE.
+This is a &lt;a href=&quot;https://github.com/gradle/gradle/pull/18028&quot;&gt;limitation of Gradle&amp;#8217;s toolchain support&lt;/a&gt;, which cannot make a difference between those 2 toolchains.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another limitation is that this works well for a &lt;em&gt;single project build&lt;/em&gt;, or a project like here where there&amp;#8217;s a common application, a support library, but all modifications happen in a single project (the application).
+Supporting multi-project builds and variants &lt;em&gt;per module&lt;/em&gt; would be possible in theory, but would add quite a lot of complexity.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It was also lucky that I could support both Micronaut 3 and Micronaut 4: in practice, the Gradle plugin for Micronaut 4 isn&amp;#8217;t compatible with Micronaut 3, so I would have to either use Micronaut 3 or Micronaut 4.
+However, we can use the Micronaut 4 plugin with Micronaut 3, provided &lt;a href=&quot;https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.micronaut.3.8.gradle.kts#L9-L14&quot;&gt;some small tweaks&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last, there is one unknown to this, which is that building synthetic projects like that makes use of APIs which are stable in Gradle, but likely to be deprecated in the future (event based APIs).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_alternatives&quot;&gt;Alternatives&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before going to the &quot;final&quot; solution, I have actually tried a few things (which could be spiked in a couple hours or so).
+In particular, the first thing I did was actually to use a &lt;em&gt;single project&lt;/em&gt;, but configure additional artifacts (e.g jar and native binary) for each variant.
+While I could make it work, the implementation turned out to be more complicated, because you have to understand how each of the plugins work (Micronaut, GraalVM, the Shadow plugin) and create exotic tasks to make things work.
+Also this had a number of drawbacks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;impossible to build variants in parallel (at least without the experimental configuration cache)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;configuring each of the variant specific build configuration (e.g adding dependencies) was more complicated. It was in particular only possible to add additional &lt;em&gt;runtime&lt;/em&gt; dependencies. If something else was needed, for example compile time dependencies or additional resources, this wasn&amp;#8217;t possible to do because a &lt;em&gt;single&lt;/em&gt; main jar was produced.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post, we have seen how we can leverage Gradle&amp;#8217;s flexibility to support what seemed to be a complicated use case: given a common codebase and some &quot;small tweaks&quot;, generate a matrix of builds which are used to build different artifacts, in order to benchmark them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The solution turned out to be quite simple to implement, and I hope pretty elegant, both in terms of user facing features (adding dimensions and configuring the build should be easy), maintenance (composition over inheritance makes it very simple to understand how things are combined) and implementation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Many thanks to &lt;a href=&quot;https://infosec.exchange/@yawkat&quot;&gt;Jonas Konrad&lt;/a&gt; for the feature requests and for reviewing this blog post!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Petit voyage en électrique</title>
       <link>https://melix.github.io/blog//2023/tourainetech-208.html</link>
