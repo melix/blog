@@ -1,0 +1,337 @@
+= Gradle's flexibility in action
+Cédric Champeau
+2023-02-06
+:jbake-type: post
+:jbake-tags: gradle,micronaut
+:jbake-status: published
+:source-highlighter: pygments
+:id: gradle-flexibility
+:linkattrs:
+:icons: font
+
+I often say that flexibility isn't the reason why you should select Gradle to build your projects: reliability, performance, reproducibility, testability are better reasons.
+There are, however, cases were its flexibility come in handy, like last week, when a colleague of mine asked me how we could benchmark a Micronaut project using a variety of combination of features and Java versions.
+For example, he wanted to compare the performance of an application with and without epoll enabled, with and without Netty's tcnative library, with and without loom support, building both the fat jar and native binary, etc.
+Depending on the combinations, the dependencies of the project may be a little different, or the build configuration may be a little different.
+
+It was an interesting challenge to pick up and the https://github.com/yawkat/micronaut-http-benchmarks[solution turned out to be quite elegant] and very powerful.
+
+== Conceptual design
+
+I have tried several options before this one, which I'm going to explain below, but let's focus with the _final design_ (at least at the moment I write this blog post).
+The matrix of artifacts to be generated can be configured in the `settings.gradle` file:
+
+[source,groovy]
+----
+combinations {
+    dimension("tcnative") {   // <1>
+        variant("off")        
+        variant("on")         
+    }
+    dimension("epoll") {      // <2>
+        variant("off")
+        variant("on")
+    }
+    dimension("json") {       // <3>
+        variant("jackson")
+        variant("serde")
+    }
+    dimension("micronaut") {  // <4>
+        variant("3.8")
+        variant("4.0")
+    }
+    dimension("java") {       // <5>
+        variant("11")
+        variant("17")
+    }
+    exclude {                 // <6>
+        // Combination of Micronaut 4 and Java 11 is invalid
+        it.contains("micronaut-4.0") && it.contains("java-11")
+    }
+}
+----
+<1> a dimension called `tcnative` is defined with 2 variants, `on` and `off`
+<2> another dimension called `epool` also has `on` and `off` variants
+<3> the `json` dimension will let us choose 2 different serialization frameworks: Jackson or Micronaut Serde
+<4> we can also select the version of Micronaut we want to test
+<5> as well as the Java version!
+<6> some invalid combinations can be excluded
+
+The generates a number of _synthetic Gradle projects_, that is to say "projects" in the Gradle terminology, but without actually duplicating sources and directories on disk.
+With the example above, we generate the following projects:
+
+ - :test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11
+ - :test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17
+ - :test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17
+ - :test-case:tcnative-off:epoll-off:json-serde:micronaut-3.8:java-11
+ - :test-case:tcnative-off:epoll-off:json-serde:micronaut-3.8:java-17
+ - :test-case:tcnative-off:epoll-off:json-serde:micronaut-4.0:java-17
+ - :test-case:tcnative-off:epoll-on:json-jackson:micronaut-3.8:java-11
+ - :test-case:tcnative-off:epoll-on:json-jackson:micronaut-3.8:java-17
+ - :test-case:tcnative-off:epoll-on:json-jackson:micronaut-4.0:java-17
+ - ... and more
+
+To build the fat jar of the "tcnative on", "epoll on", "Jackson", "Micronaut 4.0" on Java 17 combination, you can invoke:
+
+[source,bash]
+----
+$ ./gradlew :test-case:tcnative-on:epoll-on:json-jackson:micronaut-4.0:java-17:shadowJar
+----
+
+And building the native image of the "tcnative off", "epoll on", "Micronaut Serde", "Micronaut 3.8" on Java 17 combination can be done with:
+
+[source,bash]
+----
+$ ./gradlew :test-case:tcnative-off:epoll-on:json-serde:micronaut-3.8:java-17:nativeCompile
+----
+
+Cherry on the cake, all variants can be built in parallel by executing either `./gradlew shadowJar` (for the fat jars) or `./gradlew nativeCompile` (for the native binaries), which would copy all the artifacts under the root projects `build` directory so that they are easy to find in a single place.
+
+== How does it work?
+
+In a typical project, say the Micronaut application we want to benchmark, you would have a project build which consists of a single Micronaut application module.
+For example, running `./gradlew build` would build that single project artifacts.
+In a multi-project build, you could have several modules, for example `core` and `app`, and running `:core:build` would only build the core library and `:app:build` would build both `core` and `app` (assuming `app` depends on `core`.
+In both cases, single or multi-project builds, for a typical Gradle project, there's a _real_ directory associated for each project `core`, `app`, etc, where we can find sources, resources, build scripts, etc.
+
+For _synthetic projects_, we actually generate Gradle projects (aka modules) programmatically.
+We have a skeleton directory, called https://github.com/yawkat/micronaut-http-benchmarks/tree/master/test-case-common[`test-case-common`], which actually defines our application sources, configuration files, etc.
+It also contains a build script which applies a https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.gradle.kts[single convention plugin], named `io.micronaut.testcase`.
+This plugin basically corresponds to our "baseline" build: it applies the Micronaut plugin, adds a number of dependencies, configures native image building, etc.
+
+Then the "magic" is to use Gradle's https://melix.github.io/blog/2021/12/composition-in-gradle.html[composition model] for the variant aspects.
+For example, when we define the `tcnative` dimension with 2 variants `on` and `off`, we're modeling the fact that there are 2 possible outcomes for this dimension.
+In practice, enabling `tcnative` is just a matter of adding a single dependency at runtime:
+
+.io.micronaut.testcase.tcnative.on.gradle.kts
+[source,kotlin]
+----
+dependencies {
+    runtimeOnly("io.netty:netty-tcnative-boringssl-static::linux-x86_64")
+}
+----
+
+The dimension which handles the version of Java (both to compile and run the application) makes use of Gradle's toolchain support:
+
+.io.micronaut.testcase.java.17.gradle.kts
+[source,kotlin]
+----
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+----
+
+This can be done in a _convention plugin_ which is named against the dimension variant name: `io.micronaut.testcase.tcnative.on`.
+In other words, the project with path `:test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11` will have a "synthetic" build script which only consists of applying the following plugins:
+
+[source,groovy]
+----
+plugins {
+    id("io.micronaut.testcase")               <1>
+    id("io.micronaut.testcase.tcnative.off")  <2>
+    id("io.micronaut.testcase.epoll.off")     <3>
+    id("io.micronaut.testcase.json.jackson")  <4>
+    id("io.micronaut.testcase.micronaut.3.8") <5>
+    id("io.micronaut.testcase.java.11")       <6>
+}
+----
+<1> Applies the common configuration
+<2> Configures `tcnative` off
+<3> Configures `epoll` off
+<4> Configures Jackson as the serialization framework
+<5> Configures Micronaut 3.8
+<6> Configures build for Java 11
+
+Each of these plugins can be found in our https://github.com/yawkat/micronaut-http-benchmarks/tree/master/build-logic/src/main/kotlin[build logic].
+As you can see when browsing the build logic directory, there is actually one small optimization: it is not necessary to create a variant script if there's nothign to do.
+For example, in practice, `tcnative` off doesn't need any extra configuration, so there's no need to write a `io.micronaut.testcase.tcnative.off` plugin which would be empty in any case.
+
+==== Variant specific code
+
+The best case would have been that we only have to tweak the build process (for example to add dependencies, disable native image building, etc), but in some cases, we have to change the actual sources or resource files.
+Again, we leveraged Gradle's flexibility to define custom conventions in our project layout.
+In a traditional Gradle (or Maven) project, the main sources are found in `src/main/java`.
+This is the case here, but we also support adding source directories based on the variants.
+For example in this project, some DTOs will make use of Java records on Java 17, but those are not available in Java 11, so we need to write 2 variants of the same classes: one with records, the other one with good old Java beans.
+This can be done by putting the Java 11 sources under `src/main/**variants**/java-11/java`, and their equivalent Java 17 sources under `src/main/**variants**/java-17/java`.
+This is actually generic: you can use any variant name in place of `java-11`: we _could_, for example, have a source directory for the `epoll-on` folder.
+The same behavior is available for resources (in `src/main/**variants**/java-11/resources`).
+
+This provides very good flexibility while being totally understandable and conventional.
+
+==== The settings plugin
+
+So far, we explained how a user interacts with this build, for example by adding a dimension and a variant or adding specific sources, but we didn't explain how the projects are actually generated.
+For this purpose, we have to explain that Gradle supports multiple types of plugins.
+The typical plugins, which we have used so far in this blog post, the `io.micronaut.testcase.xxx` plugins, are _project plugins_, because they apply on the `Project` of a Gradle build.
+There are other types of plugins, and the other one which we're interested in here is the settings plugin.
+Unlike project plugins, these plugins are applied on the `Settings` object, that is to say thay they would be typically applied on the `settings.gradle(.kts`) file.
+This is what we have in this project:
+
+.settings.gradle.kts
+[source,kotlin]
+----
+// ...
+
+plugins {
+    id("io.micronaut.bench.variants")
+}
+
+
+include("load-generator-gatling")
+
+configure<io.micronaut.bench.AppVariants> {
+    combinations {
+        dimension("tcnative") {
+            variant("off")
+            variant("on")
+        }
+        dimension("epoll") {
+            variant("off")
+            variant("on")
+        }
+        dimension("json") {
+            variant("jackson")
+            //variant("serde")
+        }
+        dimension("micronaut") {
+            variant("3.8")
+            //variant("4.0")
+        }
+        dimension("java") {
+            //variant("11")
+            variant("17")
+        }
+        exclude {
+            // Combination of Micronaut 4 and Java 11 is invalid
+            it.contains("micronaut-4.0") && it.contains("java-11")
+        }
+    }
+}
+----
+
+The `io.micronaut.bench.variants` is another convention plugin https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.bench.variants.settings.gradle.kts[defined in our build logic].
+It doesn't do much, except for creating an _extension_, which is what lets us configure the variants:
+
+[source,kotlin]
+----
+import io.micronaut.bench.AppVariants
+
+val variants = extensions.create<AppVariants>("benchmarkVariants", settings)
+----
+
+The logic actually happens within that `AppVariants` class, for which https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io/micronaut/bench/AppVariants.kt[you can find the sources here].
+This class handles both the `variants` extension DSL and the logic to generate the projects.
+
+The entry point is the `combinations` method which takes a configuration block.
+Each of the call to `dimension` registers a new dimension, which is itself configured via a variant configuration block, where each individual variant is declared.
+When we return from this call, we have built a model of dimension of variants, for which we need to compute the cartesian product.
+
+We can check each of the entry that we have generated against the excludes, and if the combination is valid, we can use the Gradle APIs which are available in settings script to generate our synthetic projects.
+
+For example:
+
+[source,kotlin]
+----
+val projectPath = ":test-case:${path.replace('/', ':')}"
+settings.include(projectPath)
+----
+
+computes the project path (with colons) and includes it, which is equivalent to writing this manually in the `settings.gradle` file:
+
+[source,groovy]
+----
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11")
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17")
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17")
+----
+
+If we stopped here, then we would have defined projects, but Gradle would expect the sources and build scripts for these projects to be found in `test-case/tcnative-off/epoll-off/json-jackson/micronaut-3.8/java-11`.
+This isn't the case for us, since all projects will share the same project directory (`test-case-common`).
+However, if we configure all the projects to use the same directory, then things could go wrong at build time, in particular because we use parallel builds: all the projects would write their outputs in the same `build` directory, but as we have seen, they may have different sources, different dependencies, etc.
+So we need to set both the project directory to the common directory, but _also_ change the build directory to a per-project specific directory.
+This way we make sure to reuse the same sources without having to copy everything manually, but we also make sure that up-to-date checking, build caching and parallel builds work perfectly fine:
+
+[source,kotlin]
+----
+settings.project(projectPath).setProjectDir(File(settings.rootDir, "test-case-common"))
+gradle.beforeProject {
+    if (this.path == projectPath) {
+        setBuildDir(File(projectDir, "build/${path}"))
+    }
+}       
+----
+
+Note that we have to use the `gradle.beforeProject` API for this: it basically provides us with the naked `Project` instance of our synthetic projects, before its configuration phase is triggered.
+
+The next step is to make sure that once the `java` plugin is applied on a project, we configure the additional source directories for each dimension.
+This is done via the `withPlugin` API which lets use react on the application of a plugin, and the `SourceSet` API:
+
+[source,kotlin]
+----
+project.plugins.withId("java") {
+    project.extensions.findByType(JavaPluginExtension::class.java)?.let { java ->
+        variantNames.forEach { variantName ->
+            java.sourceSets.all {
+                this.java.srcDir("src/$name/variants/$variantName/java")
+                this.java.srcDir("src/$name/variants/$variantName/java")
+            }
+        }
+    }
+}
+----
+
+Last, we need to apply our convention plugins, the plugins which correspond to a specific combination variant, to our synthetic project:
+
+[source,kotlin]
+----
+gradle.afterProject {
+    if (this.path == projectPath) {
+        variantSpecs.forEach {
+            val pluginId = "io.micronaut.testcase.${it.dimensionName}.${it.name}"
+            val plugin = File(settings.settingsDir, "build-logic/src/main/kotlin/$pluginId.gradle.kts")
+            if (plugin.exists()) {
+                plugins.apply(pluginId)
+            }
+        }
+    }
+}
+----
+
+As you can see, for each variant, we basically compute the name of the plugin to apply, and if a corresponding file exists, we simply apply the plugin, that's it!
+
+It only takes around 100 lines of code to implement both the DSL and logic to generate all this, which is all the power Gradle gives us!
+
+==== Limitations
+
+Of course, there are limitations to this approach. While we could handle the Java version easily, we can't, however, add a dimension we would have needed : GraalVM CE vs GraalVM EE.
+This is a https://github.com/gradle/gradle/pull/18028[limitation of Gradle's toolchain support], which cannot make a difference between those 2 toolchains.
+
+Another limitation is that this works well for a _single project build_, or a project like here where there's a common application, a support library, but all modifications happen in a single project (the application).
+Supporting multi-project builds and variants _per module_ would be possible in theory, but would add quite a lot of complexity.
+
+It was also lucky that I could support both Micronaut 3 and Micronaut 4: in practice, the Gradle plugin for Micronaut 4 isn't compatible with Micronaut 3, so I would have to either use Micronaut 3 or Micronaut 4.
+However, we can use the Micronaut 4 plugin with Micronaut 3, provided https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.micronaut.3.8.gradle.kts#L9-L14[some small tweaks].
+
+Last, there is one unknown to this, which is that building synthetic projects like that makes use of APIs which are stable in Gradle, but likely to be deprecated in the future (event based APIs).
+
+==== Alternatives
+
+Before going to the "final" solution, I have actually tried a few things (which could be spiked in a couple hours or so).
+In particular, the first thing I did was actually to use a _single project_, but configure additional artifacts (e.g jar and native binary) for each variant.
+While I could make it work, the implementation turned out to be more complicated, because you have to understand how each of the plugins work (Micronaut, GraalVM, the Shadow plugin) and create exotic tasks to make things work.
+Also this had a number of drawbacks:
+
+- impossible to build variants in parallel (at least without the experimental configuration cache)
+- configuring each of the variant specific build configuration (e.g adding dependencies) was more complicated. It was in particular only possible to add additional _runtime_ dependencies. If something else was needed, for example compile time dependencies or additional resources, this wasn't possible to do because a _single_ main jar was produced.
+
+== Conclusion
+
+In this blog post, we have seen how we can leverage Gradle's flexibility to support what seemed to be a complicated use case: given a common codebase and some "small tweaks", generate a matrix of builds which are used to build different artifacts, in order to benchmark them.
+
+The solution turned out to be quite simple to implement, and I hope pretty elegant, both in terms of user facing features (adding dimensions and configuring the build should be easy), maintenance (composition over inheritance makes it very simple to understand how things are combined) and implementation.
+
+Many thanks to https://infosec.exchange/@yawkat[Jonas Konrad] for the feature requests and for reviewing this blog post!
+
