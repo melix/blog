@@ -7,6 +7,7 @@ Cédric Champeau
 :source-highlighter: pygments
 :id: gradle-flexibility-draft
 :linkattrs:
+:icons: font
 
 I often say that flexibility isn't the reason why you should select Gradle to build your projects: reliability, performance, reproducibility, testability are better reasons.
 There are, however, cases were its flexibility come in handy, like last week, when a colleague of mine asked me how we could benchmark a Micronaut project using a variety of combination of features and Java versions.
@@ -14,6 +15,8 @@ For example, he wanted to compare the performance of an application with and wit
 Depending on the combinations, the dependencies of the project may be a little different, or the build configuration may be a little different.
 
 It was an interesting challenge to pick up and the https://github.com/yawkat/micronaut-http-benchmarks[solution turned out to be quite elegant] and very powerful.
+
+Many thanks to https://infosec.exchange/@yawkat[Jonas Konrad] for the feature requests and for reviewing this blog post!
 
 == Conceptual design
 
@@ -222,14 +225,86 @@ val variants = extensions.create<AppVariants>("benchmarkVariants", settings)
 ----
 
 The logic actually happens within that `AppVariants` class, for which https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io/micronaut/bench/AppVariants.kt[you can find the sources here].
+This class handles both the `variants` extension DSL and the logic to generate the projects.
 
-In a nutshell, what it does is, for each call to `combinations`, create the combination of each variants, filter those which need to be excluded, then:
+The entry point is the `combinations` method which takes a configuration block.
+Each of the call to `dimension` registers a new dimension, which is itself configured via a variant configuration block, where each individual variant is declared.
+When we return from this call, we have built a model of dimension of variants, for which we need to compute the cartesian product.
 
-- create a project with the generated project path
-- configure the build directory for this project to be in `test-case-common/build/full-name-of-variant`
-- apply the convention plugins on the generated project
+We can check each of the entry that we have generated against the excludes, and if the combination is valid, we can use the Gradle APIs which are available in settings script to generate our synthetic projects.
 
-It basically takes around 100 lines of code to implement both the DSL and logic to generate all this, which is all the power Gradle gives us!
+For example:
+
+[source,kotlin]
+----
+val projectPath = ":test-case:${path.replace('/', ':')}"
+settings.include(projectPath)
+----
+
+computes the project path (with colons) and includes it, which is equivalent to writing this manually in the `settings.gradle` file:
+
+[source,groovy]
+----
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-11")
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-3.8:java-17")
+include(":test-case:tcnative-off:epoll-off:json-jackson:micronaut-4.0:java-17")
+----
+
+If we stopped here, then we would have defined projects, but Gradle would expect the sources and build scripts for these projects to be found in `test-case/tcnative-off/epoll-off/json-jackson/micronaut-3.8/java-11`.
+This isn't the case for us, since all projects will share the same project directory (`test-case-common`).
+However, if we configure all the projects to use the same directory, then things could go wrong at build time, in particular because we use parallel builds: all the projects would write their outputs in the same `build` directory, but as we have seen, they may have different sources, different dependencies, etc.
+So we need to set both the project directory to the common directory, but _also_ change the build directory to a per-project specific directory.
+This way we make sure to reuse the same sources without having to copy everything manually, but we also make sure that up-to-date checking, build caching and parallel builds work perfectly fine:
+
+[source,kotlin]
+----
+settings.project(projectPath).setProjectDir(File(settings.rootDir, "test-case-common"))
+gradle.beforeProject {
+    if (this.path == projectPath) {
+        setBuildDir(File(projectDir, "build/${path}"))
+    }
+}       
+----
+
+Note that we have to use the `gradle.beforeProject` API for this: it basically provides us with the naked `Project` instance of our synthetic projects, before its configuration phase is triggered.
+
+The next step is to make sure that once the `java` plugin is applied on a project, we configure the additional source directories for each dimension.
+This is done via the `withPlugin` API which lets use react on the application of a plugin, and the `SourceSet` API:
+
+[source,kotlin]
+----
+project.plugins.withId("java") {
+    project.extensions.findByType(JavaPluginExtension::class.java)?.let { java ->
+        variantNames.forEach { variantName ->
+            java.sourceSets.all {
+                this.java.srcDir("src/$name/variants/$variantName/java")
+                this.java.srcDir("src/$name/variants/$variantName/java")
+            }
+        }
+    }
+}
+----
+
+Last, we need to apply our convention plugins, the plugins which correspond to a specific combination variant, to our synthetic project:
+
+[source,kotlin]
+----
+gradle.afterProject {
+    if (this.path == projectPath) {
+        variantSpecs.forEach {
+            val pluginId = "io.micronaut.testcase.${it.dimensionName}.${it.name}"
+            val plugin = File(settings.settingsDir, "build-logic/src/main/kotlin/$pluginId.gradle.kts")
+            if (plugin.exists()) {
+                plugins.apply(pluginId)
+            }
+        }
+    }
+}
+----
+
+As you can see, for each variant, we basically compute the name of the plugin to apply, and if a corresponding file exists, we simply apply the plugin, that's it!
+
+It only takes around 100 lines of code to implement both the DSL and logic to generate all this, which is all the power Gradle gives us!
 
 ==== Limitations
 
@@ -238,6 +313,9 @@ This is a https://github.com/gradle/gradle/pull/18028[limitation of Gradle's too
 
 Another limitation is that this works well for a _single project build_, or a project like here where there's a common application, a support library, but all modifications happen in a single project (the application).
 Supporting multi-project builds and variants _per module_ would be possible in theory, but would add quite a lot of complexity.
+
+It was also lucky that I could support both Micronaut 3 and Micronaut 4: in practice, the Gradle plugin for Micronaut 4 isn't compatible with Micronaut 3, so I would have to either use Micronaut 3 or Micronaut 4.
+However, in practice, we can use the Micronaut 4 plugin with Micronaut 3, provided https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.micronaut.3.8.gradle.kts#L9-L14[some small tweaks].
 
 Last, there is one unknown to this, which is that building synthetic projects like that makes use of APIs which are stable in Gradle, but likely to be deprecated in the future (event based APIs).
 
