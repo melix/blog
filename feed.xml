@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 6 Feb 2023 18:30:08 +0100</pubDate>
-    <lastBuildDate>Mon, 6 Feb 2023 18:30:08 +0100</lastBuildDate>
+    <pubDate>Mon, 6 Feb 2023 22:24:34 +0100</pubDate>
+    <lastBuildDate>Mon, 6 Feb 2023 22:24:34 +0100</lastBuildDate>
 
     <item>
       <title>Gradle&amp;#8217;s flexibility in action</title>
@@ -19,7 +19,7 @@
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;I often say that flexibility isn&amp;#8217;t the reason why you should select Gradle to build your projects: reliability, performance, reproducibility, testability are better reasons.
-There are, however, cases were its flexibility come in handy, like last week, when a colleague of mine asked me how we could benchmark a Micronaut project using a variety of combination of features and Java versions.
+There are, however, cases were its flexibility comes in handy, like last week, when a colleague of mine asked me how we could benchmark a Micronaut project using a variety of combination of features and Java versions.
 For example, he wanted to compare the performance of an application with and without epoll enabled, with and without Netty&amp;#8217;s tcnative library, with and without loom support, building both the fat jar and native binary, etc.
 Depending on the combinations, the dependencies of the project may be a little different, or the build configuration may be a little different.&lt;/p&gt;
 &lt;/div&gt;
