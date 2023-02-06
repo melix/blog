@@ -5,7 +5,7 @@ Cédric Champeau
 :jbake-tags: gradle,micronaut
 :jbake-status: published
 :source-highlighter: pygments
-:id: gradle-flexibility-draft
+:id: gradle-flexibility
 :linkattrs:
 :icons: font
 
@@ -15,8 +15,6 @@ For example, he wanted to compare the performance of an application with and wit
 Depending on the combinations, the dependencies of the project may be a little different, or the build configuration may be a little different.
 
 It was an interesting challenge to pick up and the https://github.com/yawkat/micronaut-http-benchmarks[solution turned out to be quite elegant] and very powerful.
-
-Many thanks to https://infosec.exchange/@yawkat[Jonas Konrad] for the feature requests and for reviewing this blog post!
 
 == Conceptual design
 
@@ -315,7 +313,7 @@ Another limitation is that this works well for a _single project build_, or a pr
 Supporting multi-project builds and variants _per module_ would be possible in theory, but would add quite a lot of complexity.
 
 It was also lucky that I could support both Micronaut 3 and Micronaut 4: in practice, the Gradle plugin for Micronaut 4 isn't compatible with Micronaut 3, so I would have to either use Micronaut 3 or Micronaut 4.
-However, in practice, we can use the Micronaut 4 plugin with Micronaut 3, provided https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.micronaut.3.8.gradle.kts#L9-L14[some small tweaks].
+However, we can use the Micronaut 4 plugin with Micronaut 3, provided https://github.com/yawkat/micronaut-http-benchmarks/blob/master/build-logic/src/main/kotlin/io.micronaut.testcase.micronaut.3.8.gradle.kts#L9-L14[some small tweaks].
 
 Last, there is one unknown to this, which is that building synthetic projects like that makes use of APIs which are stable in Gradle, but likely to be deprecated in the future (event based APIs).
 
@@ -334,4 +332,6 @@ Also this had a number of drawbacks:
 In this blog post, we have seen how we can leverage Gradle's flexibility to support what seemed to be a complicated use case: given a common codebase and some "small tweaks", generate a matrix of builds which are used to build different artifacts, in order to benchmark them.
 
 The solution turned out to be quite simple to implement, and I hope pretty elegant, both in terms of user facing features (adding dimensions and configuring the build should be easy), maintenance (composition over inheritance makes it very simple to understand how things are combined) and implementation.
+
+Many thanks to https://infosec.exchange/@yawkat[Jonas Konrad] for the feature requests and for reviewing this blog post!
 
