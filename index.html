@@ -449,7 +449,7 @@ This is done via the <code>withPlugin</code> API which lets use react on the app
         variantNames.forEach { variantName -&gt;
             java.sourceSets.all {
                 this.java.srcDir("src/$name/variants/$variantName/java")
-                this.java.srcDir("src/$name/variants/$variantName/java")
+                this.resources.srcDir("src/$name/variants/$variantName/resources")
             }
         }
     }
