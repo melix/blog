@@ -6,9 +6,634 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 6 Feb 2023 22:24:34 +0100</pubDate>
-    <lastBuildDate>Mon, 6 Feb 2023 22:24:34 +0100</lastBuildDate>
+    <pubDate>Sun, 12 Mar 2023 18:11:28 +0100</pubDate>
+    <lastBuildDate>Sun, 12 Mar 2023 18:11:28 +0100</lastBuildDate>
 
+    <item>
+      <title>How the Micronaut team leverages Gradle&amp;#8217;s version catalogs for improved developer productivity</title>
+      <link>https://melix.github.io/blog//2023/03-12-micronaut-catalogs.html</link>
+      <pubDate>Sun, 12 Mar 2023 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2023/03-12-micronaut-catalogs.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This blog post discusses how the Micronaut development team makes use of a feature of Gradle, &lt;a href=&quot;https://docs.gradle.org/current/userguide/platforms.html&quot;&gt;version catalogs&lt;/a&gt;, to improve the team&amp;#8217;s developer productivity, reduce the risks of publishing broken releases, coordinate the releases of a large number of modules and, last but not least, provide additional features to our Gradle users.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_the_backstory&quot;&gt;The backstory&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;a href=&quot;https://micronaut.io/&quot;&gt;Micronaut Framework&lt;/a&gt; is a modern open-source framework for building JVM applications.
+It can be used to build all kinds of applications, from CLI applications to microservices or even good old monoliths.
+It supports deploying both to the JVM and native executables (using &lt;a href=&quot;https://graalvm.org&quot;&gt;GraalVM&lt;/a&gt;), making it particularly suitable for all kind of environments.
+A key feature of the Micronaut framework is developer productivity: we do everything we can to make things faster for developers.
+In particular, Micronaut has a strong emphasis on easing how you test your applications, even in native mode.
+For this we have built a number of tools, including our &lt;a href=&quot;https://micronaut-projects.github.io/micronaut-maven-plugin/latest/&quot;&gt;Maven&lt;/a&gt; and &lt;a href=&quot;https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/&quot;&gt;Gradle&lt;/a&gt; plugins.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When I joined the Micronaut team almost a couple years back, I was given the responsibility of improving the team&amp;#8217;s own developer productivity.
+It was an exciting assignment, not only because I knew the team&amp;#8217;s love about Gradle, but because I also knew that there were many things we could do to reduce the feedback time, to provide more insights about failures, to detect flaky tests, etc.
+As part of this work we have put in place a partnership with &lt;a href=&quot;https://gradle.com&quot;&gt;Gradle Inc&lt;/a&gt; which kindly provides us with a &lt;a href=&quot;https://ge.micronaut.io&quot;&gt;Gradle Enterprise instance&lt;/a&gt;, but this is not what I want to talk about today.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lately I was listening to an &lt;a href=&quot;https://www.youtube.com/watch?v=Gr96IxKwPeE&quot;&gt;interview of Aurimas Liutikas&lt;/a&gt; of the AndroidX team, who was saying that he didn&amp;#8217;t think that version catalogs were a good solution for library authors to share their recommendations of versions, and that BOMs are probably a better solution for this.
+I pinged him saying that I disagreed with this statement and offered to provide more details why, if he was interested.
+This is therefore a long answer, but one which will be easier to find than a &lt;a href=&quot;https://androiddev.social/@Aurimas/110000457198553518&quot;&gt;thread on social media&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_what_are_version_catalogs&quot;&gt;What are version catalogs?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s start with the basics: a version catalog is, like the name implies, a catalog of versions to pick from, nothing more.
+That doesn&amp;#8217;t sound too much exciting, and what versions are we talking about?
+That&amp;#8217;s version of &lt;em&gt;libraries&lt;/em&gt; or &lt;em&gt;plugins&lt;/em&gt; that you use in your build.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As an illustration, here is a version catalog, defined as a TOML file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;toml&quot;&gt;[versions]
+javapoet = &quot;1.13.0&quot;
+
+[libraries]
+javapoet = { module = &quot;com.squareup:javapoet&quot;, version.ref = &quot;javapoet&quot; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then this library &lt;em&gt;can&lt;/em&gt; be used in a &lt;code&gt;dependencies&lt;/code&gt; declaration block in any of the project&amp;#8217;s build script using a &lt;em&gt;type-safe notation&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+    implementation(libs.javapoet) {
+        because(&quot;required for Java source code generation&quot;)
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;which is &lt;em&gt;strictly equivalent&lt;/em&gt; to writing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+    implementation(&quot;com.squareup:javapoet:1.13.0&quot;) {
+        because(&quot;required for Java source code generation&quot;)
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are many advantages of using version catalogs to declare your library versions, but most notably it provides a single, standard location where those versions are declared.
+It is important to understand that a catalog is simply a &lt;em&gt;list of dependencies you can pick from&lt;/em&gt;, a bit like going to the supermarket and choosing whatever you need for your particular meal: it&amp;#8217;s not because a catalog declares libraries that you &lt;em&gt;have to&lt;/em&gt; use them.
+However, a catalog provides you with &lt;em&gt;recommendations&lt;/em&gt; of libraries to pick from.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_version_catalogs_for_micronaut_users&quot;&gt;Version catalogs for Micronaut users&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;An interesting aspect of version catalogs is that they can be published, for others to consume: they are an artifact.
+Micronaut users can already make use of catalogs, as I have explained in a &lt;a href=&quot;https://melix.github.io/blog/2022/02/micronaut-version-catalog.html&quot;&gt;previous blog post&lt;/a&gt;.
+This makes it possible for a user who doesn&amp;#8217;t know which version of Micronaut Data to use, to simply declare:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+    implementation mn.micronaut.data
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;People familiar with Maven BOMs can easily think that it is the same feature, but there are &lt;a href=&quot;https://docs.gradle.org/current/userguide/platforms.html#sub:platforms-vs-catalog&quot;&gt;key differences which are described in the Gradle docs&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the rest of this post we will now focus on how we generate those catalogs, and how they effectively help us in improving our own developer productivity.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_how_the_micronaut_team_uses_version_catalogs&quot;&gt;How the Micronaut team uses version catalogs&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_one_catalog_per_module&quot;&gt;One catalog per module&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said, the Micronaut framework consists of a large number of modules which live in their own Git repository.
+All the projects share the same layout, the same conventions in order to make things easier to maintain.
+For this purpose, we use our own collection of &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-build&quot;&gt;internal build plugins&lt;/a&gt; as well as a &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-project-template&quot;&gt;project template&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Those build plugins provide features like:
+- defining the default Java language level, setting up code conventions and code quality plugins
+- standardizing how documentation is built (using Asciidoctor)
+- setting up integration with Gradle Enterprise, to publish build scans, configure the build cache and predictive test selection
+- implementing binary compatibility checks between releases
+- configuring publication to Maven Central
+- providing a high-level model of what a Micronaut module is&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The last item is particularly important: in every Micronaut project, we have different kind of modules: libraries (which are published to Maven Central for users to consume), internal support libraries (which are not intended for external consumption), or a BOM module (which also publishes a version catalog as we&amp;#8217;re going to see).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Long story short: &lt;strong&gt;we heavily rely on conventions to reduce the maintenance costs, have consistent builds, with improved performance and higher quality standards&lt;/strong&gt;.
+If you are interested in why we have such plugins, Sergio Delamo and I gave an &lt;a href=&quot;https://www.youtube.com/watch?v=fpz63IwFIZM&quot;&gt;interview about this&lt;/a&gt; a few months ago (alert: the thumbnail shows I have hair, this is fake news!).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Each of our projects declares a version catalog, for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;this &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-core/blob/4.0.x/gradle/libs.versions.toml&quot;&gt;one for Micronaut core&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;this &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-test-resources/blob/master/gradle/libs.versions.toml&quot;&gt;one for Micronaut Test Resources&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;this &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-kafka/blob/master/gradle/libs.versions.toml&quot;&gt;one for Micronaut Kafka&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;or this &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-gradle-plugin/blob/master/gradle/libs.versions.toml&quot;&gt;one for the Micronaut Gradle Plugin&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_automatic_version_upgrades&quot;&gt;Automatic version upgrades&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the advantages of version catalogs is that it provides a centralized place for versions, which can be easily used by bots to provide pull requests for dependency upgrades.
+For this, we use &lt;a href=&quot;https://docs.renovatebot.com&quot;&gt;Renovatebot&lt;/a&gt; which integrates particularly well with version catalogs (GitHub&amp;#8217;s dependabot lacks behind in terms of support).
+This allows us to get pull requests like &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-kafka/pull/660/files&quot;&gt;this one&lt;/a&gt; which are very easy to review.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_bom_and_version_catalog_generation&quot;&gt;BOM and version catalog generation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Each of the Micronaut projects is now required to provide a BOM (Bill of Materials) for users.
+Another term for a BOM that is used in the Gradle ecosystem is a &lt;em&gt;platform&lt;/em&gt;: a platform has however slightly different semantics in Maven and Gradle.
+The main goal of a BOM is to provide a list of dependencies a project works with, and, in Maven, it &lt;em&gt;can&lt;/em&gt; be used to override the dependency versions of transitive dependencies.
+While in Maven, a BOM will only influence the dependency resolution of the project which &lt;em&gt;imports&lt;/em&gt; the BOM, in Gradle a platform fully participates in dependency resolution, including when a transitive dependency depends on a a BOM.
+To simplify, a user who &lt;em&gt;imports&lt;/em&gt; a BOM may use dependencies declared in the BOM &lt;em&gt;without specifying a version&lt;/em&gt;: the version will be fetched from the BOM.
+In that regards, it looks exactly the same as a version catalog, but there are subtle differences.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, if a user imports a BOM, any transitive dependency matching a dependency found in the BOM will be overridden (Maven) or participate in conflict resolution (Gradle).
+That is &lt;em&gt;not&lt;/em&gt; the case for a catalog: it will &lt;em&gt;not&lt;/em&gt; influence the dependency resolution unless you explicitly add a dependency which belongs to the catalog.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s why Micronaut publishes &lt;em&gt;both&lt;/em&gt; a BOM and a catalog, because they address different use cases, and they work particularly well when combined together.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Micronaut modules, you will systematically find a project with the &lt;code&gt;-bom&lt;/code&gt; suffix.
+For example, Micronaut Security will have subprojects like &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-security/tree/master/security-jwt&quot;&gt;&lt;code&gt;micronaut-security-jwt&lt;/code&gt;&lt;/a&gt;, &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-security/tree/master/security-oauth2&quot;&gt;&lt;code&gt;micronaut-security-oauth2&lt;/code&gt;&lt;/a&gt; and &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-security/tree/master/security-bom&quot;&gt;&lt;code&gt;micronaut-security-bom&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The BOM project will aggregate dependencies used by the different modules.
+In order to publish a BOM file, the only thing a project has to do is to apply our convention plugin:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;plugins {
+    id &quot;io.micronaut.build.internal.bom&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note how we don&amp;#8217;t have to declare the coordinates of the BOM (group, artifact, version), nor that we have to declare how to publish to Maven Central, what dependencies should be included in the BOM, etc: &lt;em&gt;everything&lt;/em&gt; is done by convention, that&amp;#8217;s the magic of &lt;a href=&quot;https://melix.github.io/blog/2021/12/composition-in-gradle.html&quot;&gt;composition over inheritance&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Should we want to change how we generate the BOM, the only thing we would have to do is to update our internal convention plugin, then all projects would benefit from the change once they upgrade.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_convention_over_configuration&quot;&gt;Convention over configuration&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to determine which dependencies should be included in our BOM, we defined &lt;em&gt;conventions&lt;/em&gt; that we use in our catalog files.
+In our internal terminology, when we want a dependency to be handled by the Micronaut framework, we call that a &lt;em&gt;managed&lt;/em&gt; dependency: a dependency that is managed by Micronaut and that users shouldn&amp;#8217;t care about in most cases: they don&amp;#8217;t have to think about a version, we will provide one for them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This directly translates to a convention in the version catalogs of the Micronaut projects: dependencies which are &lt;em&gt;managed&lt;/em&gt; need to be declared with a &lt;code&gt;managed-&lt;/code&gt; prefix in the catalog:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;toml&quot;&gt;[versions]
+...
+managed-kafka = &apos;3.4.0&apos;
+...
+zipkin-brave-kafka-clients = &apos;5.15.0&apos;
+
+[libraries]
+...
+managed-kafka-clients = { module = &apos;org.apache.kafka:kafka-clients&apos;, version.ref = &apos;managed-kafka&apos; }
+managed-kafka-streams = { module = &apos;org.apache.kafka:kafka-streams&apos;, version.ref = &apos;managed-kafka&apos; }
+...
+zipkin-brave-kafka-clients = { module = &apos;io.zipkin.brave:brave-instrumentation-kafka-clients&apos;, version.ref = &apos;zipkin-brave-kafka-clients&apos; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Those dependencies will end up in the version catalog that we generate, but &lt;em&gt;without&lt;/em&gt; the &lt;code&gt;managed-&lt;/code&gt; prefix.
+This means that we would generate a BOM which contains the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;xml&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&amp;gt;
+&amp;lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&amp;gt;
+  &amp;lt;!-- This module was also published with a richer model, Gradle metadata,  --&amp;gt;
+  &amp;lt;!-- which should be used instead. Do not delete the following line which  --&amp;gt;
+  &amp;lt;!-- is to indicate to Gradle or any Gradle module metadata file consumer  --&amp;gt;
+  &amp;lt;!-- that they should prefer consuming it instead. --&amp;gt;
+  &amp;lt;!-- do_not_remove: published-with-gradle-metadata --&amp;gt;
+  &amp;lt;modelVersion&amp;gt;4.0.0&amp;lt;/modelVersion&amp;gt;
+  &amp;lt;groupId&amp;gt;io.micronaut.kafka&amp;lt;/groupId&amp;gt;
+  &amp;lt;artifactId&amp;gt;micronaut-kafka-bom&amp;lt;/artifactId&amp;gt;
+  &amp;lt;version&amp;gt;5.0.0-SNAPSHOT&amp;lt;/version&amp;gt;
+  &amp;lt;packaging&amp;gt;pom&amp;lt;/packaging&amp;gt;
+  &amp;lt;name&amp;gt;Micronaut Kafka&amp;lt;/name&amp;gt;
+  &amp;lt;description&amp;gt;Integration between Micronaut and Kafka Messaging&amp;lt;/description&amp;gt;
+  &amp;lt;url&amp;gt;https://micronaut.io&amp;lt;/url&amp;gt;
+  &amp;lt;licenses&amp;gt;
+    &amp;lt;license&amp;gt;
+      &amp;lt;name&amp;gt;The Apache Software License, Version 2.0&amp;lt;/name&amp;gt;
+      &amp;lt;url&amp;gt;http://www.apache.org/licenses/LICENSE-2.0.txt&amp;lt;/url&amp;gt;
+      &amp;lt;distribution&amp;gt;repo&amp;lt;/distribution&amp;gt;
+    &amp;lt;/license&amp;gt;
+  &amp;lt;/licenses&amp;gt;
+  &amp;lt;scm&amp;gt;
+    &amp;lt;url&amp;gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&amp;lt;/url&amp;gt;
+    &amp;lt;connection&amp;gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&amp;lt;/connection&amp;gt;
+    &amp;lt;developerConnection&amp;gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&amp;lt;/developerConnection&amp;gt;
+  &amp;lt;/scm&amp;gt;
+  &amp;lt;developers&amp;gt;
+    &amp;lt;developer&amp;gt;
+      &amp;lt;id&amp;gt;graemerocher&amp;lt;/id&amp;gt;
+      &amp;lt;name&amp;gt;Graeme Rocher&amp;lt;/name&amp;gt;
+    &amp;lt;/developer&amp;gt;
+  &amp;lt;/developers&amp;gt;
+  &amp;lt;properties&amp;gt;
+    &amp;lt;micronaut.kafka.version&amp;gt;5.0.0-SNAPSHOT&amp;lt;/micronaut.kafka.version&amp;gt;
+    &amp;lt;kafka.version&amp;gt;3.4.0&amp;lt;/kafka.version&amp;gt;
+  &amp;lt;/properties&amp;gt;
+  &amp;lt;dependencyManagement&amp;gt;
+    &amp;lt;dependencies&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;org.apache.kafka&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;kafka-clients&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${kafka.compat.version}&amp;lt;/version&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;org.apache.kafka&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;kafka-streams&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${kafka.version}&amp;lt;/version&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;io.micronaut.kafka&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;micronaut-kafka&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${micronaut.kafka.version}&amp;lt;/version&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;io.micronaut.kafka&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;micronaut-kafka-streams&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${micronaut.kafka.version}&amp;lt;/version&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+    &amp;lt;/dependencies&amp;gt;
+  &amp;lt;/dependencyManagement&amp;gt;
+&amp;lt;/project&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note how we automatically translated the &lt;code&gt;managed-kafka&lt;/code&gt; property into a BOM property &lt;code&gt;kafka.version&lt;/code&gt;, which is used in the &lt;code&gt;&amp;lt;dependencyManagement&amp;gt;&lt;/code&gt; block.
+Dependencies which do &lt;em&gt;not&lt;/em&gt; start with &lt;code&gt;managed-&lt;/code&gt; &lt;strong&gt;are not included&lt;/strong&gt; in our generated BOM.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s now look at the version catalog that we generate:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;toml&quot;&gt;#
+# This file has been generated by Gradle and is intended to be consumed by Gradle
+#
+[metadata]
+format.version = &quot;1.1&quot;
+
+[versions]
+kafka = &quot;3.4.0&quot;
+kafka-compat = &quot;3.4.0&quot;
+micronaut-kafka = &quot;5.0.0-SNAPSHOT&quot;
+
+[libraries]
+kafka = {group = &quot;org.apache.kafka&quot;, name = &quot;kafka-clients&quot;, version.ref = &quot;kafka-compat&quot; }
+kafka-clients = {group = &quot;org.apache.kafka&quot;, name = &quot;kafka-clients&quot;, version.ref = &quot;kafka&quot; }
+kafka-streams = {group = &quot;org.apache.kafka&quot;, name = &quot;kafka-streams&quot;, version.ref = &quot;kafka&quot; }
+micronaut-kafka = {group = &quot;io.micronaut.kafka&quot;, name = &quot;micronaut-kafka&quot;, version.ref = &quot;micronaut-kafka&quot; }
+micronaut-kafka-bom = {group = &quot;io.micronaut.kafka&quot;, name = &quot;micronaut-kafka-bom&quot;, version.ref = &quot;micronaut-kafka&quot; }
+micronaut-kafka-streams = {group = &quot;io.micronaut.kafka&quot;, name = &quot;micronaut-kafka-streams&quot;, version.ref = &quot;micronaut-kafka&quot; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Given a &lt;em&gt;single&lt;/em&gt; input, the version catalog that we use to build our Micronaut module, our build conventions let us automatically declare which dependencies should land in the &lt;em&gt;output&lt;/em&gt; BOM and version catalogs that we generate for that project!
+Unlike Maven BOMs which either &lt;em&gt;have to&lt;/em&gt; be a parent POM &lt;em&gt;or&lt;/em&gt; redeclare all dependencies in an independent module, in Gradle we can generate these automatically and completely decouple the output BOM from what is required to build our project.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In general, all &lt;em&gt;api&lt;/em&gt; dependencies must be managed, so in the example above, the Micronaut Kafka build scripts would have an API dependency on &lt;code&gt;kafka-clients&lt;/code&gt;, which we can find in the main project build script:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+    api libs.managed.kafka.clients
+    ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The benefit of generating a version catalog for a user is that there is now a &lt;a href=&quot;https://repo1.maven.org/maven2/io/micronaut/kafka/micronaut-kafka-bom/4.5.2/micronaut-kafka-bom-4.5.2.toml&quot;&gt;Micronaut Kafka version catalog published on Maven Central&lt;/a&gt;, alongside the BOM file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This catalog can be imported by a user in their settings file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencyResolutionManagement {
+    versionCatalogs {
+         create(&quot;mnKafka&quot;) {
+             from(&quot;io.micronaut.kafka:micronaut-kafka-bom:4.5.2&quot;)
+         }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then the dependency on Micronaut Kafka and its managed dependencies can be used in a build script using the &lt;code&gt;mnKafka&lt;/code&gt; prefix:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+    implementation mnKafka.micronaut.kafka
+    implementation mnKafka.kafka.clients
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A user doesn&amp;#8217;t have to know about the dependency coordinates of Kafka clients: the IDE (at least IntelliJ IDEA) would provide completion automatically!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_bom_composition&quot;&gt;BOM composition&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Micronaut 3.x, there is a problem that we intend to fix in Micronaut 4 regarding our &quot;main&quot; BOM: the Micronaut core BOM is considered as our &quot;platform&quot; BOM, in the sense that it aggregates BOMs of various Micronaut modules.
+This makes it hard to release newer versions of Micronaut which, for example, only upgrade particular modules of Micronaut.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore in Micronaut 4, we are cleanly separating the &quot;core&quot; BOM, from the new &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-platform&quot;&gt;platform BOM&lt;/a&gt;.
+It is interesting in this blog post because it offers us the opportunity to show how we are capable of generating &lt;em&gt;aggregating BOMs&lt;/em&gt; and &lt;em&gt;aggregated catalogs&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the platform BOM module, you can find the &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-platform/blob/master/gradle/libs.versions.toml&quot;&gt;&quot;input&quot; catalog&lt;/a&gt; that we use, and only consists of &lt;code&gt;managed-&lt;/code&gt; dependencies.
+Most of those dependencies are simply dependencies on other Micronaut BOMs: this is an &quot;aggregating&quot; BOM, which imports other BOMs.
+This is, therefore, the only BOM that a user would effectively have to use when migrating to Micronaut 4: instead of importing all BOMs for the different Micronaut modules they use, they can simply import the Micronaut Platform BOM, which will then automatically include the BOMs of other modules which &quot;work well together&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This allows us to &lt;strong&gt;decouple the releases&lt;/strong&gt; of the framework from the releases of Micronaut core itself.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, there is a subtlety about aggregating BOMs in Maven: they are not regular dependencies, but dependencies with the &lt;code&gt;import&lt;/code&gt; scope.
+This means that we must make a difference between a &quot;managed dependency&quot; and an &quot;imported BOM&quot; in our input catalog.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To do this, we have &lt;em&gt;another&lt;/em&gt; naming convention, which is to use the &lt;code&gt;boms-&lt;/code&gt; prefix for imported BOMs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;toml&quot;&gt;[versions]
+...
+managed-micronaut-aws = &quot;4.0.0-SNAPSHOT&quot;
+managed-micronaut-azure = &quot;5.0.0-SNAPSHOT&quot;
+managed-micronaut-cache = &quot;4.0.0-SNAPSHOT&quot;
+managed-micronaut-core = &quot;4.0.0-SNAPSHOT&quot;
+...
+
+[libraries]
+...
+boms-micronaut-aws = { module = &quot;io.micronaut.aws:micronaut-aws-bom&quot;, version.ref = &quot;managed-micronaut-aws&quot; }
+boms-micronaut-azure = { module = &quot;io.micronaut.azure:micronaut-azure-bom&quot;, version.ref = &quot;managed-micronaut-azure&quot; }
+boms-micronaut-cache = { module = &quot;io.micronaut.cache:micronaut-cache-bom&quot;, version.ref = &quot;managed-micronaut-cache&quot; }
+boms-micronaut-core = { module = &quot;io.micronaut:micronaut-core-bom&quot;, version.ref = &quot;managed-micronaut-core&quot; }
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This results in the following BOM file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;xml&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&amp;gt;
+&amp;lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&amp;gt;
+  &amp;lt;modelVersion&amp;gt;4.0.0&amp;lt;/modelVersion&amp;gt;
+  &amp;lt;groupId&amp;gt;io.micronaut.platform&amp;lt;/groupId&amp;gt;
+  &amp;lt;artifactId&amp;gt;micronaut-platform&amp;lt;/artifactId&amp;gt;
+  &amp;lt;version&amp;gt;4.0.0-SNAPSHOT&amp;lt;/version&amp;gt;
+  &amp;lt;packaging&amp;gt;pom&amp;lt;/packaging&amp;gt;
+  &amp;lt;name&amp;gt;Micronaut Platform&amp;lt;/name&amp;gt;
+  &amp;lt;description&amp;gt;Bill-Of-Materials (BOM) and Gradle version catalogs for Micronaut&amp;lt;/description&amp;gt;
+
+  ...
+
+  &amp;lt;properties&amp;gt;
+    ...
+    &amp;lt;micronaut.aws.version&amp;gt;4.0.0-SNAPSHOT&amp;lt;/micronaut.aws.version&amp;gt;
+    &amp;lt;micronaut.azure.version&amp;gt;5.0.0-SNAPSHOT&amp;lt;/micronaut.azure.version&amp;gt;
+    &amp;lt;micronaut.cache.version&amp;gt;4.0.0-SNAPSHOT&amp;lt;/micronaut.cache.version&amp;gt;
+    &amp;lt;micronaut.core.version&amp;gt;4.0.0-SNAPSHOT&amp;lt;/micronaut.core.version&amp;gt;
+    ...
+  &amp;lt;/properties&amp;gt;
+  &amp;lt;dependencyManagement&amp;gt;
+    &amp;lt;dependencies&amp;gt;
+      ...
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;io.micronaut.aws&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;micronaut-aws-bom&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${micronaut.aws.version}&amp;lt;/version&amp;gt;
+        &amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;
+        &amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;io.micronaut.azure&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;micronaut-azure-bom&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${micronaut.azure.version}&amp;lt;/version&amp;gt;
+        &amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;
+        &amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;io.micronaut.cache&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;micronaut-cache-bom&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${micronaut.cache.version}&amp;lt;/version&amp;gt;
+        &amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;
+        &amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      &amp;lt;dependency&amp;gt;
+        &amp;lt;groupId&amp;gt;io.micronaut&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;micronaut-core-bom&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;${micronaut.core.version}&amp;lt;/version&amp;gt;
+        &amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;
+        &amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;
+      &amp;lt;/dependency&amp;gt;
+      ...
+    &amp;lt;/dependencies&amp;gt;
+  &amp;lt;/dependencyManagement&amp;gt;
+&amp;lt;/project&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A more interesting topic to discuss is what we can do with version catalogs that we publish for users: we can &lt;strong&gt;inline dependency aliases&lt;/strong&gt; from each of the imported catalogs into the platform catalog.
+All dependencies in the catalog files of each modules are directly available in the platform catalog:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;toml&quot;&gt;[versions]
+dekorate = &quot;1.0.3&quot;
+elasticsearch = &quot;7.17.8&quot;
+...
+micronaut-aws = &quot;4.0.0-SNAPSHOT&quot;
+micronaut-azure = &quot;5.0.0-SNAPSHOT&quot;
+micronaut-cache = &quot;4.0.0-SNAPSHOT&quot;
+micronaut-core = &quot;4.0.0-SNAPSHOT&quot;
+...
+
+[libraries]
+alexa-ask-sdk = {group = &quot;com.amazon.alexa&quot;, name = &quot;ask-sdk&quot;, version = &quot;&quot; }
+alexa-ask-sdk-core = {group = &quot;com.amazon.alexa&quot;, name = &quot;ask-sdk-core&quot;, version = &quot;&quot; }
+alexa-ask-sdk-lambda = {group = &quot;com.amazon.alexa&quot;, name = &quot;ask-sdk-lambda-support&quot;, version = &quot;&quot; }
+aws-java-sdk-core = {group = &quot;com.amazonaws&quot;, name = &quot;aws-java-sdk-core&quot;, version = &quot;&quot; }
+aws-lambda-core = {group = &quot;com.amazonaws&quot;, name = &quot;aws-lambda-java-core&quot;, version = &quot;&quot; }
+aws-lambda-events = {group = &quot;com.amazonaws&quot;, name = &quot;aws-lambda-java-events&quot;, version = &quot;&quot; }
+aws-serverless-core = {group = &quot;com.amazonaws.serverless&quot;, name = &quot;aws-serverless-java-container-core&quot;, version = &quot;&quot; }
+awssdk-secretsmanager = {group = &quot;software.amazon.awssdk&quot;, name = &quot;secretsmanager&quot;, version = &quot;&quot; }
+azure-cosmos = {group = &quot;com.azure&quot;, name = &quot;azure-cosmos&quot;, version = &quot;&quot; }
+azure-functions-java-library = {group = &quot;com.microsoft.azure.functions&quot;, name = &quot;azure-functions-java-library&quot;, version = &quot;&quot; }
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;code&gt;alexa-ask-sdk&lt;/code&gt; is for example an alias which was originally declared in the &lt;code&gt;micronaut-aws&lt;/code&gt; module.
+Because we aggregate all catalogs, we can inline those aliases and make them directly available in user build scripts:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencyResolutionManagement {
+    versionCatalogs {
+         create(&quot;mnKafka&quot;) {
+             from(&quot;io.micronaut.platform:micronaut-platform:4.0.0-SNAPSHOT&quot;)
+         }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+...
+    implementation(mn.micronaut.aws.alexa)
+    implementation(mn.alexa.sdk)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Generating a version catalog offers us a very pragmatic way to define all dependencies that users can use in their build scripts with guarantees that they work well together.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_technical_details&quot;&gt;Technical details&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you survived reading up to this point, you may be interested in learning how, technically, we implemented this.
+You can take a look at our &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-build&quot;&gt;internal build plugins&lt;/a&gt;, but more specifically at the &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-build/blob/master/src/main/groovy/io/micronaut/build/MicronautBomPlugin.java&quot;&gt;BOM plugin&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to generate our BOM and version catalogs, we have mainly 2 inputs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;the list of subprojects which need to participate in the BOM: in a Micronaut modules, we explained that we have several kinds of projects: libraries which are published, test suites, etc. Only a subset of these need to belong to the BOM, and we can determine that list automatically because each project applies a &lt;em&gt;convention plugin&lt;/em&gt; which determines its kind. Only projects of a particular kind are included. Should exceptions be required, we have a &lt;code&gt;MicronautBomExtension&lt;/code&gt; which allows us to configure more precisely what to include or not, via a nice DSL.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the list of dependencies, which is determined from the project&amp;#8217;s version catalog&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One issue is that while Gradle provides automatically the generated, type-safe accessors for version catalogs, there is actually no built-in model that you can access to represent the catalog &lt;em&gt;model&lt;/em&gt; itself (what is an alias, references to versions, etc): the type-safe API represents a &quot;realized&quot; catalog, but not a low-level model that we can easily manipulate.
+This means that we had to implement our &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-build/blob/master/src/main/java/io/micronaut/build/catalogs/internal/VersionCatalogTomlModel.java#L29&quot;&gt;own model for this&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We have also seen that we can generate a single platform, aggregating all Micronaut modules for a release, that the users can import into their build scripts.
+Unfortunately it is not the case for the Micronaut modules themselves: for example, Micronaut Core &lt;em&gt;must not&lt;/em&gt; depend on other Micronaut modules, but, for example, Micronaut Data can depend on Micronaut SQL and use dependencies from the Micronaut SQL catalog.
+Those modules &lt;em&gt;cannot&lt;/em&gt; depend on the platform BOM, because this is the aggregating BOM, so we would create a &lt;em&gt;cyclic dependency&lt;/em&gt; and wouldn&amp;#8217;t be able to release any module.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To mitigate this problem, our internal build plugins expose a DSL which allows each projects to declare which other modules they use:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;settings.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;micronautBuild {
+    importMicronautCatalog() // exposes a `mn` catalog
+    importMicronautCatalog(&quot;micronaut-reactor&quot;) // exposes a `mnReactor` catalog
+    importMicronautCatalog(&quot;micronaut-rxjava2&quot;) // exposes a `mnRxjava2` catalog
+    ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While this is simple from the &lt;em&gt;declaration site&lt;/em&gt; point of view, it is less practical from a &lt;em&gt;consuming&lt;/em&gt; point of view, since it forces us to use &lt;em&gt;different namespaces&lt;/em&gt; for each imported catalog:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;gradle&quot;&gt;dependencies {
+    ...
+    testImplementation mn.micronaut.inject.groovy
+    testImplementation mnRxjava2.micronaut.rxjava2
+    ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It would have been better if we could actually merge several catalogs into a single one, but unfortunately that feature &lt;a href=&quot;https://github.com/gradle/gradle/issues/20383&quot;&gt;has been removed from Gradle&lt;/a&gt;.
+I still have hope that this will eventually be implemented, because not having this creates unnecessary boilerplate in build scripts and redundancy in names (e.g &lt;code&gt;implementation mnValidation.micronaut.validation&lt;/code&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_additional_benefits_and_conclusion&quot;&gt;Additional benefits and conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All that I described in this article aren&amp;#8217;t the only benefits that we have on standardizing on version catalogs.
+For example, we have tasks which allow us to check that our generated BOM files only reference dependencies which are actually published on Maven Central, or that there are no SNAPSHOT dependencies when we perform a release.
+In the end, while most of the Micronaut developers had no idea what a version catalog was when I joined the team, all of them pro-actively migrated projects to use them because, I think, they immediately saw the benefits and value.
+It also streamlined the dependency upgrade process which was still a bit cumbersome before, despite using dependabot.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We now have a very pragmatic way to both use catalogs for building our own projects, and generating BOMs and version catalogs which can be used by both our Maven and Gradle users.
+Of course, only the Gradle users will benefit from the version catalogs, but we did that in a way which doesn&amp;#8217;t affect our Maven users (and if you use Maven, I strongly encourage you to evaluate building Micronaut projects with Gradle instead, since the UX is much better).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I cannot end this blog post without mentioning a &quot;problem&quot; that we have today, which is that if you use &lt;a href=&quot;https://micronaut.io/launch&quot;&gt;Micronaut Launch&lt;/a&gt; to generate a Micronaut project, then it will &lt;em&gt;not&lt;/em&gt; use version catalogs.
+We have an &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-starter/issues/1385&quot;&gt;issue for this&lt;/a&gt; and pull requests are very welcome!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Gradle&amp;#8217;s flexibility in action</title>
       <link>https://melix.github.io/blog//2023/gradle-synthetic-projects.html</link>

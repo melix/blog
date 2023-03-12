@@ -73,6 +73,638 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2023/03-12-micronaut-catalogs.html"><h1>How the Micronaut team leverages Gradle&#8217;s version catalogs for improved developer productivity</h1></a>
+  			<p>12 March 2023</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/micronaut.html">micronaut</a> 
+	
+		<a href="/blog/tags/gradle.html">gradle</a> 
+	
+		<a href="/blog/tags/version-catalogs.html">version catalogs</a> 
+	
+		<a href="/blog/tags/graalvm.html">graalvm</a> 
+	
+		<a href="/blog/tags/maven.html">maven</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This blog post discusses how the Micronaut development team makes use of a feature of Gradle, <a href="https://docs.gradle.org/current/userguide/platforms.html">version catalogs</a>, to improve the team&#8217;s developer productivity, reduce the risks of publishing broken releases, coordinate the releases of a large number of modules and, last but not least, provide additional features to our Gradle users.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_backstory">The backstory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://micronaut.io/">Micronaut Framework</a> is a modern open-source framework for building JVM applications.
+It can be used to build all kinds of applications, from CLI applications to microservices or even good old monoliths.
+It supports deploying both to the JVM and native executables (using <a href="https://graalvm.org">GraalVM</a>), making it particularly suitable for all kind of environments.
+A key feature of the Micronaut framework is developer productivity: we do everything we can to make things faster for developers.
+In particular, Micronaut has a strong emphasis on easing how you test your applications, even in native mode.
+For this we have built a number of tools, including our <a href="https://micronaut-projects.github.io/micronaut-maven-plugin/latest/">Maven</a> and <a href="https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/">Gradle</a> plugins.</p>
+</div>
+<div class="paragraph">
+<p>When I joined the Micronaut team almost a couple years back, I was given the responsibility of improving the team&#8217;s own developer productivity.
+It was an exciting assignment, not only because I knew the team&#8217;s love about Gradle, but because I also knew that there were many things we could do to reduce the feedback time, to provide more insights about failures, to detect flaky tests, etc.
+As part of this work we have put in place a partnership with <a href="https://gradle.com">Gradle Inc</a> which kindly provides us with a <a href="https://ge.micronaut.io">Gradle Enterprise instance</a>, but this is not what I want to talk about today.</p>
+</div>
+<div class="paragraph">
+<p>Lately I was listening to an <a href="https://www.youtube.com/watch?v=Gr96IxKwPeE">interview of Aurimas Liutikas</a> of the AndroidX team, who was saying that he didn&#8217;t think that version catalogs were a good solution for library authors to share their recommendations of versions, and that BOMs are probably a better solution for this.
+I pinged him saying that I disagreed with this statement and offered to provide more details why, if he was interested.
+This is therefore a long answer, but one which will be easier to find than a <a href="https://androiddev.social/@Aurimas/110000457198553518">thread on social media</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_are_version_catalogs">What are version catalogs?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s start with the basics: a version catalog is, like the name implies, a catalog of versions to pick from, nothing more.
+That doesn&#8217;t sound too much exciting, and what versions are we talking about?
+That&#8217;s version of <em>libraries</em> or <em>plugins</em> that you use in your build.</p>
+</div>
+<div class="paragraph">
+<p>As an illustration, here is a version catalog, defined as a TOML file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="toml">[versions]
+javapoet = "1.13.0"
+
+[libraries]
+javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then this library <em>can</em> be used in a <code>dependencies</code> declaration block in any of the project&#8217;s build script using a <em>type-safe notation</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+    implementation(libs.javapoet) {
+        because("required for Java source code generation")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>which is <em>strictly equivalent</em> to writing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+    implementation("com.squareup:javapoet:1.13.0") {
+        because("required for Java source code generation")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are many advantages of using version catalogs to declare your library versions, but most notably it provides a single, standard location where those versions are declared.
+It is important to understand that a catalog is simply a <em>list of dependencies you can pick from</em>, a bit like going to the supermarket and choosing whatever you need for your particular meal: it&#8217;s not because a catalog declares libraries that you <em>have to</em> use them.
+However, a catalog provides you with <em>recommendations</em> of libraries to pick from.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_version_catalogs_for_micronaut_users">Version catalogs for Micronaut users</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An interesting aspect of version catalogs is that they can be published, for others to consume: they are an artifact.
+Micronaut users can already make use of catalogs, as I have explained in a <a href="https://melix.github.io/blog/2022/02/micronaut-version-catalog.html">previous blog post</a>.
+This makes it possible for a user who doesn&#8217;t know which version of Micronaut Data to use, to simply declare:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+    implementation mn.micronaut.data
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>People familiar with Maven BOMs can easily think that it is the same feature, but there are <a href="https://docs.gradle.org/current/userguide/platforms.html#sub:platforms-vs-catalog">key differences which are described in the Gradle docs</a>.</p>
+</div>
+<div class="paragraph">
+<p>In the rest of this post we will now focus on how we generate those catalogs, and how they effectively help us in improving our own developer productivity.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_the_micronaut_team_uses_version_catalogs">How the Micronaut team uses version catalogs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_one_catalog_per_module">One catalog per module</h3>
+<div class="paragraph">
+<p>As I said, the Micronaut framework consists of a large number of modules which live in their own Git repository.
+All the projects share the same layout, the same conventions in order to make things easier to maintain.
+For this purpose, we use our own collection of <a href="https://github.com/micronaut-projects/micronaut-build">internal build plugins</a> as well as a <a href="https://github.com/micronaut-projects/micronaut-project-template">project template</a>.</p>
+</div>
+<div class="paragraph">
+<p>Those build plugins provide features like:
+- defining the default Java language level, setting up code conventions and code quality plugins
+- standardizing how documentation is built (using Asciidoctor)
+- setting up integration with Gradle Enterprise, to publish build scans, configure the build cache and predictive test selection
+- implementing binary compatibility checks between releases
+- configuring publication to Maven Central
+- providing a high-level model of what a Micronaut module is</p>
+</div>
+<div class="paragraph">
+<p>The last item is particularly important: in every Micronaut project, we have different kind of modules: libraries (which are published to Maven Central for users to consume), internal support libraries (which are not intended for external consumption), or a BOM module (which also publishes a version catalog as we&#8217;re going to see).</p>
+</div>
+<div class="paragraph">
+<p>Long story short: <strong>we heavily rely on conventions to reduce the maintenance costs, have consistent builds, with improved performance and higher quality standards</strong>.
+If you are interested in why we have such plugins, Sergio Delamo and I gave an <a href="https://www.youtube.com/watch?v=fpz63IwFIZM">interview about this</a> a few months ago (alert: the thumbnail shows I have hair, this is fake news!).</p>
+</div>
+<div class="paragraph">
+<p>Each of our projects declares a version catalog, for example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>this <a href="https://github.com/micronaut-projects/micronaut-core/blob/4.0.x/gradle/libs.versions.toml">one for Micronaut core</a></p>
+</li>
+<li>
+<p>this <a href="https://github.com/micronaut-projects/micronaut-test-resources/blob/master/gradle/libs.versions.toml">one for Micronaut Test Resources</a></p>
+</li>
+<li>
+<p>this <a href="https://github.com/micronaut-projects/micronaut-kafka/blob/master/gradle/libs.versions.toml">one for Micronaut Kafka</a></p>
+</li>
+<li>
+<p>or this <a href="https://github.com/micronaut-projects/micronaut-gradle-plugin/blob/master/gradle/libs.versions.toml">one for the Micronaut Gradle Plugin</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_automatic_version_upgrades">Automatic version upgrades</h3>
+<div class="paragraph">
+<p>One of the advantages of version catalogs is that it provides a centralized place for versions, which can be easily used by bots to provide pull requests for dependency upgrades.
+For this, we use <a href="https://docs.renovatebot.com">Renovatebot</a> which integrates particularly well with version catalogs (GitHub&#8217;s dependabot lacks behind in terms of support).
+This allows us to get pull requests like <a href="https://github.com/micronaut-projects/micronaut-kafka/pull/660/files">this one</a> which are very easy to review.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bom_and_version_catalog_generation">BOM and version catalog generation</h3>
+<div class="paragraph">
+<p>Each of the Micronaut projects is now required to provide a BOM (Bill of Materials) for users.
+Another term for a BOM that is used in the Gradle ecosystem is a <em>platform</em>: a platform has however slightly different semantics in Maven and Gradle.
+The main goal of a BOM is to provide a list of dependencies a project works with, and, in Maven, it <em>can</em> be used to override the dependency versions of transitive dependencies.
+While in Maven, a BOM will only influence the dependency resolution of the project which <em>imports</em> the BOM, in Gradle a platform fully participates in dependency resolution, including when a transitive dependency depends on a a BOM.
+To simplify, a user who <em>imports</em> a BOM may use dependencies declared in the BOM <em>without specifying a version</em>: the version will be fetched from the BOM.
+In that regards, it looks exactly the same as a version catalog, but there are subtle differences.</p>
+</div>
+<div class="paragraph">
+<p>For example, if a user imports a BOM, any transitive dependency matching a dependency found in the BOM will be overridden (Maven) or participate in conflict resolution (Gradle).
+That is <em>not</em> the case for a catalog: it will <em>not</em> influence the dependency resolution unless you explicitly add a dependency which belongs to the catalog.</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s why Micronaut publishes <em>both</em> a BOM and a catalog, because they address different use cases, and they work particularly well when combined together.</p>
+</div>
+<div class="paragraph">
+<p>In Micronaut modules, you will systematically find a project with the <code>-bom</code> suffix.
+For example, Micronaut Security will have subprojects like <a href="https://github.com/micronaut-projects/micronaut-security/tree/master/security-jwt"><code>micronaut-security-jwt</code></a>, <a href="https://github.com/micronaut-projects/micronaut-security/tree/master/security-oauth2"><code>micronaut-security-oauth2</code></a> and <a href="https://github.com/micronaut-projects/micronaut-security/tree/master/security-bom"><code>micronaut-security-bom</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>The BOM project will aggregate dependencies used by the different modules.
+In order to publish a BOM file, the only thing a project has to do is to apply our convention plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">plugins {
+    id "io.micronaut.build.internal.bom"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note how we don&#8217;t have to declare the coordinates of the BOM (group, artifact, version), nor that we have to declare how to publish to Maven Central, what dependencies should be included in the BOM, etc: <em>everything</em> is done by convention, that&#8217;s the magic of <a href="https://melix.github.io/blog/2021/12/composition-in-gradle.html">composition over inheritance</a>.</p>
+</div>
+<div class="paragraph">
+<p>Should we want to change how we generate the BOM, the only thing we would have to do is to update our internal convention plugin, then all projects would benefit from the change once they upgrade.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_convention_over_configuration">Convention over configuration</h3>
+<div class="paragraph">
+<p>In order to determine which dependencies should be included in our BOM, we defined <em>conventions</em> that we use in our catalog files.
+In our internal terminology, when we want a dependency to be handled by the Micronaut framework, we call that a <em>managed</em> dependency: a dependency that is managed by Micronaut and that users shouldn&#8217;t care about in most cases: they don&#8217;t have to think about a version, we will provide one for them.</p>
+</div>
+<div class="paragraph">
+<p>This directly translates to a convention in the version catalogs of the Micronaut projects: dependencies which are <em>managed</em> need to be declared with a <code>managed-</code> prefix in the catalog:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="toml">[versions]
+...
+managed-kafka = '3.4.0'
+...
+zipkin-brave-kafka-clients = '5.15.0'
+
+[libraries]
+...
+managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
+managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'managed-kafka' }
+...
+zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Those dependencies will end up in the version catalog that we generate, but <em>without</em> the <code>managed-</code> prefix.
+This means that we would generate a BOM which contains the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;!-- This module was also published with a richer model, Gradle metadata,  --&gt;
+  &lt;!-- which should be used instead. Do not delete the following line which  --&gt;
+  &lt;!-- is to indicate to Gradle or any Gradle module metadata file consumer  --&gt;
+  &lt;!-- that they should prefer consuming it instead. --&gt;
+  &lt;!-- do_not_remove: published-with-gradle-metadata --&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+  &lt;artifactId&gt;micronaut-kafka-bom&lt;/artifactId&gt;
+  &lt;version&gt;5.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;packaging&gt;pom&lt;/packaging&gt;
+  &lt;name&gt;Micronaut Kafka&lt;/name&gt;
+  &lt;description&gt;Integration between Micronaut and Kafka Messaging&lt;/description&gt;
+  &lt;url&gt;https://micronaut.io&lt;/url&gt;
+  &lt;licenses&gt;
+    &lt;license&gt;
+      &lt;name&gt;The Apache Software License, Version 2.0&lt;/name&gt;
+      &lt;url&gt;http://www.apache.org/licenses/LICENSE-2.0.txt&lt;/url&gt;
+      &lt;distribution&gt;repo&lt;/distribution&gt;
+    &lt;/license&gt;
+  &lt;/licenses&gt;
+  &lt;scm&gt;
+    &lt;url&gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&lt;/url&gt;
+    &lt;connection&gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&lt;/connection&gt;
+    &lt;developerConnection&gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&lt;/developerConnection&gt;
+  &lt;/scm&gt;
+  &lt;developers&gt;
+    &lt;developer&gt;
+      &lt;id&gt;graemerocher&lt;/id&gt;
+      &lt;name&gt;Graeme Rocher&lt;/name&gt;
+    &lt;/developer&gt;
+  &lt;/developers&gt;
+  &lt;properties&gt;
+    &lt;micronaut.kafka.version&gt;5.0.0-SNAPSHOT&lt;/micronaut.kafka.version&gt;
+    &lt;kafka.version&gt;3.4.0&lt;/kafka.version&gt;
+  &lt;/properties&gt;
+  &lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
+        &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
+        &lt;version&gt;${kafka.compat.version}&lt;/version&gt;
+      &lt;/dependency&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
+        &lt;artifactId&gt;kafka-streams&lt;/artifactId&gt;
+        &lt;version&gt;${kafka.version}&lt;/version&gt;
+      &lt;/dependency&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+        &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
+        &lt;version&gt;${micronaut.kafka.version}&lt;/version&gt;
+      &lt;/dependency&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+        &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
+        &lt;version&gt;${micronaut.kafka.version}&lt;/version&gt;
+      &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+  &lt;/dependencyManagement&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note how we automatically translated the <code>managed-kafka</code> property into a BOM property <code>kafka.version</code>, which is used in the <code>&lt;dependencyManagement&gt;</code> block.
+Dependencies which do <em>not</em> start with <code>managed-</code> <strong>are not included</strong> in our generated BOM.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s now look at the version catalog that we generate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="toml">#
+# This file has been generated by Gradle and is intended to be consumed by Gradle
+#
+[metadata]
+format.version = "1.1"
+
+[versions]
+kafka = "3.4.0"
+kafka-compat = "3.4.0"
+micronaut-kafka = "5.0.0-SNAPSHOT"
+
+[libraries]
+kafka = {group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka-compat" }
+kafka-clients = {group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka" }
+kafka-streams = {group = "org.apache.kafka", name = "kafka-streams", version.ref = "kafka" }
+micronaut-kafka = {group = "io.micronaut.kafka", name = "micronaut-kafka", version.ref = "micronaut-kafka" }
+micronaut-kafka-bom = {group = "io.micronaut.kafka", name = "micronaut-kafka-bom", version.ref = "micronaut-kafka" }
+micronaut-kafka-streams = {group = "io.micronaut.kafka", name = "micronaut-kafka-streams", version.ref = "micronaut-kafka" }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a <em>single</em> input, the version catalog that we use to build our Micronaut module, our build conventions let us automatically declare which dependencies should land in the <em>output</em> BOM and version catalogs that we generate for that project!
+Unlike Maven BOMs which either <em>have to</em> be a parent POM <em>or</em> redeclare all dependencies in an independent module, in Gradle we can generate these automatically and completely decouple the output BOM from what is required to build our project.</p>
+</div>
+<div class="paragraph">
+<p>In general, all <em>api</em> dependencies must be managed, so in the example above, the Micronaut Kafka build scripts would have an API dependency on <code>kafka-clients</code>, which we can find in the main project build script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+    api libs.managed.kafka.clients
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The benefit of generating a version catalog for a user is that there is now a <a href="https://repo1.maven.org/maven2/io/micronaut/kafka/micronaut-kafka-bom/4.5.2/micronaut-kafka-bom-4.5.2.toml">Micronaut Kafka version catalog published on Maven Central</a>, alongside the BOM file.</p>
+</div>
+<div class="paragraph">
+<p>This catalog can be imported by a user in their settings file:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencyResolutionManagement {
+    versionCatalogs {
+         create("mnKafka") {
+             from("io.micronaut.kafka:micronaut-kafka-bom:4.5.2")
+         }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the dependency on Micronaut Kafka and its managed dependencies can be used in a build script using the <code>mnKafka</code> prefix:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+    implementation mnKafka.micronaut.kafka
+    implementation mnKafka.kafka.clients
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A user doesn&#8217;t have to know about the dependency coordinates of Kafka clients: the IDE (at least IntelliJ IDEA) would provide completion automatically!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bom_composition">BOM composition</h3>
+<div class="paragraph">
+<p>In Micronaut 3.x, there is a problem that we intend to fix in Micronaut 4 regarding our "main" BOM: the Micronaut core BOM is considered as our "platform" BOM, in the sense that it aggregates BOMs of various Micronaut modules.
+This makes it hard to release newer versions of Micronaut which, for example, only upgrade particular modules of Micronaut.</p>
+</div>
+<div class="paragraph">
+<p>Therefore in Micronaut 4, we are cleanly separating the "core" BOM, from the new <a href="https://github.com/micronaut-projects/micronaut-platform">platform BOM</a>.
+It is interesting in this blog post because it offers us the opportunity to show how we are capable of generating <em>aggregating BOMs</em> and <em>aggregated catalogs</em>.</p>
+</div>
+<div class="paragraph">
+<p>In the platform BOM module, you can find the <a href="https://github.com/micronaut-projects/micronaut-platform/blob/master/gradle/libs.versions.toml">"input" catalog</a> that we use, and only consists of <code>managed-</code> dependencies.
+Most of those dependencies are simply dependencies on other Micronaut BOMs: this is an "aggregating" BOM, which imports other BOMs.
+This is, therefore, the only BOM that a user would effectively have to use when migrating to Micronaut 4: instead of importing all BOMs for the different Micronaut modules they use, they can simply import the Micronaut Platform BOM, which will then automatically include the BOMs of other modules which "work well together".</p>
+</div>
+<div class="paragraph">
+<p>This allows us to <strong>decouple the releases</strong> of the framework from the releases of Micronaut core itself.</p>
+</div>
+<div class="paragraph">
+<p>However, there is a subtlety about aggregating BOMs in Maven: they are not regular dependencies, but dependencies with the <code>import</code> scope.
+This means that we must make a difference between a "managed dependency" and an "imported BOM" in our input catalog.</p>
+</div>
+<div class="paragraph">
+<p>To do this, we have <em>another</em> naming convention, which is to use the <code>boms-</code> prefix for imported BOMs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="toml">[versions]
+...
+managed-micronaut-aws = "4.0.0-SNAPSHOT"
+managed-micronaut-azure = "5.0.0-SNAPSHOT"
+managed-micronaut-cache = "4.0.0-SNAPSHOT"
+managed-micronaut-core = "4.0.0-SNAPSHOT"
+...
+
+[libraries]
+...
+boms-micronaut-aws = { module = "io.micronaut.aws:micronaut-aws-bom", version.ref = "managed-micronaut-aws" }
+boms-micronaut-azure = { module = "io.micronaut.azure:micronaut-azure-bom", version.ref = "managed-micronaut-azure" }
+boms-micronaut-cache = { module = "io.micronaut.cache:micronaut-cache-bom", version.ref = "managed-micronaut-cache" }
+boms-micronaut-core = { module = "io.micronaut:micronaut-core-bom", version.ref = "managed-micronaut-core" }
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This results in the following BOM file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;io.micronaut.platform&lt;/groupId&gt;
+  &lt;artifactId&gt;micronaut-platform&lt;/artifactId&gt;
+  &lt;version&gt;4.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;packaging&gt;pom&lt;/packaging&gt;
+  &lt;name&gt;Micronaut Platform&lt;/name&gt;
+  &lt;description&gt;Bill-Of-Materials (BOM) and Gradle version catalogs for Micronaut&lt;/description&gt;
+
+  ...
+
+  &lt;properties&gt;
+    ...
+    &lt;micronaut.aws.version&gt;4.0.0-SNAPSHOT&lt;/micronaut.aws.version&gt;
+    &lt;micronaut.azure.version&gt;5.0.0-SNAPSHOT&lt;/micronaut.azure.version&gt;
+    &lt;micronaut.cache.version&gt;4.0.0-SNAPSHOT&lt;/micronaut.cache.version&gt;
+    &lt;micronaut.core.version&gt;4.0.0-SNAPSHOT&lt;/micronaut.core.version&gt;
+    ...
+  &lt;/properties&gt;
+  &lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+      ...
+      &lt;dependency&gt;
+        &lt;groupId&gt;io.micronaut.aws&lt;/groupId&gt;
+        &lt;artifactId&gt;micronaut-aws-bom&lt;/artifactId&gt;
+        &lt;version&gt;${micronaut.aws.version}&lt;/version&gt;
+        &lt;type&gt;pom&lt;/type&gt;
+        &lt;scope&gt;import&lt;/scope&gt;
+      &lt;/dependency&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;io.micronaut.azure&lt;/groupId&gt;
+        &lt;artifactId&gt;micronaut-azure-bom&lt;/artifactId&gt;
+        &lt;version&gt;${micronaut.azure.version}&lt;/version&gt;
+        &lt;type&gt;pom&lt;/type&gt;
+        &lt;scope&gt;import&lt;/scope&gt;
+      &lt;/dependency&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;io.micronaut.cache&lt;/groupId&gt;
+        &lt;artifactId&gt;micronaut-cache-bom&lt;/artifactId&gt;
+        &lt;version&gt;${micronaut.cache.version}&lt;/version&gt;
+        &lt;type&gt;pom&lt;/type&gt;
+        &lt;scope&gt;import&lt;/scope&gt;
+      &lt;/dependency&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;io.micronaut&lt;/groupId&gt;
+        &lt;artifactId&gt;micronaut-core-bom&lt;/artifactId&gt;
+        &lt;version&gt;${micronaut.core.version}&lt;/version&gt;
+        &lt;type&gt;pom&lt;/type&gt;
+        &lt;scope&gt;import&lt;/scope&gt;
+      &lt;/dependency&gt;
+      ...
+    &lt;/dependencies&gt;
+  &lt;/dependencyManagement&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A more interesting topic to discuss is what we can do with version catalogs that we publish for users: we can <strong>inline dependency aliases</strong> from each of the imported catalogs into the platform catalog.
+All dependencies in the catalog files of each modules are directly available in the platform catalog:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="toml">[versions]
+dekorate = "1.0.3"
+elasticsearch = "7.17.8"
+...
+micronaut-aws = "4.0.0-SNAPSHOT"
+micronaut-azure = "5.0.0-SNAPSHOT"
+micronaut-cache = "4.0.0-SNAPSHOT"
+micronaut-core = "4.0.0-SNAPSHOT"
+...
+
+[libraries]
+alexa-ask-sdk = {group = "com.amazon.alexa", name = "ask-sdk", version = "" }
+alexa-ask-sdk-core = {group = "com.amazon.alexa", name = "ask-sdk-core", version = "" }
+alexa-ask-sdk-lambda = {group = "com.amazon.alexa", name = "ask-sdk-lambda-support", version = "" }
+aws-java-sdk-core = {group = "com.amazonaws", name = "aws-java-sdk-core", version = "" }
+aws-lambda-core = {group = "com.amazonaws", name = "aws-lambda-java-core", version = "" }
+aws-lambda-events = {group = "com.amazonaws", name = "aws-lambda-java-events", version = "" }
+aws-serverless-core = {group = "com.amazonaws.serverless", name = "aws-serverless-java-container-core", version = "" }
+awssdk-secretsmanager = {group = "software.amazon.awssdk", name = "secretsmanager", version = "" }
+azure-cosmos = {group = "com.azure", name = "azure-cosmos", version = "" }
+azure-functions-java-library = {group = "com.microsoft.azure.functions", name = "azure-functions-java-library", version = "" }
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>alexa-ask-sdk</code> is for example an alias which was originally declared in the <code>micronaut-aws</code> module.
+Because we aggregate all catalogs, we can inline those aliases and make them directly available in user build scripts:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencyResolutionManagement {
+    versionCatalogs {
+         create("mnKafka") {
+             from("io.micronaut.platform:micronaut-platform:4.0.0-SNAPSHOT")
+         }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+...
+    implementation(mn.micronaut.aws.alexa)
+    implementation(mn.alexa.sdk)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Generating a version catalog offers us a very pragmatic way to define all dependencies that users can use in their build scripts with guarantees that they work well together.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_technical_details">Technical details</h3>
+<div class="paragraph">
+<p>If you survived reading up to this point, you may be interested in learning how, technically, we implemented this.
+You can take a look at our <a href="https://github.com/micronaut-projects/micronaut-build">internal build plugins</a>, but more specifically at the <a href="https://github.com/micronaut-projects/micronaut-build/blob/master/src/main/groovy/io/micronaut/build/MicronautBomPlugin.java">BOM plugin</a>.</p>
+</div>
+<div class="paragraph">
+<p>In order to generate our BOM and version catalogs, we have mainly 2 inputs:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>the list of subprojects which need to participate in the BOM: in a Micronaut modules, we explained that we have several kinds of projects: libraries which are published, test suites, etc. Only a subset of these need to belong to the BOM, and we can determine that list automatically because each project applies a <em>convention plugin</em> which determines its kind. Only projects of a particular kind are included. Should exceptions be required, we have a <code>MicronautBomExtension</code> which allows us to configure more precisely what to include or not, via a nice DSL.</p>
+</li>
+<li>
+<p>the list of dependencies, which is determined from the project&#8217;s version catalog</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>One issue is that while Gradle provides automatically the generated, type-safe accessors for version catalogs, there is actually no built-in model that you can access to represent the catalog <em>model</em> itself (what is an alias, references to versions, etc): the type-safe API represents a "realized" catalog, but not a low-level model that we can easily manipulate.
+This means that we had to implement our <a href="https://github.com/micronaut-projects/micronaut-build/blob/master/src/main/java/io/micronaut/build/catalogs/internal/VersionCatalogTomlModel.java#L29">own model for this</a>.</p>
+</div>
+<div class="paragraph">
+<p>We have also seen that we can generate a single platform, aggregating all Micronaut modules for a release, that the users can import into their build scripts.
+Unfortunately it is not the case for the Micronaut modules themselves: for example, Micronaut Core <em>must not</em> depend on other Micronaut modules, but, for example, Micronaut Data can depend on Micronaut SQL and use dependencies from the Micronaut SQL catalog.
+Those modules <em>cannot</em> depend on the platform BOM, because this is the aggregating BOM, so we would create a <em>cyclic dependency</em> and wouldn&#8217;t be able to release any module.</p>
+</div>
+<div class="paragraph">
+<p>To mitigate this problem, our internal build plugins expose a DSL which allows each projects to declare which other modules they use:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">micronautBuild {
+    importMicronautCatalog() // exposes a `mn` catalog
+    importMicronautCatalog("micronaut-reactor") // exposes a `mnReactor` catalog
+    importMicronautCatalog("micronaut-rxjava2") // exposes a `mnRxjava2` catalog
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>While this is simple from the <em>declaration site</em> point of view, it is less practical from a <em>consuming</em> point of view, since it forces us to use <em>different namespaces</em> for each imported catalog:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="gradle">dependencies {
+    ...
+    testImplementation mn.micronaut.inject.groovy
+    testImplementation mnRxjava2.micronaut.rxjava2
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It would have been better if we could actually merge several catalogs into a single one, but unfortunately that feature <a href="https://github.com/gradle/gradle/issues/20383">has been removed from Gradle</a>.
+I still have hope that this will eventually be implemented, because not having this creates unnecessary boilerplate in build scripts and redundancy in names (e.g <code>implementation mnValidation.micronaut.validation</code>).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_additional_benefits_and_conclusion">Additional benefits and conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All that I described in this article aren&#8217;t the only benefits that we have on standardizing on version catalogs.
+For example, we have tasks which allow us to check that our generated BOM files only reference dependencies which are actually published on Maven Central, or that there are no SNAPSHOT dependencies when we perform a release.
+In the end, while most of the Micronaut developers had no idea what a version catalog was when I joined the team, all of them pro-actively migrated projects to use them because, I think, they immediately saw the benefits and value.
+It also streamlined the dependency upgrade process which was still a bit cumbersome before, despite using dependabot.</p>
+</div>
+<div class="paragraph">
+<p>We now have a very pragmatic way to both use catalogs for building our own projects, and generating BOMs and version catalogs which can be used by both our Maven and Gradle users.
+Of course, only the Gradle users will benefit from the version catalogs, but we did that in a way which doesn&#8217;t affect our Maven users (and if you use Maven, I strongly encourage you to evaluate building Micronaut projects with Gradle instead, since the UX is much better).</p>
+</div>
+<div class="paragraph">
+<p>I cannot end this blog post without mentioning a "problem" that we have today, which is that if you use <a href="https://micronaut.io/launch">Micronaut Launch</a> to generate a Micronaut project, then it will <em>not</em> use version catalogs.
+We have an <a href="https://github.com/micronaut-projects/micronaut-starter/issues/1385">issue for this</a> and pull requests are very welcome!</p>
+</div>
+</div>
+</div></p>
+			<p><a href="/blog/2023/03-12-micronaut-catalogs.html#disqus_thread">Comments</a></p>
   			<a href="/blog/2023/gradle-synthetic-projects.html"><h1>Gradle&#8217;s flexibility in action</h1></a>
   			<p>06 February 2023</p>
 			<p><em>Tags: </em>
@@ -1201,503 +1833,6 @@ Qu&#8217;à celà ne tienne, c&#8217;est aussi pour ça que l&#8217;astrophotogr
 </div>
 </div></p>
 			<p><a href="/blog/2022/12/astrophoto-2022-fr.html#disqus_thread">Comments</a></p>
-  			<a href="/blog/2022/12/astrophoto-2022.html"><h1>One year of astrophotography</h1></a>
-  			<p>31 December 2022</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/astrophotography.html">astrophotography</a> 
-	
-		<a href="/blog/tags/astronomy.html">astronomy</a> 
-	
-		<a href="/blog/tags/celestron.html">celestron</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-Une version en français est disponible <a href="https://melix.github.io/blog/2022/12/astrophoto-2022-fr.html">ici</a> !
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>This is it, 2022 is coming to an end!
-I am regularly posting pictures of the universe I take from my backyards, but you may have missed some of them (note: I used to post them on Twitter, but now that I moved to Mastodon, I have <a href="https://astrodon.social/@melix">a dedicated account for this</a>), so this is the opportunity to recap!</p>
-</div>
-<div class="paragraph">
-<p>Making great photos of the sky takes some effort: of course you need some gear (telescope, camera, &#8230;&#8203;), you need good conditions (weather, moon, &#8230;&#8203;) but you also need skills in software post-processing.
-The photos I take those days are already much better than the ones I used to take a few years ago, but I see a lot of defects, noise, focusing problems, etc. so there&#8217;s still a LOT of room for improvement.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_a_couple_of_twitch_sessions_in_french">A couple of Twitch sessions (in french)</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This year, for the french speaking, I have done a couple of sessions on Twitch where I explained the basics of astrophotography, <em>from my point of view</em>.
-It&#8217;s a couple of ~90 minutes videos each, where I give some details about my setup, the gear, and software processing.
-I&#8217;ve done this because I&#8217;m always getting the same questions:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>what telescope to choose?</p>
-</li>
-<li>
-<p>how long does it take?</p>
-</li>
-<li>
-<p>how much does it cost?</p>
-</li>
-<li>
-<p>how do you proceed?</p>
-</li>
-<li>
-<p>etc.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>If you are interested (and french speaking), here are the links:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.youtube.com/watch?v=Hudtta97gDU">Astrophotographie, partie 1 - Le matériel</a></p>
-</li>
-<li>
-<p><a href="https://www.youtube.com/watch?v=tSgnOtdjVHs">Astrophotographie, partie 2 - Les miracles du logiciel</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Let me know if you are interested in seeing something similar in English.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_2022_the_photos">2022: The photos</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>I&#8217;m going to list the photos in chronological order.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-The photos I&#8217;m posting here are copyrighted, you <em>may not</em> use them or sell them without my permission.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Sometimes, there are weeks between photos, and that&#8217;s almost certainly because of the weather: when I have the opportunity, you can be sure I always take the setup out.
-However, sometimes, it&#8217;s also because I failed: you capture data, but you made a mistake (e.g, incorrect focus, not enough exposure, wrong flat frames, &#8230;&#8203;), and you have to drop everything&#8230;&#8203;</p>
-</div>
-<div class="paragraph">
-<p>For each of the photos I&#8217;m posting here, it&#8217;s a low resolution version.
-You can click on each of the photos to get a link to their <a href="https://www.astrobin.com/users/melix/">version on Astrobin</a>, which will also give you:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>acquisition details (when, how many exposures, filters, &#8230;&#8203;)</p>
-</li>
-<li>
-<p>a full resolution version : most of the photos are 62-megapixel (sometimes less because of cropping, sometimes more because of mosaics), which is roughly 7 times as many pixels as what you have in a 4K UHD TV!</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Note that when you&#8217;re on Astrobin, you can click on the photo to go to the full version, which has considerably higher resolution than the preview.</p>
-</div>
-<div class="sect2">
-<h3 id="_january">January</h3>
-<div class="paragraph">
-<p>It&#8217;s the holiday season, so let&#8217;s get started with NGC 2264 also known as the "Christmas Tree Cluster": it&#8217;s an open star cluster about 2300 light years away, located in the Monoceros constellation, which also shows a beautiful nebula called the "Cone nebula".</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/40y572/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-01-12-christmas-tree-cluster.jpg" alt="2022 01 12 christmas tree cluster"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>During winter nights are quite long, which also gave me the opportunity to shot another target, NGC 4565 aka the Needle Galaxy, a classic.
-I didn&#8217;t get enough data to properly capture the colors, but it&#8217;s still an interesting shot!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/kdbd9i/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-01-12-ngc-4565.jpg" alt="2022 01 12 ngc 4565"></a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_februrary">Februrary</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Late winter, more than a month after the previous photos, I went for a target which is well known of astrophotographers: <a href="https://en.wikipedia.org/wiki/NGC_1893">NGC 1893</a>.
-It was an image which proved difficult to make and process, because of the presence of the bright stars which created colorful reflections on my very fast setup.
-Processing can probably also be improved to reduce the stars and show the nebula better.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/po5nml/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-02-26-ic-410.jpg" alt="2022 02 26 ic 410"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>This opens the "galaxy season", which is lasting almost all spring. The next image is a "classic", the M81 and M82 couple, but I&#8217;m not super happy with the processing and resulting colors.
-This image has <em>lots</em> of details, and especially, I wanted to highlight the <a href="https://en.wikipedia.org/wiki/Integrated_Flux_Nebula">Integrated Flux Nebula</a> which is clearly visible in this sector of the sky.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/idzr7f/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-02-26-m81-m82.jpg" alt="2022 02 26 m81 m82"></a>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_march">March</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The next photo is another classic of the galaxy season, known as Markarian&#8217;s chain.
-It is lesser known to the public that while stars are grouped in clusters and galaxies, galaxies themselves are organized in larger, extremely wide structures called local groups or chains.
-Those galaxies are bound together by gravity, and Markarian&#8217;s chain is a spectacular example of this, with a small area of the sky showing dozens of galaxies in interaction.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/xz6zv3/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-03-23-Markarian-chain.jpg" alt="2022 03 23 Markarian chain"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>April wasn&#8217;t a good period, with no photo whatsoever, unfortunately, but May was the most prolific of period of the year!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_may">May</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Galaxy season isn&#8217;t over in May. I chose to image another galaxy which looks similar to the needle galaxy: NGC 5746.
-Yet, again, processing proved to be difficult because of the very bright star below it.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/yfxsfc/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-09-ngc-5746.jpg" alt="2022 05 09 ngc 5746"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Galaxy season continues with probably one of the most interesting photos of this year.
-It isn&#8217;t particularly sharp, and there&#8217;s a lot of progress to be made on processing this image, but it was an opportunity I couldn&#8217;t miss: taking a picture of a Supernova, that is to say a star which dies by exploding and emitting so much light that its brightness literally makes it stand out of the galaxy hosting it.
-The photo is also spectacular in the sense that it&#8217;s taken with a long focal length, in order to "zoom" as much as possible, but still shows a lot of other galaxies in this small area of the sky!
-Here is Supernova 2022hfs in NGC 4647: in the middle we can see the M60 galaxy and its companion NGC 4647.
-In that galaxy, at the upper top, we can see a bright spot which is the supernova:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/pbjfny/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-07-supernova-m60.jpg" alt="2022 05 07 supernova m60"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Another classic of the dark skies is the beautiful M5 globular cluster:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/5wn7o0/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-07-m5.jpg" alt="2022 05 07 m5"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>I have a fascination for "dark nebulas", which are nebulas which show dark structures, usually because of the presence of dust which blocks light, or simply because some large gas structures are not uniform.
-Usually taking photos of such structures requires <em>time</em>, long exposures, which is still possible during that period of the year, but becoming complicated.</p>
-</div>
-<div class="paragraph">
-<p>I took a couple pictures of such nebulas in May.</p>
-</div>
-<div class="paragraph">
-<p>First one is B347 and LDN 889 in Cygnus which is showing an emission nebula with a nice dark area in its center:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/ytssu6/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-28-ldn-914.jpg" alt="2022 05 28 ldn 914"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The second one is a beautiful complex structure showing dust blocking light and creating uncanny colored structures: IC 4603.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/0r1zyg/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-29-ic_4603.jpg" alt="2022 05 29 ic 4603"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Usually, I&#8217;m avoiding the moon: I prefer the beauties of deep sky objects which require very dark skies and no light pollution.
-However, from time to time, I like to give the moon a shot, which is what I did on May 10th:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/lokkfc/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-10-moon.jpg" alt="2022 05 10 moon"></a>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_june">June</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>June is the beginning of the "emission nebula" season.
-There are a lot of good targets that we can start shooting during summer.
-One of the classics is the Eagle nebula, which I had already shot. So I wanted to capture this area in wider field.
-This is why I started with a mosaic which is extremely detailed if you go to the full picture below: the image is 7360 pixels wide, for 13200 pixels height!
-The area covers the region from M16 to M24:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/cmwruf/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-30-M16-M17-M18-M24.jpg" alt="2022 05 30 M16 M17 M18 M24"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The next photo is probably my favorite of 2022.
-In comparison to other photos which literally requires hours of exposure, this one "only" took an hour, but it shows one of the most beautiful areas of the sky.
-I was particularly eager to do it, because it&#8217;s difficult to have good conditions to capture it where I live: it&#8217;s relatively low in the sky, so there is unfortunately a very short period of time when the conditions are met to capture it, and when you do so, you can&#8217;t capture a lot of data.
-In any case, here are the Trifid and Lagoon nebulas, as I said, probably one of my favorites, showing beautiful colors and well visible gas structures:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/ft7dra" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-05-30-trifid-lagoon-nebulas-v2.jpg" alt="2022 05 30 trifid lagoon nebulas v2"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>When you are an amateur astronomer, one of the first targets you try to see (especially in European summer) is the ring nebula (M57) in Lyrae.
-It is a very bright nebula which is easily visible even with modest instruments.
-Taking a picture of it and getting details of its structure is harder.
-Here, I took an ususual approach, by going full focal length and taking lots of short exposures with my planetary camera and processing the image as if it was a planet.
-Here&#8217;s what I got:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/nc88w9/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-06-17-m57-ring-nebula.jpg" alt="2022 06 17 m57 ring nebula"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>June 28 is a special day for me as it&#8217;s my wedding&#8217;s day (it&#8217;s going to be 20 years in 2023!).
-June 28, 2022 was also a prolific day with a couple of beautiful nebulas.</p>
-</div>
-<div class="paragraph">
-<p>The first one is the crescent nebula in Cygnus, which is an incredibly dense area of the sky, in the middle of the Milky Way, with lots of gas and stars:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/ee98nj/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-06-27-NGC-6888-crescent-nebula.jpg" alt="2022 06 27 NGC 6888 crescent nebula"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The 2d photo I took that day was another classic of astrophotographers, the Elephant Trunk Nebula (Tr-37).
-I told you I loved dark nebulas, this one is a good example of dark structures in a bright nebula:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/8k54oe/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-06-27-tr37-elephant-trunk-nebula.jpg" alt="2022 06 27 tr37 elephant trunk nebula"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Another example of such a nebula is NGC 7822:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/awvk46/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-06-28-Ced-214-NGC-7822.jpg" alt="2022 06 28 Ced 214 NGC 7822"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Last but not least of June, what happens after a star explodes as a supernova? The Veil Nebula, in Cygnus, is a great illustration of the result.
-This nebula is one of the most remarkable example of its kind, because it&#8217;s particularly large and shows very nice structures of filaments of matter.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/8hbi6d/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-06-27-veil-nebula.jpg" alt="2022 06 27 veil nebula"></a>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_july">July</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Summer is the best period of time to take a photo of our nearest neighbor galaxy, the famous Andromeda galaxy.
-It is visible with the naked eye (if no moon is present) and larger than the apparent size of the moon in the sky.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/15de5a/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-07-04-andromeda-galaxy.jpg" alt="2022 07 04 andromeda galaxy"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Sometimes you get the opportunity to capture comets.
-This happened for me in the beginning of July, when comet C2017 K2 Panstarrs became bright enough to be shot:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/astro/retro2022/2022-07-06-c2017-k2-panstarrs.jpg" alt="2022 07 06 c2017 k2 panstarrs">
-</div>
-</div>
-<div class="paragraph">
-<p>(for some reason I didn&#8217;t put this one on Astrobin).</p>
-</div>
-<div class="paragraph">
-<p>My next target was another example of "dark nebula", this time with a nebula which is dark because of dust blocking the light around it.
-This one is known as the Seahorse Nebula.
-Interestingly, the field I captured was wide enough to add a couple of interesting targets in the area: the open cluster NGC 6939 and the beautiful galaxy NGC 6946:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/frun9u/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-07-06-seahorse-nebula-ngc-6946.jpg" alt="2022 07 06 seahorse nebula ngc 6946"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>For the next one I chose a more difficult target, a diffuse emission nebula known as Sharpless 115.
-Such nebulas require filters to be captured properly under conditions like mine where there is light pollution (reasonable but still), and longer exposures (4 hours in this case):</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/m1x3ny/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-07-31-Sh2-115-116-112.jpg" alt="2022 07 31 Sh2 115 116 112"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The same day I captured the "Wizard Nebula" but wasn&#8217;t happy enough with the result, so I didn&#8217;t post it on Astrobin.
-Here&#8217;s the photo, though. I will definitly retry this target in 2023:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/astro/retro2022/2022-07-26-ngc-7380-wizard-nebula.jpg" alt="2022 07 26 ngc 7380 wizard nebula">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_august">August</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The next image is another of my 2022 favorites, and another dark nebula. This one is called the shark nebula, and I hope you&#8217;ll figure out why:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/eptl8u/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-08-01-ldn-1235-shark-nebula.jpg" alt="2022 08 01 ldn 1235 shark nebula"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Can&#8217;t see the shark? Maybe it&#8217;s easier with this "starless" version?</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/astro/retro2022/2022-08-01-ldn-1235-shark-nebula-starless.jpg" alt="2022 08 01 ldn 1235 shark nebula starless">
-</div>
-</div>
-<div class="paragraph">
-<p>The next image will be familiar, it&#8217;s the Andromeda galaxy, once again!
-Why capturing it multiple times? Well, as I said, the more data you gather, the better. Also processing is difficult, and you have to make a lot of trial to find the right exposure and number of frames to get a good result.
-Here&#8217;s my 2d attempt, which one do you prefer?</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/7z12bt/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-08-27-andromeda-galaxy.jpg" alt="2022 08 27 andromeda galaxy"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>Summer is ending, but there was one target I couldn&#8217;t miss: another galaxy of our local group, Messier 33, the Triangulum galaxy. This spiral galaxy is particularly magnificient with its blue&#8217;ish colors.
-If you zoom in the photo, you&#8217;ll also notice red clouds, which are nebulas where new stars are regularly formed!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/h3s597/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-08-28-m33-pinwheel.jpg" alt="2022 08 28 m33 pinwheel"></a>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_september">September</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>With the end of summer comes the rainy season, which lasts up to february.
-September gives us a few last opportunities.
-The first image, NGC 7822, I&#8217;m not super happy with, there are still gradients visible, but let me share it anyway, it&#8217;s a retro!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/x1coyx" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-09-18-NGC-7822.jpg" alt="2022 09 18 NGC 7822"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The next one is another classic of astrophoto, the North America and Pelican nebulas, which has the particularity of being a mosaic of 2 images, so if you go to the full version and zoom in, you will see a LOT of details:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/nqk6iu/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-09-18-North-America-and-Pelican.jpg" alt="2022 09 18 North America and Pelican"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The next one will again sound familiar: it&#8217;s the triangulum galaxy again, but with a longer focal length, which, in practice, means that it&#8217;s "zoomed in" compared to the previous version.
-I can only encourage you to dig into the full version, which shows an incredible amount of details, definitely another of my favorites of 2022!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/vxx62e/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-09-20-Triangulum-Galaxy-M33.jpg" alt="2022 09 20 Triangulum Galaxy M33"></a>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_november">November</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>I told you that the rainy season starts after September, so clearly, between october, and even till the end of November, I wasn&#8217;t able to capture a single target!
-I had a small window on November 29, not much time before rain, so I chose an "easy target", the famous Orion Nebula, which is so bright it doesn&#8217;t take long to capture:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/in06bo/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-11-29-orion-m42.jpg" alt="2022 11 29 orion m42"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>The next day I was able to go to a target I wanted to shoot for a long time.
-NGC 1333 is an area of the sky which shows a variety of nebulas in the same field of view: dark nebulas, but also a light, blue&#8217;ish emission nebula, and a red area where new stars are born!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/o5k14v/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-11-30-ngc-1333.jpg" alt="2022 11 30 ngc 1333"></a>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_december">December</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Finally, the last picture of this year is from a few days ago.
-I had to wait after Christmas to get another window, and I chose to try to capture the so-called "Thor&#8217;s Helmet".
-Unfortunately the weather conditions weren&#8217;t great, with lots of clouds and eventually fog, so I didn&#8217;t get as much data as I would like.
-This target is particularly difficult because it&#8217;s very low, so if I couldn&#8217;t capture it now, it would be too late after&#8230;&#8203;</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<a class="image" href="https://www.astrobin.com/ks39ts/" target="_blank" rel="noopener"><img src="/blog/img/astro/retro2022/2022-12-26-ngc-2359-Thor_s_Helmet.jpg" alt="2022 12 26 ngc 2359 Thor s Helmet"></a>
-</div>
-</div>
-<div class="paragraph">
-<p>And it&#8217;s a wrap! I wish I could do much more photos, but between the moon, the weather conditions and&#8230;&#8203; my daily job, it&#8217;s always a bit complicated.
-There are many objects I would have liked to capture, but either failed or missed the window when they are visible.
-This is why astrophotography is a lifetime hobby, after all!</p>
-</div>
-</div>
-</div></p>
-			<p><a href="/blog/2022/12/astrophoto-2022.html#disqus_thread">Comments</a></p>
 	
 	<hr />
 	
