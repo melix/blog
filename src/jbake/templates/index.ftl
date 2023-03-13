@@ -15,7 +15,6 @@
 	</#list></p>
 			
   			<p>${post.body}</p>
-			<p><a href="/blog/${post.uri}#disqus_thread">Comments</a></p>
   		</#if>
   	</#list>
 	
