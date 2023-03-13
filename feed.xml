@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 13 Mar 2023 10:45:53 +0100</pubDate>
-    <lastBuildDate>Mon, 13 Mar 2023 10:45:53 +0100</lastBuildDate>
+    <pubDate>Mon, 13 Mar 2023 15:02:25 +0100</pubDate>
+    <lastBuildDate>Mon, 13 Mar 2023 15:02:25 +0100</lastBuildDate>
 
     <item>
       <title>How the Micronaut team leverages Gradle&amp;#8217;s version catalogs for improved developer productivity</title>
@@ -130,13 +130,29 @@ All the projects share the same layout, the same conventions in order to make th
 For this purpose, we use our own collection of &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-build&quot;&gt;internal build plugins&lt;/a&gt; as well as a &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-project-template&quot;&gt;project template&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Those build plugins provide features like:
-- defining the default Java language level, setting up code conventions and code quality plugins
-- standardizing how documentation is built (using Asciidoctor)
-- setting up integration with Gradle Enterprise, to publish build scans, configure the build cache and predictive test selection
-- implementing binary compatibility checks between releases
-- configuring publication to Maven Central
-- providing a high-level model of what a Micronaut module is&lt;/p&gt;
+&lt;p&gt;Those build plugins provide features like:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;defining the default Java language level, setting up code conventions and code quality plugins&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;standardizing how documentation is built (using Asciidoctor)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;setting up integration with Gradle Enterprise, to publish build scans, configure the build cache and predictive test selection&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;implementing binary compatibility checks between releases&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;configuring publication to Maven Central&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;providing a high-level model of what a Micronaut module is&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;The last item is particularly important: in every Micronaut project, we have different kind of modules: libraries (which are published to Maven Central for users to consume), internal support libraries (which are not intended for external consumption), or a BOM module (which also publishes a version catalog as we&amp;#8217;re going to see).&lt;/p&gt;
