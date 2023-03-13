@@ -96,6 +96,7 @@ All the projects share the same layout, the same conventions in order to make th
 For this purpose, we use our own collection of https://github.com/micronaut-projects/micronaut-build[internal build plugins] as well as a https://github.com/micronaut-projects/micronaut-project-template[project template].
 
 Those build plugins provide features like:
+
 - defining the default Java language level, setting up code conventions and code quality plugins
 - standardizing how documentation is built (using Asciidoctor)
 - setting up integration with Gradle Enterprise, to publish build scans, configure the build cache and predictive test selection
