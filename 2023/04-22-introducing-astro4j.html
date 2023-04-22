@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Introducing astro4j</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		<li><a href="/blog/projects.html">Projects</a></li>
+		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://twitter.com/CedricChampeau"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	        <li><a rel="me" href="https://astrodon.social/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Introducing astro4j</h1>
+	</div>
+
+	<p><em>22 April 2023</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	</em>
+		<a href="/blog/tags/astro4j.html">astro4j</a> 
+	</em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</em>
+		<a href="/blog/tags/graalvm.html">graalvm</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This blog introduces <a href="https://github.com/melix/astro4j">astro4j</a>, my latest toy project, a open source collection of libraries and applications for astronomy, written in Java.
+In particular, I will discuss <a href="https://github.com/melix/astro4j/tree/main/jsolex">JSol&#8217;Ex</a>, a program aimed at reconstructing solar disk images from video files captured using the amazing <a href="http://www.astrosurf.com/solex/sol-ex-presentation-en.html">Sol&#8217;Ex</a> instrument.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_astro4j">Why astro4j?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m a software developer, and if you are following me, you may also know that I&#8217;m an <a href="https://www.astrobin.com/users/melix/">amateur astrophotographer</a>.
+For a long time, I&#8217;ve been fascinated by the quality of software we have in astronomy, to process images.
+If you are french speaking, you can watch a <a href="https://www.youtube.com/watch?v=tSgnOtdjVHs">presentation I gave about this topic</a>.
+Naturally, I have been curious about how all these things work, but it&#8217;s actually extremely rare to find open source software, and when you do, it&#8217;s rarely written in Java.
+For example, both <a href="http://www.firecapture.de/">Firecapture</a> (software to capture video streams) and <a href="https://www.astropixelprocessor.com/">Astro Pixel Processor</a> are written in Java, but both of them are closed source, commercial software.</p>
+</div>
+<div class="paragraph">
+<p>Last month, for my birthday, I got a <a href="http://www.astrosurf.com/solex/sol-ex-presentation-en.html">Sol&#8217;Ex</a>, an instrument which combines spectrography and software to realize amazing solar pictures in different spectral lines.
+To process those images, the easiest solution is to use <a href="http://valerie.desnoux.free.fr/inti/">the amazing INTI software</a>, written in Python, but for which sources are not published, as far as I know, neither on GitHub or GitLab.</p>
+</div>
+<div class="paragraph">
+<p>To give you an example of what you can do, here&#8217;s the <a href="https://www.astrobin.com/94gymd/">first photography</a> I&#8217;ve done with Sol&#8217;Ex and processed with INTI (color was added in Gimp):</p>
+</div>
+<a href="https://astrob.in/94gymd/0/"><img src="https://astrob.in/94gymd/0/rawthumb/regular/get.jpg?insecure"/></a>
+<div class="paragraph">
+<p>To get this result, one has to combine images which look like this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/spectrum.png" alt="spectrum">
+</div>
+</div>
+<div class="paragraph">
+<p>Interesting, no?
+At the same time, I was a bit frustrated by INTI.
+While it clearly does the job and is extremely easy to use, there are a few things which I didn&#8217;t like:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the first, which I mentioned, is that it&#8217;s using Python and that the sources are not published (as far as I understand, some algorithms are not published yet). I am not surprised that Python is used, because it&#8217;s a language which is extremely popular in academics, with lots of libraries for image processing, science oriented libs, etc. However, because it&#8217;s popular in academics also means that programs are often written by and for academics. When we&#8217;re talking about maths, it&#8217;s often short variable names, cryptic function names, etc&#8230;&#8203;</p>
+</li>
+<li>
+<p>second, after processing, INTI pops up a lot of images as individual windows. If you want to process a new file, you have to close all of them. The problem is that I still haven&#8217;t figured out in which order you have to do this so that you can restart from the initial window which lets you select a video file! Apparently, depending on the order, it will, or will not, show the selector. And sometimes, it takes several seconds before it does so.</p>
+</li>
+<li>
+<p>INTI seems to be regenerating a font cache every time I reboot. This operation takes several minutes. It&#8217;s probably an artifact of packaging the application for Windows, but still, not very user friendly.</p>
+</li>
+<li>
+<p>INTI generates a number of images, but puts them alongside the videos. I like things organized (well, at least virtually, because if you looked at my desk right now, it is likely you&#8217;d feel faint), so I wish it was creating one directory per processed video.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/inti-popups.png" alt="inti popups">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_confronting_the_old_demons">Confronting the old demons</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When I started studying at University, back in 1998, I was planning to do astrophysics.
+However, I quickly forgot about this idea when I saw the amount of maths one has to master to do modern physics.
+Clearly, I was reaching my limits, and it was extremely complicated for me.
+Fortunately, I had been doing software development for years already, because I started very young, on my father&#8217;s computer.
+So I decided to switch to computer science, where I was reasonably successful.</p>
+</div>
+<div class="paragraph">
+<p>However, not being able to do what I wanted to do has always been a frustration. It is still, today, to the point that a lot of what I&#8217;m reading is about this topic, but still, I lack the maths.</p>
+</div>
+<div class="paragraph">
+<p>It was time for me to confront my old demons, and answer a few questions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>am I still capable of understanding maths, in order to implement algorithms which I use everyday when I do astronomy image processing with software written by others?</p>
+</li>
+<li>
+<p>can I read academic papers, for example to implement a FFT (Fast Fourier Transform) algorithm, although I clearly remember that I failed to understand the principles when I was at school?</p>
+</li>
+<li>
+<p>can I do this while writing something which could be useful to others, and publish it as open source software?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Astro4j is there to answer those questions.
+I don&#8217;t have the answers yet and time will tell if I&#8217;m successful.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_modern_java">Using modern Java</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One question you may have is why Java? If you are not familiar with this language, you may have this old misconception that Java is slow.
+It&#8217;s not. Especially, if you compare to Python, it&#8217;s definitely not.</p>
+</div>
+<div class="paragraph">
+<p>This project is also for me a way to prove that you can implement "serious science" in Java.
+You can already find some science libraries in Java, but they tend to me impractical to use, because not following the industry standards (e.g published on Maven Central) or platform-dependent.</p>
+</div>
+<div class="paragraph">
+<p>I also wanted to leverage this to <em>learn something new</em>.
+So this project:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>uses Java 17 (at least for libraries, so that they can be consumed by a larger number of developers, for applications I&#8217;m considering moving to Java 20)</p>
+</li>
+<li>
+<p>uses <a href="https://openjfx.io/">JavaFX</a> (OpenJFX) for the application UI</p>
+</li>
+<li>
+<p>experiments with the <a href="https://openjdk.org/jeps/438">Vector API</a> for faster processing</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As I said, my initial goal is to obtain a software which can basically do what INTI does.
+It is not a goal to make it faster, but if I can do it, I will.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introducing_jsolex">Introducing JSol&#8217;Ex</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>After a few evenings (and a couple week-ends ;)), I already have something which performs <em>basic processing</em>, that is to say that it can process a SER video file and generate a reconstructed solar disk.
+It does <strong>not</strong> perform geometry correction, nor tilt correction, like INTI does. It doesn&#8217;t generate shifted images either (for example the doppler images), but <strong>it works</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Since the only source of information I had to do this was <a href="http://www.astrosurf.com/solex/sol-ex-presentation-en.html">Christian Buil&#8217;s website</a> and <a href="http://valerie.desnoux.free.fr/inti/">Valérie Desnoux INTI&#8217;s website</a>, I basically had to implement my own algorithms from A to Z, and just "guess" how it works.</p>
+</div>
+<div class="paragraph">
+<p>In order to do this, I had to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>implement a SER video file decoder. The library is <a href="https://github.com/melix/astro4j/tree/main/jserfile">ready</a> and performs both decoding the SER file and performs demosaicing of images</p>
+</li>
+<li>
+<p>on top of the decoder, I implemented a <a href="https://github.com/melix/astro4j/tree/main/ser-player">SER file player</a>, which is still very basic at this stage, and uses JavaFX. This player can even be compiled to a native binary using <a href="https://www.graalvm.org/">GraalVM</a>!</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example:</p>
+</div>
+ <video width="800" height="480" controls>
+  <source src="img/solex/serplayer.webm" type="video/webm">
+Your browser does not support the video tag.
+</video>
+<div class="paragraph">
+<p>Then I could finally start working on the Sol&#8217;Ex video processor.
+As I said, I don&#8217;t know how INTI works, so this is all trial and error, in the end&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>In the beginning, as I said, you have a SER video file which contains a lot of frames (for example, in my case, it&#8217;s a file from 500MB to 1GB) that we have to process in order to generate a solar disk.
+Each frame consists of a view of the light spectrum, centered on a particular spectral line.</p>
+</div>
+<div class="paragraph">
+<p>For example, in the following image, we have the H-alpha spectral line:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/spectrum.png" alt="spectrum">
+</div>
+</div>
+<div class="paragraph">
+<p>Because of optics, you can see that the line is not horizontal: each frame is distorted.
+Therefore, in order to reconstruct an image, we have to deal with that distortion first.
+For this, we have to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>detect the spectral line in the frame, which I&#8217;m doing by implementing a simple contrast detection</p>
+</li>
+<li>
+<p>perform a linear regression in order to compute a 2d order polynomial which models the distortion</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that before doing this, I had no idea how to do a 2d order regression, but I searched and found that it was possible to do so using the least squares method, so I did so.
+The result is that we can identify precisely the line with this technique:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/spectrum-line.png" alt="spectrum line">
+</div>
+</div>
+<div class="paragraph">
+<p>In the beginning, I tought I would have to perform distortion correction in order to reconstruct the image, because I was (wrongly) assuming that, because each frame represents <em>one</em> line in the reconstructed image, I had to compute the average of the colums of each frame to determine the color of a <em>single</em> pixel in the output. I was wrong (we&#8217;ll come to that later), but I did implement a distortion correction algorithm:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/spectrum-corrected.png" alt="spectrum corrected">
+</div>
+</div>
+<div class="paragraph">
+<p>When I computed the average, the resulting image was far from the quality and constrast of what I got with INTI.
+What a failure!
+So I thought that maybe I had to compute the average of the spectral line itself.
+I tried this, and indeed, the resulting image was much better, but still not the quality of INTI.
+The last thing I did, therefore, was to pick the middle of the spectral line itself, and then, magically, I got the same level of quality as with INTI (for the raw images, as I said I didn&#8217;t implement any geometry or tilt correction yet).</p>
+</div>
+<div class="paragraph">
+<p>The reason I was assuming that I had to compute an average, is that it wasn&#8217;t clear to me that the <em>absorption ray</em> would actually contain enough data to reconstruct an image.
+As it was an absorption ray, I assumed that the value would be 0, and therefore that nothing would come out of using the ray itself.
+In fact, my physics were wrong, and you <em>must</em> use that.</p>
+</div>
+<div class="paragraph">
+<p>A direct consequence is that there is actually no need to perform a distortion correction.
+Instead, you can just use the 2d order polynomial that we&#8217;ve computed, and "follow the line", that&#8217;s it!</p>
+</div>
+<div class="paragraph">
+<p>Now, we can generate an image, but it will be very dark.
+The reason is obvious: by taking the middle of the spectral line, we&#8217;re basically using dark pixels, so the dynamics of the image are extremely low.
+So, in order to have something which "looks nice", you actually have to perform brightness correction.</p>
+</div>
+<div class="paragraph">
+<p>The first algorithm I have used is simply a linear correction: we&#8217;re computing the max and min value of the image, then rescaling that so that the max value is the maximum representable (255).</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the result:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/linear.png" alt="linear">
+</div>
+</div>
+<div class="paragraph">
+<p>However, I felt that this technique wouldn&#8217;t give the best results, in particular because linear images tend to give results which are not what the eye would see: our eye performs a bit like an "exponential" accumulator, the more photos you get, the "brighter" we&#8217;ll see it.</p>
+</div>
+<div class="paragraph">
+<p>So I implemented another algorithm which I had seen in <a href="https://pixinsight.com/">PixInsight</a>, which is called inverse hyperbolic (Arcsinh) correction:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/stretched.png" alt="stretched">
+</div>
+</div>
+<div class="paragraph">
+<p>Last, you can see that the image has lots of vertical line artifacts.
+This is due to the presence of dust either on the optics or the sensors.
+INTI performs correction of those lines, and I wanted to do something similar.</p>
+</div>
+<div class="paragraph">
+<p>Again, I don&#8217;t know what INTI is doing, so I figured out my own technique, which is using "multipass" correction.
+In a nutshell, for each row, I am computing the average value of the row.
+Then, for a particular row, I compute the average of the averages of the surrounding lines (for example, 16 rows before and after).
+If the average of this line is <em>below</em> the average of the averages(!), then I&#8217;m considering that the line is darker than it should be, computing a correction factor and applying it.</p>
+</div>
+<div class="paragraph">
+<p>The result is a corrected image:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/astro/solex/banding.png" alt="banding">
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;re still not a the level of quality that INTI produces, but getting close!</p>
+</div>
+<div class="paragraph">
+<p>So what&#8217;s next? I already have <a href="https://github.com/melix/astro4j/issues">added some issues for things I want to fix</a>, and in particular, I&#8217;m looking at improving the banding reduction and performing geometry correction.
+For both, I <em>think</em> I will need to use fast fourier transforms, in order to identify the noise in one case (banding) and detect edges in the other (geometry correction).</p>
+</div>
+<div class="paragraph">
+<p>Therefore, I started to implement FFT transforms, a domain I had absolutely no knowledge of.
+Luckily, I could ask <a href="https://chat.openai.com/">ChatGPT</a> to explain to me the concepts, which made it faster to implement!
+For now, I have only implemented the <a href="https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm">Cooley-Tukey</a> algorithm.
+The issue is that this algorithm is quite slow, and requires that the input data has a length which is a power of 2.
+Given the size of the image we generate, it&#8217;s quite costly.</p>
+</div>
+<div class="paragraph">
+<p>I took advantage of this to learn about the <a href="https://openjdk.org/jeps/438">Vector API</a> to leverage SIMD instructions of modern CPUs, and it indeed made things significantly faster (about twice as fast), but still not at the level of performance that I expect.</p>
+</div>
+<div class="paragraph">
+<p>I am trying to understand the <a href="https://en.wikipedia.org/wiki/Split-radix_FFT_algorithm">split radix</a> but I&#8217;m clearly intimidated by the many equations here&#8230;&#8203; In any case I printed some papers which I hope I&#8217;ll be able to understand.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In conclusion, in this article, I&#8217;ve introduced <a href="https://github.com/melix/astro4j">astro4j</a>, an open source suite of libraries and applications written in Java for astronomy software.
+While the primary goal for me is to learn and improve my skills and knowledge of the maths behind astronomy software processing, it <em>may</em> be that it produces something useful.
+In any case, since it&#8217;s open source, if you want to contribute, feel free!</p>
+</div>
+<div class="paragraph">
+<p>And you can do so in different domains, for example, I pretty much s* at UI, so if you are a JavaFX expert, I would appreciate your pull requests!</p>
+</div>
+<div class="paragraph">
+<p>Finally, here is a video showing JSol&#8217;Ex in action:</p>
+</div>
+ <video width="1024" height="768" controls>
+  <source src="img/solex/jsolex.webm" type="video/webm">
+Your browser does not support the video tag.
+</video>
+</div>
+</div></p>
+   
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+   <script>hljs.highlightAll();</script>
+  </body>
+</html>

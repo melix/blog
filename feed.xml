@@ -6,9 +6,330 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 13 Mar 2023 15:02:25 +0100</pubDate>
-    <lastBuildDate>Mon, 13 Mar 2023 15:02:25 +0100</lastBuildDate>
+    <pubDate>Sat, 22 Apr 2023 20:49:00 +0200</pubDate>
+    <lastBuildDate>Sat, 22 Apr 2023 20:49:00 +0200</lastBuildDate>
 
+    <item>
+      <title>Introducing astro4j</title>
+      <link>https://melix.github.io/blog//2023/04-22-introducing-astro4j.html</link>
+      <pubDate>Sat, 22 Apr 2023 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2023/04-22-introducing-astro4j.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This blog introduces &lt;a href=&quot;https://github.com/melix/astro4j&quot;&gt;astro4j&lt;/a&gt;, my latest toy project, a open source collection of libraries and applications for astronomy, written in Java.
+In particular, I will discuss &lt;a href=&quot;https://github.com/melix/astro4j/tree/main/jsolex&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt;, a program aimed at reconstructing solar disk images from video files captured using the amazing &lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-presentation-en.html&quot;&gt;Sol&amp;#8217;Ex&lt;/a&gt; instrument.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_why_astro4j&quot;&gt;Why astro4j?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m a software developer, and if you are following me, you may also know that I&amp;#8217;m an &lt;a href=&quot;https://www.astrobin.com/users/melix/&quot;&gt;amateur astrophotographer&lt;/a&gt;.
+For a long time, I&amp;#8217;ve been fascinated by the quality of software we have in astronomy, to process images.
+If you are french speaking, you can watch a &lt;a href=&quot;https://www.youtube.com/watch?v=tSgnOtdjVHs&quot;&gt;presentation I gave about this topic&lt;/a&gt;.
+Naturally, I have been curious about how all these things work, but it&amp;#8217;s actually extremely rare to find open source software, and when you do, it&amp;#8217;s rarely written in Java.
+For example, both &lt;a href=&quot;http://www.firecapture.de/&quot;&gt;Firecapture&lt;/a&gt; (software to capture video streams) and &lt;a href=&quot;https://www.astropixelprocessor.com/&quot;&gt;Astro Pixel Processor&lt;/a&gt; are written in Java, but both of them are closed source, commercial software.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last month, for my birthday, I got a &lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-presentation-en.html&quot;&gt;Sol&amp;#8217;Ex&lt;/a&gt;, an instrument which combines spectrography and software to realize amazing solar pictures in different spectral lines.
+To process those images, the easiest solution is to use &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;the amazing INTI software&lt;/a&gt;, written in Python, but for which sources are not published, as far as I know, neither on GitHub or GitLab.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To give you an example of what you can do, here&amp;#8217;s the &lt;a href=&quot;https://www.astrobin.com/94gymd/&quot;&gt;first photography&lt;/a&gt; I&amp;#8217;ve done with Sol&amp;#8217;Ex and processed with INTI (color was added in Gimp):&lt;/p&gt;
+&lt;/div&gt;
+&lt;a href=&quot;https://astrob.in/94gymd/0/&quot;&gt;&lt;img src=&quot;https://astrob.in/94gymd/0/rawthumb/regular/get.jpg?insecure&quot;/&gt;&lt;/a&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To get this result, one has to combine images which look like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/spectrum.png&quot; alt=&quot;spectrum&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Interesting, no?
+At the same time, I was a bit frustrated by INTI.
+While it clearly does the job and is extremely easy to use, there are a few things which I didn&amp;#8217;t like:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;the first, which I mentioned, is that it&amp;#8217;s using Python and that the sources are not published (as far as I understand, some algorithms are not published yet). I am not surprised that Python is used, because it&amp;#8217;s a language which is extremely popular in academics, with lots of libraries for image processing, science oriented libs, etc. However, because it&amp;#8217;s popular in academics also means that programs are often written by and for academics. When we&amp;#8217;re talking about maths, it&amp;#8217;s often short variable names, cryptic function names, etc&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;second, after processing, INTI pops up a lot of images as individual windows. If you want to process a new file, you have to close all of them. The problem is that I still haven&amp;#8217;t figured out in which order you have to do this so that you can restart from the initial window which lets you select a video file! Apparently, depending on the order, it will, or will not, show the selector. And sometimes, it takes several seconds before it does so.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;INTI seems to be regenerating a font cache every time I reboot. This operation takes several minutes. It&amp;#8217;s probably an artifact of packaging the application for Windows, but still, not very user friendly.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;INTI generates a number of images, but puts them alongside the videos. I like things organized (well, at least virtually, because if you looked at my desk right now, it is likely you&amp;#8217;d feel faint), so I wish it was creating one directory per processed video.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/inti-popups.png&quot; alt=&quot;inti popups&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_confronting_the_old_demons&quot;&gt;Confronting the old demons&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When I started studying at University, back in 1998, I was planning to do astrophysics.
+However, I quickly forgot about this idea when I saw the amount of maths one has to master to do modern physics.
+Clearly, I was reaching my limits, and it was extremely complicated for me.
+Fortunately, I had been doing software development for years already, because I started very young, on my father&amp;#8217;s computer.
+So I decided to switch to computer science, where I was reasonably successful.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, not being able to do what I wanted to do has always been a frustration. It is still, today, to the point that a lot of what I&amp;#8217;m reading is about this topic, but still, I lack the maths.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It was time for me to confront my old demons, and answer a few questions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;am I still capable of understanding maths, in order to implement algorithms which I use everyday when I do astronomy image processing with software written by others?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;can I read academic papers, for example to implement a FFT (Fast Fourier Transform) algorithm, although I clearly remember that I failed to understand the principles when I was at school?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;can I do this while writing something which could be useful to others, and publish it as open source software?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Astro4j is there to answer those questions.
+I don&amp;#8217;t have the answers yet and time will tell if I&amp;#8217;m successful.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_using_modern_java&quot;&gt;Using modern Java&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One question you may have is why Java? If you are not familiar with this language, you may have this old misconception that Java is slow.
+It&amp;#8217;s not. Especially, if you compare to Python, it&amp;#8217;s definitely not.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This project is also for me a way to prove that you can implement &quot;serious science&quot; in Java.
+You can already find some science libraries in Java, but they tend to me impractical to use, because not following the industry standards (e.g published on Maven Central) or platform-dependent.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I also wanted to leverage this to &lt;em&gt;learn something new&lt;/em&gt;.
+So this project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;uses Java 17 (at least for libraries, so that they can be consumed by a larger number of developers, for applications I&amp;#8217;m considering moving to Java 20)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;uses &lt;a href=&quot;https://openjfx.io/&quot;&gt;JavaFX&lt;/a&gt; (OpenJFX) for the application UI&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;experiments with the &lt;a href=&quot;https://openjdk.org/jeps/438&quot;&gt;Vector API&lt;/a&gt; for faster processing&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said, my initial goal is to obtain a software which can basically do what INTI does.
+It is not a goal to make it faster, but if I can do it, I will.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introducing_jsolex&quot;&gt;Introducing JSol&amp;#8217;Ex&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After a few evenings (and a couple week-ends ;)), I already have something which performs &lt;em&gt;basic processing&lt;/em&gt;, that is to say that it can process a SER video file and generate a reconstructed solar disk.
+It does &lt;strong&gt;not&lt;/strong&gt; perform geometry correction, nor tilt correction, like INTI does. It doesn&amp;#8217;t generate shifted images either (for example the doppler images), but &lt;strong&gt;it works&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Since the only source of information I had to do this was &lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-presentation-en.html&quot;&gt;Christian Buil&amp;#8217;s website&lt;/a&gt; and &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;Valérie Desnoux INTI&amp;#8217;s website&lt;/a&gt;, I basically had to implement my own algorithms from A to Z, and just &quot;guess&quot; how it works.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to do this, I had to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;implement a SER video file decoder. The library is &lt;a href=&quot;https://github.com/melix/astro4j/tree/main/jserfile&quot;&gt;ready&lt;/a&gt; and performs both decoding the SER file and performs demosaicing of images&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on top of the decoder, I implemented a &lt;a href=&quot;https://github.com/melix/astro4j/tree/main/ser-player&quot;&gt;SER file player&lt;/a&gt;, which is still very basic at this stage, and uses JavaFX. This player can even be compiled to a native binary using &lt;a href=&quot;https://www.graalvm.org/&quot;&gt;GraalVM&lt;/a&gt;!&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s an example:&lt;/p&gt;
+&lt;/div&gt;
+ &lt;video width=&quot;800&quot; height=&quot;480&quot; controls&gt;
+  &lt;source src=&quot;img/solex/serplayer.webm&quot; type=&quot;video/webm&quot;&gt;
+Your browser does not support the video tag.
+&lt;/video&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I could finally start working on the Sol&amp;#8217;Ex video processor.
+As I said, I don&amp;#8217;t know how INTI works, so this is all trial and error, in the end&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the beginning, as I said, you have a SER video file which contains a lot of frames (for example, in my case, it&amp;#8217;s a file from 500MB to 1GB) that we have to process in order to generate a solar disk.
+Each frame consists of a view of the light spectrum, centered on a particular spectral line.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, in the following image, we have the H-alpha spectral line:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/spectrum.png&quot; alt=&quot;spectrum&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because of optics, you can see that the line is not horizontal: each frame is distorted.
+Therefore, in order to reconstruct an image, we have to deal with that distortion first.
+For this, we have to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;detect the spectral line in the frame, which I&amp;#8217;m doing by implementing a simple contrast detection&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;perform a linear regression in order to compute a 2d order polynomial which models the distortion&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that before doing this, I had no idea how to do a 2d order regression, but I searched and found that it was possible to do so using the least squares method, so I did so.
+The result is that we can identify precisely the line with this technique:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/spectrum-line.png&quot; alt=&quot;spectrum line&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the beginning, I tought I would have to perform distortion correction in order to reconstruct the image, because I was (wrongly) assuming that, because each frame represents &lt;em&gt;one&lt;/em&gt; line in the reconstructed image, I had to compute the average of the colums of each frame to determine the color of a &lt;em&gt;single&lt;/em&gt; pixel in the output. I was wrong (we&amp;#8217;ll come to that later), but I did implement a distortion correction algorithm:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/spectrum-corrected.png&quot; alt=&quot;spectrum corrected&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When I computed the average, the resulting image was far from the quality and constrast of what I got with INTI.
+What a failure!
+So I thought that maybe I had to compute the average of the spectral line itself.
+I tried this, and indeed, the resulting image was much better, but still not the quality of INTI.
+The last thing I did, therefore, was to pick the middle of the spectral line itself, and then, magically, I got the same level of quality as with INTI (for the raw images, as I said I didn&amp;#8217;t implement any geometry or tilt correction yet).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The reason I was assuming that I had to compute an average, is that it wasn&amp;#8217;t clear to me that the &lt;em&gt;absorption ray&lt;/em&gt; would actually contain enough data to reconstruct an image.
+As it was an absorption ray, I assumed that the value would be 0, and therefore that nothing would come out of using the ray itself.
+In fact, my physics were wrong, and you &lt;em&gt;must&lt;/em&gt; use that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A direct consequence is that there is actually no need to perform a distortion correction.
+Instead, you can just use the 2d order polynomial that we&amp;#8217;ve computed, and &quot;follow the line&quot;, that&amp;#8217;s it!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, we can generate an image, but it will be very dark.
+The reason is obvious: by taking the middle of the spectral line, we&amp;#8217;re basically using dark pixels, so the dynamics of the image are extremely low.
+So, in order to have something which &quot;looks nice&quot;, you actually have to perform brightness correction.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first algorithm I have used is simply a linear correction: we&amp;#8217;re computing the max and min value of the image, then rescaling that so that the max value is the maximum representable (255).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s the result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/linear.png&quot; alt=&quot;linear&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, I felt that this technique wouldn&amp;#8217;t give the best results, in particular because linear images tend to give results which are not what the eye would see: our eye performs a bit like an &quot;exponential&quot; accumulator, the more photos you get, the &quot;brighter&quot; we&amp;#8217;ll see it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So I implemented another algorithm which I had seen in &lt;a href=&quot;https://pixinsight.com/&quot;&gt;PixInsight&lt;/a&gt;, which is called inverse hyperbolic (Arcsinh) correction:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/stretched.png&quot; alt=&quot;stretched&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Last, you can see that the image has lots of vertical line artifacts.
+This is due to the presence of dust either on the optics or the sensors.
+INTI performs correction of those lines, and I wanted to do something similar.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again, I don&amp;#8217;t know what INTI is doing, so I figured out my own technique, which is using &quot;multipass&quot; correction.
+In a nutshell, for each row, I am computing the average value of the row.
+Then, for a particular row, I compute the average of the averages of the surrounding lines (for example, 16 rows before and after).
+If the average of this line is &lt;em&gt;below&lt;/em&gt; the average of the averages(!), then I&amp;#8217;m considering that the line is darker than it should be, computing a correction factor and applying it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The result is a corrected image:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/astro/solex/banding.png&quot; alt=&quot;banding&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;re still not a the level of quality that INTI produces, but getting close!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So what&amp;#8217;s next? I already have &lt;a href=&quot;https://github.com/melix/astro4j/issues&quot;&gt;added some issues for things I want to fix&lt;/a&gt;, and in particular, I&amp;#8217;m looking at improving the banding reduction and performing geometry correction.
+For both, I &lt;em&gt;think&lt;/em&gt; I will need to use fast fourier transforms, in order to identify the noise in one case (banding) and detect edges in the other (geometry correction).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, I started to implement FFT transforms, a domain I had absolutely no knowledge of.
+Luckily, I could ask &lt;a href=&quot;https://chat.openai.com/&quot;&gt;ChatGPT&lt;/a&gt; to explain to me the concepts, which made it faster to implement!
+For now, I have only implemented the &lt;a href=&quot;https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm&quot;&gt;Cooley-Tukey&lt;/a&gt; algorithm.
+The issue is that this algorithm is quite slow, and requires that the input data has a length which is a power of 2.
+Given the size of the image we generate, it&amp;#8217;s quite costly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I took advantage of this to learn about the &lt;a href=&quot;https://openjdk.org/jeps/438&quot;&gt;Vector API&lt;/a&gt; to leverage SIMD instructions of modern CPUs, and it indeed made things significantly faster (about twice as fast), but still not at the level of performance that I expect.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I am trying to understand the &lt;a href=&quot;https://en.wikipedia.org/wiki/Split-radix_FFT_algorithm&quot;&gt;split radix&lt;/a&gt; but I&amp;#8217;m clearly intimidated by the many equations here&amp;#8230;&amp;#8203; In any case I printed some papers which I hope I&amp;#8217;ll be able to understand.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In conclusion, in this article, I&amp;#8217;ve introduced &lt;a href=&quot;https://github.com/melix/astro4j&quot;&gt;astro4j&lt;/a&gt;, an open source suite of libraries and applications written in Java for astronomy software.
+While the primary goal for me is to learn and improve my skills and knowledge of the maths behind astronomy software processing, it &lt;em&gt;may&lt;/em&gt; be that it produces something useful.
+In any case, since it&amp;#8217;s open source, if you want to contribute, feel free!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And you can do so in different domains, for example, I pretty much s* at UI, so if you are a JavaFX expert, I would appreciate your pull requests!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally, here is a video showing JSol&amp;#8217;Ex in action:&lt;/p&gt;
+&lt;/div&gt;
+ &lt;video width=&quot;1024&quot; height=&quot;768&quot; controls&gt;
+  &lt;source src=&quot;img/solex/jsolex.webm&quot; type=&quot;video/webm&quot;&gt;
+Your browser does not support the video tag.
+&lt;/video&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>How the Micronaut team leverages Gradle&amp;#8217;s version catalogs for improved developer productivity</title>
       <link>https://melix.github.io/blog//2023/03-12-micronaut-catalogs.html</link>
