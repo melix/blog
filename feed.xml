@@ -6,9 +6,402 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 15 Oct 2023 16:09:44 +0200</pubDate>
-    <lastBuildDate>Sun, 15 Oct 2023 16:09:44 +0200</lastBuildDate>
+    <pubDate>Thu, 4 Jan 2024 16:49:49 +0100</pubDate>
+    <lastBuildDate>Thu, 4 Jan 2024 16:49:49 +0100</lastBuildDate>
 
+    <item>
+      <title>Stacking and mosaic creation with JSol&amp;#8217;Ex 2.0</title>
+      <link>https://melix.github.io/blog//2024/01-04-jsolex-2.0.html</link>
+      <pubDate>Thu, 4 Jan 2024 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2024/01-04-jsolex-2.0.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A couple days ago I have released &lt;a href=&quot;https://github.com/melix/astro4j/releases/tag/2.0.0&quot;&gt;JSol&amp;#8217;Ex 2.0&lt;/a&gt;.
+This software can be used as an alternative to &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;INTI&lt;/a&gt; to process solar images acquired using Christian Buil&amp;#8217;s &lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-presentation-en.html&quot;&gt;Sol&amp;#8217;Ex&lt;/a&gt;.
+This new version introduces 2 new features that I would like to describe in more details in this blog post: stacking and mosaic stitching.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_stacking&quot;&gt;Stacking&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Stacking should be something familiar to anyone doing planetary imaging.
+One of the most popular sofware for doing stacking is &lt;a href=&quot;https://www.autostakkert.com/wp/&quot;&gt;AutoStakkert!&lt;/a&gt; which has recently seen a new major version.
+Stacking usually consists of taking a large number of images, selecting a few reference points and trying to align these images to reconstruct a single, stacked image which increases the signal-to-noise ratio.
+Each of the individual images are usually small and there are a large number of images (since the goal is to reduce the impact of turbulence, typically, videos are taken with a high frame rate, often higher than 100 frames per second).
+In addition, there are little to no changes between the details of a series (granted that you limit the capture to a few seconds, to avoid the rotation of the planet typically) so the images are really &quot;only&quot; disformed by turbulence.
+In the context of Sol&amp;#8217;Ex image processing, the situation is a bit different: we have a few captures of large images: in practice, capturing an image takes time (it&amp;#8217;s a scan of the sun which will consist of a video of several seconds just to build a &lt;em&gt;single&lt;/em&gt; image) and the solar details can move quickly between captures.
+In practice, it means that you can reasonably stack 2 to 5 images, maybe more if the scans are quick enough and that there are not too many changes between scans.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The question for me was how to implement such an algorithm for JSol&amp;#8217;Ex?
+Compared to planetary image stacking, we have a few advantages:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;images have a great resolution: depending on the camera that you use and the binning mode, you can have images which range from several hundreds pixels large to a few thousands pixels&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the images are well defined : in planetary observation, there are a few &quot;high quality&quot; images in a video of several thousand frames, but most images are either fully or partially disformed&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;there&amp;#8217;s little movement between images: anyone who has stacked a planetary video can see that it&amp;#8217;s frequent to see jumps of several pixels between 2 images, just because of turbulence&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;for each image, we already have determined the ellipse which makes the solar disk and should also have corrected the geometry, so that all solar disks are &quot;perfect circles&quot;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, a naive approach, which I tried without success a few months ago, is a geometric approach where we simply make all solar disks the same (by resizing), align them then create an average image.
+To illustrate this approach, let&amp;#8217;s look at some images:&lt;/p&gt;
+&lt;/div&gt;
+ &lt;video width=&quot;1024&quot; height=&quot;768&quot; controls&gt;
+  &lt;source src=&quot;https://melix.github.io/blog/img/jsolex2/reference.webm&quot; type=&quot;video/webm&quot;&gt;
+Your browser does not support the video tag.
+&lt;/video&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this video we can see that there is quite some movement visible between each image.
+Each of them is already of quite good quality, but we can notice some noise and more importantly, a shear effect due to the fact that a scan takes several seconds and that we reconstruct line by line :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/stack-ref.jpg&quot; alt=&quot;stack ref&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The average image is therefore quite blurry:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/stack-average.jpg&quot; alt=&quot;stack average&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, using the average image is &lt;em&gt;not&lt;/em&gt; a good option for stacking and that&amp;#8217;s why I recommended to use &lt;a href=&quot;https://www.autostakkert.com/wp/&quot;&gt;AutoStakkert!&lt;/a&gt; instead, which gave better results.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to achieve better results, I opted for a simple yet effective algorithm:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;first, estimate the sharpness of each image. This is done by computing the &lt;a href=&quot;https://en.wikipedia.org/wiki/Laplace_operator&quot;&gt;Laplacian&lt;/a&gt; of each image. The image with the best sharpness is selected as the &lt;em&gt;reference&lt;/em&gt; image&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;divide each image into tiles (by default, a tile has a width of 32 pixels)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;for each tile, try to align it with the reference image by computing an error between the reference tile and the image&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the error is based on root mean squared error of the pixel intensities : the better the tiles are aligned, the closer to 0 the error will be&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;this is the most expensive operation, because it requires computing the error for various positions&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;we&amp;#8217;re only looking for displacements with a maximum shift of 2/3 of the tile size (so, by default, 21 pixels maximum)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;if the shift between 2 tiles is higher than this limit, we won&amp;#8217;t be able to align the tiles properly&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We could have stopped here and already reconstruct an image at this stage, but the result wouldn&amp;#8217;t be great: the fact that we use tiles would be visible at the edges of the tiles, with square artifacts clearly visible.
+To reduce the artifacts, I opted for a &quot;sliding window&quot; algorith, where the next tile will overlap the previous one by a factor between 0 (no overlap) and 1 (100% overlap).
+This means that for each pixel, we will get a &quot;stack&quot; of pixel values computed from the alignment of several tiles.
+The final pixel value is then computed by taking the median value of the stack.
+Even so, some stacking vertical or horizontal artifacts can still be sometimes visible, so the last &quot;trick&quot; I used is to build the stacks by only taking pixels within a certain radius, instead of the whole square.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The resulting, stacked image is here:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/stack-jsolex.jpg&quot; alt=&quot;stack jsolex&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can see that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;noise from the original images is gone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;shearing artifacts are significantly reduced&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the resulting image is not as blurry as the average version&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There were, however, some compromises I had to make, in order to avoid that the stacking process takes too long.
+In particular, the tile alignment process (in particular error computation) is very expensive, since for each tile, we have to compute 21*21 = 441 errors by default.
+With an overlap factor of 0.3, that&amp;#8217;s, for an image of 1024 pixels large, more than 5 million errors to compute.
+Even computing them in parallel takes long, therefore I added &lt;a href=&quot;https://en.wikipedia.org/wiki/Local_search_(optimization)&quot;&gt;local search optimization&lt;/a&gt;: basically, instead of searching in the whole space, I&amp;#8217;m only looking for errors within a restricted radius (8 pixels).
+Then, we take the minimal error of this area and resume searching from that position: step by step we&amp;#8217;re moving &quot;closer&quot; to a local optimum which will hopefully be the best possible error.
+While this doesn&amp;#8217;t guarantee to find the best possible solution, it proved to provide very good results while significantly cutting down the computation times.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;From several tests I made, the quality of the stacked image matches that of Autostakkert!.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_mosaic_composition&quot;&gt;Mosaic composition&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The next feature I added in JSol&amp;#8217;Ex 2, which is also the one which took me most time to implement, is mosaic composition.
+To some extent, this feature is similar to stacking, except that in stacking, we know that all images represent the same region of the solar disk and that they are roughly aligned.
+With mosaics, we have to work with different regions of the solar disk which overlap, and need to be stitched together in order to compose a larger image.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On December 7th, 2024, I had given a glimpse of that feature for &lt;a href=&quot;https://www.astro-images-processing.fr/articles/135166-pratique-et-traitement-d-images-sol-ex&quot;&gt;the french astrophotograhers association AIP&lt;/a&gt;, but I wasn&amp;#8217;t happy enough with the result so decided to delay the release.
+Even today, I&amp;#8217;m not fully satisfied, but it gives reasonable results on several images I tried so decided it was good enough for public release and getting feedback about this feature.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mosaic composition is not an easy task: there are several problems we have to solve:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;first, we need to identify, in each image, the regions which &quot;overlap&quot;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;then for each image, we need to be able to tell if the pixel value we read at a particular place is relevant for the whole composition or not&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;then we have to do the alignment&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;and finally avoid mosaicing artifacts, typically vertical or horizontal lines at the &quot;edges&quot;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In addition, mosaic composition is not immune to the problem that each image can have different illumination, or even that the regions which are overlapping have slightly (or even sometimes significantly) moved between the captures.
+Therefore, the idea is to &quot;warp&quot; images together in order to make them stitch smoothly.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_preparing_panels_for_integration&quot;&gt;Preparing panels for integration&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here are the main steps of the algorithm I have implemented:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;resize images so that they all solar disks have the same radius (in pixels), and that all images are square&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;normalize the histograms of each panel so that all images have similar lightness&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;estimate the background level of each panel, in order to have a good estimate of when a pixel of an image is relevant or not and perform background neutralization&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;there can be more than 2 panels to integrate. My algorithm works by stitching them 2 by 2, which implies sorting the panels by putting the panels which overlap the most in front, then stitching the 2 most overlapping panels together. The result of the operation is then stitched together with the next panel, until we have integrated all of them.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The stitching part works quite differently than with typical stacking.
+In stacking, we have &lt;em&gt;complete&lt;/em&gt; data for each image: we &quot;only&quot; have to align them.
+With mosaics, there are &quot;missing&quot; parts in the image that we need to fill in.
+To do this, we have to identify which part of a panel can be blended into the reconstructed image in order to complete it.
+This means that the alignment process is significanly more complicated than with typical stacking, since we will work on &quot;missing&quot; data.
+Part of the difficulty is precisely identifying if something is missing or not, that is to say if the signal of a pixel in one of the panels is relevant to the composition of the final image.
+This is done by comparing it with the estimated background level, but that&amp;#8217;s not the only trick.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Despite the fact that our panels are supposedly aligned and that the circles representing the solar disks are supposed to be the same, in practice, depending on the quality of the capture and the ellipse regression success, the disks may be &lt;em&gt;slightly off&lt;/em&gt;, with deformations.
+There can even be slight rotations between panels (because of flexions at capture time, or processing artifacts).
+As a consequence, a naive approach consisting of trying to minimize the error between 2 panels by moving them a few pixels in each direction like in stacking &lt;em&gt;doesn&amp;#8217;t work&lt;/em&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;first of all, while you may properly align one edge of the solar disk, we can see that some regions will be misaligned. If these regions correspond to high contrast areas like filaments, it gives real bad results. If it happens at the edges of the sun, you can even see part of the disk being shifted a few pixels away from the other panel, which is clearly wrong.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;second, estimating the error is not so simple, since we have &lt;em&gt;incomplete&lt;/em&gt; disks. And in this case, the error has to be computed on large areas, which means that the operation is very expensive.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;third, because we have to decide whether to pick a pixel from one panel or the other, this has the tendency to create very strong artifacts (vertical or horizontal lines) at the stitching edges&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_stitching_algorithm&quot;&gt;The stitching algorithm&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Giving all the issues I described above, I chose to implement an algorithm which would work similarly to stacking, by &quot;warping&quot; a panel into another.
+This process is iterative, and the idea is to take a &quot;reference&quot; panel, which is the one which has the most &quot;relevant&quot; pixels, and align tiles from the 2d panel into this reference panel.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To do this, we compute a grid of &quot;reference points&quot; which are in the &quot;overlapping&quot; area.
+These points belong to the reference image, and one difficulty is to filter out points which belong to &quot;incomplete&quot; tiles.
+Once we have these points, for each of them, we compute an alignment between the reference tile and the tile of the panel we&amp;#8217;re trying to integrate.
+This gives us, roughly, a &quot;model&quot; of how tiles are displaced in the overlapping area.
+The larger the overlapping area is, the better the model will be, but experience shows that distorsion on one edge of the solar disk can be significanly different at the other edge.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The next step consists of trying to align tiles of the panel we integrate to the reference panel using this model.
+This is where the iteration process happens.
+In a nutshell, we have an area where the solar disk is &quot;truncated&quot;.
+Even if we split the image in tiles like with stacking, we cannot really tell whether a tile is &quot;complete&quot; or not, because it depends both on the pixel intensities of the reference panel and the second panel, and the background level.
+In particular, calcium images may have dark areas &lt;em&gt;within&lt;/em&gt; the solar disk which are sometimes as dark as the background.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you are struggling to understand how difficult it can be to determine if part of the image we consider is relevant or not, let&amp;#8217;s illustrate with this image:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/panel_noise.jpg&quot; alt=&quot;panel noise&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Can you see what&amp;#8217;s wrong in this image?
+Let&amp;#8217;s increase constrast to make it clearly visible:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/panel_noise2.jpg&quot; alt=&quot;panel noise2&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now it should be pretty obvious that below the south edge of the truncated disk, we have an area which has pixels which are above the value of the background, but do not constitute actual signal!
+This problem took me quite some time to solve, and it&amp;#8217;s only recently that I figured out a solution: before mosaicing, I am performing a background neutralization step, by modeling the background and substracting it from the image.
+While this doesn&amp;#8217;t fully solve the problem, it makes it much less relevant for composition.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In addition, we have to compose the image using tiles which are incomplete, and we don&amp;#8217;t know the orientation of the panels: they can be assembled north/south, or west/east, and nothing tells us.
+Potentially, it can even be a combination of these for a large number of panels.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Therefore, the algorithm works by creating a &quot;mask&quot; of the image being reconstructed.
+This mask tells us &quot;for this particular pixel, I have reconstructed a value, or the value of the reference image is good enough and we won&amp;#8217;t touch it&quot;.
+Then, for each tile, we consider tiles for which the mask is incomplete.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to determine how to align the truncated disk with data from the other image, we compute an estimate of the distortion of the tile based on the displacements models we have determined earlier.
+Basically, for a new &quot;tile&quot; to be integrated, we will consider the sample &quot;reference points&quot; which are within a reasonable distance of the tile.
+For this set of reference points, we know that they are &quot;close enough&quot; to compute an average model of the distorsion, that I call the &quot;local distorsion&quot;: we can estimate, based on the distance of each reference point, how much they contribute to the final distorsion model for that particular point.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The key is really to consider &lt;em&gt;enough&lt;/em&gt; samples to have a good distorsion model, but not too many because then the &quot;locality&quot; of alignment would become too problematic and we&amp;#8217;d face misalignments.
+Because there are not so many samples for each &quot;incomplete&quot; tile, we are in fact going to reconstruct, naturally, the image from the edges where there&amp;#8217;s missing data: when there are no samples, it basically means we cannot compute a model, so we don&amp;#8217;t know how to align tiles.
+If we have enough samples, then we can compute a reliable model of the distorsion, and then we can reconstruct the missing part of each tile, by properly aligning the tiles together.
+If the number of samples is not sufficient to consider a good model, then we assume that no distorsion happens, which is often the case for &quot;background&quot; tiles.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Most of the difficulty in this algorithm is properly identifying &quot;when&quot; we can stitch tiles together, that is to say when we can tell that the alignment between tiles makes sense and that the alignment is correct.
+Often, I got good results for one kind of images (e.g, h-alpha images) but horrible results with others (e.g calcium) or the other way around.
+I cannot really say I took a very scientific approach to this problem, but more an empirical approach, tweaking parameters of my algorithm until it gave good enough results in all cases.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I mentioned that the algorithm is iterative, but didn&amp;#8217;t explain why yet: when we compute the tile alignments, we only do so because we have enough local samples for alignment.
+We do this for all tiles that match this criteria, but we won&amp;#8217;t, for example, be able to align a tile which is in the top of the image, if the bottom hasn&amp;#8217;t been reconstructed.
+Therefore, the iteration happens when we have reconstructed all the tiles we could in one step: then we recompute new reference points, and complete the image, not forgetting, of course, to update our mask to tell that some pixels were completed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Overall the algorithm is fairly fast, and can be stopped once we have completed all tiles, or after a number of fixed iterations in case of difficulties (often due to the background itself).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_one_last_step&quot;&gt;One last step&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The algorithm we&amp;#8217;ve described provides us with a way to &quot;roughly&quot; reconstruct an image, but it doesn&amp;#8217;t work like what you&amp;#8217;d intuititvely think of mosaic composition, by &quot;moving&quot; 2 panels until they properly align and blend them toghether.
+Instead, it will reconstruct an image by assembling &lt;em&gt;tiles&lt;/em&gt; together, from what is &lt;em&gt;already&lt;/em&gt; reconstructed: it is more fine grained, which will fix a number of the issues we&amp;#8217;ve faced before: local distorsions, or images which are not properly aligned because the details at the surface at the sun &lt;em&gt;have moved&lt;/em&gt; between the moment the first panel was captured and the second one did.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we stopped there, we would see an image which looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/mosaic_reconstructed.jpg&quot; alt=&quot;mosaic reconstructed&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can see a clear horizontal line, which is due to the fact that we&amp;#8217;re reconstructing using tiles, and that depending on the alignment of tiles with the &quot;missing&quot; areas, we can have strong or weak artifacts at the borders.
+Errors are even more visible in this image in calcium K line:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/mosaic_error_calcium.jpg&quot; alt=&quot;mosaic error calcium&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This time it&amp;#8217;s very problematic and we are facing several of the issues we attempted to avoid: details have significantly moved between the north and south panel were captured, which leads to &quot;shadowing&quot; artifacts, and there are also tiling artifacts visible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, the image we get is &lt;em&gt;good enough&lt;/em&gt; to perform one last step: use it as a &lt;em&gt;reference image&lt;/em&gt; in the stacking algorithm we described in the first section of this blog post.
+The reason stacking works well is because we know we have complete images that we can align.
+Here, we have roughly reconstructed an image that we can use as a &quot;complete reference&quot;.
+The idea is therefore to take each tile of each panel and &quot;blend&quot; it using the reconstructed reference.
+Of course, there is one big difference between the stacking in the first section and the stacking we have to do now.
+We&amp;#8217;re not really going to use the reconstructed image, except for aligning tiles together and computing a &quot;weight&quot; for each tile, which depends on the relative luminosity between the reference image tile we&amp;#8217;re considering and the corresponding panel tile.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This gives us a pretty good result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/mosaic_halpha_final.jpg&quot; alt=&quot;mosaic halpha final&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2/mosaic_calcium_final.jpg&quot; alt=&quot;mosaic calcium final&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The images we got there are not perfect, which is why I&amp;#8217;m not fully satisfied yet, but they are however already quite good, given that it&amp;#8217;s all done in a few seconds, using the same software that you&amp;#8217;d use to reconstruct Sol&amp;#8217;Ex images!
+In other words, the goal of these features is &lt;em&gt;not&lt;/em&gt; to get the same level of quality that you&amp;#8217;d get by using your favorite post-processing or mosaic composition software, but good enough to get you a reasonable result in a reasonable amount of time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, on my machine, it takes less than one minute to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;stack images of the north and south panels (~10 images to stack)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;stitch them together in a mosaic&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It would have taken several minutes, or even more, using external software, especially for the mosaic part.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this blog post, I have described how I got to implement 2 algorithms, the stacking algorithm and the mosaic composition one, in JSol&amp;#8217;Ex.
+None of the algorithms were based on any research paper: they were really designed in an &quot;adhoc&quot; way, as my intuition of how things could work.
+It proved to be quite difficult, and it is very likely that better algorithms are described in the wild: I will consider them for future versions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nevertheless, I&amp;#8217;m quite happy with the outcome, since, remember, I have started this program as an experiment and for learning purposes only.
+Now I sincerely hope that it will help you get amazing solar images!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Introducing astro4j</title>
       <link>https://melix.github.io/blog//2023/04-22-introducing-astro4j.html</link>
