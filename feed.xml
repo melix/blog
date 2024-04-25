@@ -6,9 +6,270 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 26 Feb 2024 09:50:58 +0100</pubDate>
-    <lastBuildDate>Mon, 26 Feb 2024 09:50:58 +0100</lastBuildDate>
+    <pubDate>Thu, 25 Apr 2024 21:43:55 +0200</pubDate>
+    <lastBuildDate>Thu, 25 Apr 2024 21:43:55 +0200</lastBuildDate>
 
+    <item>
+      <title>JSol&amp;#8217;Ex 2.2.0 et amélioration du contraste</title>
+      <link>https://melix.github.io/blog//2024/04-25-jsolex-contrast.html</link>
+      <pubDate>Thu, 25 Apr 2024 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2024/04-25-jsolex-contrast.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/melix/astro4j/releases/tag/2.2.0&quot;&gt;JSol&amp;#8217;Ex 2.2.0&lt;/a&gt; est tout juste sorti ! Dans cette version, j&amp;#8217;ai particulièrement travaillé sur l&amp;#8217;amélioration des contrastes. En effet, celles et ceux qui m&amp;#8217;ont entendu parler de ce logiciel savent que je râle depuis longtemps sur mon algo d&amp;#8217;amélioration de contraste. Dans JSol&amp;#8217;Ex, il y a plusieurs algorithmes d&amp;#8217;implémentés. Historiquement, le premier était une transformation sinus hyperbolique inverse, qui fonctionne relativement bien pour faire ressortir les zones plus sombres, mais éclaircit trop le reste. L&amp;#8217;autre algorithme, utilisé aussi par &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;INTI&lt;/a&gt;, c&amp;#8217;est la normalisation locale d&amp;#8217;histogramme (CLAHE).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_les_problèmes_avec_clahe&quot;&gt;Les problèmes avec CLAHE&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;CLAHE est un algorithme qui améliore sensiblement le contraste. Cependant, je n&amp;#8217;ai jamais été très content du résultat. Je ne sais pas comment Valérie Desnoux fait dans INTI, qui a l&amp;#8217;air de s&amp;#8217;en sortir mieux, mais dans JSol&amp;#8217;Ex les résultats obtenus sont assez moyens.
+En particulier, je note plusieurs défauts :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;la création d&amp;#8217;artéfacts, liés au fait que cet algorithme travaille sur des &quot;tuiles&quot; d&amp;#8217;une taille donnée. Plus la taille de la tuile est élevée, moins l&amp;#8217;amélioration de contraste est aggressive, mais plus les artéfacts sont visibles&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;sur l&amp;#8217;image du soleil, les limbes sont toujours éclaircis, ce qui me mène au point suivant&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;les images solaires paraissent plus &quot;plates&quot; : le relief, en particulier l&amp;#8217;obscurcissement lié à la sphéricité du soleil, disparaît. C&amp;#8217;est aussi un effet mécanique de l&amp;#8217;algorithme lui-même : plus la taille des tuiles est faible, moins on peut utiliser de valeurs distinctes. Ainsi pour une taille de tuile à 16 pixels, on aura au maximum 256 valeurs possibles (pour une image 16 bits avec 65536 valeurs à l&amp;#8217;origine). Or, les meilleurs résultats, sur Sol&amp;#8217;Ex, sont obtenus avec une taille de tuile de 8 pixels, soit une réduction à 64 valeurs possibles maximum.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;il y a trop de paramètres possibles : la taille des tuiles, la dynamique et enfin le &quot;facteur de coupe&quot; pour l&amp;#8217;égalisation. Sans entrer dans les détails, trouver une combinaison qui fonctionne bien indépendamment de la taille des images en entrée, de la dynamique de l&amp;#8217;image et enfin du type d&amp;#8217;image (H-alpha, calcium) est presque impossible.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour illustrer mon propos, voici par exemple un disque solaire (le fichier SER est &lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-traitement.html&quot;&gt;celui disponible sur le site de Christian Buil&lt;/a&gt;) traité par JSol&amp;#8217;Ex 2.1 (version précédente donc), avec les paramètres par défaut, une tuile de taille 16 pixels (à gauche) ou 64 pixels (à droite) :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;
+&lt;div class=&quot;container-fluid&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+   &lt;div class=&quot;col-md-6&quot;&gt;
+      &lt;img class=&quot;img-responsive pop&quot; src=&quot;/blog/img/jsolex2_2/clahe_16_jsolex_2.1.jpg&quot;&gt;
+   &lt;/div&gt;
+   &lt;div class=&quot;col-md-6&quot;&gt;
+      &lt;img class=&quot;img-responsive pop&quot; src=&quot;/blog/img/jsolex2_2/clahe_64_jsolex_2.1.jpg&quot;&gt;
+   &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On note déja clairement éclaircissement des limbes, et des artéfacts &quot;carrés&quot; qui apparaissent dès que la taille des tuiles augmente.
+Trouver les bons paramètres qui conviennent à tous étant compliqué, JSol&amp;#8217;Ex offrait déja la possibilité de changer ces paramètres (taille de tuile, intensité, &amp;#8230;&amp;#8203;) mais je pense que peu d&amp;#8217;utilisateurs le faisaient.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Aussi ais-je décidé d&amp;#8217;ajouter un algorithme dans JSol&amp;#8217;Ex 2.2 dédié aux images solaires.
+Pour vous donner un peu envie de lire la suite, voici ce qu&amp;#8217;on peut obtenir avec JSol&amp;#8217;Ex 2.2 sur la même image :&lt;/p&gt;
+&lt;/div&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/christian-jsolex-2.2-decon.jpg&quot; class=&quot;img-responsive center-block&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_nouvel_algorithme&quot;&gt;Nouvel algorithme&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le nouvel algorithme est disponible dans JSol&amp;#8217;Ex 2.2 et est l&amp;#8217;algorithme utilisé par défaut.
+Il combine plusieurs techniques, dont une correction du gamma avec masques, CLAHE et un stretching dynamique de l&amp;#8217;image, pour produire une image plus digne de ce que Sol&amp;#8217;Ex peut faire.
+Je ne prétends pas que cet algorithme est parfait, il a lui aussi des défauts, mais il semble être un bon compromis.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Afin de vérifier mes assertions, j&amp;#8217;ai procédé méthodiquement à une comparaison des images produites avec les paramètres par défaut de INTI, JSol&amp;#8217;Ex 2.1 et JSol&amp;#8217;Ex 2.2 (la seule modification est l&amp;#8217;autocrop activé et un retournement vertical pour que les images soient orientées de la même façon).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commençons par la vidéo H-alpha de démonstration utilisée par Christian Buil sur son site.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Les images pouvant être difficiles à comparer en taille réduite, je vous invite à faire un clic doit et ouvrir l&amp;#8217;image dans un nouvel onglet pour comparer.&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/comparaison-panel-1.jpg&quot; alt=&quot;comparaison panel 1&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On note clairement que sur JSol&amp;#8217;Ex 2.1, il y avait certes une amélioration de contraste, mais elle se faisait au prix d&amp;#8217;artéfacts et d&amp;#8217;une perte de relief.
+En revanche, JSol&amp;#8217;Ex 2.2 offre une image plus nette que celle d&amp;#8217;INTI, sans avoir les défauts de CLAHE.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Continuons avec une autre image solaire en H-alpha, avec plus de dynamique :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/comparaison-panel-2.jpg&quot; alt=&quot;comparaison panel 2&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Là encore on remarque que JSol&amp;#8217;Ex 2.1 produisait une image raisonnable mais assez saturée et surtout &quot;plate&quot;.
+La version 2.2.0, quant à elle, offre une meilleure dynamique tout en préservant les détails et cette impression de profondeur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous pouvons aussi comparer les résultats sur une image obtenue avec une plus longue focale et un disque partiel :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/comparaison-panel-3.jpg&quot; alt=&quot;comparaison panel 3&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette fois-ci on note que les 3 logiciels s&amp;#8217;en tirent honorablement.
+Cependant, JSol&amp;#8217;Ex 2.1.3 affiche une image moins contrastée que la v2.2.0, alors qu&amp;#8217;INTI v6 affiche une image légèrement plus floue.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Malheureusement suite à une fausse manipulation, j&amp;#8217;ai perdu la plupart de mes fichiers SER en raie calcium. J&amp;#8217;ai cependant pu faire des comparaisons, sur des fichiers loins d&amp;#8217;être idéaux.
+Les résultats sont cependant intéressants :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/comparaison-panel-4.jpg&quot; alt=&quot;comparaison panel 4&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette fois-ci, on constate que JSol&amp;#8217;Ex 2.1 s&amp;#8217;en sortait plutôt bien. INTI là encore fait un travail remarquable, mais JSol&amp;#8217;Ex 2.2 sature trop l&amp;#8217;image.
+C&amp;#8217;est un défaut que j&amp;#8217;espère arriver à corriger, qui est lié au fait que les images calcium on un histogramme avec une gaussienne à base très large.
+Il est néanmoins possible d&amp;#8217;atténuer la saturation en choisissant un facteur de correction moins fort (par exemple 1.1 au lieu de la valeur par défaut 1.5), ce que je vous encourage à faire pour les images Calcium (conserver le 1.5 pour le h-alpha, baisser pour le calcium) :&lt;/p&gt;
+&lt;/div&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/calcium-1-jsolex-2-2-facteur-1.1.jpg&quot; class=&quot;img-responsive center-block&quot; width=&quot;50%&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le résultat dépendra cependant beaucoup de l&amp;#8217;exposition initiale de votre vidéo. Voici un autre exemple en raie calcium K:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/comparaison-panel-5.jpg&quot; alt=&quot;comparaison panel 5&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il est utile de noter que si vous n&amp;#8217;êtes pas satisfait du nouvel algorithme, il est tout à fait possible de repasser à CLAHE :&lt;/p&gt;
+&lt;/div&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/config-params.jpg&quot; class=&quot;img-responsive center-block&quot; width=&quot;50%&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, il vous est tout à fait possible d&amp;#8217;être plus ou moins &quot;aggressif&quot; sur l&amp;#8217;amélioration de constraste à effectuer.
+Ansi, dans les paramètres de traitement, vous pouvez changer le facteur &lt;em&gt;gamma&lt;/em&gt; qui permet d&amp;#8217;assombrir l&amp;#8217;image.
+Pour l&amp;#8217;exemple, si on pousse les curseurs un peu loin (par exemple à &lt;em&gt;4&lt;/em&gt; dans l&amp;#8217;image suivante), vous constaterez que l&amp;#8217;image reste exploitable, et surtout que les défauts de CLAHE qui a tendance à aplatir les images est complètement disparu :&lt;/p&gt;
+&lt;/div&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/gamma-4.jpg&quot; class=&quot;img-responsive center-block&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_pour_aller_encore_plus_loin&quot;&gt;Pour aller encore plus loin&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Tout d&amp;#8217;abord, JSol&amp;#8217;Ex offre un &lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html#imagemath&quot;&gt;langage de script&lt;/a&gt; qui permet d&amp;#8217;aller bien plus loin dans les traitements, de générer automatiquement des animations, etc.
+Bien sûr, les améliorations de JSol&amp;#8217;Ex 2.2 sont disponibles dans les scripts par l&amp;#8217;intermédiaire de 2 nouvelles fonctions : &lt;code&gt;adjust_gamma&lt;/code&gt; qui permet de réaliser une simple correction de gamma sur l&amp;#8217;image, et &lt;code&gt;auto_constrast&lt;/code&gt; qui correspond à la correction décrite dans ce billet de blog.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, nous n&amp;#8217;avons pas encore parlé des fonctionnalités désactivées par défaut, mais qui étaient déja disponibles dans JSol&amp;#8217;Ex : la déconvolution et l&amp;#8217;amélioration de la netteté.
+Ces deux options sont activables dans les paramètres de traitement :&lt;/p&gt;
+&lt;/div&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/config-params-2.jpg&quot; class=&quot;img-responsive center-block&quot; width=&quot;50%&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne recommande pas nécessairement de cocher la case &quot;aiguiser les détails&quot; si vous avez des images trop bruitées.
+Cette dernière ligne compare donc la même image, traitée avec &lt;a href=&quot;/blog/img/jsolex2_2/halpha-3-inti-6.png&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;INTI v6&lt;/a&gt;, JSol&amp;#8217;Ex 2.2 (dernière version donc), mais &lt;a href=&quot;/blog/img/jsolex2_2/halpha-3-jsolex-2.2.jpg&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;sans déconvolution&lt;/a&gt;, &lt;a href=&quot;/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon.jpg&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;avec déconvolution&lt;/a&gt; et finalement &lt;a href=&quot;/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon-sharpen.jpg&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;avec déconvolution et amélioration des détails&lt;/a&gt; :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/comparaison-panel-6.jpg&quot; alt=&quot;comparaison panel 6&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En ce qui me concerne, je trouve la version déconvoluée particulièrement plaisante à l&amp;#8217;oeil, et j&amp;#8217;active donc systématiquement la déconvolution :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon.jpg&quot; alt=&quot;halpha 3 jsolex 2.2 decon&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En conclusion, dans ce billet je vous ai présenté le nouvel algorithme de correction de contraste, activé par défaut dans JSol&amp;#8217;Ex 2.2.
+Je pense que les résultats sont assez probants, et que JSol&amp;#8217;Ex n&amp;#8217;a plus à rougir de INTI en ce qui concerne les images avec amélioration de contraste.
+S&amp;#8217;il reste des améliorations à faire sur les images calcium, il est cependant tout à fait possible de modifier les paramètres par défaut, voire de changer d&amp;#8217;algorithme.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;N&amp;#8217;oubliez pas non plus que JSo&amp;#8217;Ex offre d&amp;#8217;autres fonctionnalités comme la colorisation automatique des images, le stacking, la création de mosaïques solaires ou encore un langage de script particulièrement puissant, qui vous permet par exemple de générer des animations automatiquement.
+Je vais donc conclure ce billet avec un exemple de script qui utilise cette nouvelle amélioration de contraste pour produire une animation qui nous fait plonger dans l&amp;#8217;atmosphère solaire en jouant sur le décalage de pixels :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;# Décalage de pixels qu&apos;on applique, de -15 à +15, pas de 0.5
+images=range(-15,15,.5)
+# On calcule une image corrigée de ses transversalliums
+corrigee=fix_banding(images,32,40)
+# Déconvolution
+decon=rl_decon(corrigee)
+# On redimensionne
+redim=rescale_rel(autocrop2(decon,1.1),.5,.5)
+# On applique la correction de contraste décrite dans ce billet
+cst=auto_contrast(redim,1.5)
+
+[outputs]
+# Enfin on produit l&apos;animation (75ms entre chaque frame)
+animation=anim(cst,75)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;text-center&quot;&gt;
+ &lt;video width=&quot;640&quot; height=&quot;640&quot; controls&gt;
+  &lt;source src=&quot;https://melix.github.io/blog/img/astro/solex2_2/anim.webm&quot; type=&quot;video/webm&quot;&gt;
+Your browser does not support the video tag.
+&lt;/video&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_bonus&quot;&gt;Bonus&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;en profite enfin pour partager deux vidéos, à destination des débutants sur Sol&amp;#8217;Ex, que j&amp;#8217;ai faites récemment :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=NsDgg4o2SDw&quot;&gt;Trouver le soleil sans chercheur solaire&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=8lWXcPG16I0&quot;&gt;Régler exposition, gain et binning&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_ressources&quot;&gt;Ressources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/melix/astro4j&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt; (téléchargement)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt; (documentation)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;INTI&lt;/a&gt; (logiciel officiel)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-traitement.html&quot;&gt;Sol&amp;#8217;Ex&lt;/a&gt; (site officiel Sol&amp;#8217;Ex)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Adaptive_histogram_equalization&quot;&gt;CLAHE&lt;/a&gt; (algorithme)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Gamma_correction&quot;&gt;Gamma correction&lt;/a&gt; (algorithme)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Vers un effondrement civilisationnel ?</title>
       <link>https://melix.github.io/blog//2024/02-22-effondrement.html</link>

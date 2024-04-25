@@ -73,6 +73,271 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2024/04-25-jsolex-contrast.html"><h1>JSol&#8217;Ex 2.2.0 et amélioration du contraste</h1></a>
+  			<p>25 April 2024</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	
+		<a href="/blog/tags/solaire.html">solaire</a> 
+	
+		<a href="/blog/tags/astronomie.html">astronomie</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/melix/astro4j/releases/tag/2.2.0">JSol&#8217;Ex 2.2.0</a> est tout juste sorti ! Dans cette version, j&#8217;ai particulièrement travaillé sur l&#8217;amélioration des contrastes. En effet, celles et ceux qui m&#8217;ont entendu parler de ce logiciel savent que je râle depuis longtemps sur mon algo d&#8217;amélioration de contraste. Dans JSol&#8217;Ex, il y a plusieurs algorithmes d&#8217;implémentés. Historiquement, le premier était une transformation sinus hyperbolique inverse, qui fonctionne relativement bien pour faire ressortir les zones plus sombres, mais éclaircit trop le reste. L&#8217;autre algorithme, utilisé aussi par <a href="http://valerie.desnoux.free.fr/inti/">INTI</a>, c&#8217;est la normalisation locale d&#8217;histogramme (CLAHE).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_problèmes_avec_clahe">Les problèmes avec CLAHE</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>CLAHE est un algorithme qui améliore sensiblement le contraste. Cependant, je n&#8217;ai jamais été très content du résultat. Je ne sais pas comment Valérie Desnoux fait dans INTI, qui a l&#8217;air de s&#8217;en sortir mieux, mais dans JSol&#8217;Ex les résultats obtenus sont assez moyens.
+En particulier, je note plusieurs défauts :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>la création d&#8217;artéfacts, liés au fait que cet algorithme travaille sur des "tuiles" d&#8217;une taille donnée. Plus la taille de la tuile est élevée, moins l&#8217;amélioration de contraste est aggressive, mais plus les artéfacts sont visibles</p>
+</li>
+<li>
+<p>sur l&#8217;image du soleil, les limbes sont toujours éclaircis, ce qui me mène au point suivant</p>
+</li>
+<li>
+<p>les images solaires paraissent plus "plates" : le relief, en particulier l&#8217;obscurcissement lié à la sphéricité du soleil, disparaît. C&#8217;est aussi un effet mécanique de l&#8217;algorithme lui-même : plus la taille des tuiles est faible, moins on peut utiliser de valeurs distinctes. Ainsi pour une taille de tuile à 16 pixels, on aura au maximum 256 valeurs possibles (pour une image 16 bits avec 65536 valeurs à l&#8217;origine). Or, les meilleurs résultats, sur Sol&#8217;Ex, sont obtenus avec une taille de tuile de 8 pixels, soit une réduction à 64 valeurs possibles maximum.</p>
+</li>
+<li>
+<p>il y a trop de paramètres possibles : la taille des tuiles, la dynamique et enfin le "facteur de coupe" pour l&#8217;égalisation. Sans entrer dans les détails, trouver une combinaison qui fonctionne bien indépendamment de la taille des images en entrée, de la dynamique de l&#8217;image et enfin du type d&#8217;image (H-alpha, calcium) est presque impossible.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Pour illustrer mon propos, voici par exemple un disque solaire (le fichier SER est <a href="http://www.astrosurf.com/solex/sol-ex-traitement.html">celui disponible sur le site de Christian Buil</a>) traité par JSol&#8217;Ex 2.1 (version précédente donc), avec les paramètres par défaut, une tuile de taille 16 pixels (à gauche) ou 64 pixels (à droite) :</p>
+</div>
+<div class="paragraph">
+<p>
+<div class="container-fluid">
+<div class="row">
+   <div class="col-md-6">
+      <img class="img-responsive pop" src="/blog/img/jsolex2_2/clahe_16_jsolex_2.1.jpg">
+   </div>
+   <div class="col-md-6">
+      <img class="img-responsive pop" src="/blog/img/jsolex2_2/clahe_64_jsolex_2.1.jpg">
+   </div>
+</div>
+</div>
+</p>
+</div>
+<div class="paragraph">
+<p>On note déja clairement éclaircissement des limbes, et des artéfacts "carrés" qui apparaissent dès que la taille des tuiles augmente.
+Trouver les bons paramètres qui conviennent à tous étant compliqué, JSol&#8217;Ex offrait déja la possibilité de changer ces paramètres (taille de tuile, intensité, &#8230;&#8203;) mais je pense que peu d&#8217;utilisateurs le faisaient.</p>
+</div>
+<div class="paragraph">
+<p>Aussi ais-je décidé d&#8217;ajouter un algorithme dans JSol&#8217;Ex 2.2 dédié aux images solaires.
+Pour vous donner un peu envie de lire la suite, voici ce qu&#8217;on peut obtenir avec JSol&#8217;Ex 2.2 sur la même image :</p>
+</div>
+<img src="/blog/img/jsolex2_2/christian-jsolex-2.2-decon.jpg" class="img-responsive center-block" width="50%">
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nouvel_algorithme">Nouvel algorithme</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Le nouvel algorithme est disponible dans JSol&#8217;Ex 2.2 et est l&#8217;algorithme utilisé par défaut.
+Il combine plusieurs techniques, dont une correction du gamma avec masques, CLAHE et un stretching dynamique de l&#8217;image, pour produire une image plus digne de ce que Sol&#8217;Ex peut faire.
+Je ne prétends pas que cet algorithme est parfait, il a lui aussi des défauts, mais il semble être un bon compromis.</p>
+</div>
+<div class="paragraph">
+<p>Afin de vérifier mes assertions, j&#8217;ai procédé méthodiquement à une comparaison des images produites avec les paramètres par défaut de INTI, JSol&#8217;Ex 2.1 et JSol&#8217;Ex 2.2 (la seule modification est l&#8217;autocrop activé et un retournement vertical pour que les images soient orientées de la même façon).</p>
+</div>
+<div class="paragraph">
+<p>Commençons par la vidéo H-alpha de démonstration utilisée par Christian Buil sur son site.</p>
+</div>
+<div class="paragraph">
+<p><strong>Les images pouvant être difficiles à comparer en taille réduite, je vous invite à faire un clic doit et ouvrir l&#8217;image dans un nouvel onglet pour comparer.</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/comparaison-panel-1.jpg" alt="comparaison panel 1">
+</div>
+</div>
+<div class="paragraph">
+<p>On note clairement que sur JSol&#8217;Ex 2.1, il y avait certes une amélioration de contraste, mais elle se faisait au prix d&#8217;artéfacts et d&#8217;une perte de relief.
+En revanche, JSol&#8217;Ex 2.2 offre une image plus nette que celle d&#8217;INTI, sans avoir les défauts de CLAHE.</p>
+</div>
+<div class="paragraph">
+<p>Continuons avec une autre image solaire en H-alpha, avec plus de dynamique :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/comparaison-panel-2.jpg" alt="comparaison panel 2">
+</div>
+</div>
+<div class="paragraph">
+<p>Là encore on remarque que JSol&#8217;Ex 2.1 produisait une image raisonnable mais assez saturée et surtout "plate".
+La version 2.2.0, quant à elle, offre une meilleure dynamique tout en préservant les détails et cette impression de profondeur.</p>
+</div>
+<div class="paragraph">
+<p>Nous pouvons aussi comparer les résultats sur une image obtenue avec une plus longue focale et un disque partiel :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/comparaison-panel-3.jpg" alt="comparaison panel 3">
+</div>
+</div>
+<div class="paragraph">
+<p>Cette fois-ci on note que les 3 logiciels s&#8217;en tirent honorablement.
+Cependant, JSol&#8217;Ex 2.1.3 affiche une image moins contrastée que la v2.2.0, alors qu&#8217;INTI v6 affiche une image légèrement plus floue.</p>
+</div>
+<div class="paragraph">
+<p>Malheureusement suite à une fausse manipulation, j&#8217;ai perdu la plupart de mes fichiers SER en raie calcium. J&#8217;ai cependant pu faire des comparaisons, sur des fichiers loins d&#8217;être idéaux.
+Les résultats sont cependant intéressants :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/comparaison-panel-4.jpg" alt="comparaison panel 4">
+</div>
+</div>
+<div class="paragraph">
+<p>Cette fois-ci, on constate que JSol&#8217;Ex 2.1 s&#8217;en sortait plutôt bien. INTI là encore fait un travail remarquable, mais JSol&#8217;Ex 2.2 sature trop l&#8217;image.
+C&#8217;est un défaut que j&#8217;espère arriver à corriger, qui est lié au fait que les images calcium on un histogramme avec une gaussienne à base très large.
+Il est néanmoins possible d&#8217;atténuer la saturation en choisissant un facteur de correction moins fort (par exemple 1.1 au lieu de la valeur par défaut 1.5), ce que je vous encourage à faire pour les images Calcium (conserver le 1.5 pour le h-alpha, baisser pour le calcium) :</p>
+</div>
+<img src="/blog/img/jsolex2_2/calcium-1-jsolex-2-2-facteur-1.1.jpg" class="img-responsive center-block" width="50%">
+<div class="paragraph">
+<p>Le résultat dépendra cependant beaucoup de l&#8217;exposition initiale de votre vidéo. Voici un autre exemple en raie calcium K:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/comparaison-panel-5.jpg" alt="comparaison panel 5">
+</div>
+</div>
+<div class="paragraph">
+<p>Il est utile de noter que si vous n&#8217;êtes pas satisfait du nouvel algorithme, il est tout à fait possible de repasser à CLAHE :</p>
+</div>
+<img src="/blog/img/jsolex2_2/config-params.jpg" class="img-responsive center-block" width="50%">
+<div class="paragraph">
+<p>Enfin, il vous est tout à fait possible d&#8217;être plus ou moins "aggressif" sur l&#8217;amélioration de constraste à effectuer.
+Ansi, dans les paramètres de traitement, vous pouvez changer le facteur <em>gamma</em> qui permet d&#8217;assombrir l&#8217;image.
+Pour l&#8217;exemple, si on pousse les curseurs un peu loin (par exemple à <em>4</em> dans l&#8217;image suivante), vous constaterez que l&#8217;image reste exploitable, et surtout que les défauts de CLAHE qui a tendance à aplatir les images est complètement disparu :</p>
+</div>
+<img src="/blog/img/jsolex2_2/gamma-4.jpg" class="img-responsive center-block" width="50%">
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pour_aller_encore_plus_loin">Pour aller encore plus loin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Tout d&#8217;abord, JSol&#8217;Ex offre un <a href="https://melix.github.io/astro4j/latest/fr/jsolex.html#imagemath">langage de script</a> qui permet d&#8217;aller bien plus loin dans les traitements, de générer automatiquement des animations, etc.
+Bien sûr, les améliorations de JSol&#8217;Ex 2.2 sont disponibles dans les scripts par l&#8217;intermédiaire de 2 nouvelles fonctions : <code>adjust_gamma</code> qui permet de réaliser une simple correction de gamma sur l&#8217;image, et <code>auto_constrast</code> qui correspond à la correction décrite dans ce billet de blog.</p>
+</div>
+<div class="paragraph">
+<p>Enfin, nous n&#8217;avons pas encore parlé des fonctionnalités désactivées par défaut, mais qui étaient déja disponibles dans JSol&#8217;Ex : la déconvolution et l&#8217;amélioration de la netteté.
+Ces deux options sont activables dans les paramètres de traitement :</p>
+</div>
+<img src="/blog/img/jsolex2_2/config-params-2.jpg" class="img-responsive center-block" width="50%">
+<div class="paragraph">
+<p>Je ne recommande pas nécessairement de cocher la case "aiguiser les détails" si vous avez des images trop bruitées.
+Cette dernière ligne compare donc la même image, traitée avec <a href="/blog/img/jsolex2_2/halpha-3-inti-6.png" target="_blank" rel="noopener">INTI v6</a>, JSol&#8217;Ex 2.2 (dernière version donc), mais <a href="/blog/img/jsolex2_2/halpha-3-jsolex-2.2.jpg" target="_blank" rel="noopener">sans déconvolution</a>, <a href="/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon.jpg" target="_blank" rel="noopener">avec déconvolution</a> et finalement <a href="/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon-sharpen.jpg" target="_blank" rel="noopener">avec déconvolution et amélioration des détails</a> :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/comparaison-panel-6.jpg" alt="comparaison panel 6">
+</div>
+</div>
+<div class="paragraph">
+<p>En ce qui me concerne, je trouve la version déconvoluée particulièrement plaisante à l&#8217;oeil, et j&#8217;active donc systématiquement la déconvolution :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon.jpg" alt="halpha 3 jsolex 2.2 decon">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>En conclusion, dans ce billet je vous ai présenté le nouvel algorithme de correction de contraste, activé par défaut dans JSol&#8217;Ex 2.2.
+Je pense que les résultats sont assez probants, et que JSol&#8217;Ex n&#8217;a plus à rougir de INTI en ce qui concerne les images avec amélioration de contraste.
+S&#8217;il reste des améliorations à faire sur les images calcium, il est cependant tout à fait possible de modifier les paramètres par défaut, voire de changer d&#8217;algorithme.</p>
+</div>
+<div class="paragraph">
+<p>N&#8217;oubliez pas non plus que JSo&#8217;Ex offre d&#8217;autres fonctionnalités comme la colorisation automatique des images, le stacking, la création de mosaïques solaires ou encore un langage de script particulièrement puissant, qui vous permet par exemple de générer des animations automatiquement.
+Je vais donc conclure ce billet avec un exemple de script qui utilise cette nouvelle amélioration de contraste pour produire une animation qui nous fait plonger dans l&#8217;atmosphère solaire en jouant sur le décalage de pixels :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"># Décalage de pixels qu'on applique, de -15 à +15, pas de 0.5
+images=range(-15,15,.5)
+# On calcule une image corrigée de ses transversalliums
+corrigee=fix_banding(images,32,40)
+# Déconvolution
+decon=rl_decon(corrigee)
+# On redimensionne
+redim=rescale_rel(autocrop2(decon,1.1),.5,.5)
+# On applique la correction de contraste décrite dans ce billet
+cst=auto_contrast(redim,1.5)
+
+[outputs]
+# Enfin on produit l'animation (75ms entre chaque frame)
+animation=anim(cst,75)</code></pre>
+</div>
+</div>
+<div class="text-center">
+ <video width="640" height="640" controls>
+  <source src="https://melix.github.io/blog/img/astro/solex2_2/anim.webm" type="video/webm">
+Your browser does not support the video tag.
+</video>
+</div>
+<div class="sect2">
+<h3 id="_bonus">Bonus</h3>
+<div class="paragraph">
+<p>J&#8217;en profite enfin pour partager deux vidéos, à destination des débutants sur Sol&#8217;Ex, que j&#8217;ai faites récemment :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.youtube.com/watch?v=NsDgg4o2SDw">Trouver le soleil sans chercheur solaire</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=8lWXcPG16I0">Régler exposition, gain et binning</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ressources">Ressources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/melix/astro4j">JSol&#8217;Ex</a> (téléchargement)</p>
+</li>
+<li>
+<p><a href="https://melix.github.io/astro4j/latest/fr/jsolex.html">JSol&#8217;Ex</a> (documentation)</p>
+</li>
+<li>
+<p><a href="http://valerie.desnoux.free.fr/inti/">INTI</a> (logiciel officiel)</p>
+</li>
+<li>
+<p><a href="http://www.astrosurf.com/solex/sol-ex-traitement.html">Sol&#8217;Ex</a> (site officiel Sol&#8217;Ex)</p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Adaptive_histogram_equalization">CLAHE</a> (algorithme)</p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Gamma_correction">Gamma correction</a> (algorithme)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></p>
   			<a href="/blog/2024/02-22-effondrement.html"><h1>Vers un effondrement civilisationnel ?</h1></a>
   			<p>22 February 2024</p>
 			<p><em>Tags: </em>
@@ -1394,653 +1659,6 @@ In any case, since it&#8217;s open source, if you want to contribute, feel free!
   <source src="https://melix.github.io/blog/img/astro/solex/jsolex.webm" type="video/webm">
 Your browser does not support the video tag.
 </video>
-</div>
-</div></p>
-  			<a href="/blog/2023/03-12-micronaut-catalogs.html"><h1>How the Micronaut team leverages Gradle&#8217;s version catalogs for improved developer productivity</h1></a>
-  			<p>12 March 2023</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/micronaut.html">micronaut</a> 
-	
-		<a href="/blog/tags/gradle.html">gradle</a> 
-	
-		<a href="/blog/tags/version-catalogs.html">version catalogs</a> 
-	
-		<a href="/blog/tags/graalvm.html">graalvm</a> 
-	
-		<a href="/blog/tags/maven.html">maven</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>This blog post discusses how the Micronaut development team makes use of a feature of Gradle, <a href="https://docs.gradle.org/current/userguide/platforms.html">version catalogs</a>, to improve the team&#8217;s developer productivity, reduce the risks of publishing broken releases, coordinate the releases of a large number of modules and, last but not least, provide additional features to our Gradle users.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_backstory">The backstory</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The <a href="https://micronaut.io/">Micronaut Framework</a> is a modern open-source framework for building JVM applications.
-It can be used to build all kinds of applications, from CLI applications to microservices or even good old monoliths.
-It supports deploying both to the JVM and native executables (using <a href="https://graalvm.org">GraalVM</a>), making it particularly suitable for all kind of environments.
-A key feature of the Micronaut framework is developer productivity: we do everything we can to make things faster for developers.
-In particular, Micronaut has a strong emphasis on easing how you test your applications, even in native mode.
-For this we have built a number of tools, including our <a href="https://micronaut-projects.github.io/micronaut-maven-plugin/latest/">Maven</a> and <a href="https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/">Gradle</a> plugins.</p>
-</div>
-<div class="paragraph">
-<p>When I joined the Micronaut team almost a couple years back, I was given the responsibility of improving the team&#8217;s own developer productivity.
-It was an exciting assignment, not only because I knew the team&#8217;s love about Gradle, but because I also knew that there were many things we could do to reduce the feedback time, to provide more insights about failures, to detect flaky tests, etc.
-As part of this work we have put in place a partnership with <a href="https://gradle.com">Gradle Inc</a> which kindly provides us with a <a href="https://ge.micronaut.io">Gradle Enterprise instance</a>, but this is not what I want to talk about today.</p>
-</div>
-<div class="paragraph">
-<p>Lately I was listening to an <a href="https://www.youtube.com/watch?v=Gr96IxKwPeE">interview of Aurimas Liutikas</a> of the AndroidX team, who was saying that he didn&#8217;t think that version catalogs were a good solution for library authors to share their recommendations of versions, and that BOMs are probably a better solution for this.
-I pinged him saying that I disagreed with this statement and offered to provide more details why, if he was interested.
-This is therefore a long answer, but one which will be easier to find than a <a href="https://androiddev.social/@Aurimas/110000457198553518">thread on social media</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_what_are_version_catalogs">What are version catalogs?</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Let&#8217;s start with the basics: a version catalog is, like the name implies, a catalog of versions to pick from, nothing more.
-That doesn&#8217;t sound too much exciting, and what versions are we talking about?
-That&#8217;s version of <em>libraries</em> or <em>plugins</em> that you use in your build.</p>
-</div>
-<div class="paragraph">
-<p>As an illustration, here is a version catalog, defined as a TOML file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="toml">[versions]
-javapoet = "1.13.0"
-
-[libraries]
-javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then this library <em>can</em> be used in a <code>dependencies</code> declaration block in any of the project&#8217;s build script using a <em>type-safe notation</em>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-    implementation(libs.javapoet) {
-        because("required for Java source code generation")
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>which is <em>strictly equivalent</em> to writing:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-    implementation("com.squareup:javapoet:1.13.0") {
-        because("required for Java source code generation")
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>There are many advantages of using version catalogs to declare your library versions, but most notably it provides a single, standard location where those versions are declared.
-It is important to understand that a catalog is simply a <em>list of dependencies you can pick from</em>, a bit like going to the supermarket and choosing whatever you need for your particular meal: it&#8217;s not because a catalog declares libraries that you <em>have to</em> use them.
-However, a catalog provides you with <em>recommendations</em> of libraries to pick from.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_version_catalogs_for_micronaut_users">Version catalogs for Micronaut users</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>An interesting aspect of version catalogs is that they can be published, for others to consume: they are an artifact.
-Micronaut users can already make use of catalogs, as I have explained in a <a href="https://melix.github.io/blog/2022/02/micronaut-version-catalog.html">previous blog post</a>.
-This makes it possible for a user who doesn&#8217;t know which version of Micronaut Data to use, to simply declare:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-    implementation mn.micronaut.data
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>People familiar with Maven BOMs can easily think that it is the same feature, but there are <a href="https://docs.gradle.org/current/userguide/platforms.html#sub:platforms-vs-catalog">key differences which are described in the Gradle docs</a>.</p>
-</div>
-<div class="paragraph">
-<p>In the rest of this post we will now focus on how we generate those catalogs, and how they effectively help us in improving our own developer productivity.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_how_the_micronaut_team_uses_version_catalogs">How the Micronaut team uses version catalogs</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_one_catalog_per_module">One catalog per module</h3>
-<div class="paragraph">
-<p>As I said, the Micronaut framework consists of a large number of modules which live in their own Git repository.
-All the projects share the same layout, the same conventions in order to make things easier to maintain.
-For this purpose, we use our own collection of <a href="https://github.com/micronaut-projects/micronaut-build">internal build plugins</a> as well as a <a href="https://github.com/micronaut-projects/micronaut-project-template">project template</a>.</p>
-</div>
-<div class="paragraph">
-<p>Those build plugins provide features like:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>defining the default Java language level, setting up code conventions and code quality plugins</p>
-</li>
-<li>
-<p>standardizing how documentation is built (using Asciidoctor)</p>
-</li>
-<li>
-<p>setting up integration with Gradle Enterprise, to publish build scans, configure the build cache and predictive test selection</p>
-</li>
-<li>
-<p>implementing binary compatibility checks between releases</p>
-</li>
-<li>
-<p>configuring publication to Maven Central</p>
-</li>
-<li>
-<p>providing a high-level model of what a Micronaut module is</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>The last item is particularly important: in every Micronaut project, we have different kind of modules: libraries (which are published to Maven Central for users to consume), internal support libraries (which are not intended for external consumption), or a BOM module (which also publishes a version catalog as we&#8217;re going to see).</p>
-</div>
-<div class="paragraph">
-<p>Long story short: <strong>we heavily rely on conventions to reduce the maintenance costs, have consistent builds, with improved performance and higher quality standards</strong>.
-If you are interested in why we have such plugins, Sergio Delamo and I gave an <a href="https://www.youtube.com/watch?v=fpz63IwFIZM">interview about this</a> a few months ago (alert: the thumbnail shows I have hair, this is fake news!).</p>
-</div>
-<div class="paragraph">
-<p>Each of our projects declares a version catalog, for example:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>this <a href="https://github.com/micronaut-projects/micronaut-core/blob/4.0.x/gradle/libs.versions.toml">one for Micronaut core</a></p>
-</li>
-<li>
-<p>this <a href="https://github.com/micronaut-projects/micronaut-test-resources/blob/master/gradle/libs.versions.toml">one for Micronaut Test Resources</a></p>
-</li>
-<li>
-<p>this <a href="https://github.com/micronaut-projects/micronaut-kafka/blob/master/gradle/libs.versions.toml">one for Micronaut Kafka</a></p>
-</li>
-<li>
-<p>or this <a href="https://github.com/micronaut-projects/micronaut-gradle-plugin/blob/master/gradle/libs.versions.toml">one for the Micronaut Gradle Plugin</a></p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_automatic_version_upgrades">Automatic version upgrades</h3>
-<div class="paragraph">
-<p>One of the advantages of version catalogs is that it provides a centralized place for versions, which can be easily used by bots to provide pull requests for dependency upgrades.
-For this, we use <a href="https://docs.renovatebot.com">Renovatebot</a> which integrates particularly well with version catalogs (GitHub&#8217;s dependabot lacks behind in terms of support).
-This allows us to get pull requests like <a href="https://github.com/micronaut-projects/micronaut-kafka/pull/660/files">this one</a> which are very easy to review.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_bom_and_version_catalog_generation">BOM and version catalog generation</h3>
-<div class="paragraph">
-<p>Each of the Micronaut projects is now required to provide a BOM (Bill of Materials) for users.
-Another term for a BOM that is used in the Gradle ecosystem is a <em>platform</em>: a platform has however slightly different semantics in Maven and Gradle.
-The main goal of a BOM is to provide a list of dependencies a project works with, and, in Maven, it <em>can</em> be used to override the dependency versions of transitive dependencies.
-While in Maven, a BOM will only influence the dependency resolution of the project which <em>imports</em> the BOM, in Gradle a platform fully participates in dependency resolution, including when a transitive dependency depends on a a BOM.
-To simplify, a user who <em>imports</em> a BOM may use dependencies declared in the BOM <em>without specifying a version</em>: the version will be fetched from the BOM.
-In that regards, it looks exactly the same as a version catalog, but there are subtle differences.</p>
-</div>
-<div class="paragraph">
-<p>For example, if a user imports a BOM, any transitive dependency matching a dependency found in the BOM will be overridden (Maven) or participate in conflict resolution (Gradle).
-That is <em>not</em> the case for a catalog: it will <em>not</em> influence the dependency resolution unless you explicitly add a dependency which belongs to the catalog.</p>
-</div>
-<div class="paragraph">
-<p>That&#8217;s why Micronaut publishes <em>both</em> a BOM and a catalog, because they address different use cases, and they work particularly well when combined together.</p>
-</div>
-<div class="paragraph">
-<p>In Micronaut modules, you will systematically find a project with the <code>-bom</code> suffix.
-For example, Micronaut Security will have subprojects like <a href="https://github.com/micronaut-projects/micronaut-security/tree/master/security-jwt"><code>micronaut-security-jwt</code></a>, <a href="https://github.com/micronaut-projects/micronaut-security/tree/master/security-oauth2"><code>micronaut-security-oauth2</code></a> and <a href="https://github.com/micronaut-projects/micronaut-security/tree/master/security-bom"><code>micronaut-security-bom</code></a>.</p>
-</div>
-<div class="paragraph">
-<p>The BOM project will aggregate dependencies used by the different modules.
-In order to publish a BOM file, the only thing a project has to do is to apply our convention plugin:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">plugins {
-    id "io.micronaut.build.internal.bom"
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Note how we don&#8217;t have to declare the coordinates of the BOM (group, artifact, version), nor that we have to declare how to publish to Maven Central, what dependencies should be included in the BOM, etc: <em>everything</em> is done by convention, that&#8217;s the magic of <a href="https://melix.github.io/blog/2021/12/composition-in-gradle.html">composition over inheritance</a>.</p>
-</div>
-<div class="paragraph">
-<p>Should we want to change how we generate the BOM, the only thing we would have to do is to update our internal convention plugin, then all projects would benefit from the change once they upgrade.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_convention_over_configuration">Convention over configuration</h3>
-<div class="paragraph">
-<p>In order to determine which dependencies should be included in our BOM, we defined <em>conventions</em> that we use in our catalog files.
-In our internal terminology, when we want a dependency to be handled by the Micronaut framework, we call that a <em>managed</em> dependency: a dependency that is managed by Micronaut and that users shouldn&#8217;t care about in most cases: they don&#8217;t have to think about a version, we will provide one for them.</p>
-</div>
-<div class="paragraph">
-<p>This directly translates to a convention in the version catalogs of the Micronaut projects: dependencies which are <em>managed</em> need to be declared with a <code>managed-</code> prefix in the catalog:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="toml">[versions]
-...
-managed-kafka = '3.4.0'
-...
-zipkin-brave-kafka-clients = '5.15.0'
-
-[libraries]
-...
-managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
-managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'managed-kafka' }
-...
-zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Those dependencies will end up in the version catalog that we generate, but <em>without</em> the <code>managed-</code> prefix.
-This means that we would generate a BOM which contains the following:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-  &lt;!-- This module was also published with a richer model, Gradle metadata,  --&gt;
-  &lt;!-- which should be used instead. Do not delete the following line which  --&gt;
-  &lt;!-- is to indicate to Gradle or any Gradle module metadata file consumer  --&gt;
-  &lt;!-- that they should prefer consuming it instead. --&gt;
-  &lt;!-- do_not_remove: published-with-gradle-metadata --&gt;
-  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-  &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
-  &lt;artifactId&gt;micronaut-kafka-bom&lt;/artifactId&gt;
-  &lt;version&gt;5.0.0-SNAPSHOT&lt;/version&gt;
-  &lt;packaging&gt;pom&lt;/packaging&gt;
-  &lt;name&gt;Micronaut Kafka&lt;/name&gt;
-  &lt;description&gt;Integration between Micronaut and Kafka Messaging&lt;/description&gt;
-  &lt;url&gt;https://micronaut.io&lt;/url&gt;
-  &lt;licenses&gt;
-    &lt;license&gt;
-      &lt;name&gt;The Apache Software License, Version 2.0&lt;/name&gt;
-      &lt;url&gt;http://www.apache.org/licenses/LICENSE-2.0.txt&lt;/url&gt;
-      &lt;distribution&gt;repo&lt;/distribution&gt;
-    &lt;/license&gt;
-  &lt;/licenses&gt;
-  &lt;scm&gt;
-    &lt;url&gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&lt;/url&gt;
-    &lt;connection&gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&lt;/connection&gt;
-    &lt;developerConnection&gt;scm:git@github.com:micronaut-projects/micronaut-kafka.git&lt;/developerConnection&gt;
-  &lt;/scm&gt;
-  &lt;developers&gt;
-    &lt;developer&gt;
-      &lt;id&gt;graemerocher&lt;/id&gt;
-      &lt;name&gt;Graeme Rocher&lt;/name&gt;
-    &lt;/developer&gt;
-  &lt;/developers&gt;
-  &lt;properties&gt;
-    &lt;micronaut.kafka.version&gt;5.0.0-SNAPSHOT&lt;/micronaut.kafka.version&gt;
-    &lt;kafka.version&gt;3.4.0&lt;/kafka.version&gt;
-  &lt;/properties&gt;
-  &lt;dependencyManagement&gt;
-    &lt;dependencies&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
-        &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-        &lt;version&gt;${kafka.compat.version}&lt;/version&gt;
-      &lt;/dependency&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
-        &lt;artifactId&gt;kafka-streams&lt;/artifactId&gt;
-        &lt;version&gt;${kafka.version}&lt;/version&gt;
-      &lt;/dependency&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
-        &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
-        &lt;version&gt;${micronaut.kafka.version}&lt;/version&gt;
-      &lt;/dependency&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
-        &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
-        &lt;version&gt;${micronaut.kafka.version}&lt;/version&gt;
-      &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-  &lt;/dependencyManagement&gt;
-&lt;/project&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Note how we automatically translated the <code>managed-kafka</code> property into a BOM property <code>kafka.version</code>, which is used in the <code>&lt;dependencyManagement&gt;</code> block.
-Dependencies which do <em>not</em> start with <code>managed-</code> <strong>are not included</strong> in our generated BOM.</p>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s now look at the version catalog that we generate:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="toml">#
-# This file has been generated by Gradle and is intended to be consumed by Gradle
-#
-[metadata]
-format.version = "1.1"
-
-[versions]
-kafka = "3.4.0"
-kafka-compat = "3.4.0"
-micronaut-kafka = "5.0.0-SNAPSHOT"
-
-[libraries]
-kafka = {group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka-compat" }
-kafka-clients = {group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka" }
-kafka-streams = {group = "org.apache.kafka", name = "kafka-streams", version.ref = "kafka" }
-micronaut-kafka = {group = "io.micronaut.kafka", name = "micronaut-kafka", version.ref = "micronaut-kafka" }
-micronaut-kafka-bom = {group = "io.micronaut.kafka", name = "micronaut-kafka-bom", version.ref = "micronaut-kafka" }
-micronaut-kafka-streams = {group = "io.micronaut.kafka", name = "micronaut-kafka-streams", version.ref = "micronaut-kafka" }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Given a <em>single</em> input, the version catalog that we use to build our Micronaut module, our build conventions let us automatically declare which dependencies should land in the <em>output</em> BOM and version catalogs that we generate for that project!
-Unlike Maven BOMs which either <em>have to</em> be a parent POM <em>or</em> redeclare all dependencies in an independent module, in Gradle we can generate these automatically and completely decouple the output BOM from what is required to build our project.</p>
-</div>
-<div class="paragraph">
-<p>In general, all <em>api</em> dependencies must be managed, so in the example above, the Micronaut Kafka build scripts would have an API dependency on <code>kafka-clients</code>, which we can find in the main project build script:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-    api libs.managed.kafka.clients
-    ...
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The benefit of generating a version catalog for a user is that there is now a <a href="https://repo1.maven.org/maven2/io/micronaut/kafka/micronaut-kafka-bom/4.5.2/micronaut-kafka-bom-4.5.2.toml">Micronaut Kafka version catalog published on Maven Central</a>, alongside the BOM file.</p>
-</div>
-<div class="paragraph">
-<p>This catalog can be imported by a user in their settings file:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencyResolutionManagement {
-    versionCatalogs {
-         create("mnKafka") {
-             from("io.micronaut.kafka:micronaut-kafka-bom:4.5.2")
-         }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then the dependency on Micronaut Kafka and its managed dependencies can be used in a build script using the <code>mnKafka</code> prefix:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-    implementation mnKafka.micronaut.kafka
-    implementation mnKafka.kafka.clients
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>A user doesn&#8217;t have to know about the dependency coordinates of Kafka clients: the IDE (at least IntelliJ IDEA) would provide completion automatically!</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_bom_composition">BOM composition</h3>
-<div class="paragraph">
-<p>In Micronaut 3.x, there is a problem that we intend to fix in Micronaut 4 regarding our "main" BOM: the Micronaut core BOM is considered as our "platform" BOM, in the sense that it aggregates BOMs of various Micronaut modules.
-This makes it hard to release newer versions of Micronaut which, for example, only upgrade particular modules of Micronaut.</p>
-</div>
-<div class="paragraph">
-<p>Therefore in Micronaut 4, we are cleanly separating the "core" BOM, from the new <a href="https://github.com/micronaut-projects/micronaut-platform">platform BOM</a>.
-It is interesting in this blog post because it offers us the opportunity to show how we are capable of generating <em>aggregating BOMs</em> and <em>aggregated catalogs</em>.</p>
-</div>
-<div class="paragraph">
-<p>In the platform BOM module, you can find the <a href="https://github.com/micronaut-projects/micronaut-platform/blob/master/gradle/libs.versions.toml">"input" catalog</a> that we use, and only consists of <code>managed-</code> dependencies.
-Most of those dependencies are simply dependencies on other Micronaut BOMs: this is an "aggregating" BOM, which imports other BOMs.
-This is, therefore, the only BOM that a user would effectively have to use when migrating to Micronaut 4: instead of importing all BOMs for the different Micronaut modules they use, they can simply import the Micronaut Platform BOM, which will then automatically include the BOMs of other modules which "work well together".</p>
-</div>
-<div class="paragraph">
-<p>This allows us to <strong>decouple the releases</strong> of the framework from the releases of Micronaut core itself.</p>
-</div>
-<div class="paragraph">
-<p>However, there is a subtlety about aggregating BOMs in Maven: they are not regular dependencies, but dependencies with the <code>import</code> scope.
-This means that we must make a difference between a "managed dependency" and an "imported BOM" in our input catalog.</p>
-</div>
-<div class="paragraph">
-<p>To do this, we have <em>another</em> naming convention, which is to use the <code>boms-</code> prefix for imported BOMs:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="toml">[versions]
-...
-managed-micronaut-aws = "4.0.0-SNAPSHOT"
-managed-micronaut-azure = "5.0.0-SNAPSHOT"
-managed-micronaut-cache = "4.0.0-SNAPSHOT"
-managed-micronaut-core = "4.0.0-SNAPSHOT"
-...
-
-[libraries]
-...
-boms-micronaut-aws = { module = "io.micronaut.aws:micronaut-aws-bom", version.ref = "managed-micronaut-aws" }
-boms-micronaut-azure = { module = "io.micronaut.azure:micronaut-azure-bom", version.ref = "managed-micronaut-azure" }
-boms-micronaut-cache = { module = "io.micronaut.cache:micronaut-cache-bom", version.ref = "managed-micronaut-cache" }
-boms-micronaut-core = { module = "io.micronaut:micronaut-core-bom", version.ref = "managed-micronaut-core" }
-...</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This results in the following BOM file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-  &lt;groupId&gt;io.micronaut.platform&lt;/groupId&gt;
-  &lt;artifactId&gt;micronaut-platform&lt;/artifactId&gt;
-  &lt;version&gt;4.0.0-SNAPSHOT&lt;/version&gt;
-  &lt;packaging&gt;pom&lt;/packaging&gt;
-  &lt;name&gt;Micronaut Platform&lt;/name&gt;
-  &lt;description&gt;Bill-Of-Materials (BOM) and Gradle version catalogs for Micronaut&lt;/description&gt;
-
-  ...
-
-  &lt;properties&gt;
-    ...
-    &lt;micronaut.aws.version&gt;4.0.0-SNAPSHOT&lt;/micronaut.aws.version&gt;
-    &lt;micronaut.azure.version&gt;5.0.0-SNAPSHOT&lt;/micronaut.azure.version&gt;
-    &lt;micronaut.cache.version&gt;4.0.0-SNAPSHOT&lt;/micronaut.cache.version&gt;
-    &lt;micronaut.core.version&gt;4.0.0-SNAPSHOT&lt;/micronaut.core.version&gt;
-    ...
-  &lt;/properties&gt;
-  &lt;dependencyManagement&gt;
-    &lt;dependencies&gt;
-      ...
-      &lt;dependency&gt;
-        &lt;groupId&gt;io.micronaut.aws&lt;/groupId&gt;
-        &lt;artifactId&gt;micronaut-aws-bom&lt;/artifactId&gt;
-        &lt;version&gt;${micronaut.aws.version}&lt;/version&gt;
-        &lt;type&gt;pom&lt;/type&gt;
-        &lt;scope&gt;import&lt;/scope&gt;
-      &lt;/dependency&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;io.micronaut.azure&lt;/groupId&gt;
-        &lt;artifactId&gt;micronaut-azure-bom&lt;/artifactId&gt;
-        &lt;version&gt;${micronaut.azure.version}&lt;/version&gt;
-        &lt;type&gt;pom&lt;/type&gt;
-        &lt;scope&gt;import&lt;/scope&gt;
-      &lt;/dependency&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;io.micronaut.cache&lt;/groupId&gt;
-        &lt;artifactId&gt;micronaut-cache-bom&lt;/artifactId&gt;
-        &lt;version&gt;${micronaut.cache.version}&lt;/version&gt;
-        &lt;type&gt;pom&lt;/type&gt;
-        &lt;scope&gt;import&lt;/scope&gt;
-      &lt;/dependency&gt;
-      &lt;dependency&gt;
-        &lt;groupId&gt;io.micronaut&lt;/groupId&gt;
-        &lt;artifactId&gt;micronaut-core-bom&lt;/artifactId&gt;
-        &lt;version&gt;${micronaut.core.version}&lt;/version&gt;
-        &lt;type&gt;pom&lt;/type&gt;
-        &lt;scope&gt;import&lt;/scope&gt;
-      &lt;/dependency&gt;
-      ...
-    &lt;/dependencies&gt;
-  &lt;/dependencyManagement&gt;
-&lt;/project&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>A more interesting topic to discuss is what we can do with version catalogs that we publish for users: we can <strong>inline dependency aliases</strong> from each of the imported catalogs into the platform catalog.
-All dependencies in the catalog files of each modules are directly available in the platform catalog:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="toml">[versions]
-dekorate = "1.0.3"
-elasticsearch = "7.17.8"
-...
-micronaut-aws = "4.0.0-SNAPSHOT"
-micronaut-azure = "5.0.0-SNAPSHOT"
-micronaut-cache = "4.0.0-SNAPSHOT"
-micronaut-core = "4.0.0-SNAPSHOT"
-...
-
-[libraries]
-alexa-ask-sdk = {group = "com.amazon.alexa", name = "ask-sdk", version = "" }
-alexa-ask-sdk-core = {group = "com.amazon.alexa", name = "ask-sdk-core", version = "" }
-alexa-ask-sdk-lambda = {group = "com.amazon.alexa", name = "ask-sdk-lambda-support", version = "" }
-aws-java-sdk-core = {group = "com.amazonaws", name = "aws-java-sdk-core", version = "" }
-aws-lambda-core = {group = "com.amazonaws", name = "aws-lambda-java-core", version = "" }
-aws-lambda-events = {group = "com.amazonaws", name = "aws-lambda-java-events", version = "" }
-aws-serverless-core = {group = "com.amazonaws.serverless", name = "aws-serverless-java-container-core", version = "" }
-awssdk-secretsmanager = {group = "software.amazon.awssdk", name = "secretsmanager", version = "" }
-azure-cosmos = {group = "com.azure", name = "azure-cosmos", version = "" }
-azure-functions-java-library = {group = "com.microsoft.azure.functions", name = "azure-functions-java-library", version = "" }
-...</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The <code>alexa-ask-sdk</code> is for example an alias which was originally declared in the <code>micronaut-aws</code> module.
-Because we aggregate all catalogs, we can inline those aliases and make them directly available in user build scripts:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencyResolutionManagement {
-    versionCatalogs {
-         create("mnKafka") {
-             from("io.micronaut.platform:micronaut-platform:4.0.0-SNAPSHOT")
-         }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-...
-    implementation(mn.micronaut.aws.alexa)
-    implementation(mn.alexa.sdk)
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Generating a version catalog offers us a very pragmatic way to define all dependencies that users can use in their build scripts with guarantees that they work well together.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_technical_details">Technical details</h3>
-<div class="paragraph">
-<p>If you survived reading up to this point, you may be interested in learning how, technically, we implemented this.
-You can take a look at our <a href="https://github.com/micronaut-projects/micronaut-build">internal build plugins</a>, but more specifically at the <a href="https://github.com/micronaut-projects/micronaut-build/blob/master/src/main/groovy/io/micronaut/build/MicronautBomPlugin.java">BOM plugin</a>.</p>
-</div>
-<div class="paragraph">
-<p>In order to generate our BOM and version catalogs, we have mainly 2 inputs:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>the list of subprojects which need to participate in the BOM: in a Micronaut modules, we explained that we have several kinds of projects: libraries which are published, test suites, etc. Only a subset of these need to belong to the BOM, and we can determine that list automatically because each project applies a <em>convention plugin</em> which determines its kind. Only projects of a particular kind are included. Should exceptions be required, we have a <code>MicronautBomExtension</code> which allows us to configure more precisely what to include or not, via a nice DSL.</p>
-</li>
-<li>
-<p>the list of dependencies, which is determined from the project&#8217;s version catalog</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>One issue is that while Gradle provides automatically the generated, type-safe accessors for version catalogs, there is actually no built-in model that you can access to represent the catalog <em>model</em> itself (what is an alias, references to versions, etc): the type-safe API represents a "realized" catalog, but not a low-level model that we can easily manipulate.
-This means that we had to implement our <a href="https://github.com/micronaut-projects/micronaut-build/blob/master/src/main/java/io/micronaut/build/catalogs/internal/VersionCatalogTomlModel.java#L29">own model for this</a>.</p>
-</div>
-<div class="paragraph">
-<p>We have also seen that we can generate a single platform, aggregating all Micronaut modules for a release, that the users can import into their build scripts.
-Unfortunately it is not the case for the Micronaut modules themselves: for example, Micronaut Core <em>must not</em> depend on other Micronaut modules, but, for example, Micronaut Data can depend on Micronaut SQL and use dependencies from the Micronaut SQL catalog.
-Those modules <em>cannot</em> depend on the platform BOM, because this is the aggregating BOM, so we would create a <em>cyclic dependency</em> and wouldn&#8217;t be able to release any module.</p>
-</div>
-<div class="paragraph">
-<p>To mitigate this problem, our internal build plugins expose a DSL which allows each projects to declare which other modules they use:</p>
-</div>
-<div class="listingblock">
-<div class="title">settings.gradle</div>
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">micronautBuild {
-    importMicronautCatalog() // exposes a `mn` catalog
-    importMicronautCatalog("micronaut-reactor") // exposes a `mnReactor` catalog
-    importMicronautCatalog("micronaut-rxjava2") // exposes a `mnRxjava2` catalog
-    ...
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>While this is simple from the <em>declaration site</em> point of view, it is less practical from a <em>consuming</em> point of view, since it forces us to use <em>different namespaces</em> for each imported catalog:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="gradle">dependencies {
-    ...
-    testImplementation mn.micronaut.inject.groovy
-    testImplementation mnRxjava2.micronaut.rxjava2
-    ...
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It would have been better if we could actually merge several catalogs into a single one, but unfortunately that feature <a href="https://github.com/gradle/gradle/issues/20383">has been removed from Gradle</a>.
-I still have hope that this will eventually be implemented, because not having this creates unnecessary boilerplate in build scripts and redundancy in names (e.g <code>implementation mnValidation.micronaut.validation</code>).</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_additional_benefits_and_conclusion">Additional benefits and conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>All that I described in this article aren&#8217;t the only benefits that we have on standardizing on version catalogs.
-For example, we have tasks which allow us to check that our generated BOM files only reference dependencies which are actually published on Maven Central, or that there are no SNAPSHOT dependencies when we perform a release.
-In the end, while most of the Micronaut developers had no idea what a version catalog was when I joined the team, all of them pro-actively migrated projects to use them because, I think, they immediately saw the benefits and value.
-It also streamlined the dependency upgrade process which was still a bit cumbersome before, despite using dependabot.</p>
-</div>
-<div class="paragraph">
-<p>We now have a very pragmatic way to both use catalogs for building our own projects, and generating BOMs and version catalogs which can be used by both our Maven and Gradle users.
-Of course, only the Gradle users will benefit from the version catalogs, but we did that in a way which doesn&#8217;t affect our Maven users (and if you use Maven, I strongly encourage you to evaluate building Micronaut projects with Gradle instead, since the UX is much better).</p>
-</div>
-<div class="paragraph">
-<p>I cannot end this blog post without mentioning a "problem" that we have today, which is that if you use <a href="https://micronaut.io/launch">Micronaut Launch</a> to generate a Micronaut project, then it will <em>not</em> use version catalogs.
-We have an <a href="https://github.com/micronaut-projects/micronaut-starter/issues/1385">issue for this</a> and pull requests are very welcome!</p>
-</div>
 </div>
 </div></p>
 	
