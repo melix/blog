@@ -6,9 +6,322 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Fri, 26 Apr 2024 10:19:36 +0200</pubDate>
-    <lastBuildDate>Fri, 26 Apr 2024 10:19:36 +0200</lastBuildDate>
+    <pubDate>Fri, 14 Jun 2024 13:38:13 +0200</pubDate>
+    <lastBuildDate>Fri, 14 Jun 2024 13:38:13 +0200</lastBuildDate>
 
+    <item>
+      <title>Extraction automatique d&amp;#8217;images Hélium avec JSol&amp;#8217;Ex</title>
+      <link>https://melix.github.io/blog//2024/06-14-jsolex-helium-continuum.html</link>
+      <pubDate>Fri, 14 Jun 2024 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2024/06-14-jsolex-helium-continuum.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans ce billet, je vais prendre exemple d&amp;#8217;un cas d&amp;#8217;utilisation particulier, l&amp;#8217;extraction d&amp;#8217;images Hélium, pour expliquer comment j&amp;#8217;envisage le développement de JSol&amp;#8217;Ex, dans l&amp;#8217;optique de simplifier, d&amp;#8217;une version à une autre, son exploitation par les utilisateurs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_principe_du_solex&quot;&gt;Principe du Sol&amp;#8217;Ex&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Rappelons tout d&amp;#8217;abord le principe de base du &lt;a href=&quot;http://www.astrosurf.com/solex/&quot;&gt;Sol&amp;#8217;Ex de Christian Buil&lt;/a&gt;.
+Le concept requiert de reconstituer une image du soleil, ligne par ligne, en exploitant une vidéo dont chaque trame montre une partie du spectre solaire, centré sur une raie particulière que l&amp;#8217;on étudie.
+La raie la plus communément étudiée est la raie H-alpha, qui, sur le spectre solaire, apparaît en absorption, c&amp;#8217;est à dire qu&amp;#8217;elle sera une ligne sombre sur une image du spectre :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-helium/spectre.jpg&quot; alt=&quot;spectre&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Image du spectre solaire, raie H-alpha sombre détectée&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;En haut, l&amp;#8217;image telle qu&amp;#8217;on la trouve dans la vidéo, la ligne est &quot;déformée&quot;. En bas, l&amp;#8217;image &quot;corrigée&quot;. Les points bleus correspondent à la détection de l&amp;#8217;effet Doppler, les lignes sombres verticales correspondent à des taches solaires.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les logiciels comme &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;INTI&lt;/a&gt; et &lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt; exploitent le fait que la ligne étudiée est la plus sombre de l&amp;#8217;image pour se repérer.
+Un des aspects fondamentaux de la reconstruction que je n&amp;#8217;avais honnêtement pas compris lorsque je me suis lancé dans ce projet, c&amp;#8217;est que &lt;strong&gt;tout le signal permettant de recomposer l&amp;#8217;image H-alpha se trouve dans cette ligne sombre&lt;/strong&gt;.
+En effet, même si elle paraît &quot;noire&quot;, il y a en fait bien d&amp;#8217;infimes variations dans cette ligne, et c&amp;#8217;est celà qui nous sert à reconstituer une image !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock tip&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Tip&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;8 bits vs 16 bits&lt;/div&gt;
+Cet aspect explique l&amp;#8217;importance d&amp;#8217;utiliser une acquisition en 16 bits et non en 8-bits.
+En effet, si l&amp;#8217;acquisition est faite en 8 bits, on ne dispose que de 256 valeurs possibles pour encoder l&amp;#8217;ensemble de la dynamique de l&amp;#8217;image.
+Si le signal ne se trouve qu&amp;#8217;au centre de la raie, on comprend vite qu&amp;#8217;on ne dispose alors que d&amp;#8217;un nombre très limité de valeurs pour ce qui se passe dans cette simple région.
+En utilisant 16 bits, on augmente sensiblement notre capacité à encoder des valeurs de niveaux différents dans le centre de la raie, puisqu&amp;#8217;on dispose cette fois de 65536 valeurs possibles pour l&amp;#8217;ensemble de l&amp;#8217;image !
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_cas_des_raies_hélium&quot;&gt;Le cas des raies Hélium&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La détection de raies sombres permet, si la fenêtre de cropping du spectre est relativement petite, de se concentrer sur une raie à étudier.
+Ca fonctionne très bien pour les raies H-alpha, Magnésium, Calcium K ou H, etc, qui sont des raies en absorption.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En revanche, la raie Hélium est une raie en émission : elle est &quot;claire&quot; au lieu d&amp;#8217;être sombre, mais elle est aussi impossible à distinguer dans la plupart des trames parce que noyée dans le flux.
+Aussi les logiciels ne peuvent pas la trouver.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Alors, comment fait JSol&amp;#8217;Ex, dans ses dernières versions, pour être capable de produire en 1 clic une image Hélium comme celle ci-dessous ?
+La question est intéressante non seulement d&amp;#8217;un point de vue technique, mais aussi pour comprendre la façon dont j&amp;#8217;aborde le développement de JSol&amp;#8217;Ex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-helium/image-helium.jpg&quot; alt=&quot;image helium&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le site de Christian Buil &lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-observation.html&quot;&gt;est une nouvelle mine d&amp;#8217;information pour nous aider&lt;/a&gt; : pour pouvoir produire une telle image, il est nécessaire de prendre une raie sombre comme référence, puis d&amp;#8217;appliquer un &quot;décalage de pixels&quot; pour &quot;trouver&quot; la raie Hélium.
+Enfin, il est nécessaire de procéder à une soustraction du continuum (une 2ème image).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette notion de décalage de pixels est bien connue des utilisateurs chevronnés du Sol&amp;#8217;Ex.
+Le principe est relativement simple : au lieu de reconstituer une image en utilisant le centre de la raie détectée (la ligne rouge dans l&amp;#8217;image spectrale ci-dessus), on va reconstituer une image en se décalant vers le haut ou vers le bas de quelques pixels.
+C&amp;#8217;est ce même principe qui permet de créer des images Doppler du soleil, qui montrent en bleu les régions qui s&amp;#8217;approchent de nous et en rouge celles qui s&amp;#8217;éloignent.
+On peut même produire des timelapses assez spectaculaires comme cette animation que j&amp;#8217;ai réalisée le 5 juin 2024 et qui est générée par le logiciel en quelques minutes :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style=&quot;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;&quot;&gt; &lt;iframe style=&quot;width:100%;height:100%;position:absolute;left:0px;top:0px;overflow:hidden&quot; frameborder=&quot;0&quot; type=&quot;text/html&quot; src=&quot;https://www.dailymotion.com/embed/video/x8znzg6?autoplay=1&quot; width=&quot;100%&quot; height=&quot;100%&quot; allowfullscreen title=&quot;Dailymotion Video Player&quot; allow=&quot;autoplay; web-share&quot;&gt; &lt;/iframe&gt; &lt;/div&gt;
+&lt;br&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme &lt;a href=&quot;https://www.youtube.com/watch?v=TuF6R9K5cqg&amp;amp;feature=youtu.be&quot;&gt;Christian l&amp;#8217;explique dans cette vidéo&lt;/a&gt;, trouver ce décalage de pixels n&amp;#8217;est pas forcément chose simple.
+Tout d&amp;#8217;abord, il est nécessaire de trouver la raie &quot;sombre&quot; de référence : on utilisera traditionellement le doublet du sodium pour se répérer, puis on utilisera la raie Sodium D2 ou encore la raie Fe I présente à côté comme référence.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, il faut trouver ce fameux décalage de pixels pour &quot;tomber&quot; sur la raie Hélium.
+La vidéo de Christian ne montre pas les dernières améliorations que Valérie Desnoux a intégré à INTI pour rendre les choses plus simples, mais, grossièrement, il faut :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;faire une capture surexposée qui va nous permettre de &quot;voir&quot; la raie hélium&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;faire une capture &quot;normale&quot; pour disposer de l&amp;#8217;image à réellement traiter&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ouvrir INTI et traiter la première vidéo pour disposer de l&amp;#8217;image moyenne montrant la raie Hélium en bord de champ&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;traiter la 2ème vidéo en mode &quot;raie libre&quot;, utiliser &quot;polynôme automatique&quot; et ouvrir l&amp;#8217;image moyenne calculée lors du premier traitement pour trouver le décalage&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;enfin utiliser un autre logiciel comme i-Spec pour faire la soustraction&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette procédure, &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;bien que documentée&lt;/a&gt;, est très intimidante pour les utilisateurs et explique que peu se soient lancés dans ce défi.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans JSol&amp;#8217;Ex, la procédure est simplifiée au maximum :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;on fait une capture &quot;classique&quot;, intégrant la raie de référence (ex SoD2) et en utilisant un cropping assez large pour intégrer aussi la raie proche Hélium&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on ouvre le fichier dans JSol&amp;#8217;Ex : les images sont générées automatiquement, il n&amp;#8217;y a rien à calculer, pas de soustraction de continuum, rien, juste un clic !&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Ca ne prend que quelques secondes !&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;iframe width=&quot;1000&quot; height=&quot;600&quot; src=&quot;https://www.youtube.com/embed/yE6de4JM0Cw?si=O_qZrCAISZliPfxA&quot; title=&quot;YouTube video player&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&quot; referrerpolicy=&quot;strict-origin-when-cross-origin&quot; allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_processus_de_simplification&quot;&gt;Le processus de simplification&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_imagemath&quot;&gt;ImageMath&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Avant d&amp;#8217;en arriver là, il a fallu de nombreuses améliorations, qui ont été livrées au fur et à mesure des versions.
+La première, c&amp;#8217;est ce système de script que j&amp;#8217;ai appelé &quot;ImageMath&quot; (le nom est inspiré de PixelMath dans PixInsight) : il permet d&amp;#8217;utiliser des scripts pour produire des images que JSol&amp;#8217;Ex ne produit pas tout seul.
+Cette avancée a permis d&amp;#8217;écrire un script qui produit une image Hélium à partir d&amp;#8217;un seul fichier SER :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Un exemple de script permettant de générer une image Hélium&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;[params]
+# Entrer la valeur du décalage de raie
+RaieHelium = -85
+# Limites hautes et basses pour le continuum
+ContinuumLo=-80
+ContinuumHi=-70
+# Stretch de l&apos;image
+Stretch=10
+
+## Variables temporaires
+[tmp]
+continuum = max(range(ContinuumLo,ContinuumHi))
+helium_raw = autocrop(img(RaieHelium) - continuum)
+
+## Maintenant les images !
+[outputs]
+helium = asinh_stretch(helium_raw, blackPoint, Stretch)
+helium_fixed = asinh_stretch(fix_banding(helium_raw;BandWidth;BandIterations),blackPoint, Stretch)
+helium_color = colorize(helium_fixed, &quot;Helium (D3)&quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Néanmoins, vous noterez que ce script nécessite toujours de déterminer le décalage de la raie Hélium, ainsi que la position du continuum.
+Ceci pouvait cependant être fait simplement avec le même fichier SER en l&amp;#8217;ouvrant dans le &quot;débogueur de raie&quot;, une procédure que &lt;a href=&quot;https://www.youtube.com/watch?v=EwUUg06opKU&quot;&gt;je décrivais à l&amp;#8217;époque dans une vidéo&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette procédure permettait ainsi d&amp;#8217;obtenir une image Hélium en moins de 5 minutes, ce qui était déja une amélioration sensible par rapport à avant : plus besoin de faire 2 vidéos distinctes et un décalage de pixels calculé par le logiciel avec l&amp;#8217;assistance de l&amp;#8217;utilisateur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bien que ce soit une amélioration notable, on peut faire encore mieux.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_profils_spectraux&quot;&gt;Profils spectraux&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex affiche depuis longtemps dans un onglet le &quot;profil spectral&quot; de l&amp;#8217;image étudiée et peut aussi calculer la &lt;em&gt;dispersion&lt;/em&gt;, mesurée en Angrstöms par pixel, d&amp;#8217;une image.
+Ce profil correspond à l&amp;#8217;intensité des raies pour un décalage de pixels donné.
+Depuis la version 2.3.0 cependant, j&amp;#8217;ai intégré une fonctionnalité qui permet de détecter automatiquement la raie étudiée grâce à la comparaison de ce profil à un profil de référence (les données sont issues de la &lt;a href=&quot;https://bass2000.obspm.fr/solar_spect.php&quot;&gt;base de données BASS2000&lt;/a&gt;).
+Grâce à celà, il est désormais possible de savoir comment une image &quot;s&amp;#8217;aligne&quot; entre le profil de référence et celui qu&amp;#8217;on étudie.
+Puisque l&amp;#8217;on connait à la fois la position de la raie de référence (Sodium D2 par exemple) et la dispersion, il est alors possible de calculer de combien de pixels on doit se déplacer pour trouver la raie Hélium !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette fonctionnalité est d&amp;#8217;ailleurs disponible dans les scripts sous le nom de &apos;find_shift`.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_soustraction_du_continuum&quot;&gt;Soustraction du continuum&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A ce stade, nous disposons donc d&amp;#8217;une image dont on sait qu&amp;#8217;elle contient une raie de référence (Sodium D2 ou Fer Fe I) mais aussi le décalage en pixels de la raie Hélium.
+Il nous manque cependant la soustraction du continuum.
+Là encore, le script ci-dessus montre qu&amp;#8217;il fallait entrer une valeur &quot;à la main&quot; pour trouver ce qu&amp;#8217;il fallait soustraire.
+Une façon simple de procéder était encore une fois d&amp;#8217;ouvrir le débogueur et de regarder les lignes plus claires dans le spectre : l&amp;#8217;oeil étant assez sensible aux changements de contraste, il n&amp;#8217;était pas trop compliqué de trouver un intervalle raisonnable pour le continuum.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Néanmoins, si on souhaite arriver à un traitement complètement automatique, on ne peut plus se baser sur une valeur &quot;pifométrique&quot;.
+Une façon naïve de régler le problème aurait été d&amp;#8217;utiliser un décalage fixe (par exemple 15 pixels).
+Cependant, ça ne fonctionne pas, pour plusieurs raisons :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;le décalage dépend de la résolution (taille des pixels, dispersion)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on peut tomber sur une raie trop sombre, cette région du spectre étant assez contrastée&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;le résultat est très sensible à l&amp;#8217;exposition&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour cette raison, j&amp;#8217;ai ajouté une fonctionnalité qui calcule un &quot;continuum synthétique&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il faut noter que contrairement à l&amp;#8217;image &quot;continuum&quot; qui utilise un décalage fixe (et configurable) dans les traitements standards, ce continuum synthétique est utilisé uniquement dans le contexte du traitement Hélium, ou lors de l&amp;#8217;utilisation de la fonction &lt;code&gt;continuum()&lt;/code&gt; dans un script.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;idée de cette fonction est de calculer une image qui représente au mieux le continuum à soustraire.
+Au lieu d&amp;#8217;utiliser un seul décalage de pixels, on va effectuer un calcul à partir de plusieurs décalages (cette fonction nécessite donc plus de ressources lors du traitement).
+Ainsi la première chose à comprendre c&amp;#8217;est qu&amp;#8217;il ne s&amp;#8217;agira pas d&amp;#8217;une image à une longueur d&amp;#8217;onde précise, mais bel et bien d&amp;#8217;une image synthétique basée sur des propriétés statistiques.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En premier lieu, on effectue un échantillonnage des images à différents décalages de pixels, du minimum possible au maximum possible par rapport à la fenêtre de cropping du spectre et de la distorsion.
+Par exemple, si chaque trame fait 2000x200 pixels, on dispose potentiellement de 100 décalages entiers (la hauteur de l&amp;#8217;image).
+Cependant, à cause de la distorsion, seuls un sous-ensemble nous permet d&amp;#8217;avoir des lignes complètes lors de la reconstruction (disons, 180 lignes, qui donneront 180 images).
+Sur ces 180 décalages possible, nous n&amp;#8217;allons, pour des raisons de performance, uniquement en retenir un échantillon (environ 1/3), ce qui nous donnera donc 60 images à étudier.
+Sur ces 60 images, on élimine celles qui correspondent à un décalage de pixel trop proche de la raie de référence puisque de manière évidente elles ne correspondent pas au continuum.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dès lors commence l&amp;#8217;analyse statistique : pour chacune de ces images, on calcule leur valeur moyenne.
+Ensuite, nous calculons la moyenne de ces moyennes et nous ne conservons que les images dont la moyenne est supérieure à cette moyenne.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A ce stade, il nous reste donc quelques candidates, dont la luminosité est suffisante pour être considérée comme le continuum, mais on dispose bien d&amp;#8217;une liste d&amp;#8217;images.
+La dernière étape consiste donc à calculer la médiane de toutes ces images, pour obtenir un et un seul &quot;continuum synthétique&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Si on reprend les étapes, celà nous donne par exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;on dispose de 60 images à des décalages de pixels (entiers)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on retire les 8 qui sont au centre de la raie étudiée, il en reste 52&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on calcule la valeur moyenne de chacune de ces images : 5000, 8000, 5200, 6400, &amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on calcule la moyenne de toutes ces moyennes, par ex: 6000&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on ne retient que les images dont la moyenne est supérieure à cette moyenne, disons qu&amp;#8217;il en reste 30&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;on calcule la médiane de ces 30 images&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il ne nous reste donc plus qu&amp;#8217;à faire la soustraction entre l&amp;#8217;image au décalage de pixels de la raie Hélium avec le continuum synthétique calculé et on obtient l&amp;#8217;image Hélium ci-dessus, en quelques secondes seulement !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans ce billet, j&amp;#8217;ai décris la façon dont je procède pour améliorer JSol&amp;#8217;Ex.
+En premier lieu, il s&amp;#8217;agit d&amp;#8217;identifier un besoin particulier, par exemple, ici, produire une image Hélium.
+A partir de ce besoin, il s&amp;#8217;agit de chercher comment simplifier un tel traitement.
+La simplification ne se fait alors qu&amp;#8217;à partir de ce dont je dispose à un instant &lt;em&gt;t&lt;/em&gt;.
+Par exemple, dans un premier temps, il a s&amp;#8217;agit d&amp;#8217;ajouter un système de scripts, qui, outre le traitement des images Hélium, permet d&amp;#8217;exploiter la richesse des données disponibles dans un scan.
+Les personnes intéressées peuvent en apprendre plus sur les scripts &lt;a href=&quot;https://youtu.be/8XKzFcmvqfI&quot;&gt;dans ce tutoriel&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, il a s&amp;#8217;agit d&amp;#8217;ajouter des fonctionnalités permettant de simplifier la configuration pour les utilisateurs, en l&amp;#8217;occurrence la détection automatique de raie, puis d&amp;#8217;exploiter ces nouvelles fonctionnalités pour simplifier encore plus le traitement des images.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ainsi, il s&amp;#8217;agit d&amp;#8217;une méthode très itérative, mais toujours dans le but de livrer des incréments fournissant une certaine valeur ajoutée aux utilisateurs.
+La bonne nouvelle, c&amp;#8217;est que j&amp;#8217;ai beaucoup d&amp;#8217;autres idées en tête !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_ressources&quot;&gt;Ressources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt; (téléchargement et documentation)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;INTI&lt;/a&gt; (logiciel officiel)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.astrosurf.com/solex/sol-ex-traitement.html&quot;&gt;Sol&amp;#8217;Ex&lt;/a&gt; (site officiel Sol&amp;#8217;Ex)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>JSol&amp;#8217;Ex 2.2.0 et amélioration du contraste</title>
       <link>https://melix.github.io/blog//2024/04-25-jsolex-contrast.html</link>
