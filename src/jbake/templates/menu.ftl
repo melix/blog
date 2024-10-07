@@ -12,12 +12,14 @@
             <div class="navbar-collapse collapse">
               <ul class="nav navbar-nav">                
                 <li><a href="/blog/about.html">About</a></li>
-		<li><a href="/blog/projects.html">Projects</a></li>
-		<li><a href="/blog/astronomy.html">Astronomy</a></li>
+		          <li><a href="/blog/projects.html">Projects</a></li>
+				    <li><a href="/blog/jsolex.html">JSol'Ex</a></li>
+		<li><a href="/blog/astrophotography.html">Astrophotography</a></li>
 		<li class="dropdown">
           		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
 		          <ul class="dropdown-menu" role="menu">
-				<li><a href="/blog/tags/gradle.html">Gradle</a></li>
+		          <li><a href="/blog/tags/jsolex.html">JSol'Ex</a></li>
+				    <li><a href="/blog/tags/gradle.html">Gradle</a></li>
                 <li><a href="/blog/tags/groovy.html">Groovy</a></li>
                 <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
                 <li><a href="/blog/tags/index.html">See all tags</a></li>
