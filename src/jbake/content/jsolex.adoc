@@ -5,6 +5,7 @@ Cédric Champeau
 :jbake-tags: solex,jsolex
 :jbake-status: published
 :jbake-cached: true
+:toc: true
 
 +++
 <style>
@@ -21,19 +22,43 @@ Cédric Champeau
 </style>
 +++
 
-Cliquez <<french-version,ici pour la version française>>
+Cliquez link:jsolex_fr.html[ici pour la version française].
 
+[[about-solex]]
+== About the Sol'Ex project
+
+The Sol'Ex, aka Solar Exporer, is an DIY instrument created by Christian Buil which allows imaging the sun, at low cost, but with high quality.
+It is capable of observing the sun in various spectral rays: H-alpha, calcium, Helium D3, etc.
+It is used by hundreds of amateur astronomers around the world.
+
+image::/blog/img/astro/solex/solex_case.jpg[]
+
+image::/blog/img/astro/solex/sun_ha.jpg[]
+
+=== Links of interest
+
+Here are a few links that you probably want to explore before getting started:
+
+- http://www.astrosurf.com/solex/sol-ex-presentation-en.html[Christian Buil's reference site about Sol'Ex], your starting point for building a Sol'Ex
+- http://valerie.desnoux.free.fr/inti/[Valérie Desnoux's INTI], official software for processing Sol'Ex images
+- https://espace-infini.fr/[Jérôme Bastardie's site], which contains very nice animations illustrating how Sol'Ex works, a must see!
+- https://azur3dprintshop.com/[Azur3DPrint], a french company where you can buy pre-printed parts for your Sol'Ex
+- https://www.shelyak.com/[Shelyak Instruments], where you can buy your optical kit for Sol'Ex
+- https://melix.github.io/astro4j/latest/en/jsolex.html[JSol'Ex homepage], an alternative software to INTI that I have written for learning purposes and described in this page
+
+[[about-jsolex]]
 == About JSol'Ex
 
 JSol'Ex is a solar images processing software for http://www.astrosurf.com/solex/sol-ex-presentation-en.html[Christian Buil's Sol'Ex].
-It is capable of processing SER files captured with this instrument in order to produce images of the solar disk, in a similar way to what http://valerie.desnoux.free.fr/inti/[INTI from Valérie Desnoux] is doing, which is the official software for processing your Sol'Ex images.
-It is primarily designed to process images for Sol'Ex, but it might work properly for other kinds of spectroheliographs.
+It is capable of processing SER files captured with this instrument in order to produce images of the solar disk, in a similar way to what http://valerie.desnoux.free.fr/inti/[Valérie Desnoux's INTI], which is the official software for processing your Sol'Ex images, is doing.
+JSol'Ex is primarily designed to process images for Sol'Ex, but it might work properly for other kinds of spectroheliographs.
 
 JSol'Ex is free software published under the Apache 2 software license.
 It is written in en Java and provided for free without any warranty.
 
 JSol'Ex documentation and downloads can be found https://melix.github.io/astro4j/latest/en/jsolex.html[here]. 
 
+[[tutorials]]
 === Videos
 
 Below you can find a list of videos I've created about Sol'Ex and JSol'Ex:
@@ -53,56 +78,11 @@ Below you can find a list of videos I've created about Sol'Ex and JSol'Ex:
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/UBua8bizQkM[🇫🇷 Demo of JSol'Ex 1.5, July 2023]
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/l6tb-UFC6Zs[🇬🇧 JSol'Ex 1.4 walkthrough and ImageMath tutorial, July 2023]
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/LytT0EV25SQ[🇫🇷 ImageMath Tutorial with JSol'Ex, July 2023]
+
+The videos below are probably not worth watching since they are fairly outdated.
+
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/EwUUg06opKU[🇫🇷 Processing an Helium image with JSol'Ex 1.3.0, June 2023]
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/WfDHML5RYCM[🇫🇷 Demo of JSol'Ex 1.2, June 2023]
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/L8JmDXzmk0g[🇫🇷 Demo of JSol'Ex 1.0, May 2023]
 - +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/2qzcExrURIo[🇫🇷 Presentation of JSol'Ex, May 2023]
-
-[[french-version]]
-== A propos de JSol'Ex
-
-JSol'Ex est un traitement d'images solaires produites par l'intermédiaire du http://www.astrosurf.com/solex/[Sol'Ex de Christian Buil].
-Il permet de traiter les fichiers SER capturés avec cet instrument pour produire des images du disque solaire, de manière similaire à http://valerie.desnoux.free.fr/inti/[INTI de Valérie Desnoux], qui est le logiciel officiel pour vos images Sol'Ex.
-S'il est principalement conçu pour traiter les images produites par Sol'Ex, il est possible qu'il donne de bons résultats sur d'autres héliospectrographes.
-
-JSol'Ex est un logiciel libre sous licence Apache 2, écrit en Java et fourni à titre gratuit sans aucune garantie.
-
-La documentation et les téléchargements de JSol'Ex https://melix.github.io/astro4j/latest/fr/jsolex.html[se trouvent ici].
-
-.Note aux utilisateurs français
-[IMPORTANT]
-====
-**Si vous votez Rassemblement National ou tout autre parti proche de l'extrême droite, je vous demande de ne pas utiliser ce logiciel**
-
-Mes convictions sont diamètralement opposées à celles de ces partis et je ne souhaite pas que mon travail, développé sur mon temps libre avec une licence libre serve à des personnes qui soutiennent ces idées nauséabondes.
-
-La solidarité, le partage, l'ouverture aux autres, la lutte contre les discriminations et les inégalités, le respect de toutes les religions, de tous les genres sont les valeurs qui m'animent. Elles sont à l'opposé de celles prônées par ces partis.
-
-Je vous invite à ne pas céder aux sirènes de la haine et à vous tourner vers des valeurs plus positives, où votre bien-être ne passe pas par le rejet de l'autre.
-====
-
-
-=== Vidéos
-
-Vous trouverez ci-dessous une liste de vidéos et tutoriels à propos du Sol'Ex ou JSol'Ex :
-
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/4GwH3gSfnxY[🇫🇷 Tutoriel JSol'Ex 2.7 + SharpCap : Extraire une image Hélium, Septembre 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/xxs2blZSJkY[🇬🇧 Empiler des images directement dans JSol'Ex grâce au mode batch, Juillet 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/Q9CLj-aa_a8[🇫🇷 Les nouveautés de JSol'Ex 2.6, July 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/mo2QJZSbELU[🇫🇷 Créer des animations avec JSol'Ex 2.5, Juin 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/yE6de4JM0Cw[🇫🇷 Traitement ultra-simplifié de la raie Hélium avec JSol'Ex 2.4, Juin 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/8XKzFcmvqfI[🇫🇷 Tutoriel ImageMath avec JSol'Ex 2.4, Juin 2024]
-- +++<span class="badge badge-solex">Sol'Ex</span>+++ https://youtu.be/tDVaA29OEHQ[🇫🇷 Trucs et Astuces Sol'Ex : focalisation, Juin 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/FGUuBiJ8cWo[🇬🇧 Les nouveautés de JSol'Ex 2.4, Juin 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/wuSekZg7HPo[🇫🇷 Les nouveautés de JSol'Ex 2.3, Mai 2024]
-- +++<span class="badge badge-solex">Sol'Ex</span>+++ https://youtu.be/NsDgg4o2SDw[🇫🇷 Trucs et Astuces Sol'Ex : trouver le soleil sans chercheur, Avril 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/pFLkMOJgcrg[🇫🇷 Empilement et création de mosaïques avec JSol'Ex 2.0, Janvier 2024]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/LbLqfpXfdAY[🇫🇷 Les nouveautés de JSol'Ex 1.8, Novembre 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/UBua8bizQkM[🇫🇷 Démo de JSol'Ex 1.5, Juillet 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/l6tb-UFC6Zs[🇬🇧 Tour d'horizon de JSol'Ex 1.4 et tutoriel ImageMath, Juilet 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/LytT0EV25SQ[🇫🇷 Tutoriel ImageMath avec JSol'Ex, Juillet 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/EwUUg06opKU[🇫🇷 Traiter une image Hélium en moins de 2 minutes avec JSol'Ex 1.3.0, Juin 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/WfDHML5RYCM[🇫🇷 Démo de JSol'Ex 1.2, Juin 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/L8JmDXzmk0g[🇫🇷 Démo de JSol'Ex 1.0, Mai 2023]
-- +++<span class="badge badge-jsolex">JSol'Ex</span>+++ https://youtu.be/2qzcExrURIo[🇫🇷 Présentation de JSol'Ex, Mai 2023]
 
