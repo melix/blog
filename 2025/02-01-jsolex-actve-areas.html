@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Automatic active area detection with JSol&#8217;Ex 2.9</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../favicon.ico">
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		          <li><a href="/blog/projects.html">Projects</a></li>
+				    <li><a href="/blog/jsolex.html">JSol'Ex</a></li>
+		<li><a href="/blog/astrophotography.html">Astrophotography</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+		          <li><a href="/blog/tags/jsolex.html">JSol'Ex</a></li>
+				    <li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://bsky.app/profile/melix.champeau.me"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	        <li><a rel="me" href="https://astrodon.social/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Automatic active area detection with JSol&#8217;Ex 2.9</h1>
+	</div>
+
+	<p><em>01 February 2025</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	</em>
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	</em>
+		<a href="/blog/tags/solar.html">solar</a> 
+	</em>
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The latest release of JSol&#8217;Ex as of writing this blog post, JSol&#8217;Ex 2.9, ships with a new ability: automatically detecting <a href="https://en.wikipedia.org/wiki/Active_region">active areas</a>.
+In this blog post, I will explain the principles and the algorithm I used, but also show its limits.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_about_active_regions">About active regions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, a bit of vocabulary.
+An active region is a region of the Sun atmosphere where special activity occurs, such as flares or coronal mass ejections.
+They don&#8217;t have to be associated with sunspots, but in general, they are.
+In JSol&#8217;Ex, we&#8217;re essentially detecting sunspots, and the terminology "active regions" essentially comes from the fact that we can use the <a href="https://www.swpc.noaa.gov/" class="bare">https://www.swpc.noaa.gov/</a>NOAA database] to label these active regions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spectroheliographs">Spectroheliographs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An instrument like <a href="http://www.astrosurf.com/solex/">Christian Buil&#8217;s Sol&#8217;Ex</a>, called a spectroheliograph (or SHG in short) doesn&#8217;t offer any kind of "live view" like typical solar instruments like Coronado or Lunt instruments.
+Instead, what we get is a video file, where each frames consists of a "slice" of the sun, observed as a portion of the light spectrum:</p>
+</div>
+<video controls autoplay height="80">
+    <source src="/blog/video/anim-spectrum.webm"
+            type="video/webm">
+</video>
+<div class="paragraph">
+<p>The video above is an excerpt from a so-called "scan": the principle is to have a slice of the sun passing through a slit, and a grating is used to spread the light into a spectrum.
+Here, we are observing a curved dark line, which is the H-alpha line, and the "wobbling" we see around that line is an illustration of the <a href="https://en.wikipedia.org/wiki/Doppler_effect">Doppler effect</a>.
+The idea of software like <a href="http://valerie.desnoux.free.fr/inti/">Valérie Desnoux&#8217;s INTI</a> and <a href="https://melix.github.io/astro4j/2.9.0/en/jsolex.html">JSol&#8217;Ex</a> is to extract pixels from the studied line (here H-alpha) in order to reconstruct an image of the sun.</p>
+</div>
+<div class="paragraph">
+<p>However, as you can see in that animation, there&#8217;s a lot more information available in each frame.
+While we are mostly interested in the central line (here H-alpha), it&#8217;s also interesting to look "above" or "below" the line, which is often referred to "pixel shifting", in which case we&#8217;re not studying H-alpha, but a different wavelength: that&#8217;s one of the strenghts of Sol&#8217;Ex, which makes it possible to do "science" at home!</p>
+</div>
+<div class="paragraph">
+<p>In particular, this video shows a couple interesting features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>sometimes, you see some vertical dark lines appearing: these are features of the solar atmosphere. The darker lines which spread around multiple columns are these we are mostly interested in for this blog post: they correspond to sunspots!</p>
+</li>
+<li>
+<p>near the end of the video, on the right, you will see a white flash apparearing inside of of these regions: it&#8217;s a solar flare!</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This video is actually an excerpt from one of the many captures I&#8217;ve done with Sol&#8217;Ex, and I captured it during an eruption, on May 5th, 2024.
+What you are seeing here is the <a href="https://www.earth.com/news/sunspot-region-ar3664-blasted-earth-mars-may-2024-still-very-active/">massive AR3664 region</a> which was suject to multiple X-flares and resulted in beautiful auroras on Earth!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_automatic_active_region_detection">Automatic active region detection</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve always considered that it would be a cool feature to be able to detect these lines automatically in JSol&#8217;Ex, and provide an overlay of the detected sunspots.
+Here we go, it is finally implemented in JSol&#8217;Ex 2.9.0!
+If you select the "full processing mode" or that you check the "active regions" checkbox in a custom process, then JSol&#8217;Ex will automatically create an image of the sun with the detected active regions as an overlay:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-ar/ar-labels.jpg" alt="ar labels">
+</div>
+</div>
+<div class="paragraph">
+<p>Unfortunately that day I didn&#8217;t capture a full disk, but you can see that JSol&#8217;Ex annotated the disk with the detected active regions, but it also added the labels for these regions automatically.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take another example with an image captured in Calcium K on January 17, 2025:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-ar/detection-calcium.jpg" alt="detection calcium">
+</div>
+</div>
+<div class="paragraph">
+<p>You will notice 2 different colors for labels:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>blue labels are the ones detected by JSol&#8217;Ex</p>
+</li>
+<li>
+<p>red labels are the ones coming from the NOAA database, which were not detected</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Sometimes, you will see like in the image above regions which are not detected, and others which are detected but not in the NOAA database.
+The reason why not all of them are detected is that I had to choose "reasonable" detection thresholds, which work for most use cases.
+I plan to improve the algorithm over time to make it more robust, based on your feedback.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_does_it_work">How does it work?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The algorithm is based on a simple analysis of each frame.
+If you open your SER file in JSol&#8217;Ex video analyzer, you will see something similar to this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-ar/detection-debugger.jpg" alt="detection debugger">
+</div>
+</div>
+<div class="paragraph">
+<p>On the top, you see the original frame, with the curved H-alpha line.
+On the bottom, you see the corrected frame, where the H-alpha line is straightened, and the active regions are highlighted in purple.</p>
+</div>
+<div class="paragraph">
+<p>The algorithm is based on the following steps:</p>
+</div>
+<div class="paragraph">
+<p>For each frame:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Detect the borders of the sun</p>
+</li>
+<li>
+<p>For each column, compute the average intensity of the column, as well as its standard deviation</p>
+</li>
+<li>
+<p>Compute a 3rd order polynomial fit of the average intensity and standard deviation</p>
+</li>
+<li>
+<p>now, for each column, we compare its average intensity and standard deviation to the polynomial fits: if both of them are below a particular threshold, we consider that we have detected a candidate</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The reason to only keep candidates which have both average intensity and standard deviation below a threshold is because:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>sunspots characterize by a clear vertical line, which means that the standard deviation is low (most pixels have a similar value on the column)</p>
+</li>
+<li>
+<p>sunspots are darker than the surrounding, which means that the average intensity is lower</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>At the moment, I&#8217;m using the following thresholds (note that they may change in future releases, as I improve the accuracy):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>average intensity threshold: 0.95 times the predicted value</p>
+</li>
+<li>
+<p>standard deviation threshold: 0.85 times the predicted value</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Once we have the results for all frames, we aggregate active regions by collecting adjacent candidates.</p>
+</div>
+<div class="paragraph">
+<p>Finally, we filter out regions which are too small, then perform clustering of regions which are close to each other.</p>
+</div>
+<div class="paragraph">
+<p>The whole algorithm <a href="https://github.com/melix/astro4j/blob/dbb2418318f4cb143726791830a32da00a35ae6f/jsolex-core/src/main/java/me/champeau/a4j/jsolex/processing/sun/detection/PhenomenaDetector.java#L40">can be found here</a> (note that it also includes redshift detection, which was discussed in a different blog post).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_limitations">Limitations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This algorithm proves to work relatively well in many different wavelengths (H-alpha, calcium, magnesium &#8230;&#8203;).
+However, there are sometimes false positives.
+This is for example the case when I&#8217;m scanning in H-beta, due to the long focal length of my telescope and astigmatism, and the fact that H-beta provides a lot of details.</p>
+</div>
+<div class="paragraph">
+<p>In this case, the algorithm detects areas which are actually just noise:</p>
+</div>
+<div class="paragraph">
+<p>Note that these are close to the north and south poles.
+I have also noticed that the algorithm tends to detect noise as active regions when we&#8217;re close to the limb, which is also why I&#8217;m currently filtering these out.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-ar/active_regions_noise.jpg" alt="active regions noise">
+</div>
+</div>
+<div class="paragraph">
+<p>At this stage, I have chosen not to make the detection thresholds configurable, because I consider these internal implementation details, which may change in the future, and that I don&#8217;t want to expose to the user.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_annotation_of_active_regions">Annotation of active regions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once piece of work that we didn&#8217;t explain yet is how JSol&#8217;Ex puts labels around active regions.
+For this, we are using the <a href="https://www.swpc.noaa.gov/products/solar-region-summary">NOAA Solar Region Summary</a> database.</p>
+</div>
+<div class="paragraph">
+<p>This provides us, at a particular date, the list of active regions with their positions on the solar disk.
+JSol&#8217;Ex will compare these with the detected regions, and put the labels in different colors based on whether they were detected or not.</p>
+</div>
+<div class="paragraph">
+<p>However, the position of active regions will only be correct if:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>you have properly oriented your image (north at the top, east on the left): to help you with this, use the "GONG" tab on the right of the interface to download a reference image and compare with yours</p>
+</li>
+<li>
+<p>you are using an equatorial mount. If you are not, then make sure to check the new "alt-az" mode and enter your GPS coordinates in the settings, so that JSol&#8217;Ex can compute the parallactic angle of the sun at the moment of the observation and automatically correct the orientation of the image.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The data from NOAA is cached in your local filesystem, so that we don&#8217;t have to download it every time you open a video file.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_frequently_asked_questions">Frequently Asked Questions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Despite only having released this a day ago, I already have received the same question multiple times: can JSol&#8217;Ex be used to annotate an <em>existing</em> image of the sun, that is to say, take a JPG or PNG image and annotate it?</p>
+</div>
+<div class="paragraph">
+<p>If you have read carefully this blog post and that I explained things correctly, you will have understood that the answer is no: because my algorithm is based on the analysis of each frame, there&#8217;s no such information available in a single image.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I hope you will enjoy this new feature in JSol&#8217;Ex 2.9.0.
+This blog post is a tentative explanation of the algorithm, and I will be happy to answer any questions you may have about it.
+As always, feel free to contribute, JSol&#8217;Ex is open source!</p>
+</div>
+</div>
+</div></p>
+   
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+   <script>hljs.highlightAll();</script>
+  </body>
+</html>

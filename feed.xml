@@ -6,9 +6,269 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 8 Oct 2024 09:49:09 +0200</pubDate>
-    <lastBuildDate>Tue, 8 Oct 2024 09:49:09 +0200</lastBuildDate>
+    <pubDate>Sat, 1 Feb 2025 16:23:22 +0100</pubDate>
+    <lastBuildDate>Sat, 1 Feb 2025 16:23:22 +0100</lastBuildDate>
 
+    <item>
+      <title>Automatic active area detection with JSol&amp;#8217;Ex 2.9</title>
+      <link>https://melix.github.io/blog//2025/02-01-jsolex-actve-areas.html</link>
+      <pubDate>Sat, 1 Feb 2025 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2025/02-01-jsolex-actve-areas.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The latest release of JSol&amp;#8217;Ex as of writing this blog post, JSol&amp;#8217;Ex 2.9, ships with a new ability: automatically detecting &lt;a href=&quot;https://en.wikipedia.org/wiki/Active_region&quot;&gt;active areas&lt;/a&gt;.
+In this blog post, I will explain the principles and the algorithm I used, but also show its limits.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_about_active_regions&quot;&gt;About active regions&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all, a bit of vocabulary.
+An active region is a region of the Sun atmosphere where special activity occurs, such as flares or coronal mass ejections.
+They don&amp;#8217;t have to be associated with sunspots, but in general, they are.
+In JSol&amp;#8217;Ex, we&amp;#8217;re essentially detecting sunspots, and the terminology &quot;active regions&quot; essentially comes from the fact that we can use the &lt;a href=&quot;https://www.swpc.noaa.gov/&quot; class=&quot;bare&quot;&gt;https://www.swpc.noaa.gov/&lt;/a&gt;NOAA database] to label these active regions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_spectroheliographs&quot;&gt;Spectroheliographs&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;An instrument like &lt;a href=&quot;http://www.astrosurf.com/solex/&quot;&gt;Christian Buil&amp;#8217;s Sol&amp;#8217;Ex&lt;/a&gt;, called a spectroheliograph (or SHG in short) doesn&amp;#8217;t offer any kind of &quot;live view&quot; like typical solar instruments like Coronado or Lunt instruments.
+Instead, what we get is a video file, where each frames consists of a &quot;slice&quot; of the sun, observed as a portion of the light spectrum:&lt;/p&gt;
+&lt;/div&gt;
+&lt;video controls autoplay height=&quot;80&quot;&gt;
+    &lt;source src=&quot;/blog/video/anim-spectrum.webm&quot;
+            type=&quot;video/webm&quot;&gt;
+&lt;/video&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The video above is an excerpt from a so-called &quot;scan&quot;: the principle is to have a slice of the sun passing through a slit, and a grating is used to spread the light into a spectrum.
+Here, we are observing a curved dark line, which is the H-alpha line, and the &quot;wobbling&quot; we see around that line is an illustration of the &lt;a href=&quot;https://en.wikipedia.org/wiki/Doppler_effect&quot;&gt;Doppler effect&lt;/a&gt;.
+The idea of software like &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;Valérie Desnoux&amp;#8217;s INTI&lt;/a&gt; and &lt;a href=&quot;https://melix.github.io/astro4j/2.9.0/en/jsolex.html&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt; is to extract pixels from the studied line (here H-alpha) in order to reconstruct an image of the sun.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, as you can see in that animation, there&amp;#8217;s a lot more information available in each frame.
+While we are mostly interested in the central line (here H-alpha), it&amp;#8217;s also interesting to look &quot;above&quot; or &quot;below&quot; the line, which is often referred to &quot;pixel shifting&quot;, in which case we&amp;#8217;re not studying H-alpha, but a different wavelength: that&amp;#8217;s one of the strenghts of Sol&amp;#8217;Ex, which makes it possible to do &quot;science&quot; at home!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In particular, this video shows a couple interesting features:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;sometimes, you see some vertical dark lines appearing: these are features of the solar atmosphere. The darker lines which spread around multiple columns are these we are mostly interested in for this blog post: they correspond to sunspots!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;near the end of the video, on the right, you will see a white flash apparearing inside of of these regions: it&amp;#8217;s a solar flare!&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This video is actually an excerpt from one of the many captures I&amp;#8217;ve done with Sol&amp;#8217;Ex, and I captured it during an eruption, on May 5th, 2024.
+What you are seeing here is the &lt;a href=&quot;https://www.earth.com/news/sunspot-region-ar3664-blasted-earth-mars-may-2024-still-very-active/&quot;&gt;massive AR3664 region&lt;/a&gt; which was suject to multiple X-flares and resulted in beautiful auroras on Earth!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_automatic_active_region_detection&quot;&gt;Automatic active region detection&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve always considered that it would be a cool feature to be able to detect these lines automatically in JSol&amp;#8217;Ex, and provide an overlay of the detected sunspots.
+Here we go, it is finally implemented in JSol&amp;#8217;Ex 2.9.0!
+If you select the &quot;full processing mode&quot; or that you check the &quot;active regions&quot; checkbox in a custom process, then JSol&amp;#8217;Ex will automatically create an image of the sun with the detected active regions as an overlay:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-ar/ar-labels.jpg&quot; alt=&quot;ar labels&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unfortunately that day I didn&amp;#8217;t capture a full disk, but you can see that JSol&amp;#8217;Ex annotated the disk with the detected active regions, but it also added the labels for these regions automatically.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s take another example with an image captured in Calcium K on January 17, 2025:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-ar/detection-calcium.jpg&quot; alt=&quot;detection calcium&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You will notice 2 different colors for labels:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;blue labels are the ones detected by JSol&amp;#8217;Ex&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;red labels are the ones coming from the NOAA database, which were not detected&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Sometimes, you will see like in the image above regions which are not detected, and others which are detected but not in the NOAA database.
+The reason why not all of them are detected is that I had to choose &quot;reasonable&quot; detection thresholds, which work for most use cases.
+I plan to improve the algorithm over time to make it more robust, based on your feedback.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_how_does_it_work&quot;&gt;How does it work?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The algorithm is based on a simple analysis of each frame.
+If you open your SER file in JSol&amp;#8217;Ex video analyzer, you will see something similar to this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-ar/detection-debugger.jpg&quot; alt=&quot;detection debugger&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On the top, you see the original frame, with the curved H-alpha line.
+On the bottom, you see the corrected frame, where the H-alpha line is straightened, and the active regions are highlighted in purple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The algorithm is based on the following steps:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For each frame:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Detect the borders of the sun&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;For each column, compute the average intensity of the column, as well as its standard deviation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Compute a 3rd order polynomial fit of the average intensity and standard deviation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;now, for each column, we compare its average intensity and standard deviation to the polynomial fits: if both of them are below a particular threshold, we consider that we have detected a candidate&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The reason to only keep candidates which have both average intensity and standard deviation below a threshold is because:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;sunspots characterize by a clear vertical line, which means that the standard deviation is low (most pixels have a similar value on the column)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;sunspots are darker than the surrounding, which means that the average intensity is lower&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At the moment, I&amp;#8217;m using the following thresholds (note that they may change in future releases, as I improve the accuracy):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;average intensity threshold: 0.95 times the predicted value&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;standard deviation threshold: 0.85 times the predicted value&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once we have the results for all frames, we aggregate active regions by collecting adjacent candidates.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally, we filter out regions which are too small, then perform clustering of regions which are close to each other.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The whole algorithm &lt;a href=&quot;https://github.com/melix/astro4j/blob/dbb2418318f4cb143726791830a32da00a35ae6f/jsolex-core/src/main/java/me/champeau/a4j/jsolex/processing/sun/detection/PhenomenaDetector.java#L40&quot;&gt;can be found here&lt;/a&gt; (note that it also includes redshift detection, which was discussed in a different blog post).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_limitations&quot;&gt;Limitations&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This algorithm proves to work relatively well in many different wavelengths (H-alpha, calcium, magnesium &amp;#8230;&amp;#8203;).
+However, there are sometimes false positives.
+This is for example the case when I&amp;#8217;m scanning in H-beta, due to the long focal length of my telescope and astigmatism, and the fact that H-beta provides a lot of details.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this case, the algorithm detects areas which are actually just noise:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Note that these are close to the north and south poles.
+I have also noticed that the algorithm tends to detect noise as active regions when we&amp;#8217;re close to the limb, which is also why I&amp;#8217;m currently filtering these out.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-ar/active_regions_noise.jpg&quot; alt=&quot;active regions noise&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this stage, I have chosen not to make the detection thresholds configurable, because I consider these internal implementation details, which may change in the future, and that I don&amp;#8217;t want to expose to the user.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_annotation_of_active_regions&quot;&gt;Annotation of active regions&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once piece of work that we didn&amp;#8217;t explain yet is how JSol&amp;#8217;Ex puts labels around active regions.
+For this, we are using the &lt;a href=&quot;https://www.swpc.noaa.gov/products/solar-region-summary&quot;&gt;NOAA Solar Region Summary&lt;/a&gt; database.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This provides us, at a particular date, the list of active regions with their positions on the solar disk.
+JSol&amp;#8217;Ex will compare these with the detected regions, and put the labels in different colors based on whether they were detected or not.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However, the position of active regions will only be correct if:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;you have properly oriented your image (north at the top, east on the left): to help you with this, use the &quot;GONG&quot; tab on the right of the interface to download a reference image and compare with yours&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;you are using an equatorial mount. If you are not, then make sure to check the new &quot;alt-az&quot; mode and enter your GPS coordinates in the settings, so that JSol&amp;#8217;Ex can compute the parallactic angle of the sun at the moment of the observation and automatically correct the orientation of the image.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The data from NOAA is cached in your local filesystem, so that we don&amp;#8217;t have to download it every time you open a video file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_frequently_asked_questions&quot;&gt;Frequently Asked Questions&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Despite only having released this a day ago, I already have received the same question multiple times: can JSol&amp;#8217;Ex be used to annotate an &lt;em&gt;existing&lt;/em&gt; image of the sun, that is to say, take a JPG or PNG image and annotate it?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you have read carefully this blog post and that I explained things correctly, you will have understood that the answer is no: because my algorithm is based on the analysis of each frame, there&amp;#8217;s no such information available in a single image.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I hope you will enjoy this new feature in JSol&amp;#8217;Ex 2.9.0.
+This blog post is a tentative explanation of the algorithm, and I will be happy to answer any questions you may have about it.
+As always, feel free to contribute, JSol&amp;#8217;Ex is open source!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Extraction automatique d&amp;#8217;images Hélium avec JSol&amp;#8217;Ex</title>
       <link>https://melix.github.io/blog//2024/06-14-jsolex-helium-continuum.html</link>
