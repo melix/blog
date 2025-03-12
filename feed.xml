@@ -6,9 +6,204 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Wed, 12 Mar 2025 09:15:35 +0100</pubDate>
-    <lastBuildDate>Wed, 12 Mar 2025 09:15:35 +0100</lastBuildDate>
+    <pubDate>Wed, 12 Mar 2025 09:32:20 +0100</pubDate>
+    <lastBuildDate>Wed, 12 Mar 2025 09:32:20 +0100</lastBuildDate>
 
+    <item>
+      <title>JSol&amp;#8217;Ex errands: How it helped uncovering an inaccuracy of the SHG 700 specifcations</title>
+      <link>https://melix.github.io/blog//2025/03-11-jsolex-shg700.html</link>
+      <pubDate>Tue, 11 Mar 2025 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2025/03-11-jsolex-shg700.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For a few months, I&amp;#8217;ve been working with Minh, from MLAstro, to improve support of the &lt;a href=&quot;https://mlastro.com/mlastro-shg&quot;&gt;SHG 700&lt;/a&gt; in JSol&amp;#8217;Ex.
+While JSol&amp;#8217;Ex was initially designed for &lt;a href=&quot;https://solex.astrosurf.com/sol-ex-presentation-en.html&quot;&gt;Christian Buil&amp;#8217;s Sol&amp;#8217;Ex&lt;/a&gt;, it appears that lots of users are using it to process images acquired using a different spectroheliograph.
+A while back, I added the ability to declare the specifications of the spectroheliograph you are using, which makes JSol&amp;#8217;Ex compatible with a wide variety of instruments.
+An example of collaboration with Minh is the experimental flat correction, which is recommended to enable with the SHG 700, and the addition of the SHG 700 to the list of instruments which are officially supported, in addition to the Sol&amp;#8217;Ex and the &lt;a href=&quot;https://www.sunscan.net/&quot;&gt;Sunscan&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_first_light_with_shg_700&quot;&gt;First light with SHG 700&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, I had been working with MLAstro for quite some time already, but I didn&amp;#8217;t own the instrument.
+This has recently been &quot;fixed&quot; and I&amp;#8217;m now a happy user of the SHG 700!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I must say that Minh&amp;#8217;s design is fairly impressive, it&amp;#8217;s a truly qualitative instrument.
+The aluminum housing makes it extremely robust, without any flexion, and it comes pre-collimated.
+In addition, the micro-focusers, which are used for the collimator lens, for the camera objective and for the wavelength selection wheel, are extremely pleasant to use: anyone who has struggled with the collimation of the Sol&amp;#8217;Ex will immediately feel the magic.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Being a regular user of the Sol&amp;#8217;Ex, I immediately felt comfortable with the SHG 700: it only took me a few minutes to setup and get my first images!
+Fine tuning the focus is a breeze with the microfocusers, it&amp;#8217;s really fantastic to use.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;My first images were showcased by MLAStro, but here are a few:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/13_10_48_0000_ha_batch.jpg&quot; alt=&quot;13 10 48 0000 ha batch&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/CaK.jpg&quot; alt=&quot;CaK&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/20250503-Hb.jpg&quot; alt=&quot;20250503 Hb&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/20250503-Mg-b1.jpg&quot; alt=&quot;20250503 Mg b1&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/20250307-animation-Ha-inv.gif&quot; alt=&quot;20250307 animation Ha inv&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_a_mystery&quot;&gt;A mystery&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While the above images were fairly easy to produce, I was puzzled because I didn&amp;#8217;t manage to get any decent image in Helium D3.
+This was surprising, because the sensitivity of the SHG700 is higher, especially because there&amp;#8217;s no need for a ND filter or a an ERF, so it was curious that the only helium image I was able to produce was this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/helium-error.jpg&quot; alt=&quot;helium error&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To understand the problem was that, it is important to mention that unlike Minh, I was using JSol&amp;#8217;Ex &lt;a href=&quot;http://localhost:8820/blog/2024/06-14-jsolex-helium-continuum.html&quot;&gt;one-click, fully automated processing&lt;/a&gt;, a feature which was introduced a while ago (June 2024) and worked extremely well for both Sol&amp;#8217;Ex and Sunscan files (N.B: the Sunscan app introduced the same feature a few days ago).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This feature only works if we can properly compute the dispersion of the spectrum, which is measured in Angstrom/pixel.
+In order to compute this, we need to know the specifications of the spectroheliograph, such as the grating density, the focal length of the collimator and objective lenses, the total angle as well as the pixel size of the camera.
+Once we know all this, we can determine how many pixels separate the reference line that we use, for example the Sodium D2 line, from the Helium D3 line.
+To illustrate this, let&amp;#8217;s say that we have a dispersion of 0.1Å/px. The Helium line is to be found at 5875.62Å, when the reference line, the Sodium D2 line, is detected at 5889.95Å.
+Therefore, the Helium line can be found 14.33Å away from the D2 line, which means 14.33/0.1 = 143.3 pixels away.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Using both Sol&amp;#8217;Ex and Sunscan, I had great experience at extracting this line automatically, so it was to say the least curious that it wouldn&amp;#8217;t work with the SHG 700.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_investigation&quot;&gt;Investigation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So I contacted Minh, and after eliminating obvious possible candidates, like weak signal or incorrect exposition or gain, I decided to go the &quot;old way&quot; and searched for the helium line manually.
+It was with great surprise that I discovered that when JSol&amp;#8217;Ex told me that the line should be 124.9, I was measuring something closer to 116 pixels!
+I brought this to Minh, and we identified 3 possible causes for this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;an error in the computation of the dispersion in JSol&amp;#8217;Ex&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a different focal length of the SHG 700&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a grating which wouldn&amp;#8217;t have the expected number of lines/mm&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It was also possible, but unlikely, that a combination of 2 and 3 would happen.
+The first thing I&amp;#8217;ve done is double checking my formula to compute the dispersion in JSol&amp;#8217;Ex.
+I was doubtful that it could be wrong, given that it was used with success on different SHGs.
+In addition, it gave exactly the same result as the &lt;a href=&quot;https://solarchatforum.com/viewtopic.php?t=48072&quot;&gt;Ken Harrison&apos; SimSpec SHG spreadsheet&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So we moved to the 2d option: the SHG 700 was advertised with a focal length of 75mm.
+However, the pixel shift I was manually measuring was closer to 70mm.
+I brought this again to Minh, who contacted the supplier of the lens, and here&amp;#8217;s what he told me:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The lens from the first production run had a focal length of 72mm, a discrepancy I was unaware of at the time. I had sourced this lens from a supplier in China and provided them with the Zemax file for my self-designed 6-element Double Gauss 75mm lens. The first prototype was disappointing—its near-UV performance and coating were poor, and contrast was low across the field. This was largely due to my inexperience in optical design, as I had only begun learning Zemax a month prior, making this my first optical project.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I raised these concerns with the supplier, who was very accommodating and offered to help optimize the design while ensuring key parameters such as focal length, aperture, and exit pupil remained unchanged. With each revision, the lens improved—by the second and third prototypes, contrast was significantly better, sharpness in the blue end of the spectrum improved, and the field was much flatter across the FOV. The field of view closely matched the earlier lens, and because I had already tested focal length in previous iterations, I didn’t think to recheck it. Visually, the lenses appeared identical, except for a slight shift in coating hue.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;The third prototype was approved for production and became the MLAstro &quot;75mm&quot; compound lens used in all MLAstro SHGs. However, it was only later confirmed by the supplier that the final production lens actually had a focal length of 72mm instead of 75mm&lt;/strong&gt;. The optimizations for blue performance and field flattening had slightly shortened the focal length.&quot;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;div class=&quot;attribution&quot;&gt;
+&amp;#8212; Mihn Truong Nguyen&lt;br&gt;
+&lt;cite&gt;MLAstro&lt;/cite&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So I changed the focal length to 72mm and got this image instead:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/helium-fixed.jpg&quot; alt=&quot;helium fixed&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s quite a difference! So it appeared that the software was correct, and that it allowed identifying a problem in the spectrograph specifications, because a spectral line wasn&amp;#8217;t found where it should have been!
+While going from 75mm to 72mm won&amp;#8217;t make much of a difference, the fact of not using the right numbers makes a huge difference in JSol&amp;#8217;Ex: computations are all off, which includes the pixel shifts like in this exercise, but also the measured redshifts.
+In addition, this would make it impossible to perform more complicated tasks like finding the ionized Fe lines when imaging the corona E.
+The image is stil less contrasted than it should be, which may indicate that the computation is slightly off, or it&amp;#8217;s just due to the weather conditions that day, I didn&amp;#8217;t have the opportunity to retry.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lastly, we can actually see fairly easily that the new focal length is a better fit, by using JSol&amp;#8217;Ex &quot;profile&quot; tab.
+In that tab, we compare the profile of the spectrum that you captured with a reference spectrum from the BASS2000 database: this is also how the software automatically determines what spectral line is observed, by comparing the profiles together.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With a 75mm length and an H-alpha profile, here&amp;#8217;s what we got:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/profile-75mm.jpg&quot; alt=&quot;profile 75mm&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can see that while the H-alpha profile is found, as soon as we move towards the wings, there are slight shifts between the local minimas.
+When we switch to a 72mm length, these are perfectly aligned:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/shg700/profile-72mm.jpg&quot; alt=&quot;profile 72mm&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The SHG 700 is a fairly impressive instrument: it&amp;#8217;s robust, it&amp;#8217;s a pleasure to use with its microfocusers, and Minh is always super responsive and very patient.
+Its use doesn&amp;#8217;t come without drawbacks, though.
+It&amp;#8217;s weight, for example, restricts it to refractors which have a good focuser.
+The dimension of the sun is also smaller than with the Sol&amp;#8217;Ex at equivalent focal length (see &lt;a href=&quot;https://solarchatforum.com/viewtopic.php?p=460891#p460891&quot;&gt;this post for an explanation&lt;/a&gt;).
+However, it produces stunning images, sometimes rivalizing these produced with an etalon.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While testing it, I faced this problem that the helium line images were significantly worse than with the Sol&amp;#8217;Ex, which didn&amp;#8217;t quite make sense.
+After investigation, it turned out we had highlighted a difference in the specifications, a lens had been changed from 75mm to 72mm by the supplier, without letting MLAstro know.
+That&amp;#8217;s a pity, but, in the end, the problem is very easy to fix in JSol&amp;#8217;Ex.
+Be sure to upgrade to JSol&amp;#8217;Ex 2.11.2 which includes &lt;a href=&quot;https://github.com/melix/astro4j/pull/525&quot;&gt;a fix to update the focal length&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Automatic active region detection with JSol&amp;#8217;Ex 2.9</title>
       <link>https://melix.github.io/blog//2025/02-01-jsolex-actve-areas.html</link>
