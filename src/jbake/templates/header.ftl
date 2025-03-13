@@ -27,6 +27,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
     <link rel="shortcut icon" href="<#if (content.rootpath)??>${content.rootpath}<#else></#if>favicon.ico">
+    <script defer data-domain="melix.github.io" src="https://analytics.champeau.me/js/script.js"></script>
   </head>
   <body>
     <div id="wrap">
