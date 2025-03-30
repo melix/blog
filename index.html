@@ -76,6 +76,200 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2025/03-30-partial-eclipse.html"><h1>Partial Eclipse of March 29, 2025</h1></a>
+  			<p>30 March 2025</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	
+		<a href="/blog/tags/solar.html">solar</a> 
+	
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<style>
+.videoWrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>
+<div class="paragraph">
+<p>In this blog post I&#8217;m describing what is probably a world premiere (let me know if not!): capturing a partial solar eclipse using a spectroheliograph and making an animation which covers the whole event.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preparations">Preparations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On March 29, 2025, we were lucky to get a partial solar eclipse visible in France, with a maximum of about 25%.
+I wanted to do what was a first for me, capturing the event, so I used a TS-Optics 80mm refractor with a 560mm focal length, equipped with an MLAstro SHG 700 spectroheliograph.
+The Astro Club Challandais was organizing a group observation this morning, but my initial decision was not to attend.
+Instead, I opted to limit the risks by performing this somewhat complex setup at home, in familiar territory. Unlike the SUNSCAN, using a spectroheliograph like the SHG 700 requires more equipment: a telescope, a mount (AZ-EQ6), and in my case, a mini PC for data acquisition (running Windows) along with a laptop for remote connection to the PC.</p>
+</div>
+<div class="paragraph">
+<p>I have conducted observations away from home before, but from experience, setting everything up—including WiFi, polar alignment, etc.—can be a bit too risky for an event like this.
+So, all week, I anxiously monitored the weather.
+Yesterday, the forecast looked grim, with thick clouds and rain.
+However, the gods of astronomy were merciful, blessing us with a beautiful day.
+The sky wasn’t entirely clear, but it was good enough for observations.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_some_more_context">Some more context</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, I had a specific observation protocol in mind.
+As you may know, a spectroheliograph doesn’t directly produce an image—it requires software to process video scans of the Sun.
+In the case of the Sunscan, the software is built into the device, but for a Sol’Ex-type setup, an independent software handles this task.
+You are probably familiar with INTI, but I have my own software: <a href="https://melix.github.io/astro4j/latest/en/jsolex.html">JSol’Ex</a>.</p>
+</div>
+<div class="paragraph">
+<p>The advantage of developing my own software is that I was able to anticipate potential issues.
+One major challenge with an eclipse is that the software must "recognize" the Sun&#8217;s outline, which won’t always be perfectly round—in fact, it could be quite elliptical.
+The software corrects the image by detecting the edges, but when the Moon moves in front, the sampling points become completely incorrect, sometimes detecting the lunar limb instead of the Sun’s!</p>
+</div>
+<div class="paragraph">
+<p>My strategy was to start early enough to adjust settings for minimal camera tilt and, more importantly, to ensure an X/Y ratio of 1.0.
+With these reference scans, I could then force all subsequent scans to use the same parameters.
+So, I began my first scans under a beautifully clear sky! After some adjustments, I was ready: a single scan, and we were good to go!</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/09_45_53_0000_09_45_53_autostretch_0_00.jpg" alt="09 45 53 0000 09 45 53 autostretch 0 00">
+</div>
+</div>
+<div class="paragraph">
+<p>At the same time, I activated JSol’Ex’s integrated web server and set up a tunnel so my friends could watch my observations live! I planned to perform a scan every two minutes using a Python script in SharpCap, automating the recording, scan start, stop, and rewind. JSol’Ex’s "continuous" mode processed scans in real time.
+Everything was going smoothly&#8230;&#8203; until panic struck—clouds!</p>
+</div>
+<div class="paragraph">
+<p>For the past three hours, the sky had been perfectly clear. Yet, just ten minutes before the eclipse began, clouds started rolling in.
+What bad luck! Fortunately, by spacing out the scans, I managed to capture many of them in cloud-free moments.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/clouds.jpg" alt="clouds">
+</div>
+</div>
+<div class="paragraph">
+<p>The eclipse began, and the first scans featuring the Moon appeared.
+It worked! Forcing the X/Y ratio was effective!</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/begin-eclipse.jpg" alt="begin eclipse">
+</div>
+</div>
+<div class="paragraph">
+<p>As the scans piled up, I encountered a new problem.
+While locking the X/Y ratio helped, the software still needed to calculate an ellipse to determine the Sun’s center for cropping.
+But things started going wrong—the software was miscalculating everything. I had anticipated this, and I already had a workaround in mind, but the necessary code wasn’t deployed on my mini PC.
+So, I didn&#8217;t worry too much and simply shared the raw images, which were perfectly round—because, as you recall, I had already adjusted my X/Y ratio to 1.0!</p>
+</div>
+<div class="paragraph">
+<p>I continued scanning, though my setup wasn&#8217;t perfectly precise.
+My polar alignment wasn’t flawless, and I had no millimeter-accurate return-to-start positioning.
+As a result, I had to manually realign between each scan.
+While this wasn’t a major issue, it did create some intriguing scans. For those familiar with Sol’Ex, seeing "gaps" in the spectrum due to the Moon’s presence was quite unusual, making centering more difficult.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/anim.gif" alt="anim">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_eclipse_reaches_maximum">The eclipse reaches maximum</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Time passed, scans continued, and finally, we reached the maximum eclipse phase!</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/max-mono.jpg" alt="max mono">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/max-mix.jpg" alt="max mix">
+</div>
+</div>
+<div class="paragraph">
+<p>At one point, I wondered whether we could see lunar relief in the images.
+However, given the jagged edges typical of SHG imaging, it was hard to say for sure, but, I think some of the details visible below are actual surface details.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/eclipse/crop.jpg" alt="crop">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_end_of_observation">End of observation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By the end of the eclipse, I had 80 SER files, taken between 9:37 AM and 1:43 PM, totaling nearly 175 GB of data!
+It was time to transfer everything to my desktop PC to create an animation.
+This also gave me a chance to test whether my earlier workarounds for ellipse detection would function as expected.
+I ran batch processing, and boom—within minutes, I had this animation:</p>
+</div>
+<div class="videoWrapper">
+<iframe src="https://www.youtube.com/embed/1C8CCPQnedM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+<div class="paragraph">
+<p>And here’s the continuum version which was weirdly compressed by Youtube:</p>
+</div>
+<div class="videoWrapper">
+<iframe src="https://www.youtube.com/embed/C_qJnSaSpaU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+<div class="paragraph">
+<p>This was just a first draft, using a beta version of my software.
+A few hours later I released a new version of the animation which is visible below:</p>
+</div>
+<div class="videoWrapper">
+<iframe src="https://www.youtube.com/embed/hAcHwbWDiW0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the end, the experiment was a success! I also took this opportunity to improve my software, which will benefit everyone. If you have eclipse scans, don’t discard them! Soon, you’ll be able to process them too.</p>
+</div>
+<div class="paragraph">
+<p>The big question now is: Could this be done during a total solar eclipse, such as next year&#8217;s in Spain?
+Well, I feel lucky that this one was only 25% partial.
+Managing ellipse detection and mount realignment between scans is already quite tricky.
+During a total eclipse, there wouldn’t even be a reference point!</p>
+</div>
+<div class="paragraph">
+<p>Unless one has flawless alignment, a mount capable of returning to position perfectly, and a steady scanning speed, this would be a real challenge.
+Honestly, it&#8217;s beyond my current expertise—it would require a lot more work.</p>
+</div>
+<div class="paragraph">
+<p>P.S: For french speaking readers in west of France (or simply if you are nearby at that date), we organize the <a href="https://astroclubchallanda.wixsite.com/website/rsv">Rencontres Solaires de Vendée</a> on June 7, where we can discuss this topic!</p>
+</div>
+</div>
+</div></p>
   			<a href="/blog/2025/03-11-jsolex-shg700.html"><h1>JSol&#8217;Ex errands: How it helped uncovering an inaccuracy of the SHG 700 specifications</h1></a>
   			<p>11 March 2025</p>
 			<p><em>Tags: </em>
@@ -861,276 +1055,6 @@ La bonne nouvelle, c&#8217;est que j&#8217;ai beaucoup d&#8217;autres idées en 
 </li>
 <li>
 <p><a href="http://www.astrosurf.com/solex/sol-ex-traitement.html">Sol&#8217;Ex</a> (site officiel Sol&#8217;Ex)</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div></p>
-  			<a href="/blog/2024/04-25-jsolex-contrast.html"><h1>JSol&#8217;Ex 2.2.0 et amélioration du contraste</h1></a>
-  			<p>25 April 2024</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/solex.html">solex</a> 
-	
-		<a href="/blog/tags/jsolex.html">jsolex</a> 
-	
-		<a href="/blog/tags/solaire.html">solaire</a> 
-	
-		<a href="/blog/tags/astronomie.html">astronomie</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="https://github.com/melix/astro4j/releases/tag/2.2.0">JSol&#8217;Ex 2.2.0</a> est tout juste sorti ! Dans cette version, j&#8217;ai particulièrement travaillé sur l&#8217;amélioration des contrastes. En effet, celles et ceux qui m&#8217;ont entendu parler de ce logiciel savent que je râle depuis longtemps sur mon algo d&#8217;amélioration de contraste. Dans JSol&#8217;Ex, il y a plusieurs algorithmes d&#8217;implémentés. Historiquement, le premier était une transformation sinus hyperbolique inverse, qui fonctionne relativement bien pour faire ressortir les zones plus sombres, mais éclaircit trop le reste. L&#8217;autre algorithme, utilisé aussi par <a href="http://valerie.desnoux.free.fr/inti/">INTI</a>, c&#8217;est la normalisation locale d&#8217;histogramme (CLAHE).</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_les_problèmes_avec_clahe">Les problèmes avec CLAHE</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>CLAHE est un algorithme qui améliore sensiblement le contraste. Cependant, je n&#8217;ai jamais été très content du résultat. Je ne sais pas comment Valérie Desnoux fait dans INTI, qui a l&#8217;air de s&#8217;en sortir mieux, mais dans JSol&#8217;Ex les résultats obtenus sont assez moyens.
-En particulier, je note plusieurs défauts :</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>la création d&#8217;artéfacts, liés au fait que cet algorithme travaille sur des "tuiles" d&#8217;une taille donnée. Plus la taille de la tuile est élevée, moins l&#8217;amélioration de contraste est aggressive, mais plus les artéfacts sont visibles</p>
-</li>
-<li>
-<p>sur l&#8217;image du soleil, les limbes sont toujours éclaircis, ce qui me mène au point suivant</p>
-</li>
-<li>
-<p>les images solaires paraissent plus "plates" : le relief, en particulier l&#8217;obscurcissement lié à la sphéricité du soleil, disparaît. C&#8217;est aussi un effet mécanique de l&#8217;algorithme lui-même : plus la taille des tuiles est faible, moins on peut utiliser de valeurs distinctes. Ainsi pour une taille de tuile à 16 pixels, on aura au maximum 256 valeurs possibles (pour une image 16 bits avec 65536 valeurs à l&#8217;origine). Or, les meilleurs résultats, sur Sol&#8217;Ex, sont obtenus avec une taille de tuile de 8 pixels, soit une réduction à 64 valeurs possibles maximum.</p>
-</li>
-<li>
-<p>il y a trop de paramètres possibles : la taille des tuiles, la dynamique et enfin le "facteur de coupe" pour l&#8217;égalisation. Sans entrer dans les détails, trouver une combinaison qui fonctionne bien indépendamment de la taille des images en entrée, de la dynamique de l&#8217;image et enfin du type d&#8217;image (H-alpha, calcium) est presque impossible.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Pour illustrer mon propos, voici par exemple un disque solaire (le fichier SER est <a href="http://www.astrosurf.com/solex/sol-ex-traitement.html">celui disponible sur le site de Christian Buil</a>) traité par JSol&#8217;Ex 2.1 (version précédente donc), avec les paramètres par défaut, une tuile de taille 16 pixels (à gauche) ou 64 pixels (à droite) :</p>
-</div>
-<div class="paragraph">
-<p>
-<div class="container-fluid">
-<div class="row">
-   <div class="col-md-6">
-      <img class="img-responsive pop" src="/blog/img/jsolex2_2/clahe_16_jsolex_2.1.jpg">
-   </div>
-   <div class="col-md-6">
-      <img class="img-responsive pop" src="/blog/img/jsolex2_2/clahe_64_jsolex_2.1.jpg">
-   </div>
-</div>
-</div>
-</p>
-</div>
-<div class="paragraph">
-<p>On note déja clairement éclaircissement des limbes, et des artéfacts "carrés" qui apparaissent dès que la taille des tuiles augmente.
-Trouver les bons paramètres qui conviennent à tous étant compliqué, JSol&#8217;Ex offrait déja la possibilité de changer ces paramètres (taille de tuile, intensité, &#8230;&#8203;) mais je pense que peu d&#8217;utilisateurs le faisaient.</p>
-</div>
-<div class="paragraph">
-<p>Aussi ais-je décidé d&#8217;ajouter un algorithme dans JSol&#8217;Ex 2.2 dédié aux images solaires.
-Pour vous donner un peu envie de lire la suite, voici ce qu&#8217;on peut obtenir avec JSol&#8217;Ex 2.2 sur la même image :</p>
-</div>
-<img src="/blog/img/jsolex2_2/christian-jsolex-2.2-decon.jpg" class="img-responsive center-block" width="50%">
-</div>
-</div>
-<div class="sect1">
-<h2 id="_nouvel_algorithme">Nouvel algorithme</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Le nouvel algorithme est disponible dans JSol&#8217;Ex 2.2 et est l&#8217;algorithme utilisé par défaut.
-Il combine plusieurs techniques, dont une correction du gamma avec masques, CLAHE et un stretching dynamique de l&#8217;image, pour produire une image plus digne de ce que Sol&#8217;Ex peut faire.
-Je ne prétends pas que cet algorithme est parfait, il a lui aussi des défauts, mais il semble être un bon compromis.</p>
-</div>
-<div class="paragraph">
-<p>Afin de vérifier mes assertions, j&#8217;ai procédé méthodiquement à une comparaison des images produites avec les paramètres par défaut de INTI, JSol&#8217;Ex 2.1 et JSol&#8217;Ex 2.2 (la seule modification est l&#8217;autocrop activé et un retournement vertical pour que les images soient orientées de la même façon).</p>
-</div>
-<div class="paragraph">
-<p>Commençons par la vidéo H-alpha de démonstration utilisée par Christian Buil sur son site.</p>
-</div>
-<div class="paragraph">
-<p><strong>Les images pouvant être difficiles à comparer en taille réduite, je vous invite à faire un clic doit et ouvrir l&#8217;image dans un nouvel onglet pour comparer.</strong></p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/comparaison-panel-1.jpg" alt="comparaison panel 1">
-</div>
-</div>
-<div class="paragraph">
-<p>On note clairement que sur JSol&#8217;Ex 2.1, il y avait certes une amélioration de contraste, mais elle se faisait au prix d&#8217;artéfacts et d&#8217;une perte de relief.
-En revanche, JSol&#8217;Ex 2.2 offre une image plus nette que celle d&#8217;INTI, sans avoir les défauts de CLAHE.</p>
-</div>
-<div class="paragraph">
-<p>Continuons avec une autre image solaire en H-alpha, avec plus de dynamique :</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/comparaison-panel-2.jpg" alt="comparaison panel 2">
-</div>
-</div>
-<div class="paragraph">
-<p>Là encore on remarque que JSol&#8217;Ex 2.1 produisait une image raisonnable mais assez saturée et surtout "plate".
-La version 2.2.0, quant à elle, offre une meilleure dynamique tout en préservant les détails et cette impression de profondeur.</p>
-</div>
-<div class="paragraph">
-<p>Nous pouvons aussi comparer les résultats sur une image obtenue avec une plus longue focale et un disque partiel :</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/comparaison-panel-3.jpg" alt="comparaison panel 3">
-</div>
-</div>
-<div class="paragraph">
-<p>Cette fois-ci on note que les 3 logiciels s&#8217;en tirent honorablement.
-Cependant, JSol&#8217;Ex 2.1.3 affiche une image moins contrastée que la v2.2.0, alors qu&#8217;INTI v6 affiche une image légèrement plus floue.</p>
-</div>
-<div class="paragraph">
-<p>Malheureusement suite à une fausse manipulation, j&#8217;ai perdu la plupart de mes fichiers SER en raie calcium. J&#8217;ai cependant pu faire des comparaisons, sur des fichiers loins d&#8217;être idéaux.
-Les résultats sont cependant intéressants :</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/comparaison-panel-4.jpg" alt="comparaison panel 4">
-</div>
-</div>
-<div class="paragraph">
-<p>Cette fois-ci, on constate que JSol&#8217;Ex 2.1 s&#8217;en sortait plutôt bien. INTI là encore fait un travail remarquable, mais JSol&#8217;Ex 2.2 sature trop l&#8217;image.
-C&#8217;est un défaut que j&#8217;espère arriver à corriger, qui est lié au fait que les images calcium on un histogramme avec une gaussienne à base très large.
-Il est néanmoins possible d&#8217;atténuer la saturation en choisissant un facteur de correction moins fort (par exemple 1.1 au lieu de la valeur par défaut 1.5), ce que je vous encourage à faire pour les images Calcium (conserver le 1.5 pour le h-alpha, baisser pour le calcium) :</p>
-</div>
-<img src="/blog/img/jsolex2_2/calcium-1-jsolex-2-2-facteur-1.1.jpg" class="img-responsive center-block" width="50%">
-<div class="paragraph">
-<p>Le résultat dépendra cependant beaucoup de l&#8217;exposition initiale de votre vidéo. Voici un autre exemple en raie calcium K:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/comparaison-panel-5.jpg" alt="comparaison panel 5">
-</div>
-</div>
-<div class="paragraph">
-<p>Il est utile de noter que si vous n&#8217;êtes pas satisfait du nouvel algorithme, il est tout à fait possible de repasser à CLAHE :</p>
-</div>
-<img src="/blog/img/jsolex2_2/config-params.jpg" class="img-responsive center-block" width="50%">
-<div class="paragraph">
-<p>Enfin, il vous est tout à fait possible d&#8217;être plus ou moins "aggressif" sur l&#8217;amélioration de constraste à effectuer.
-Ansi, dans les paramètres de traitement, vous pouvez changer le facteur <em>gamma</em> qui permet d&#8217;assombrir l&#8217;image.
-Pour l&#8217;exemple, si on pousse les curseurs un peu loin (par exemple à <em>4</em> dans l&#8217;image suivante), vous constaterez que l&#8217;image reste exploitable, et surtout que les défauts de CLAHE qui a tendance à aplatir les images est complètement disparu :</p>
-</div>
-<img src="/blog/img/jsolex2_2/gamma-4.jpg" class="img-responsive center-block" width="50%">
-</div>
-</div>
-<div class="sect1">
-<h2 id="_pour_aller_encore_plus_loin">Pour aller encore plus loin</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Tout d&#8217;abord, JSol&#8217;Ex offre un <a href="https://melix.github.io/astro4j/latest/fr/jsolex.html#imagemath">langage de script</a> qui permet d&#8217;aller bien plus loin dans les traitements, de générer automatiquement des animations, etc.
-Bien sûr, les améliorations de JSol&#8217;Ex 2.2 sont disponibles dans les scripts par l&#8217;intermédiaire de 2 nouvelles fonctions : <code>adjust_gamma</code> qui permet de réaliser une simple correction de gamma sur l&#8217;image, et <code>auto_constrast</code> qui correspond à la correction décrite dans ce billet de blog.</p>
-</div>
-<div class="paragraph">
-<p>Enfin, nous n&#8217;avons pas encore parlé des fonctionnalités désactivées par défaut, mais qui étaient déja disponibles dans JSol&#8217;Ex : la déconvolution et l&#8217;amélioration de la netteté.
-Ces deux options sont activables dans les paramètres de traitement :</p>
-</div>
-<img src="/blog/img/jsolex2_2/config-params-2.jpg" class="img-responsive center-block" width="50%">
-<div class="paragraph">
-<p>Je ne recommande pas nécessairement de cocher la case "aiguiser les détails" si vous avez des images trop bruitées.
-Cette dernière ligne compare donc la même image, traitée avec <a href="/blog/img/jsolex2_2/halpha-3-inti-6.png" target="_blank" rel="noopener">INTI v6</a>, JSol&#8217;Ex 2.2 (dernière version donc), mais <a href="/blog/img/jsolex2_2/halpha-3-jsolex-2.2.jpg" target="_blank" rel="noopener">sans déconvolution</a>, <a href="/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon.jpg" target="_blank" rel="noopener">avec déconvolution</a> et finalement <a href="/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon-sharpen.jpg" target="_blank" rel="noopener">avec déconvolution et amélioration des détails</a> :</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/comparaison-panel-6.jpg" alt="comparaison panel 6">
-</div>
-</div>
-<div class="paragraph">
-<p>En ce qui me concerne, je trouve la version déconvoluée particulièrement plaisante à l&#8217;oeil, et j&#8217;active donc systématiquement la déconvolution :</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex2_2/halpha-3-jsolex-2.2-decon.jpg" alt="halpha 3 jsolex 2.2 decon">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>En conclusion, dans ce billet je vous ai présenté le nouvel algorithme de correction de contraste, activé par défaut dans JSol&#8217;Ex 2.2.
-Je pense que les résultats sont assez probants, et que JSol&#8217;Ex n&#8217;a plus à rougir de INTI en ce qui concerne les images avec amélioration de contraste.
-Cependant, je rappelle encore une fois que le logiciel officiel <strong>est</strong> INTI, que c&#8217;est le seul validé avec le sérieux de Christian Buil et Valérie Desnoux.
-Si vous voulez déposer des images sur BASS2000, vous <strong>devez</strong> utiliser INTI.
-Par ailleurs, je vous conseille toujours de comparer les résultats, ne considérez pas que JSol&#8217;Ex fait un meilleur travail, c&#8217;est probablement faux.</p>
-</div>
-<div class="paragraph">
-<p>Par exemple, il reste des améliorations à faire sur les images calcium. Mais il est cependant tout à fait possible de modifier les paramètres par défaut, voire de changer d&#8217;algorithme.</p>
-</div>
-<div class="paragraph">
-<p>N&#8217;oubliez pas non plus que JSo&#8217;Ex offre d&#8217;autres fonctionnalités comme la colorisation automatique des images, le stacking, la création de mosaïques solaires ou encore un langage de script particulièrement puissant, qui vous permet par exemple de générer des animations automatiquement.
-Je vais donc conclure ce billet avec un exemple de script qui utilise cette nouvelle amélioration de contraste pour produire une animation qui nous fait plonger dans l&#8217;atmosphère solaire en jouant sur le décalage de pixels :</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="python"># Décalage de pixels qu'on applique, de -15 à +15, pas de 0.5
-images=range(-15,15,.5)
-# On calcule une image corrigée de ses transversalliums
-corrigee=fix_banding(images,32,40)
-# Déconvolution
-decon=rl_decon(corrigee)
-# On redimensionne
-redim=rescale_rel(autocrop2(decon,1.1),.5,.5)
-# On applique la correction de contraste décrite dans ce billet
-cst=auto_contrast(redim,1.5)
-
-[outputs]
-# Enfin on produit l'animation (75ms entre chaque frame)
-animation=anim(cst,75)</code></pre>
-</div>
-</div>
-<div class="text-center">
- <video width="640" height="640" controls>
-  <source src="https://melix.github.io/blog/img/jsolex2_2/animation.webm" type="video/webm">
-Your browser does not support the video tag.
-</video>
-</div>
-<div class="sect2">
-<h3 id="_bonus">Bonus</h3>
-<div class="paragraph">
-<p>J&#8217;en profite enfin pour partager deux vidéos, à destination des débutants sur Sol&#8217;Ex, que j&#8217;ai faites récemment :</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.youtube.com/watch?v=NsDgg4o2SDw">Trouver le soleil sans chercheur solaire</a></p>
-</li>
-<li>
-<p><a href="https://www.youtube.com/watch?v=8lWXcPG16I0">Régler exposition, gain et binning</a></p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_ressources">Ressources</h3>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://github.com/melix/astro4j">JSol&#8217;Ex</a> (téléchargement)</p>
-</li>
-<li>
-<p><a href="https://melix.github.io/astro4j/latest/fr/jsolex.html">JSol&#8217;Ex</a> (documentation)</p>
-</li>
-<li>
-<p><a href="http://valerie.desnoux.free.fr/inti/">INTI</a> (logiciel officiel)</p>
-</li>
-<li>
-<p><a href="http://www.astrosurf.com/solex/sol-ex-traitement.html">Sol&#8217;Ex</a> (site officiel Sol&#8217;Ex)</p>
-</li>
-<li>
-<p><a href="https://en.wikipedia.org/wiki/Adaptive_histogram_equalization">CLAHE</a> (algorithme)</p>
-</li>
-<li>
-<p><a href="https://en.wikipedia.org/wiki/Gamma_correction">Gamma correction</a> (algorithme)</p>
 </li>
 </ul>
 </div>
