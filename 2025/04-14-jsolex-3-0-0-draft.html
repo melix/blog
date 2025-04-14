@@ -210,10 +210,28 @@ These are completely removed in the image on the right, processed automatically 
 <h3 id="_physical_flat_correction">Physical flat correction</h3>
 <div class="paragraph">
 <p>Another common issue with SHGs is the presence of vignetting, visible on the poles of the solar disk.
-These defects are due to a combination of different factors, including the width of the slit, the focal length of the telescope, the reflection coefficient of the slit protection substrate at different wavelengths, etc.
-Usually, these defects are not visible on smaller slits, but they can become pronounced on longer slits (&gt; 7mm) or longer focal lengths (&gt; 500mm).
-To fix this, JSol&#8217;Ex had until now the option to use artificial flat correction: the idea was basicaly to model the illumination of the solar disk via a polynomial and to apply a correction to the image.
-This works relavitvely well, but it can sometimes introduce some noise, or even bias the reconstruction on low-contrast images.
+The vignetting issue stems from the following factors, in the order of their impact:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the physical size of the SHG’s optical components — including the lens diameter, grating size, and slit length</p>
+</li>
+<li>
+<p>the telescope’s focal ratio and focal length</p>
+</li>
+<li>
+<p>the telescope’s own intrinsic vignetting (though this is rarely a significant factor)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For prebuilt SHGs like the MLAstro SHG 700, the size of the lens and grating is typically constrained by the housing design and cost limitations.
+As a result, vignetting often becomes an issue when using longer focal length telescopes,—especially when paired with a longer slit.</p>
+</div>
+<div class="paragraph">
+<p>To fix this, JSol&#8217;Ex had until now the option to use artificial flat correction: the idea was basicaly to model the illumination of the solar disk via a polynomial and to apply a correction to the image.
+This works relatively well, but it can sometimes introduce some noise, or even bias the reconstruction on low-contrast images.
 On even longer slits, this artificial correction is not sufficient to remove the vignetting, so JSol&#8217;Ex 3 introduces the ability to use a <strong>physical flat correction</strong>.</p>
 </div>
 <div class="paragraph">
