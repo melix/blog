@@ -76,6 +76,433 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2025/04-14-jsolex-3-0-0.html"><h1>JSol&#8217;Ex 3.0.0 is out!</h1></a>
+  			<p>14 April 2025</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	
+		<a href="/blog/tags/solar.html">solar</a> 
+	
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>After dozens of hours of work, I&#8217;m happy to announce the release of JSol&#8217;Ex 3.0.0!
+This major release is a new milestone in the development of JSol&#8217;Ex, and it brings new features and improvements that I hope you will enjoy.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_bit_of_history">A bit of history</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Since its inception as an educational project for understanding how the Sol&#8217;Ex works, JSol&#8217;Ex has grown into a powerful tool for processing and analyzing images captured with the Sol&#8217;Ex.
+However, it became very popular over time and started to be used outside the sole Sol&#8217;Ex community.
+In particular, it is now a tool of choice for many spectroheliographs owners.</p>
+</div>
+<div class="paragraph">
+<p>I have always been keen on providing a user-friendly interface while keeping a good innovation pace.
+JSol&#8217;Ex was the first SHG software to offer:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>automatic colorization of images</p>
+</li>
+<li>
+<p>automatic detection of spectral lines</p>
+</li>
+<li>
+<p>Doppler eclipse image, inverted image and orientation grid</p>
+</li>
+<li>
+<p>automatic correction of the P angle</p>
+</li>
+<li>
+<p>single click processing of Helium line images</p>
+</li>
+<li>
+<p>embedded stacking</p>
+</li>
+<li>
+<p>automatic trimming and compression of SER files</p>
+</li>
+<li>
+<p>identifying what frame of a SER file matches a particular point of the solar disk</p>
+</li>
+<li>
+<p>an optimal exposure calculator</p>
+</li>
+<li>
+<p>automatic detection of redshifts</p>
+</li>
+<li>
+<p>automatic detection and annotation of sunspots</p>
+</li>
+<li>
+<p>automatic creation of animations of a single image taken at different wavelengths</p>
+</li>
+<li>
+<p>a full-fledged scripting engine which allows creation of custom images, animations, etc.</p>
+</li>
+<li>
+<p>support for home-made SHGs</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>and more!</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All integrated into a single, easy to use, cross-platform application: no need for Gimp, ImPPG or Autostakkert! (but you can use them if you want to!).</p>
+</div>
+<div class="paragraph">
+<p>For this new release, I wondered if I should <a href="https://github.com/melix/astro4j/issues/502">change the name</a> so that it better matches the new scope of the project, but eventually decided to keep it as it is, because it is already well known in the community and that changing it also implies significant amount of time spent on this that wouldn&#8217;t go into the new features.</p>
+</div>
+<div class="sect2">
+<h3 id="_here_comes_jsolex_3_0_0">Here comes JSol&#8217;Ex 3.0.0!</h3>
+<div class="paragraph">
+<p>In addition to performance improvements and bugfixes, this release deserves its major version number because of many significant improvements.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_improved_image_quality">Improved image quality</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_better_line_detection">Better line detection</h3>
+<div class="paragraph">
+<p>The first thing you may notice is the improved image quality.
+The algorithm to detect the spectral lines have been improved, which will result in a better polynomial detection and therefore a more accurate image reconstruction.
+This will be noticeable in images which have low signal, which is often the case in calcium.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_background_removal">Background removal</h3>
+<div class="paragraph">
+<p>Next, a new background removal algorithm has been added.
+It is fairly common to have either internal reflections or light leaks in the optical path of a spectroheliograph.
+This results in images which are hard to process or not usable at all.
+This version of JSol&#8217;Ex is capable of removing difficult gradients.
+To illustrate this, here&#8217;s an image that a user with a Sunscan sent me:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex3/sunscan_ca_bg.jpg" alt="sunscan ca bg">
+</div>
+</div>
+<div class="paragraph">
+<p>The image on the left is <em>unprocessed</em> and shows important internal reflections.
+These are completely removed in the image on the right, processed automatically with JSol&#8217;Ex.</p>
+</div>
+<div class="paragraph">
+<p>This background removal will only be applied to the "Autostretch" image, which is the default "enhanced" image that JSol&#8217;Ex is using, but it is also available as a standalone function in ImageMath scripts.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_physical_flat_correction">Physical flat correction</h3>
+<div class="paragraph">
+<p>Another common issue with SHGs is the presence of vignetting, visible on the poles of the solar disk.
+The vignetting issue stems from the following factors, in the order of their impact:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the physical size of the SHG’s optical components — including the lens diameter, grating size, and slit length</p>
+</li>
+<li>
+<p>the telescope’s focal ratio and focal length</p>
+</li>
+<li>
+<p>the telescope’s own intrinsic vignetting (though this is rarely a significant factor)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For prebuilt SHGs like the MLAstro SHG 700, the size of the lens and grating is typically constrained by the housing design and cost limitations.
+As a result, vignetting often becomes an issue when using longer focal length telescopes,—especially when paired with a longer slit.</p>
+</div>
+<div class="paragraph">
+<p>To fix this, JSol&#8217;Ex had until now the option to use artificial flat correction: the idea was basicaly to model the illumination of the solar disk via a polynomial and to apply a correction to the image.
+This works relatively well, but it can sometimes introduce some noise, or even bias the reconstruction on low-contrast images.
+On even longer slits, this artificial correction is not sufficient to remove the vignetting, so JSol&#8217;Ex 3 introduces the ability to use a <strong>physical flat correction</strong>.</p>
+</div>
+<div class="paragraph">
+<p>The idea with a physical flat correction is to take a series of 10 to 20 images of the sun, using a light diffuser device at the entrance of the telescope, such as tracing paper, in order to diffuse light.
+The flat should be captured with the same cropping window as the one used for the solar images, but exposure will be longer, and possibly higher gain as well.
+The result is a SER file that JSol&#8217;Ex can use to create a model of the illumination of the disk, which can be used to correct the images.</p>
+</div>
+<div class="paragraph">
+<p>As an illustration, here&#8217;s a series of 3 images of the Sun, taken with a prototype of a 10mm slit:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex3/flat_correction.jpg" alt="flat correction">
+</div>
+</div>
+<div class="paragraph">
+<p>The image on the left is done without any correction and shows very strong vignetting.
+The image in the middle is done with the artificial flat correction, improves the situation, but still shows some vignetting.
+The image on the right is done with the physical flat correction, which is much better and shows no vignetting at all.</p>
+</div>
+<div class="paragraph">
+<p>Flats can be reused between sessions, as long as you use the same cropping window and the same wavelength.</p>
+</div>
+<div class="paragraph">
+<p>The physical flat correction can also be used on images taken with a Sol&#8217;Ex, in particular for some wavelengths like H-beta which show stronger illumination of the middle of the solar disk.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Flat correction is not designed to fix transversalliums: it has to apply low pass filtering to the image to compute a good flat, which will remove the transverse lines.
+To correct transversalliums, use the banding correction parameters.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_new_stretching_options">New Stretching Options</h3>
+<div class="paragraph">
+<p>By default, JSol&#8217;Ex used to display images applying a linear stretch.
+Starting with this version, it is possible to select which stretching algorithm to use: linear, curve or no stretching at all.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex3/stretching.jpg" alt="stretching">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_distance_measurement_tool">Distance measurement tool</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This version introduces a new tool to measure distances!
+This feature was suggested by Minh Nguyen from <a href="https://mlastro.com/">MLAstro</a>, after seeing one of my images in Calcium H, which showed a very long filament:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex3/open-measure.jpg" alt="open measure">
+</div>
+</div>
+<div class="paragraph">
+<p>This tool lets you click on waypoints to follow a path and make measurements on the disk, in which case the distances take the curvature into account, or outside the disk, for example to measure the size of prominences, in which case the distances are linear.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex3/measurements.jpg" alt="measurements">
+</div>
+</div>
+<div class="paragraph">
+<p>The measured distances are always an approximation, because it&#8217;s basically impossible to know at what height a particular feature is located, but it gives a good rough estimate.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_new_scripting_features">New scripting features</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last but not least, this version significantly improves the scripting engine, aka ImageMath.
+While this feature is for more advanced users, it is an extremely powerful tool which lets you generate custom images, automatically stack images, create animations, etc.</p>
+</div>
+<div class="paragraph">
+<p>In this version, the scripting engine has been rewritten to make it more enjoyable to use.
+It adds:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the ability to write expressions on several lines</p>
+</li>
+<li>
+<p>the possibility to use named parameters</p>
+</li>
+<li>
+<p>the ability to define your own functions</p>
+</li>
+<li>
+<p>call an external web service to generate script snippets</p>
+</li>
+<li>
+<p>the ability to import scripts into other scripts</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As well as new functions.
+Let&#8217;s take a deeper look.</p>
+</div>
+<div class="sect2">
+<h3 id="_declaring_your_own_functions">Declaring your own functions</h3>
+<div class="paragraph">
+<p>You may have faced the situation where you wanted to apply the same operation to several images.
+For example, let&#8217;s imagine that you want to decorate an image with the observation details and the solar parameters.</p>
+</div>
+<div class="paragraph">
+<p>Before, you would write something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>image1=draw_solar_params(draw_obs_details(some_image)
+image2=draw_solar_params(draw_obs_details(some_other_image)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, you can define a function, let&#8217;s call it <code>decorate</code>, which will take an image and return the decorated image:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>[fun:decorate img]
+    result = draw_solar_params(draw_obs_details(img))
+
+[outputs]
+image1=decorate(some_image)
+image2=decorate(some_other_image)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can take a look at the <a href="https://melix.github.io/astro4j/3.0.0/en/jsolex.html#custom-functions">documentation</a> for more details.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_importing_scripts">Importing scripts</h3>
+<div class="paragraph">
+<p>In the previous section we have seen how to define functions.
+It can be useful to externalize these functions in a separate file, so that they can be reused in other scripts.
+This is now possible with the <code>import</code> statement.</p>
+</div>
+<div class="paragraph">
+<p>For example, let&#8217;s say you have a file called <code>utils.math</code> which contains the <code>decorate</code> function.</p>
+</div>
+<div class="paragraph">
+<p>We can now import this file in our script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>[include "utils"]
+
+[outputs]
+image1=decorate(some_image)
+image2=decorate(some_other_image)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will import the <code>utils.math</code> file and make the <code>decorate</code> function available in the current script.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_named_parameters">Named parameters</h3>
+<div class="paragraph">
+<p>Named parameters are a new feature that allows you to pass parameters to functions by name, instead of by position.
+This is particularly useful for functions that take a lot of parameters, or when you want to make your code more readable.</p>
+</div>
+<div class="paragraph">
+<p>For example, in the example above, we could have written:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>[include "utils"]
+
+[outputs]
+image1=decorate(img: some_image)
+image2=decorate(img: some_other_image)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The names of the parameters are <a href="https://melix.github.io/astro4j/3.0.0/en/jsolex.html#_functions_available_in_imagemath">documented here</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_new_functions">New functions</h3>
+<div class="paragraph">
+<p>This version introduces a few new functions, which are available in the scripting engine:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>bg_model</code>: background sky modeling</p>
+</li>
+<li>
+<p><code>a2px</code> and <code>px2a</code>: conversion between pixels and Angstroms</p>
+</li>
+<li>
+<p><code>wavelen</code>: returns the wavelength of an image, based on its pixel shift, dispersion, and reference wavelength</p>
+</li>
+<li>
+<p><code>remote_scriptgen</code>: allows calling an external web service to generate a script or images</p>
+</li>
+<li>
+<p><code>transition</code>: creates a transition between two or more images</p>
+</li>
+<li>
+<p><code>curve_transform</code>: applies a transformation to the image based on a curve</p>
+</li>
+<li>
+<p><code>equalize</code>: equalizes the histograms of a series of images so that they look similar in brightness and contrast</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And others have been improved:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>find_shift</code>: added an optional parameter for the reference wavelength</p>
+</li>
+<li>
+<p><code>continuum</code>: improved function reliability, enhancing Helium line extraction</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>transition</code> function, for example, is capable of generating intermediate frames in an animation, based on the actual difference of time between two images, offering the ability to have smooth, uniform transitions between images.</p>
+</div>
+<div class="paragraph">
+<p>This is how my <a href="https://melix.github.io/blog/2025/03-30-partial-eclipse.html">partial solar eclipse</a> animation was created!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_acknowledgements">Acknowledgements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I would like to thank all the users who have contributed to this release by reporting bugs, suggesting features, and testing the software.
+In particular, I would like to recognize the following people:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Minh Nguyen, <a href="https://mlastro.com/">MLAstro&#8217;s founder</a> for his help with the background removal and flat correction algorithms, as well as the new distance measurement tool and review of this blog post</p>
+</li>
+<li>
+<p>Yves Robin for his testing and improvement ideas</p>
+</li>
+<li>
+<p>my wife for her patience, while I was going to bed late every night to work on this release</p>
+</li>
+</ul>
+</div>
+</div>
+</div></p>
   			<a href="/blog/2025/03-30-partial-eclipse.html"><h1>Partial Eclipse of March 29, 2025</h1></a>
   			<p>30 March 2025</p>
 			<p><em>Tags: </em>
