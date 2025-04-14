@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 14 Apr 2025 22:11:40 +0200</pubDate>
-    <lastBuildDate>Mon, 14 Apr 2025 22:11:40 +0200</lastBuildDate>
+    <pubDate>Mon, 14 Apr 2025 22:15:44 +0200</pubDate>
+    <lastBuildDate>Mon, 14 Apr 2025 22:15:44 +0200</lastBuildDate>
 
     <item>
       <title>JSol&amp;#8217;Ex 3.0.0 is out!</title>
@@ -17,6 +17,23 @@
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
+&lt;style&gt;
+.videoWrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+&lt;/style&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;After dozens of hours of work, I&amp;#8217;m happy to announce the release of JSol&amp;#8217;Ex 3.0.0!
 This major release is a new milestone in the development of JSol&amp;#8217;Ex, and it brings new features and improvements that I hope you will enjoy.&lt;/p&gt;
@@ -98,6 +115,9 @@ JSol&amp;#8217;Ex was the first SHG software to offer:&lt;/p&gt;
 &lt;h3 id=&quot;_here_comes_jsolex_3_0_0&quot;&gt;Here comes JSol&amp;#8217;Ex 3.0.0!&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;In addition to performance improvements and bugfixes, this release deserves its major version number because of many significant improvements.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;videoWrapper&quot;&gt;
+&lt;iframe src=&quot;https://www.youtube.com/embed/9mU_8j3lNcg&quot; title=&quot;YouTube video player&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&quot; referrerpolicy=&quot;strict-origin-when-cross-origin&quot; allowfullscreen&gt;&lt;/iframe&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
