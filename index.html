@@ -76,6 +76,165 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2025/05-02-jsolex-3-1-0.html"><h1>Jagged Edges Correction with JSol&#8217;Ex 3.1</h1></a>
+  			<p>02 May 2025</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	
+		<a href="/blog/tags/solar.html">solar</a> 
+	
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<style>
+.videoWrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>
+<div class="paragraph">
+<p>I&#8217;m happy to announce the release of JSol&#8217;Ex 3.1, which ships with a long awaited feature: jagged edges correction! Let&#8217;s explore in this article what this is about.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_dreaded_jagged_edges">The dreaded jagged edges</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spectroheliographs like the Sol&#8217;Ex or the Sunscan are not using a traditional imaging system like, for example, in planetary imaging, where you can capture dozens to hundreds of frames per second and do the so called "lucky imaging" to get the best frames and stack them together to get a high resolution image.</p>
+</div>
+<div class="paragraph">
+<p>In the case of a spectroheliograph, the image is built by scanning the solar disk in a series of "slices" of the sun: it takes several seconds and sometimes minutes (~3 minutes when you let the sun pass "naturally" through the slit) to get a full image of the sun.</p>
+</div>
+<div class="paragraph">
+<p>In practice, this means that between each frame, each "slice" of the sun, the atmosphere will have slightly moved, causing some misalignment between the frames.
+This is also particularly visible when there is some wind, which can cause the telescope to shake a bit, and the image to be misaligned.
+Lastly, you may even have a mount which is not perfectly balanced, or which has some resonance at certain scan speeds.</p>
+</div>
+<div class="paragraph">
+<p>As an illustration, let&#8217;s take this image captured using a Sunscan (courtesy of Oscar Canales):</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/jsolex_3_1/original.jpg" alt="original">
+</div>
+</div>
+<div class="paragraph">
+<p>This image shows 3 problems:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>the jagged edges, which cause some unpleasant "spikes" on the edges of the sun</p>
+</li>
+<li>
+<p>misalignment of features of the sun, particularly visible on filaments</p>
+</li>
+<li>
+<p>a disk which isn&#8217;t perfectly round</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>These issues are typical of spectroheliographs, and are the main limiting factor when it comes to achieving high resolution images.
+Therefore, excellent seeing conditions are a must to get high quality images.
+Even if you do stacking, the fact that the reference image will show spikes is often a problem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_correcting_jagged_edges">Correcting jagged edges</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Starting with release 3.1.0, JSol&#8217;Ex ships with an <strong>experimental</strong> feature to correct jagged edges.
+It is not perfect yet, but good enough for you to provide feedback and even improve the quality of your images.</p>
+</div>
+<div class="paragraph">
+<p>For example, here&#8217;s the same image, but with jagged edges correction applied:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/jsolex_3_1/corrected.jpg" alt="corrected">
+</div>
+</div>
+<div class="paragraph">
+<p>And so that it&#8217;s even easier to see the difference, here&#8217;s a blinking animation of the two images:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/jsolex_3_1/blink.gif" alt="blink">
+</div>
+</div>
+<div class="paragraph">
+<p>The jagged edges are now mostly gone, the features in the sun are better aligned, and the image is much more pleasant to look at.
+There is still some jagging visible, the correction will never be perfect, but it is a good start.</p>
+</div>
+<div class="paragraph">
+<p>In particular, you should be careful when applying the correction, because it could cause some artifacts in the image, in particular on prominences.
+As usual, with great powers comes great responsibilities!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_does_it_work">How does it work?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To illustrate how the correction works, let&#8217;s imagine a perfect scan: a scan speed giving us a perfectly circular disk, no turbulence, no wind, etc.</p>
+</div>
+<div class="paragraph">
+<p>In this case, what we would see during the scan is a spectrum which width slowly increases, reaches a maximum, and then decreases.
+The pace at which the width increases and decreases is determined by the scan speed and is predictable.
+In particular, the left and right borders of the spectrum will follow a circular curve.</p>
+</div>
+<div class="paragraph">
+<p>Now, let&#8217;s get back to a "real world" scan.
+In that case, the left and right edges will slightly deviate from the circular curve.
+They will also follow the path of an ellipse: in fact, this ellipse is already required in order to perform geometric correction.</p>
+</div>
+<div class="paragraph">
+<p>The idea is therefore quite simple in theory: we need to detect the left and right edges of the spectrum, then compare them to the ideal ellipse that we have computed.
+Pixels which deviate from this curve give us an information about the jagged edges.
+We can then compute a distortion map, which will be used to correct the image.</p>
+</div>
+<div class="paragraph">
+<p>In practice, we also need to apply some filtering of samples: in practice, while the detection of edges is robust enough to provide us with a good geometric correction, it is not perfect.
+It can also be skewed by the presence of proms for example.
+Therefore, we are performing a sigma clipping on the detected edges, in order to remove outliers, that is to say pixels which deviate too much from the average deviation.</p>
+</div>
+<div class="paragraph">
+<p>This is also why the correction will not work properly if the image is not focused correctly: you would combine two problems in one, and the correction would not be able to detect the edges properly.</p>
+</div>
+<div class="paragraph">
+<p>In addition, in the image above you can see that the bottom most prominence is slightly distorted, which is caused by the fact that it&#8217;s far away from the 2 points which were used to compute the distortion.
+It may be possible to reduce such artifacts by using a smaller sigma factor (at the risk of undercorrecting edges).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this blog post, I have described the new jagged edges correction feature in JSol&#8217;Ex 3.1.
+This solves one of the most common issues users are having with spectroheliographs, and I hope it will help you get better images.
+However, as usual, it&#8217;s a work in progress, so do not hesitate to provide feedback!</p>
+</div>
+</div>
+</div></p>
   			<a href="/blog/2025/04-14-jsolex-3-0-0.html"><h1>JSol&#8217;Ex 3.0.0 is out!</h1></a>
   			<p>14 April 2025</p>
 			<p><em>Tags: </em>
@@ -924,270 +1083,6 @@ However, it produces stunning images, sometimes rivalizing these produced with a
 After investigation, it turned out we had highlighted a difference in the specifications, a lens had been changed from 75mm to 72mm by the supplier, without letting MLAstro know.
 That&#8217;s a pity, but, in the end, the problem is very easy to fix in JSol&#8217;Ex.
 Be sure to upgrade to JSol&#8217;Ex 2.11.2 which includes <a href="https://github.com/melix/astro4j/pull/525">a fix to update the focal length</a>.</p>
-</div>
-</div>
-</div></p>
-  			<a href="/blog/2025/02-01-jsolex-actve-areas.html"><h1>Automatic active region detection with JSol&#8217;Ex 2.9</h1></a>
-  			<p>01 February 2025</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/solex.html">solex</a> 
-	
-		<a href="/blog/tags/jsolex.html">jsolex</a> 
-	
-		<a href="/blog/tags/solar.html">solar</a> 
-	
-		<a href="/blog/tags/astronomy.html">astronomy</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p>The latest release of JSol&#8217;Ex as of writing this blog post, JSol&#8217;Ex 2.9, ships with a new ability: automatically detecting <a href="https://en.wikipedia.org/wiki/Active_region">active regions</a>.
-In this blog post, I will explain the principles and the algorithm I used, but also show its limits.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_about_active_regions">About active regions</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>First of all, a bit of vocabulary.
-An active region is a region of the Sun atmosphere where special activity occurs, such as flares or coronal mass ejections.
-They don&#8217;t have to be associated with sunspots, but in general, they are.
-In JSol&#8217;Ex, we&#8217;re essentially detecting sunspots, and the terminology "active regions" essentially comes from the fact that we can use the <a href="https://www.swpc.noaa.gov/" class="bare">https://www.swpc.noaa.gov/</a>NOAA database] to label these active regions.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_spectroheliographs">Spectroheliographs</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>An instrument like <a href="http://www.astrosurf.com/solex/">Christian Buil&#8217;s Sol&#8217;Ex</a>, called a spectroheliograph (or SHG in short) doesn&#8217;t offer any kind of "live view" like typical solar instruments like Coronado or Lunt instruments.
-Instead, what we get is a video file, where each frames consists of a "slice" of the sun, observed as a portion of the light spectrum:</p>
-</div>
-<video controls autoplay height="80">
-    <source src="/blog/video/anim-spectrum.webm"
-            type="video/webm">
-</video>
-<div class="paragraph">
-<p>The video above is an excerpt from a so-called "scan": the principle is to have a slice of the sun passing through a slit, and a grating is used to spread the light into a spectrum.
-Here, we are observing a curved dark line, which is the H-alpha line, and the "wobbling" we see around that line is an illustration of the <a href="https://en.wikipedia.org/wiki/Doppler_effect">Doppler effect</a>.
-The idea of software like <a href="http://valerie.desnoux.free.fr/inti/">Valérie Desnoux&#8217;s INTI</a> and <a href="https://melix.github.io/astro4j/2.9.0/en/jsolex.html">JSol&#8217;Ex</a> is to extract pixels from the studied line (here H-alpha) in order to reconstruct an image of the sun.</p>
-</div>
-<div class="paragraph">
-<p>However, as you can see in that animation, there&#8217;s a lot more information available in each frame.
-While we are mostly interested in the central line (here H-alpha), it&#8217;s also interesting to look "above" or "below" the line, which is often referred to "pixel shifting", in which case we&#8217;re not studying H-alpha, but a different wavelength: that&#8217;s one of the strenghts of Sol&#8217;Ex, which makes it possible to do "science" at home!</p>
-</div>
-<div class="paragraph">
-<p>In particular, this video shows a couple interesting features:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>sometimes, you see some vertical dark lines appearing: these are features of the solar atmosphere. The darker lines which spread around multiple columns are these we are mostly interested in for this blog post: they correspond to sunspots!</p>
-</li>
-<li>
-<p>near the end of the video, on the right, you will see a white flash apparearing inside of of these regions: it&#8217;s a solar flare!</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>This video is actually an excerpt from one of the many captures I&#8217;ve done with Sol&#8217;Ex, and I captured it during an eruption, on May 5th, 2024.
-What you are seeing here is the <a href="https://www.earth.com/news/sunspot-region-ar3664-blasted-earth-mars-may-2024-still-very-active/">massive AR3664 region</a> which was suject to multiple X-flares and resulted in beautiful auroras on Earth!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_automatic_active_region_detection">Automatic active region detection</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>I&#8217;ve always considered that it would be a cool feature to be able to detect these lines automatically in JSol&#8217;Ex, and provide an overlay of the detected sunspots.
-Here we go, it is finally implemented in JSol&#8217;Ex 2.9.0!
-If you select the "full processing mode" or that you check the "active regions" checkbox in a custom process, then JSol&#8217;Ex will automatically create an image of the sun with the detected active regions as an overlay:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex-ar/ar-labels.jpg" alt="ar labels">
-</div>
-</div>
-<div class="paragraph">
-<p>Unfortunately that day I didn&#8217;t capture a full disk, but you can see that JSol&#8217;Ex annotated the disk with the detected active regions, but it also added the labels for these regions automatically.</p>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s take another example with an image captured in Calcium K on January 17, 2025:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex-ar/detection-calcium.jpg" alt="detection calcium">
-</div>
-</div>
-<div class="paragraph">
-<p>You will notice 2 different colors for labels:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>blue labels are the ones detected by JSol&#8217;Ex</p>
-</li>
-<li>
-<p>red labels are the ones coming from the NOAA database, which were not detected</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Sometimes, you will see like in the image above regions which are not detected, and others which are detected but not in the NOAA database.
-The reason why not all of them are detected is that I had to choose "reasonable" detection thresholds, which work for most use cases.
-I plan to improve the algorithm over time to make it more robust, based on your feedback.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_how_does_it_work">How does it work?</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The algorithm is based on a simple analysis of each frame.
-If you open your SER file in JSol&#8217;Ex video analyzer, you will see something similar to this:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex-ar/detection-debugger.jpg" alt="detection debugger">
-</div>
-</div>
-<div class="paragraph">
-<p>On the top, you see the original frame, with the curved H-alpha line.
-On the bottom, you see the corrected frame, where the H-alpha line is straightened, and the active regions are highlighted in purple.</p>
-</div>
-<div class="paragraph">
-<p>The algorithm is based on the following steps:</p>
-</div>
-<div class="paragraph">
-<p>For each frame:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Detect the borders of the sun</p>
-</li>
-<li>
-<p>For each column, compute the average intensity of the column, as well as its standard deviation</p>
-</li>
-<li>
-<p>Compute a 3rd order polynomial fit of the average intensity and standard deviation</p>
-</li>
-<li>
-<p>now, for each column, we compare its average intensity and standard deviation to the polynomial fits: if both of them are below a particular threshold, we consider that we have detected a candidate</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>The reason to only keep candidates which have both average intensity and standard deviation below a threshold is because:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>sunspots characterize by a clear vertical line, which means that the standard deviation is low (most pixels have a similar value on the column)</p>
-</li>
-<li>
-<p>sunspots are darker than the surrounding, which means that the average intensity is lower</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>At the moment, I&#8217;m using the following thresholds (note that they may change in future releases, as I improve the accuracy):</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>average intensity threshold: 0.95 times the predicted value</p>
-</li>
-<li>
-<p>standard deviation threshold: 0.85 times the predicted value</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Once we have the results for all frames, we aggregate active regions by collecting adjacent candidates.</p>
-</div>
-<div class="paragraph">
-<p>Finally, we filter out regions which are too small, then perform clustering of regions which are close to each other.</p>
-</div>
-<div class="paragraph">
-<p>The whole algorithm <a href="https://github.com/melix/astro4j/blob/dbb2418318f4cb143726791830a32da00a35ae6f/jsolex-core/src/main/java/me/champeau/a4j/jsolex/processing/sun/detection/PhenomenaDetector.java#L40">can be found here</a> (note that it also includes redshift detection, which was discussed in a different blog post).</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_limitations">Limitations</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This algorithm proves to work relatively well in many different wavelengths (H-alpha, calcium, magnesium &#8230;&#8203;).
-However, there are sometimes false positives.
-This is for example the case when I&#8217;m scanning in H-beta, due to the long focal length of my telescope and astigmatism, and the fact that H-beta provides a lot of details.</p>
-</div>
-<div class="paragraph">
-<p>In this case, the algorithm detects areas which are actually just noise:</p>
-</div>
-<div class="paragraph">
-<p>Note that these are close to the north and south poles.
-I have also noticed that the algorithm tends to detect noise as active regions when we&#8217;re close to the limb, which is also why I&#8217;m currently filtering these out.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/jsolex-ar/active_regions_noise.jpg" alt="active regions noise">
-</div>
-</div>
-<div class="paragraph">
-<p>At this stage, I have chosen not to make the detection thresholds configurable, because I consider these internal implementation details, which may change in the future, and that I don&#8217;t want to expose to the user.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_annotation_of_active_regions">Annotation of active regions</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once piece of work that we didn&#8217;t explain yet is how JSol&#8217;Ex puts labels around active regions.
-For this, we are using the <a href="https://www.swpc.noaa.gov/products/solar-region-summary">NOAA Solar Region Summary</a> database.</p>
-</div>
-<div class="paragraph">
-<p>This provides us, at a particular date, the list of active regions with their positions on the solar disk.
-JSol&#8217;Ex will compare these with the detected regions, and put the labels in different colors based on whether they were detected or not.</p>
-</div>
-<div class="paragraph">
-<p>However, the position of active regions will only be correct if:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>you have properly oriented your image (north at the top, east on the left): to help you with this, use the "GONG" tab on the right of the interface to download a reference image and compare with yours</p>
-</li>
-<li>
-<p>you are using an equatorial mount. If you are not, then make sure to check the new "alt-az" mode and enter your GPS coordinates in the settings, so that JSol&#8217;Ex can compute the parallactic angle of the sun at the moment of the observation and automatically correct the orientation of the image.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>The data from NOAA is cached in your local filesystem, so that we don&#8217;t have to download it every time you open a video file.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_frequently_asked_questions">Frequently Asked Questions</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Despite only having released this a day ago, I already have received the same question multiple times: can JSol&#8217;Ex be used to annotate an <em>existing</em> image of the sun, that is to say, take a JPG or PNG image and annotate it?</p>
-</div>
-<div class="paragraph">
-<p>If you have read carefully this blog post and that I explained things correctly, you will have understood that the answer is no: because my algorithm is based on the analysis of each frame, there&#8217;s no such information available in a single image.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>I hope you will enjoy this new feature in JSol&#8217;Ex 2.9.0.
-This blog post is a tentative explanation of the algorithm, and I will be happy to answer any questions you may have about it.
-As always, feel free to contribute, JSol&#8217;Ex is open source!</p>
 </div>
 </div>
 </div></p>
