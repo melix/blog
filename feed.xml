@@ -6,9 +6,385 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Fri, 2 May 2025 17:58:02 +0200</pubDate>
-    <lastBuildDate>Fri, 2 May 2025 17:58:02 +0200</lastBuildDate>
+    <pubDate>Mon, 19 May 2025 20:11:55 +0200</pubDate>
+    <lastBuildDate>Mon, 19 May 2025 20:11:55 +0200</lastBuildDate>
 
+    <item>
+      <title>Ellerman Bombs Detection with JSol&amp;#8217;Ex 3.2</title>
+      <link>https://melix.github.io/blog//2025/05-19-jsolex-3-2-0.html</link>
+      <pubDate>Sat, 17 May 2025 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2025/05-19-jsolex-3-2-0.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;style&gt;
+.videoWrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+&lt;/style&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_about_ellerman_bombs&quot;&gt;About Ellerman Bombs&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ellerman bombs were first described by Ferdinand Ellerman back in 1917.
+Ellerman&amp;#8217;s article was named -Solar Hydrogen &quot;Bombs&quot;- and it&amp;#8217;s only later that these were commonly referred to as &quot;Ellerman bombs&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I came upon this term while reading &lt;a href=&quot;http://www.astrosurf.com/rondi/obs/shg/Bombes_ellerman.htm&quot;&gt;an article from Sylvain or André Rondi&lt;/a&gt; quite early in my solar imaging journey, and I was since then obsessed by these phenomena.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ellerman Bombs are small, transient, and explosive events that occur in the solar atmosphere, particularly in the vicinity of sunspots.
+These are very short lived compared to other solar features: from several dozens of seconds to a few minutes.
+The most common explanation is magnetic reconnection, which occurs when two magnetic regions opposite polarity come into contact and reconnect, releasing energy in the form of heat and light.
+This is for example described in &lt;a href=&quot;https://dx.doi.org/10.1051/0004-6361/201321632&quot;&gt;this article from González, Danilovic and Kneer&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Amateur observations of Ellerman bombs are quite rare, but Rondi described such observations using a spectroheliograph back in 2005.
+They are rare because they are mostly invisible where the amateur observations are made (the center of the H-alpha line), and are too small to notice.
+However, these are visible in the wings of the H-alpha line: this is where a spectroheliograph comes in handy, since the cropping window that is used to capture an image contains more than just the H-alpha line.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I had a &lt;a href=&quot;https://github.com/melix/astro4j/issues/382&quot;&gt;long standing issue&lt;/a&gt; to do something about it in JSol&amp;#8217;Ex, and I finally got around to it: all it took was getting some test data to entertain the ideas.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_observation_of_an_ellerman_bomb&quot;&gt;Observation of an Ellerman Bomb&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I am doing many observations of the sun: I started in 2023 with a Sol&amp;#8217;Ex, then I recently got an SHG 700, so I have accumulated quite a bit of data, which is completed by scans which are shared with me by other users of JSol&amp;#8217;Ex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I have been looking for Ellerman bombs in my data, but I never found any yet.
+This changed a couple weeks ago: I was doing some routine work on JSol&amp;#8217;Ex and using a capture I had done in April, 29, 2025 at 08:32 UTC, when I noticed, by accident, a bright spot in the continuum image:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/continuum.jpg&quot; alt=&quot;continuum&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It may not be obvious at first, which is precisely why these are hard to spot, so here&amp;#8217;s a hint:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/zoom_continuum.png&quot; alt=&quot;zoom continuum&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex offers the ability to easily generate animations of the data captured at different wavelengths, so I generated a quick animation, which shows the same image at ±2.5Å from the center of the H-alpha line:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/anim_ellerman.gif&quot; alt=&quot;anim ellerman&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can see the typical behavior of an Ellerman bomb: it is bright in the wings of the H-alpha line,  but it vanishes when we are at the center of the line.
+The fine spectral dispersion of the spectroheliograph makes it possible to highlight this phenomenon very precisely.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The corresponding frame of the SER file shows the aspect of the Ellerman bomb in the spectrum:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/ellerman-spectrum.png&quot; alt=&quot;ellerman spectrum&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The shape that you can see is often referred to as the &quot;moustache&quot;.
+At this stage I was pretty sure I had observed my first Ellerman bomb, and that I could implement an algorithm to detect it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_jsolex_3_2_auto_detection&quot;&gt;JSol&amp;#8217;Ex 3.2 auto-detection&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex 3.2 ships with a new feature to automatically detect Ellerman bombs in the data.
+Currently, it is limited to H-alpha, but it should be possible to detect these in CaII as well.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The algorithm I implemented uses statistical analysis of the spectrum to match the characteristics of the &quot;moustache&quot; shape, in particular:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a maximum of intensity around 1Å from the center of the line&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a distance which spreads up to 5Å from the center of the line&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a brightening which is only visible in the wings of the line&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex will generate, for each detection, an image showing the location of the detected bombs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/ellerman-location.jpg&quot; alt=&quot;ellerman location&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And for each bomb, it will create an image which shows the region of the spectrum which is used to detect the bomb.
+This is for example what is automatically generated for the bomb described above:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/spectrum-detection.jpg&quot; alt=&quot;spectrum detection&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_algorithm_details&quot;&gt;Algorithm details&lt;/h3&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+This is a description of the algorithm that I implemented in an &lt;em&gt;adhoc&lt;/em&gt; fashion: I&amp;#8217;m not a mathematician nor a scientist: I&amp;#8217;m an engineer and the algorithm above was implemented using my &quot;intuition&quot; of what I thought would work. It is likely to change as new versions are released.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The algorithm is based on the following steps:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;for each frame in the SER file, identify the &quot;borders&quot; of the sun&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;perform a Gaussian blur on the spectrum to reduce noise&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;within the borders, compute, for each column, the average intensity of the spectrum for the center of the line and the wings separately. The center of the line is defined as the range [-0.35Å, 0.35Å] and the wings as the range [-5Å, -0.35Å[ ∪ ]0.35Å, 5Å]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;compute the maximum intensity of the wings, starting from the center of the line, and going outwards until we reach the maximum intensity (local extremum)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;compute the average of each column average intensity for the wings (the &quot;global average&quot;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With Ellerman bomb scoring parameters defined below, the algorithm proceeds per column:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;For each column index &lt;code&gt;x&lt;/code&gt; in the spectrum image:&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Build a neighborhood of up to 16 columns around &lt;code&gt;x&lt;/code&gt;:
+&lt;code&gt;Nₓ = { x + k  |  k ∈ ℤ,  |k| ≤ 8 }&lt;/code&gt;, clamped to the image boundaries.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Compute the overall mean column intensity
+&lt;code&gt;Ī_global = (1 / N_total) ∑_{j=1..N_total} Ī(j)&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Exclude any columns in &lt;code&gt;Nₓ&lt;/code&gt; whose average intensity falls below 90 % of &lt;code&gt;Ī_global&lt;/code&gt;, since very dark columns (usually sunspots) would pull down our estimate of the local wing background and hide true brightening events. Call the remaining set &lt;code&gt;Mₓ&lt;/code&gt; and let &lt;code&gt;m = |Mₓ|&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If &lt;code&gt;m &amp;lt; 1&lt;/code&gt;, there aren’t enough valid neighbors to form a reliable background—skip column &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;On the Gaussian-smoothed data, measure three key values at column &lt;code&gt;x&lt;/code&gt;:&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;c₀ ≔ I_center(x)&lt;/code&gt;, the mean intensity in the core region of the spectral line.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;c_w ≔ I_wing(x)&lt;/code&gt;, the average intensity across the two wing windows at ±1 Å.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;c_max ≔ max_{p ∈ wing-pixels nearest ±1 Å} I(p, x)&lt;/code&gt;, the single highest wing intensity near the expected shift.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Compute the local wing background
+&lt;code&gt;r₀ = (1 / (m−1)) ∑_{j ∈ Mₓ, j≠x} I_wing(j)&lt;/code&gt;.
+Using only nearby “bright enough” columns keeps the background estimate from being skewed by dark features.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Define a line-brightening factor
+&lt;code&gt;B = max(1, c₀ / min(r₀, I_center,global))&lt;/code&gt;.
+Ellerman bombs boost the wings without greatly brightening the core, whereas flares brighten both.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Form an initial score
+&lt;code&gt;S₀ = 1 + c_max / min(r₀, I_wing,global)&lt;/code&gt;,
+where &lt;code&gt;I_wing,global = (1/N_total) ∑_{j=1..N_total} I_wing(j)&lt;/code&gt;.
+This compares the local wing peak to the typical wing level across the image.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Adjust for how many neighbors were used:
+&lt;code&gt;S₁ = S₀ × (m / 16)&lt;/code&gt;.
+Fewer valid neighbors mean less confidence, so the score is scaled down proportionally.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Compute the wing-to-background ratio
+&lt;code&gt;rᵢ = c_max / r₀&lt;/code&gt;.
+If &lt;code&gt;rᵢ ≤ 1.05&lt;/code&gt;, the wing peak is too close to the local background and the column is discarded. Otherwise, we boost the score further:&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Raise &lt;code&gt;S₁&lt;/code&gt; to the power of &lt;code&gt;e^{rᵢ}&lt;/code&gt;, giving
+&lt;code&gt;S₂ = S₁^( e^{rᵢ} )&lt;/code&gt;.
+This makes the score grow quickly when the wing peak stands out strongly.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Multiply by &lt;code&gt;√(c_max / c₀)&lt;/code&gt; to get
+&lt;code&gt;S₃ = S₂ · √(c_max / c₀)&lt;/code&gt;.
+That emphasizes cases where the wings are much brighter than the core.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Finally, penalize any shift away from the ideal ±1 Å wing position. If &lt;code&gt;y_core&lt;/code&gt; and &lt;code&gt;y_max&lt;/code&gt; are the pixel locations of line center and wing peak, compute
+&lt;code&gt;Δλ = |y_max – y_core| × (Å / pixel)&lt;/code&gt;,
+then
+&lt;code&gt;S_final = S₃ / (1 + |1 Å – Δλ|)&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If &lt;code&gt;S_final &amp;gt; 12&lt;/code&gt;, mark column &lt;code&gt;x&lt;/code&gt; as a candidate event. Use the value of &lt;code&gt;B&lt;/code&gt; to decide:&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;When &lt;code&gt;B &amp;lt; 1.5&lt;/code&gt;, it behaves like an Ellerman bomb (wings bright, core unchanged).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;When &lt;code&gt;B &amp;gt; 2&lt;/code&gt;, it matches a flare (both core and wings bright).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If &lt;code&gt;1.5 ≤ B ≤ 2&lt;/code&gt;, the result is ambiguous and ignored.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All thresholds (0.9× global mean, 1.05 ratio, score &amp;gt; 12, B cutoffs) were chosen by testing on data and visually inspecting results.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_post_filtering&quot;&gt;Post-filtering&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There will often be cases where the same bomb is detected in multiple frames.
+Therefore, we need to do some merging of bombs which are spatially connected.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Eventually, we apply a limit threshold: if there are more than 5 Ellerman Bombs detected in an image, then we consider the detection to be false positives (this happens typically on saturated images, or images with too much noise).
+This is a bit arbitrary, but it seems to work well in practice.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_test_data&quot;&gt;Test data&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I had about ~1100 scans I could reuse for detection, and it successfully discovered Ellerman bombs candidates in about 10% of them.
+Of course this required some tuning and several runs to get the parameters right.
+This doesn&amp;#8217;t mean that you have 10% chances of finding an Ellerman bomb in your data, because the test data I have is biased (I often do 10 to 20 scans in a row, within a few minutes, to perform stacking, so if a bomb is detected in an image, it has decent chances of being detected in the next one).
+Also, I am using the term &quot;Ellerman Bomb candidate&quot;, because there&amp;#8217;s nothing better than visual confirmation to make sure that what you see is indeed an Ellerman bomb: an algorithm is not perfect, and it may fail for many reasons (noise, saturation, artifacts, etc.)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here are a few examples of Ellerman bombs candidates detected in my data:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/candidate1.jpg&quot; alt=&quot;candidate1&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/candidate2.jpg&quot; alt=&quot;candidate2&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/candidate3.jpg&quot; alt=&quot;candidate3&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/candidate4.jpg&quot; alt=&quot;candidate4&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/candidate5.jpg&quot; alt=&quot;candidate5&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/ellerman/candidate6.jpg&quot; alt=&quot;candidate6&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This blog post described my first visual Ellerman bomb detection.
+Then I described how I implemented an algorithm to automatically detect Ellerman bombs in JSol&amp;#8217;Ex 3.2.
+I am very happy to release this to the wild, so that this kind of discovery is made more accessible to everyone.
+Of course, as I always say, you should take the detections with care, and always review the results.
+This is why you get both a global &quot;map&quot; of the detected bombs, and a detailed view of each bomb, which can be used to confirm the detection.
+In addition, I recommend that you create animations of the regions, which you can simply do in JSol&amp;#8217;Ex by CTLR+clicking on the image then selecting an area around the bomb.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally, I&amp;#8217;d like to thank my friends of the Astro Club de Challans, who heard me talk about Ellerman bombs detection for a while, showing them preliminary results, and who were very supportive of my work.
+Last but not least, thanks again to my wife for her patience, seeing me work on this (too) late at night!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_bibiography&quot;&gt;Bibiography&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://ui.adsabs.harvard.edu/abs/1917ApJ&amp;#8230;&amp;#8203;.46..298E/abstract&quot;&gt;Ellerman, F. (1917) - Solar Hydrogen &quot;Bombs&quot;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.astrosurf.com/rondi/obs/shg/Bombes_ellerman.htm&quot;&gt;S. Rondi, A. Rondi - Bombes d&amp;#8217;Ellerman&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://dx.doi.org/10.1051/0004-6361/201321632&quot;&gt;N. Bello González , S. Danilovic , and F. Kneer - On the structure and dynamics of Ellerman bombs&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.jstage.jst.go.jp/article/starsandgalaxies/6/0/6_3/_article/-char/en&quot;&gt;R. Ichikawa, S. Nozawa - Detailed altitude analysis of Ellerman bomb using the domeless solar telescope at the Hida Observatory, Kyoto University&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://arxiv.org/abs/1407.3048&quot;&gt;Jie Hong, M. D. Ding, Ying Li, Cheng Fang, Wenda Cao - Spectral observations of Ellerman bombs and fitting with a two-cloud model&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://arxiv.org/abs/1406.5702&quot;&gt;A. Berlicki, P. Heinzel - Observations and NLTE modeling of Ellerman bombs&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://adsabs.harvard.edu/full/2007ASPC..368..253P&quot;&gt;E. Pariat, B. Schmieder, A. Berlicki., A. López Ariste - Spectrophotometry of Ellerman Bombs with THEMIS&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Jagged Edges Correction with JSol&amp;#8217;Ex 3.1</title>
       <link>https://melix.github.io/blog//2025/05-02-jsolex-3-1-0.html</link>
