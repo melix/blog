@@ -76,8 +76,168 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2025/09-11-jsolex-4.0.0.html"><h1>JSol&#8217;Ex 4.0.0 est sorti !</h1></a>
+  			<p>11 septembre 2025</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	
+		<a href="/blog/tags/solaire.html">solaire</a> 
+	
+		<a href="/blog/tags/astronomie.html">astronomie</a> 
+	
+		<a href="/blog/tags/ia.html">ia</a> 
+	
+		<a href="/blog/tags/claude.html">claude</a> 
+	
+		<a href="/blog/tags/bass2000.html">bass2000</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Le 18 février 2023, je montais à l&#8217;Observatoire du Pic du Midi de Bigorre pour y passer une "Nuit au Sommet", une expérience mêlant observation nocturne et visite des installations scientifiques. J&#8217;y ai découvert avec fascination le coronographe Bernard-Lyot, l&#8217;expérience <a href="https://climso.fr/">CLIMSO</a> gérée par les Observateurs Associés de l&#8217;Observatoire Midi-Pyrénées.</p>
+</div>
+<div class="paragraph">
+<p>Des étoiles plein les yeux (et une en particulier, notre soleil), ma vie d&#8217;astronome amateur centrée sur le ciel profond allait basculer vers l&#8217;observation de notre Soleil. De retour à la maison, j&#8217;ai commencé à me renseigner sur le matériel solaire, et découvrait avec stupéfaction qu&#8217;il fallait investir, beaucoup, pour pouvoir observer notre astre en toute sécurité : filtres pleine ouverture, étalons, &#8230;&#8203; tout avait un coût démesuré pour un débutant comme moi. De quoi décourager, jusqu&#8217;à ce que je tombe par hasard <a href="http://www.astrosurf.com/solex/">sur le projet Sol&#8217;Ex</a>, initié par la légende Christian Buil.</p>
+</div>
+<div class="paragraph">
+<p>Ce projet, très didactique, permet de se construire un spectrohéliographe, par impression 3D. Un tel instrument présente de nombreux avantages : coût modeste, résolution élevée et la possibilité d&#8217;observer dans de nombreuses longueurs d&#8217;ondes tout en mettant à disposition des données exploitables scientifiquement !</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;inconvénient, si c&#8217;en est vraiment un, de cet instrument est qu&#8217;il ne produit pas une image du soleil observable directement à l&#8217;oculaire. Il est nécessaire d&#8217;utiliser un logiciel de reconstruction qui, à partir d&#8217;une vidéo enregistrant un "scan" du soleil, permet de générer une (voir plus) images du soleil. Ce processus de reconstruction, bien mystérieux pour moi à l&#8217;époque, était réalisé par un <a href="http://valerie.desnoux.free.fr/inti/">logiciel écrit par Valérie Desnoux, nommé INTI</a>. Etant développeur (Java), je me suis alors lancé un challenge à l&#8217;époque : puisque je ne comprenais pas comment ça fonctionnait, j&#8217;allais essayer de créer moi-même un logiciel pour faire cette reconstruction. De cet appétit est né <a href="https://melix.github.io/astro4j/latest/fr/jsolex.html">JSol&#8217;Ex</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jsolex_4_0_et_la_collaboration_scientifique">JSol&#8217;Ex 4.0 et la collaboration scientifique</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous voici 2 ans et demi plus tard, JSol&#8217;Ex arrive en version 4. Entre temps, le nombre d&#8217;utilisateurs a explosé et mon logiciel est exploité non seulement par les utilisateurs du Sol&#8217;Ex de Christian Buil, mais aussi pour des spectrohéliographes commerciaux comme le <a href="https://mlastro.com/mlastro-shg">MLAstro SHG 700</a> (que j&#8217;utilise désormais). JSol&#8217;Ex a apporté de nombreuses innovations, comme la possibilité d&#8217;exécuter des scripts pour générer des animations, faire du stacking, créer des images personnalisées, ou encore la détection automatique d&#8217;éruptions, des régions actives (avec annotation), la détection de bombes d&#8217;Ellerman, la correction des bords dentelés et j&#8217;en passe.</p>
+</div>
+<div class="paragraph">
+<p>Récemment, JSol&#8217;Ex a été utilisé pour réaliser un <a href="https://iopscience.iop.org/article/10.3847/2515-5172/adef50">Atlas de Spectrohéliogrammes</a>, et mentionné dans <a href="https://arxiv.org/abs/2508.10853">un article précisément sur la détection des bombes d&#8217;Ellerman</a>. Bref, JSol&#8217;Ex était devenu suffisamment mature pour faire de la "vraie science", chose qui m&#8217;a toujours un peu effrayé pour être honnête.</p>
+</div>
+<div class="paragraph">
+<p>Ainsi, j&#8217;ai toujours refusé d&#8217;intégrer une fonctionnalité dans JSol&#8217;Ex, qui m&#8217;a pourtant été demandée de nombreuses fois : la possibilité de l&#8217;utiliser pour soumettre des images dans la <a href="https://bass2000.obspm.fr/">base de données BASS2000</a> de l&#8217;<a href="https://www.linkedin.com/school/lira-observatoire-de-paris/">Observatoire de Paris-Meudon</a>. Plusieurs raisons à cela : d&#8217;une, je ne faisais pas confiance à mon propre logiciel pour sa qualité "scientifique". Si je le savais capable de produire de "belles images", il est tout à fait différent de s&#8217;en servir pour une exploitation scientifique. D&#8217;autre part, il n&#8217;était pas question pour moi d&#8217;intégrer une fonctionnalité qui avait été développée par Valérie Desnoux (autrice de INTI) et l&#8217;équipe de Meudon sans son accord, par respect pour son travail.</p>
+</div>
+<div class="paragraph">
+<p>Cependant, vous aurez compris que les temps ont changé et que la pression des utilisateurs ainsi que mes discussions avec Florence Cornu, du projet SOLAP, aux Rencontres du Ciel et de l&#8217;Espace fin 2024, puis aux <a href="https://www.mars60.fr/jason2025/">JASON</a> en Juin dernier ont eu raison de mes doutes. Avec son accord et celui de Valérie, je suis donc heureux de vous annoncer que JSol&#8217;Ex 4 est officiellement supporté pour soumettre vos images dans la base de données BASS 2000 !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_un_assistant_pas_à_pas">Un assistant pas à pas</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ne souhaitant pas faire les choses à moitié, j&#8217;ai particulièrement peaufiné le logiciel pour simplifier cette procédure. J&#8217;ai souhaité faire les choses avec sérieux, puisqu&#8217;il s&#8217;agit d&#8217;une base de données professionnelle, exploitée par des scientifiques. Ainsi, une chose importante pour moi était de guider l&#8217;utilisateur dans ce processus et de lui faire comprendre l&#8217;importance de la qualité des données, tout en simplifiant le processus de soumission.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-4.0/bass2000.jpg" alt="bass2000">
+</div>
+<div class="title">Figure 1. Assistant de soumission BASS2000</div>
+</div>
+<div class="paragraph">
+<p>Ainsi par exemple, BASS2000 n&#8217;a que très peu de tolérance sur les problèmes d&#8217;orientation de l&#8217;image : il faut que le Nord solaire soit à moins de 1 degré d&#8217;erreur, sinon l&#8217;image sera refusée. L&#8217;assistant intègre donc un outil pour aider à vérifier l&#8217;orientation et corriger les erreurs minimes dues par exemple à une mise en station imparfaite.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;assistant guidera aussi l&#8217;utilisateur dans son processus de soumission, en lui demandant de bien vérifier toutes les métadonnées associées à l&#8217;observation, et ira jusqu&#8217;à envoyer l&#8217;image sur le serveur FTP de BASS2000 pour validation par les équipes.</p>
+</div>
+<div class="paragraph">
+<p>Je suis particulièrement reconnaissant à Florence CORNU pour son aide afin que les images JSol&#8217;Ex soient acceptées dans la base et je remercie mes beta-testeurs qui ont patiemment testé mes versions de développement pendant l&#8217;été.</p>
+</div>
+<div class="paragraph">
+<p>Je ne vous cache pas qu&#8217;il s&#8217;agit là d&#8217;une forme de reconnaissance de mon travail, des centaines d&#8217;heures passées soirs et week-ends à développer ce logiciel qui rappelons-le est <a href="https://github.com/melix/astro4j">entièrement Open Source et gratuit</a>.</p>
+</div>
+<div class="paragraph">
+<p>Enfin, je ne peux pas m&#8217;arrêter sans vous annoncer une deuxième bonne nouvelle : non seulement vous pourrez utiliser JSol&#8217;Ex pour soumettre vos images acquises avec un Sol&#8217;Ex, mais aussi avec le MLAstro SHG 700, qui devient officiellement supporté dans la base BASS2000 !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changements_dans_linterface">Changements dans l&#8217;interface</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Pour cette version j&#8217;ai aussi souhaité moderniser un peu l&#8217;interface graphique et la simplifier : avec le nombre de fonctionnalités croissantes arrive ce moment fatidique que tout développeur redoute : que l&#8217;interface ne devienne trop complexe pour les nouveaux utilisateurs et ne parle qu&#8217;aux anciens. J&#8217;ai essayé d&#8217;éviter cet écueil au cours du temps en refusant certaines fonctionnalités trop "de niche", mais sans pouvoir pour autant réussir à avoir une interface totalement claire.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-4.0/interface-overview.jpg" alt="interface overview">
+</div>
+<div class="title">Figure 2. Aperçu des changements d&#8217;interface</div>
+</div>
+<div class="paragraph">
+<p>Cette nouvelle version essaie donc de regrouper les paramètres par sections plus claires, tout en ajoutant des infobulles pour guider les utilisateurs, anciens comme nouveaux, dans cet esprit qui est que le logiciel se doit d&#8217;être le plus didactique possible : j&#8217;essaie, autant que faire se peut, de vous transmettre en tant qu&#8217;utilisateurs ce que moi-même j&#8217;apprends en développant ce logiciel. Un exemple frappant de cette philosophie, c&#8217;est cette fonctionnalité que j&#8217;avais ajoutée qui permet de montrer en cliquant sur le disque solaire, à quelle image il correspond dans le fichier source (une vidéo contenant des spectres).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_détection_dellipse_assistée_par_lutilisateur">Détection d&#8217;ellipse assistée par l&#8217;utilisateur</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je vous parlais un peu plus haut de l&#8217;Atlas des Spectrohéliogrammes. Cet atlas, réalisé par Pál Váradi Nagy, nécessite un travail énorme d&#8217;analyse des données et est réalisé à l&#8217;aide de scripts JSol&#8217;Ex. Cependant, pour certaines longueurs d&#8217;ondes ou pour parfois des images un peu compliquées à traiter, le logiciel peut échouer à détecter correctement les contours du disque solaire. Ceci peut arriver notamment lorsque les images sont peu contrastées ou lorsqu&#8217;il y a des réflexions internes qui biaisent la détection.</p>
+</div>
+<div class="paragraph">
+<p>Afin de résoudre ces cas complexes qui, encore une fois, nuisent à l&#8217;analyse scientifiques, j&#8217;ai ajouté la possibilité d&#8217;aider le logiciel à détecter les contours, et ainsi à obtenir un image solaire bien ronde:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-4.0/ellipse-detection-assistant.jpg" alt="ellipse detection assistant">
+</div>
+<div class="title">Figure 3. Détection d&#8217;ellipse assistée par l&#8217;utilisateur</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lia_à_la_rescousse">L&#8217;IA à la rescousse</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je suis développeur et en tant que tel, sur ce media, il me semblait pertinent d&#8217;ajouter une section sur la façon dont cette version a été développée.</p>
+</div>
+<div class="paragraph">
+<p>Cette version est la première version qui a été développée avec l&#8217;aide de l&#8217;IA, en particulier Claude Code. En effet, les dernières innovations en matière d&#8217;IA agentique sont pour le coup la véritable révolution à venir : autant avant, avoir une IA qui n&#8217;était pas capable de comprendre le contexte, faire des refactorings ou prévoir un plan de développement ne les rendait pas particulièrement utiles, autant les IA à base d&#8217;agents, qui sont capables d&#8217;analyser votre code, appeler des outils de manière autonome et avoir de vraies interactions avec vous sont un "game changer" de mon point de vue.</p>
+</div>
+<div class="paragraph">
+<p>Dans cette version, j&#8217;ai donc utilisé Claude Code (plan Pro) pour m&#8217;aider à faire les refactorings dont j&#8217;avais besoin et m&#8217;assister dans une tâche où je ne suis pas particulièrement à l&#8217;aise : le design d&#8217;interfaces graphiques.</p>
+</div>
+<div class="paragraph">
+<p>De manière générale, ça fonctionne plutôt bien. Très bien même. La capacité de l&#8217;outil à définir un plan d&#8217;implémentation et comprendre les besoins est assez fascinante. Le code généré, en revanche, nécessite toujours beaucoup de review. On pourrait dire que j&#8217;ai l&#8217;impression d&#8217;avoir un (très bon) stagiaire avec moi, en permanence. En tant que développeur senior, je suis assez rapide à identifier là où l&#8217;IA complique les choses inutilement, ou utilise des design pattern dépréciés, ou ne respecte pas les conventions de code. Je serai, par exemple, terrifié si le code original produit était parti en production sans review. Mais, en lui donnant les bonnes directions, en lui expliquant ses erreurs, on arrive rapidement à ce que l&#8217;on souhaite avec la qualité que l&#8217;on souhaite.</p>
+</div>
+<div class="paragraph">
+<p>Quelques exemples de choses qui ne fonctionnent pour le coup vraiment pas bien:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Claude vous demande de créer un fichier CLAUDE.md qui comprend des instructions sur comment compiler votre projet, comment il est organisé, etc. Bref, du contexte qui est systématiquement ajouté à chaque session. Pourtant, à l&#8217;utilisation, Claude ignore allègrement ces instructions.</p>
+</li>
+<li>
+<p>En Java, les fichiers .properties sont encodés en ISO-8859-1, même dans une base où tous les sources sont en UTF-8. C&#8217;est une bizarrerie historique, mais Claude ne la comprend absolument pas. A chaque fois qu&#8217;il modifie mes fichiers properties (qui servent à l&#8217;internationalisation de l&#8217;interface), il casse systématiquement l&#8217;encodage. Pour l&#8217;éviter, le dois systématiquement, avant de lui faire faire une opération dont je sais qu&#8217;elle implique ces fichiers, lui dire "respecte les guidelines du fichier CLAUDE" où je lui ai donné une technique pour éviter les problèmes (convertir le fichier en UTF-8, puis l&#8217;éditer, puis le reconvertir en ISO-8859-1)</p>
+</li>
+<li>
+<p>Les commentaires dans le code. Quand on commence à avoir un peu de bouteille comme moi, il est assez insupportable de lire des commentaires "captain obvious", ce genre de commentaires qui dit "la ligne suivante calcule 1+1". Claude en génère beaucoup. Trop. Et malgré le fait que mon fichier CLAUDE lui interdise explicitement.</p>
+</li>
+<li>
+<p>La confiance en soi. Claude est bien trop optimiste et tend trop à flatter l&#8217;utilisateur. Par exemple, si je lui mens explicitement ("ton algorithme est faux parce que XXX"), il répondra systématiquement "Tu as raison !" sans "réfléchir" (j&#8217;utilise les guillemets avec intention), comme un tic de langage ! Ca devient assez frustrant à la longue, lorsqu&#8217;il ne comprend pas un problème ou complique inutilement l&#8217;implémentation.</p>
+</li>
+<li>
+<p>Les limites : on arrive, sur un projet de la taille de JSol&#8217;Ex, très rapidement aux limites d&#8217;usage même sur un forfait Pro. Si je suis satisfait de ce que ça m&#8217;apporte pour le prix, je ne suis pas prêt à payer les 200€ / mois pour augmenter ces limites. N&#8217;oublions pas que je fais ça sur mon temps libre&#8230;&#8203; je n&#8217;ai aucune obligation de résultat !</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Quoi qu&#8217;il en soit, il s&#8217;agit là d&#8217;avancées qu&#8217;il devient difficile d&#8217;ignorer. Et ceux qui me connaissent savent à quel point je suis critique sur l&#8217;utilisation des IA, les mythes autour de ce qu&#8217;elle est capable de faire et son impact écologique. Néanmoins, une chose est certaine : les dirigeants qui pensent économiser du temps et de l&#8217;argent en virant leurs développeurs pour les remplacer par de l&#8217;IA se mettent une balle dans le pied : elle pose de sérieux problèmes de qualité de code et donc de maintenance, et, avec l&#8217;arrivée des agents, posent de graves problèmes de sécurité (un outil autonome qui décide par lui même s&#8217;il faut vous demander l&#8217;autorisation pour exécuter une commande !"). L&#8217;IA doit être vue comme une aide à la productivité, mais qui doit être cadrée par des gens d&#8217;expérience. Bref, nous sommes à un tournant et je ne suis pas encore bien à l&#8217;aise avec ce que cela implique. Nous n&#8217;avons jamais été aussi près du rêve de gosse que j&#8217;avais d&#8217;IA "autonomes", mais la maturité me force à en avoir peur.</p>
+</div>
+<div class="paragraph">
+<p>Mais nous nous éloignons là du sujet initial et concluons donc ce billet : dites bienvenue à JSol&#8217;Ex 4, consultez la vidéo de présentation ci-dessous et n&#8217;hésitez pas à contribuer !</p>
+</div>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4SPKsNvnzKo?si=KuqIIMc1H6SLgVec" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+</div></p>
   			<a href="/blog/2025/05-19-jsolex-3-2-0.html"><h1>Ellerman Bombs Detection with JSol&#8217;Ex 3.2</h1></a>
-  			<p>17 May 2025</p>
+  			<p>17 mai 2025</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/solex.html">solex</a> 
 	
@@ -461,7 +621,7 @@ Last but not least, thanks again to my wife for her patience, seeing me work on 
 </div>
 </div></p>
   			<a href="/blog/2025/05-02-jsolex-3-1-0.html"><h1>Jagged Edges Correction with JSol&#8217;Ex 3.1</h1></a>
-  			<p>02 May 2025</p>
+  			<p>02 mai 2025</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/solex.html">solex</a> 
 	
@@ -620,7 +780,7 @@ However, as usual, it&#8217;s a work in progress, so do not hesitate to provide 
 </div>
 </div></p>
   			<a href="/blog/2025/04-14-jsolex-3-0-0.html"><h1>JSol&#8217;Ex 3.0.0 is out!</h1></a>
-  			<p>14 April 2025</p>
+  			<p>14 avril 2025</p>
 			<p><em>Tags: </em>
 		<a href="/blog/tags/solex.html">solex</a> 
 	
@@ -1063,203 +1223,6 @@ In particular, I would like to recognize the following people:</p>
 <p>my wife for her patience, while I was going to bed late every night to work on this release</p>
 </li>
 </ul>
-</div>
-</div>
-</div></p>
-  			<a href="/blog/2025/03-30-partial-eclipse.html"><h1>Partial Eclipse of March 29, 2025</h1></a>
-  			<p>30 March 2025</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/solex.html">solex</a> 
-	
-		<a href="/blog/tags/jsolex.html">jsolex</a> 
-	
-		<a href="/blog/tags/solar.html">solar</a> 
-	
-		<a href="/blog/tags/astronomy.html">astronomy</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<style>
-.videoWrapper {
-  position: relative;
-  padding-bottom: 56.25%;
-  /* 16:9 */
-  padding-top: 25px;
-  height: 0;
-}
-
-.videoWrapper iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-</style>
-<div class="paragraph">
-<p>In this blog post I&#8217;m describing what is probably a world premiere (let me know if not!): capturing a partial solar eclipse using a spectroheliograph and making an animation which covers the whole event.</p>
-</div>
-<div class="paragraph">
-<p><em>Edit: Turns out Olivier Aguerre did something similar, described <a href="http://www.astrosurf.com/topic/175255-eclipse-partielle-du-2903-en-ha-et-continuum-avec-soles/">here (french)</a>.</em></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_preparations">Preparations</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>On March 29, 2025, we were lucky to get a partial solar eclipse visible in France, with a maximum of about 25%.
-I wanted to do what was a first for me, capturing the event, so I used a TS-Optics 80mm refractor with a 560mm focal length, equipped with an MLAstro SHG 700 spectroheliograph.
-The Astro Club Challandais was organizing a group observation this morning, but my initial decision was not to attend.
-Instead, I opted to limit the risks by performing this somewhat complex setup at home, in familiar territory. Unlike the SUNSCAN, using a spectroheliograph like the SHG 700 requires more equipment: a telescope, a mount (AZ-EQ6), and in my case, a mini PC for data acquisition (running Windows) along with a laptop for remote connection to the PC.</p>
-</div>
-<div class="paragraph">
-<p>I have conducted observations away from home before, but from experience, setting everything up—including WiFi, polar alignment, etc.—can be a bit too risky for an event like this.
-So, all week, I anxiously monitored the weather.
-Yesterday, the forecast looked grim, with thick clouds and rain.
-However, the gods of astronomy were merciful, blessing us with a beautiful day.
-The sky wasn’t entirely clear, but it was good enough for observations.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_some_more_context">Some more context</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>First of all, I had a specific observation protocol in mind.
-As you may know, a spectroheliograph doesn’t directly produce an image—it requires software to process video scans of the Sun.
-In the case of the Sunscan, the software is built into the device, but for a Sol’Ex-type setup, an independent software handles this task.
-You are probably familiar with INTI, but I have my own software: <a href="https://melix.github.io/astro4j/latest/en/jsolex.html">JSol’Ex</a>.</p>
-</div>
-<div class="paragraph">
-<p>The advantage of developing my own software is that I was able to anticipate potential issues.
-One major challenge with an eclipse is that the software must "recognize" the Sun&#8217;s outline, which won’t always be perfectly round—in fact, it could be quite elliptical.
-The software corrects the image by detecting the edges, but when the Moon moves in front, the sampling points become completely incorrect, sometimes detecting the lunar limb instead of the Sun’s!</p>
-</div>
-<div class="paragraph">
-<p>My strategy was to start early enough to adjust settings for minimal camera tilt and, more importantly, to ensure an X/Y ratio of 1.0.
-With these reference scans, I could then force all subsequent scans to use the same parameters.
-So, I began my first scans under a beautifully clear sky! After some adjustments, I was ready: a single scan, and we were good to go!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/09_45_53_0000_09_45_53_autostretch_0_00.jpg" alt="09 45 53 0000 09 45 53 autostretch 0 00">
-</div>
-</div>
-<div class="paragraph">
-<p>At the same time, I activated JSol’Ex’s integrated web server and set up a tunnel so my friends could watch my observations live! I planned to perform a scan every two minutes using a Python script in SharpCap, automating the recording, scan start, stop, and rewind. JSol’Ex’s "continuous" mode processed scans in real time.
-Everything was going smoothly&#8230;&#8203; until panic struck—clouds!</p>
-</div>
-<div class="paragraph">
-<p>For the past three hours, the sky had been perfectly clear. Yet, just ten minutes before the eclipse began, clouds started rolling in.
-What bad luck! Fortunately, by spacing out the scans, I managed to capture many of them in cloud-free moments.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/clouds.jpg" alt="clouds">
-</div>
-</div>
-<div class="paragraph">
-<p>The eclipse began, and the first scans featuring the Moon appeared.
-It worked! Forcing the X/Y ratio was effective!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/begin-eclipse.jpg" alt="begin eclipse">
-</div>
-</div>
-<div class="paragraph">
-<p>As the scans piled up, I encountered a new problem.
-While locking the X/Y ratio helped, the software still needed to calculate an ellipse to determine the Sun’s center for cropping.
-But things started going wrong—the software was miscalculating everything. I had anticipated this, and I already had a workaround in mind, but the necessary code wasn’t deployed on my mini PC.
-So, I didn&#8217;t worry too much and simply shared the raw images, which were perfectly round—because, as you recall, I had already adjusted my X/Y ratio to 1.0!</p>
-</div>
-<div class="paragraph">
-<p>I continued scanning, though my setup wasn&#8217;t perfectly precise.
-My polar alignment wasn’t flawless, and I had no millimeter-accurate return-to-start positioning.
-As a result, I had to manually realign between each scan.
-While this wasn’t a major issue, it did create some intriguing scans. For those familiar with Sol’Ex, seeing "gaps" in the spectrum due to the Moon’s presence was quite unusual, making centering more difficult.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/anim.gif" alt="anim">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_eclipse_reaches_maximum">The eclipse reaches maximum</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Time passed, scans continued, and finally, we reached the maximum eclipse phase!</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/max-mono.jpg" alt="max mono">
-</div>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/max-mix.jpg" alt="max mix">
-</div>
-</div>
-<div class="paragraph">
-<p>At one point, I wondered whether we could see lunar relief in the images.
-However, given the jagged edges typical of SHG imaging, it was hard to say for sure, but, I think some of the details visible below are actual surface details.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/blog/img/eclipse/crop.jpg" alt="crop">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_end_of_observation">End of observation</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>By the end of the eclipse, I had 80 SER files, taken between 9:37 AM and 1:43 PM, totaling nearly 175 GB of data!
-It was time to transfer everything to my desktop PC to create an animation.
-This also gave me a chance to test whether my earlier workarounds for ellipse detection would function as expected.
-I ran batch processing, and boom—within minutes, I had this animation:</p>
-</div>
-<div class="videoWrapper">
-<iframe src="https://www.youtube.com/embed/1C8CCPQnedM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-<div class="paragraph">
-<p>And here’s the continuum version which was weirdly compressed by Youtube:</p>
-</div>
-<div class="videoWrapper">
-<iframe src="https://www.youtube.com/embed/C_qJnSaSpaU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-<div class="paragraph">
-<p>This was just a first draft, using a beta version of my software.
-A few hours later I released a new version of the animation which is visible below:</p>
-</div>
-<div class="videoWrapper">
-<iframe src="https://www.youtube.com/embed/hAcHwbWDiW0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In the end, the experiment was a success! I also took this opportunity to improve my software, which will benefit everyone. If you have eclipse scans, don’t discard them! Soon, you’ll be able to process them too.</p>
-</div>
-<div class="paragraph">
-<p>The big question now is: Could this be done during a total solar eclipse, such as next year&#8217;s in Spain?
-Well, I feel lucky that this one was only 25% partial.
-Managing ellipse detection and mount realignment between scans is already quite tricky.
-During a total eclipse, there wouldn’t even be a reference point!</p>
-</div>
-<div class="paragraph">
-<p>Unless one has flawless alignment, a mount capable of returning to position perfectly, and a steady scanning speed, this would be a real challenge.
-Honestly, it&#8217;s beyond my current expertise—it would require a lot more work.</p>
-</div>
-<div class="paragraph">
-<p>P.S: For french speaking readers in west of France (or simply if you are nearby at that date), we organize the <a href="https://astroclubchallanda.wixsite.com/website/rsv">Rencontres Solaires de Vendée</a> on June 7, where we can discuss this topic!</p>
 </div>
 </div>
 </div></p>

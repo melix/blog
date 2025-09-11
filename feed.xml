@@ -6,13 +6,163 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 19 May 2025 20:21:32 +0200</pubDate>
-    <lastBuildDate>Mon, 19 May 2025 20:21:32 +0200</lastBuildDate>
+    <pubDate>jeu., 11 sept. 2025 15:08:40 +0200</pubDate>
+    <lastBuildDate>jeu., 11 sept. 2025 15:08:40 +0200</lastBuildDate>
 
+    <item>
+      <title>JSol&amp;#8217;Ex 4.0.0 est sorti !</title>
+      <link>https://melix.github.io/blog//2025/09-11-jsolex-4.0.0.html</link>
+      <pubDate>jeu., 11 sept. 2025 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2025/09-11-jsolex-4.0.0.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le 18 février 2023, je montais à l&amp;#8217;Observatoire du Pic du Midi de Bigorre pour y passer une &quot;Nuit au Sommet&quot;, une expérience mêlant observation nocturne et visite des installations scientifiques. J&amp;#8217;y ai découvert avec fascination le coronographe Bernard-Lyot, l&amp;#8217;expérience &lt;a href=&quot;https://climso.fr/&quot;&gt;CLIMSO&lt;/a&gt; gérée par les Observateurs Associés de l&amp;#8217;Observatoire Midi-Pyrénées.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Des étoiles plein les yeux (et une en particulier, notre soleil), ma vie d&amp;#8217;astronome amateur centrée sur le ciel profond allait basculer vers l&amp;#8217;observation de notre Soleil. De retour à la maison, j&amp;#8217;ai commencé à me renseigner sur le matériel solaire, et découvrait avec stupéfaction qu&amp;#8217;il fallait investir, beaucoup, pour pouvoir observer notre astre en toute sécurité : filtres pleine ouverture, étalons, &amp;#8230;&amp;#8203; tout avait un coût démesuré pour un débutant comme moi. De quoi décourager, jusqu&amp;#8217;à ce que je tombe par hasard &lt;a href=&quot;http://www.astrosurf.com/solex/&quot;&gt;sur le projet Sol&amp;#8217;Ex&lt;/a&gt;, initié par la légende Christian Buil.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce projet, très didactique, permet de se construire un spectrohéliographe, par impression 3D. Un tel instrument présente de nombreux avantages : coût modeste, résolution élevée et la possibilité d&amp;#8217;observer dans de nombreuses longueurs d&amp;#8217;ondes tout en mettant à disposition des données exploitables scientifiquement !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;inconvénient, si c&amp;#8217;en est vraiment un, de cet instrument est qu&amp;#8217;il ne produit pas une image du soleil observable directement à l&amp;#8217;oculaire. Il est nécessaire d&amp;#8217;utiliser un logiciel de reconstruction qui, à partir d&amp;#8217;une vidéo enregistrant un &quot;scan&quot; du soleil, permet de générer une (voir plus) images du soleil. Ce processus de reconstruction, bien mystérieux pour moi à l&amp;#8217;époque, était réalisé par un &lt;a href=&quot;http://valerie.desnoux.free.fr/inti/&quot;&gt;logiciel écrit par Valérie Desnoux, nommé INTI&lt;/a&gt;. Etant développeur (Java), je me suis alors lancé un challenge à l&amp;#8217;époque : puisque je ne comprenais pas comment ça fonctionnait, j&amp;#8217;allais essayer de créer moi-même un logiciel pour faire cette reconstruction. De cet appétit est né &lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html&quot;&gt;JSol&amp;#8217;Ex&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_jsolex_4_0_et_la_collaboration_scientifique&quot;&gt;JSol&amp;#8217;Ex 4.0 et la collaboration scientifique&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous voici 2 ans et demi plus tard, JSol&amp;#8217;Ex arrive en version 4. Entre temps, le nombre d&amp;#8217;utilisateurs a explosé et mon logiciel est exploité non seulement par les utilisateurs du Sol&amp;#8217;Ex de Christian Buil, mais aussi pour des spectrohéliographes commerciaux comme le &lt;a href=&quot;https://mlastro.com/mlastro-shg&quot;&gt;MLAstro SHG 700&lt;/a&gt; (que j&amp;#8217;utilise désormais). JSol&amp;#8217;Ex a apporté de nombreuses innovations, comme la possibilité d&amp;#8217;exécuter des scripts pour générer des animations, faire du stacking, créer des images personnalisées, ou encore la détection automatique d&amp;#8217;éruptions, des régions actives (avec annotation), la détection de bombes d&amp;#8217;Ellerman, la correction des bords dentelés et j&amp;#8217;en passe.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Récemment, JSol&amp;#8217;Ex a été utilisé pour réaliser un &lt;a href=&quot;https://iopscience.iop.org/article/10.3847/2515-5172/adef50&quot;&gt;Atlas de Spectrohéliogrammes&lt;/a&gt;, et mentionné dans &lt;a href=&quot;https://arxiv.org/abs/2508.10853&quot;&gt;un article précisément sur la détection des bombes d&amp;#8217;Ellerman&lt;/a&gt;. Bref, JSol&amp;#8217;Ex était devenu suffisamment mature pour faire de la &quot;vraie science&quot;, chose qui m&amp;#8217;a toujours un peu effrayé pour être honnête.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ainsi, j&amp;#8217;ai toujours refusé d&amp;#8217;intégrer une fonctionnalité dans JSol&amp;#8217;Ex, qui m&amp;#8217;a pourtant été demandée de nombreuses fois : la possibilité de l&amp;#8217;utiliser pour soumettre des images dans la &lt;a href=&quot;https://bass2000.obspm.fr/&quot;&gt;base de données BASS2000&lt;/a&gt; de l&amp;#8217;&lt;a href=&quot;https://www.linkedin.com/school/lira-observatoire-de-paris/&quot;&gt;Observatoire de Paris-Meudon&lt;/a&gt;. Plusieurs raisons à cela : d&amp;#8217;une, je ne faisais pas confiance à mon propre logiciel pour sa qualité &quot;scientifique&quot;. Si je le savais capable de produire de &quot;belles images&quot;, il est tout à fait différent de s&amp;#8217;en servir pour une exploitation scientifique. D&amp;#8217;autre part, il n&amp;#8217;était pas question pour moi d&amp;#8217;intégrer une fonctionnalité qui avait été développée par Valérie Desnoux (autrice de INTI) et l&amp;#8217;équipe de Meudon sans son accord, par respect pour son travail.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cependant, vous aurez compris que les temps ont changé et que la pression des utilisateurs ainsi que mes discussions avec Florence Cornu, du projet SOLAP, aux Rencontres du Ciel et de l&amp;#8217;Espace fin 2024, puis aux &lt;a href=&quot;https://www.mars60.fr/jason2025/&quot;&gt;JASON&lt;/a&gt; en Juin dernier ont eu raison de mes doutes. Avec son accord et celui de Valérie, je suis donc heureux de vous annoncer que JSol&amp;#8217;Ex 4 est officiellement supporté pour soumettre vos images dans la base de données BASS 2000 !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_un_assistant_pas_à_pas&quot;&gt;Un assistant pas à pas&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ne souhaitant pas faire les choses à moitié, j&amp;#8217;ai particulièrement peaufiné le logiciel pour simplifier cette procédure. J&amp;#8217;ai souhaité faire les choses avec sérieux, puisqu&amp;#8217;il s&amp;#8217;agit d&amp;#8217;une base de données professionnelle, exploitée par des scientifiques. Ainsi, une chose importante pour moi était de guider l&amp;#8217;utilisateur dans ce processus et de lui faire comprendre l&amp;#8217;importance de la qualité des données, tout en simplifiant le processus de soumission.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-4.0/bass2000.jpg&quot; alt=&quot;bass2000&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Assistant de soumission BASS2000&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ainsi par exemple, BASS2000 n&amp;#8217;a que très peu de tolérance sur les problèmes d&amp;#8217;orientation de l&amp;#8217;image : il faut que le Nord solaire soit à moins de 1 degré d&amp;#8217;erreur, sinon l&amp;#8217;image sera refusée. L&amp;#8217;assistant intègre donc un outil pour aider à vérifier l&amp;#8217;orientation et corriger les erreurs minimes dues par exemple à une mise en station imparfaite.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;assistant guidera aussi l&amp;#8217;utilisateur dans son processus de soumission, en lui demandant de bien vérifier toutes les métadonnées associées à l&amp;#8217;observation, et ira jusqu&amp;#8217;à envoyer l&amp;#8217;image sur le serveur FTP de BASS2000 pour validation par les équipes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je suis particulièrement reconnaissant à Florence CORNU pour son aide afin que les images JSol&amp;#8217;Ex soient acceptées dans la base et je remercie mes beta-testeurs qui ont patiemment testé mes versions de développement pendant l&amp;#8217;été.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne vous cache pas qu&amp;#8217;il s&amp;#8217;agit là d&amp;#8217;une forme de reconnaissance de mon travail, des centaines d&amp;#8217;heures passées soirs et week-ends à développer ce logiciel qui rappelons-le est &lt;a href=&quot;https://github.com/melix/astro4j&quot;&gt;entièrement Open Source et gratuit&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, je ne peux pas m&amp;#8217;arrêter sans vous annoncer une deuxième bonne nouvelle : non seulement vous pourrez utiliser JSol&amp;#8217;Ex pour soumettre vos images acquises avec un Sol&amp;#8217;Ex, mais aussi avec le MLAstro SHG 700, qui devient officiellement supporté dans la base BASS2000 !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_changements_dans_linterface&quot;&gt;Changements dans l&amp;#8217;interface&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour cette version j&amp;#8217;ai aussi souhaité moderniser un peu l&amp;#8217;interface graphique et la simplifier : avec le nombre de fonctionnalités croissantes arrive ce moment fatidique que tout développeur redoute : que l&amp;#8217;interface ne devienne trop complexe pour les nouveaux utilisateurs et ne parle qu&amp;#8217;aux anciens. J&amp;#8217;ai essayé d&amp;#8217;éviter cet écueil au cours du temps en refusant certaines fonctionnalités trop &quot;de niche&quot;, mais sans pouvoir pour autant réussir à avoir une interface totalement claire.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-4.0/interface-overview.jpg&quot; alt=&quot;interface overview&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Aperçu des changements d&amp;#8217;interface&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette nouvelle version essaie donc de regrouper les paramètres par sections plus claires, tout en ajoutant des infobulles pour guider les utilisateurs, anciens comme nouveaux, dans cet esprit qui est que le logiciel se doit d&amp;#8217;être le plus didactique possible : j&amp;#8217;essaie, autant que faire se peut, de vous transmettre en tant qu&amp;#8217;utilisateurs ce que moi-même j&amp;#8217;apprends en développant ce logiciel. Un exemple frappant de cette philosophie, c&amp;#8217;est cette fonctionnalité que j&amp;#8217;avais ajoutée qui permet de montrer en cliquant sur le disque solaire, à quelle image il correspond dans le fichier source (une vidéo contenant des spectres).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_détection_dellipse_assistée_par_lutilisateur&quot;&gt;Détection d&amp;#8217;ellipse assistée par l&amp;#8217;utilisateur&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je vous parlais un peu plus haut de l&amp;#8217;Atlas des Spectrohéliogrammes. Cet atlas, réalisé par Pál Váradi Nagy, nécessite un travail énorme d&amp;#8217;analyse des données et est réalisé à l&amp;#8217;aide de scripts JSol&amp;#8217;Ex. Cependant, pour certaines longueurs d&amp;#8217;ondes ou pour parfois des images un peu compliquées à traiter, le logiciel peut échouer à détecter correctement les contours du disque solaire. Ceci peut arriver notamment lorsque les images sont peu contrastées ou lorsqu&amp;#8217;il y a des réflexions internes qui biaisent la détection.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Afin de résoudre ces cas complexes qui, encore une fois, nuisent à l&amp;#8217;analyse scientifiques, j&amp;#8217;ai ajouté la possibilité d&amp;#8217;aider le logiciel à détecter les contours, et ainsi à obtenir un image solaire bien ronde:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-4.0/ellipse-detection-assistant.jpg&quot; alt=&quot;ellipse detection assistant&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Détection d&amp;#8217;ellipse assistée par l&amp;#8217;utilisateur&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_lia_à_la_rescousse&quot;&gt;L&amp;#8217;IA à la rescousse&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je suis développeur et en tant que tel, sur ce media, il me semblait pertinent d&amp;#8217;ajouter une section sur la façon dont cette version a été développée.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette version est la première version qui a été développée avec l&amp;#8217;aide de l&amp;#8217;IA, en particulier Claude Code. En effet, les dernières innovations en matière d&amp;#8217;IA agentique sont pour le coup la véritable révolution à venir : autant avant, avoir une IA qui n&amp;#8217;était pas capable de comprendre le contexte, faire des refactorings ou prévoir un plan de développement ne les rendait pas particulièrement utiles, autant les IA à base d&amp;#8217;agents, qui sont capables d&amp;#8217;analyser votre code, appeler des outils de manière autonome et avoir de vraies interactions avec vous sont un &quot;game changer&quot; de mon point de vue.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans cette version, j&amp;#8217;ai donc utilisé Claude Code (plan Pro) pour m&amp;#8217;aider à faire les refactorings dont j&amp;#8217;avais besoin et m&amp;#8217;assister dans une tâche où je ne suis pas particulièrement à l&amp;#8217;aise : le design d&amp;#8217;interfaces graphiques.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De manière générale, ça fonctionne plutôt bien. Très bien même. La capacité de l&amp;#8217;outil à définir un plan d&amp;#8217;implémentation et comprendre les besoins est assez fascinante. Le code généré, en revanche, nécessite toujours beaucoup de review. On pourrait dire que j&amp;#8217;ai l&amp;#8217;impression d&amp;#8217;avoir un (très bon) stagiaire avec moi, en permanence. En tant que développeur senior, je suis assez rapide à identifier là où l&amp;#8217;IA complique les choses inutilement, ou utilise des design pattern dépréciés, ou ne respecte pas les conventions de code. Je serai, par exemple, terrifié si le code original produit était parti en production sans review. Mais, en lui donnant les bonnes directions, en lui expliquant ses erreurs, on arrive rapidement à ce que l&amp;#8217;on souhaite avec la qualité que l&amp;#8217;on souhaite.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quelques exemples de choses qui ne fonctionnent pour le coup vraiment pas bien:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Claude vous demande de créer un fichier CLAUDE.md qui comprend des instructions sur comment compiler votre projet, comment il est organisé, etc. Bref, du contexte qui est systématiquement ajouté à chaque session. Pourtant, à l&amp;#8217;utilisation, Claude ignore allègrement ces instructions.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;En Java, les fichiers .properties sont encodés en ISO-8859-1, même dans une base où tous les sources sont en UTF-8. C&amp;#8217;est une bizarrerie historique, mais Claude ne la comprend absolument pas. A chaque fois qu&amp;#8217;il modifie mes fichiers properties (qui servent à l&amp;#8217;internationalisation de l&amp;#8217;interface), il casse systématiquement l&amp;#8217;encodage. Pour l&amp;#8217;éviter, le dois systématiquement, avant de lui faire faire une opération dont je sais qu&amp;#8217;elle implique ces fichiers, lui dire &quot;respecte les guidelines du fichier CLAUDE&quot; où je lui ai donné une technique pour éviter les problèmes (convertir le fichier en UTF-8, puis l&amp;#8217;éditer, puis le reconvertir en ISO-8859-1)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Les commentaires dans le code. Quand on commence à avoir un peu de bouteille comme moi, il est assez insupportable de lire des commentaires &quot;captain obvious&quot;, ce genre de commentaires qui dit &quot;la ligne suivante calcule 1+1&quot;. Claude en génère beaucoup. Trop. Et malgré le fait que mon fichier CLAUDE lui interdise explicitement.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;La confiance en soi. Claude est bien trop optimiste et tend trop à flatter l&amp;#8217;utilisateur. Par exemple, si je lui mens explicitement (&quot;ton algorithme est faux parce que XXX&quot;), il répondra systématiquement &quot;Tu as raison !&quot; sans &quot;réfléchir&quot; (j&amp;#8217;utilise les guillemets avec intention), comme un tic de langage ! Ca devient assez frustrant à la longue, lorsqu&amp;#8217;il ne comprend pas un problème ou complique inutilement l&amp;#8217;implémentation.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Les limites : on arrive, sur un projet de la taille de JSol&amp;#8217;Ex, très rapidement aux limites d&amp;#8217;usage même sur un forfait Pro. Si je suis satisfait de ce que ça m&amp;#8217;apporte pour le prix, je ne suis pas prêt à payer les 200€ / mois pour augmenter ces limites. N&amp;#8217;oublions pas que je fais ça sur mon temps libre&amp;#8230;&amp;#8203; je n&amp;#8217;ai aucune obligation de résultat !&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quoi qu&amp;#8217;il en soit, il s&amp;#8217;agit là d&amp;#8217;avancées qu&amp;#8217;il devient difficile d&amp;#8217;ignorer. Et ceux qui me connaissent savent à quel point je suis critique sur l&amp;#8217;utilisation des IA, les mythes autour de ce qu&amp;#8217;elle est capable de faire et son impact écologique. Néanmoins, une chose est certaine : les dirigeants qui pensent économiser du temps et de l&amp;#8217;argent en virant leurs développeurs pour les remplacer par de l&amp;#8217;IA se mettent une balle dans le pied : elle pose de sérieux problèmes de qualité de code et donc de maintenance, et, avec l&amp;#8217;arrivée des agents, posent de graves problèmes de sécurité (un outil autonome qui décide par lui même s&amp;#8217;il faut vous demander l&amp;#8217;autorisation pour exécuter une commande !&quot;). L&amp;#8217;IA doit être vue comme une aide à la productivité, mais qui doit être cadrée par des gens d&amp;#8217;expérience. Bref, nous sommes à un tournant et je ne suis pas encore bien à l&amp;#8217;aise avec ce que cela implique. Nous n&amp;#8217;avons jamais été aussi près du rêve de gosse que j&amp;#8217;avais d&amp;#8217;IA &quot;autonomes&quot;, mais la maturité me force à en avoir peur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais nous nous éloignons là du sujet initial et concluons donc ce billet : dites bienvenue à JSol&amp;#8217;Ex 4, consultez la vidéo de présentation ci-dessous et n&amp;#8217;hésitez pas à contribuer !&lt;/p&gt;
+&lt;/div&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/4SPKsNvnzKo?si=KuqIIMc1H6SLgVec&quot; title=&quot;YouTube video player&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&quot; referrerpolicy=&quot;strict-origin-when-cross-origin&quot; allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Ellerman Bombs Detection with JSol&amp;#8217;Ex 3.2</title>
       <link>https://melix.github.io/blog//2025/05-19-jsolex-3-2-0.html</link>
-      <pubDate>Sat, 17 May 2025 00:00:00 +0200</pubDate>
+      <pubDate>sam., 17 mai 2025 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2025/05-19-jsolex-3-2-0.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -388,7 +538,7 @@ Last but not least, thanks again to my wife for her patience, seeing me work on 
     <item>
       <title>Jagged Edges Correction with JSol&amp;#8217;Ex 3.1</title>
       <link>https://melix.github.io/blog//2025/05-02-jsolex-3-1-0.html</link>
-      <pubDate>Fri, 2 May 2025 00:00:00 +0200</pubDate>
+      <pubDate>ven., 2 mai 2025 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2025/05-02-jsolex-3-1-0.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -543,7 +693,7 @@ However, as usual, it&amp;#8217;s a work in progress, so do not hesitate to prov
     <item>
       <title>JSol&amp;#8217;Ex 3.0.0 is out!</title>
       <link>https://melix.github.io/blog//2025/04-14-jsolex-3-0-0.html</link>
-      <pubDate>Mon, 14 Apr 2025 00:00:00 +0200</pubDate>
+      <pubDate>lun., 14 avr. 2025 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2025/04-14-jsolex-3-0-0.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -986,7 +1136,7 @@ In particular, I would like to recognize the following people:&lt;/p&gt;
     <item>
       <title>Partial Eclipse of March 29, 2025</title>
       <link>https://melix.github.io/blog//2025/03-30-partial-eclipse.html</link>
-      <pubDate>Sun, 30 Mar 2025 00:00:00 +0100</pubDate>
+      <pubDate>dim., 30 mars 2025 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2025/03-30-partial-eclipse.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -1179,7 +1329,7 @@ Honestly, it&amp;#8217;s beyond my current expertise—it would require a lot mo
     <item>
       <title>JSol&amp;#8217;Ex errands: How it helped uncovering an inaccuracy of the SHG 700 specifications</title>
       <link>https://melix.github.io/blog//2025/03-11-jsolex-shg700.html</link>
-      <pubDate>Tue, 11 Mar 2025 00:00:00 +0100</pubDate>
+      <pubDate>mar., 11 mars 2025 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2025/03-11-jsolex-shg700.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -1382,7 +1532,7 @@ Be sure to upgrade to JSol&amp;#8217;Ex 2.11.2 which includes &lt;a href=&quot;h
     <item>
       <title>Automatic active region detection with JSol&amp;#8217;Ex 2.9</title>
       <link>https://melix.github.io/blog//2025/02-01-jsolex-actve-areas.html</link>
-      <pubDate>Sat, 1 Feb 2025 00:00:00 +0100</pubDate>
+      <pubDate>sam., 1 févr. 2025 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2025/02-01-jsolex-actve-areas.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -1642,7 +1792,7 @@ As always, feel free to contribute, JSol&amp;#8217;Ex is open source!&lt;/p&gt;
     <item>
       <title>Extraction automatique d&amp;#8217;images Hélium avec JSol&amp;#8217;Ex</title>
       <link>https://melix.github.io/blog//2024/06-14-jsolex-helium-continuum.html</link>
-      <pubDate>Fri, 14 Jun 2024 00:00:00 +0200</pubDate>
+      <pubDate>ven., 14 juin 2024 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2024/06-14-jsolex-helium-continuum.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -1958,7 +2108,7 @@ La bonne nouvelle, c&amp;#8217;est que j&amp;#8217;ai beaucoup d&amp;#8217;autre
     <item>
       <title>JSol&amp;#8217;Ex 2.2.0 et amélioration du contraste</title>
       <link>https://melix.github.io/blog//2024/04-25-jsolex-contrast.html</link>
-      <pubDate>Thu, 25 Apr 2024 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 25 avr. 2024 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2024/04-25-jsolex-contrast.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -2224,7 +2374,7 @@ Your browser does not support the video tag.
     <item>
       <title>Vers un effondrement civilisationnel ?</title>
       <link>https://melix.github.io/blog//2024/02-22-effondrement.html</link>
-      <pubDate>Thu, 22 Feb 2024 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 22 févr. 2024 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2024/02-22-effondrement.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -2807,7 +2957,7 @@ La première de nos libertés, c&amp;#8217;est encore de voter, faisons le tant 
     <item>
       <title>Stacking and mosaic creation with JSol&amp;#8217;Ex 2.0</title>
       <link>https://melix.github.io/blog//2024/01-04-jsolex-2.0.html</link>
-      <pubDate>Thu, 4 Jan 2024 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 4 janv. 2024 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2024/01-04-jsolex-2.0.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -3200,7 +3350,7 @@ Now I sincerely hope that it will help you get amazing solar images!&lt;/p&gt;
     <item>
       <title>Introducing astro4j</title>
       <link>https://melix.github.io/blog//2023/04-22-introducing-astro4j.html</link>
-      <pubDate>Sat, 22 Apr 2023 00:00:00 +0200</pubDate>
+      <pubDate>sam., 22 avr. 2023 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2023/04-22-introducing-astro4j.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -3533,7 +3683,7 @@ Your browser does not support the video tag.
     <item>
       <title>How the Micronaut team leverages Gradle&amp;#8217;s version catalogs for improved developer productivity</title>
       <link>https://melix.github.io/blog//2023/03-12-micronaut-catalogs.html</link>
-      <pubDate>Sun, 12 Mar 2023 00:00:00 +0100</pubDate>
+      <pubDate>dim., 12 mars 2023 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2023/03-12-micronaut-catalogs.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -4174,7 +4324,7 @@ We have an &lt;a href=&quot;https://github.com/micronaut-projects/micronaut-star
     <item>
       <title>Gradle&amp;#8217;s flexibility in action</title>
       <link>https://melix.github.io/blog//2023/gradle-synthetic-projects.html</link>
-      <pubDate>Mon, 6 Feb 2023 00:00:00 +0100</pubDate>
+      <pubDate>lun., 6 févr. 2023 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2023/gradle-synthetic-projects.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -4635,7 +4785,7 @@ Also this had a number of drawbacks:&lt;/p&gt;
     <item>
       <title>Petit voyage en électrique</title>
       <link>https://melix.github.io/blog//2023/tourainetech-208.html</link>
-      <pubDate>Fri, 20 Jan 2023 00:00:00 +0100</pubDate>
+      <pubDate>ven., 20 janv. 2023 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2023/tourainetech-208.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -4766,7 +4916,7 @@ Et compte-tenu de l&amp;#8217;urgence climatique, j&amp;#8217;ai fais le choix d
     <item>
       <title>Un an d&amp;#8217;astrophotographie</title>
       <link>https://melix.github.io/blog//2022/12/astrophoto-2022-fr.html</link>
-      <pubDate>Sat, 31 Dec 2022 00:00:00 +0100</pubDate>
+      <pubDate>sam., 31 déc. 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/12/astrophoto-2022-fr.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -5295,7 +5445,7 @@ Qu&amp;#8217;à celà ne tienne, c&amp;#8217;est aussi pour ça que l&amp;#8217;
     <item>
       <title>One year of astrophotography</title>
       <link>https://melix.github.io/blog//2022/12/astrophoto-2022.html</link>
-      <pubDate>Sat, 31 Dec 2022 00:00:00 +0100</pubDate>
+      <pubDate>sam., 31 déc. 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/12/astrophoto-2022.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -5789,7 +5939,7 @@ This is why astrophotography is a lifetime hobby, after all!&lt;/p&gt;
     <item>
       <title>Monitoring pour optimiser ma conso électrique</title>
       <link>https://melix.github.io/blog//2022/11/monitoring-elec.html</link>
-      <pubDate>Sat, 26 Nov 2022 00:00:00 +0100</pubDate>
+      <pubDate>sam., 26 nov. 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/11/monitoring-elec.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -6066,7 +6216,7 @@ Cela rend la revente bien moins intéressante, puisque malgré le fait qu&amp;#8
     <item>
       <title>Hello, Mastodon (goodbye Twitter!)</title>
       <link>https://melix.github.io/blog//2022/11/hello-mastodon.html</link>
-      <pubDate>Sun, 6 Nov 2022 00:00:00 +0100</pubDate>
+      <pubDate>dim., 6 nov. 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/11/hello-mastodon.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -6220,7 +6370,7 @@ So be it.&lt;/p&gt;
     <item>
       <title>Astrophotographie: la suite !</title>
       <link>https://melix.github.io/blog//2022/10/astro-twitch.html</link>
-      <pubDate>Wed, 5 Oct 2022 00:00:00 +0200</pubDate>
+      <pubDate>mer., 5 oct. 2022 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2022/10/astro-twitch.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -6245,7 +6395,7 @@ Nous parlerons de flats, darks, pré-traitement, stacking, &amp;#8230;&amp;#8203
     <item>
       <title>Introducing Micronaut Test Resources</title>
       <link>https://melix.github.io/blog//2022/08/micronaut-test-resources.html</link>
-      <pubDate>Thu, 4 Aug 2022 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 4 août 2022 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2022/08/micronaut-test-resources.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -6940,7 +7090,7 @@ For advanced use cases, &lt;a href=&quot;https://micronaut-projects.github.io/mi
     <item>
       <title>Je suis le gars chiant</title>
       <link>https://melix.github.io/blog//2022/07/je-suis-le-gars-chiant.html</link>
-      <pubDate>Thu, 28 Jul 2022 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 28 juil. 2022 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2022/07/je-suis-le-gars-chiant.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -7041,7 +7191,7 @@ J&amp;#8217;en veux, en revanche, à ceux qui utilisent &lt;em&gt;sciemment&lt;/
     <item>
       <title>There is no single dependency graph</title>
       <link>https://melix.github.io/blog//2022/07/there-is-no-single-dependency-graph.html</link>
-      <pubDate>Mon, 4 Jul 2022 00:00:00 +0200</pubDate>
+      <pubDate>lun., 4 juil. 2022 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2022/07/there-is-no-single-dependency-graph.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -7230,7 +7380,7 @@ Of course, we didn&amp;#8217;t mention more advanced features like optional depe
     <item>
       <title>Gradle quickie: laziness</title>
       <link>https://melix.github.io/blog//2022/05/gradle-laziness.html</link>
-      <pubDate>Tue, 24 May 2022 00:00:00 +0200</pubDate>
+      <pubDate>mar., 24 mai 2022 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2022/05/gradle-laziness.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -7658,7 +7808,7 @@ This makes it particularly complicated to upgrade builds without pissing off a n
     <item>
       <title>Astrophotographie: rendez-vous sur Twitch !</title>
       <link>https://melix.github.io/blog//2022/05/astro-twitch.html</link>
-      <pubDate>Tue, 3 May 2022 00:00:00 +0200</pubDate>
+      <pubDate>mar., 3 mai 2022 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2022/05/astro-twitch.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -7743,7 +7893,7 @@ Attention, il ne s&amp;#8217;agira pas d&amp;#8217;une présentation générique
     <item>
       <title>Conditional dependencies with Gradle</title>
       <link>https://melix.github.io/blog//2022/03/gradle-conditional-dependencies.html</link>
-      <pubDate>Mon, 21 Mar 2022 00:00:00 +0100</pubDate>
+      <pubDate>lun., 21 mars 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/03/gradle-conditional-dependencies.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -8195,7 +8345,7 @@ At this moment, we know that the configuration is complete, so we can guarantee 
     <item>
       <title>Using the Micronaut Version Catalog</title>
       <link>https://melix.github.io/blog//2022/02/micronaut-version-catalog.html</link>
-      <pubDate>Tue, 8 Feb 2022 00:00:00 +0100</pubDate>
+      <pubDate>mar., 8 févr. 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/02/micronaut-version-catalog.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -8374,7 +8524,7 @@ It&amp;#8217;s particularly interesting if you are using the Kotlin DSL as I men
     <item>
       <title>Understanding Gradle plugins: the provider API</title>
       <link>https://melix.github.io/blog//2022/01/understanding-provider-api.html</link>
-      <pubDate>Mon, 24 Jan 2022 00:00:00 +0100</pubDate>
+      <pubDate>lun., 24 janv. 2022 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2022/01/understanding-provider-api.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -9101,7 +9251,7 @@ There is effectively no need to publish a plugin, either to a local repository, 
     <item>
       <title>Composition over inheritance: Gradle vs Maven</title>
       <link>https://melix.github.io/blog//2021/12/composition-in-gradle.html</link>
-      <pubDate>Wed, 1 Dec 2021 00:00:00 +0100</pubDate>
+      <pubDate>mer., 1 déc. 2021 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2021/12/composition-in-gradle.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -9467,7 +9617,7 @@ On the other hand, Gradle uses a &lt;em&gt;composition&lt;/em&gt; model which ma
     <item>
       <title>Multi-repository development made easy</title>
       <link>https://melix.github.io/blog//2021/11/multirepo-dev-made-easy.html</link>
-      <pubDate>Thu, 4 Nov 2021 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 4 nov. 2021 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2021/11/multirepo-dev-made-easy.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -9639,7 +9789,7 @@ It will also be interesting to get your user stories so that we, collectively, c
     <item>
       <title>A Gradle quickie: properly using dependsOn</title>
       <link>https://melix.github.io/blog//2021/10/gradle-quickie-dependson.html</link>
-      <pubDate>Wed, 6 Oct 2021 00:00:00 +0200</pubDate>
+      <pubDate>mer., 6 oct. 2021 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2021/10/gradle-quickie-dependson.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -9853,7 +10003,7 @@ tasks.named(&apos;jar&apos;, Jar) {
     <item>
       <title>Frequently asked questions about version catalogs</title>
       <link>https://melix.github.io/blog//2021/03/version-catalogs-faq.html</link>
-      <pubDate>Sun, 11 Apr 2021 00:00:00 +0200</pubDate>
+      <pubDate>dim., 11 avr. 2021 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2021/03/version-catalogs-faq.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -10159,7 +10309,7 @@ We want to encourage this model, rather than supporting &lt;em&gt;adhoc&lt;/em&g
     <item>
       <title>Simplified version management with Gradle 7</title>
       <link>https://melix.github.io/blog//2021/03/version-catalogs.html</link>
-      <pubDate>Wed, 24 Mar 2021 00:00:00 +0100</pubDate>
+      <pubDate>mer., 24 mars 2021 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2021/03/version-catalogs.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -10467,7 +10617,7 @@ Thanks to Gradle&amp;#8217;s advanced dependency resolution engine, it&amp;#8217
     <item>
       <title>Using Java 16 with Gradle</title>
       <link>https://melix.github.io/blog//2021/03/gradle-java16.html</link>
-      <pubDate>Wed, 17 Mar 2021 00:00:00 +0100</pubDate>
+      <pubDate>mer., 17 mars 2021 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2021/03/gradle-java16.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -10725,7 +10875,7 @@ This solution is better for performance, even if a bit &quot;hackish&quot;:&lt;/
     <item>
       <title>Gradle + WebAssembly</title>
       <link>https://melix.github.io/blog//2021/02/gradle-webassembly.html</link>
-      <pubDate>Sun, 21 Feb 2021 00:00:00 +0100</pubDate>
+      <pubDate>dim., 21 févr. 2021 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2021/02/gradle-webassembly.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -11089,7 +11239,7 @@ Nevertheless, this experiment is quite fun and I&amp;#8217;m going to experiment
     <item>
       <title>The problem with Gradle: really?</title>
       <link>https://melix.github.io/blog//2021/01/the-problem-with-gradle.html</link>
-      <pubDate>Wed, 6 Jan 2021 00:00:00 +0100</pubDate>
+      <pubDate>mer., 6 janv. 2021 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2021/01/the-problem-with-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -11537,7 +11687,7 @@ However, with the experimental &lt;a href=&quot;https://docs.gradle.org/current/
     <item>
       <title>Dependabot and automated dependency upgrades</title>
       <link>https://melix.github.io/blog//2020/10/about-dependabot.html</link>
-      <pubDate>Sun, 11 Oct 2020 00:00:00 +0200</pubDate>
+      <pubDate>dim., 11 oct. 2020 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2020/10/about-dependabot.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -11797,7 +11947,7 @@ However, we have alternate solutions. For example a few weeks ago I experimented
     <item>
       <title>Configuring git to use main instead of master</title>
       <link>https://melix.github.io/blog//2020/06/updating-git.html</link>
-      <pubDate>Wed, 17 Jun 2020 00:00:00 +0200</pubDate>
+      <pubDate>mer., 17 juin 2020 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2020/06/updating-git.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -11930,7 +12080,7 @@ To do this, go to &lt;code&gt;Settings&lt;/code&gt; &amp;#8594; &lt;code&gt;Bran
     <item>
       <title>Using Java feature previews with Gradle</title>
       <link>https://melix.github.io/blog//2020/06/java-feature-previews-gradle.html</link>
-      <pubDate>Thu, 11 Jun 2020 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 11 juin 2020 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2020/06/java-feature-previews-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -12058,7 +12208,7 @@ All you need is to tell what JDK to use and Gradle will take care of finding a J
     <item>
       <title>Mon engagement pour Montaigu-Vendée</title>
       <link>https://melix.github.io/blog//2020/03/mvea2020.html</link>
-      <pubDate>Sat, 7 Mar 2020 00:00:00 +0100</pubDate>
+      <pubDate>sam., 7 mars 2020 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2020/03/mvea2020.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -12227,7 +12377,7 @@ Je me présente humblement sur la liste de Vincent MATHIEU, une liste composée 
     <item>
       <title>Chronicles of an introvert remote worker</title>
       <link>https://melix.github.io/blog//2020/01/introvert-remote.html</link>
-      <pubDate>Fri, 3 Jan 2020 00:00:00 +0100</pubDate>
+      <pubDate>ven., 3 janv. 2020 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2020/01/introvert-remote.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -12455,7 +12605,7 @@ I am also the coach of my younger boy&amp;#8217;s (10 yo) basketball team, which
     <item>
       <title>Gradle myth busting: scripting</title>
       <link>https://melix.github.io/blog//2019/11/gradle-scripting.html</link>
-      <pubDate>Sun, 3 Nov 2019 00:00:00 +0100</pubDate>
+      <pubDate>dim., 3 nov. 2019 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2019/11/gradle-scripting.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -12719,7 +12869,7 @@ Therefore, &lt;em&gt;correctness&lt;/em&gt;, incremental builds, incremental com
     <item>
       <title>Chroniques d&amp;#8217;un introverti en télétravail</title>
       <link>https://melix.github.io/blog//2019/09/introverti-teletravail.html</link>
-      <pubDate>Sun, 29 Sep 2019 00:00:00 +0200</pubDate>
+      <pubDate>dim., 29 sept. 2019 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2019/09/introverti-teletravail.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -12891,7 +13041,7 @@ Je suis aussi le coach de l&amp;#8217;équipe de basket de mon fils de 10 ans, c
     <item>
       <title>Dependency Management at Gradle</title>
       <link>https://melix.github.io/blog//2019/07/dependency-management.html</link>
-      <pubDate>Thu, 11 Jul 2019 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 11 juil. 2019 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2019/07/dependency-management.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -13075,7 +13225,7 @@ Does it mean that Gradle is perfect? Hell, no. We&amp;#8217;re going to make mis
     <item>
       <title>Goodbye, Groovy!</title>
       <link>https://melix.github.io/blog//2019/03/goodbye-groovy.html</link>
-      <pubDate>Thu, 21 Mar 2019 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 21 mars 2019 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2019/03/goodbye-groovy.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -13148,7 +13298,7 @@ The reality is that I&amp;#8217;ve been more excited with Kotlin than Groovy lat
     <item>
       <title>A simple native HTTP server with GraalVM</title>
       <link>https://melix.github.io/blog//2019/03/simple-http-server-graal.html</link>
-      <pubDate>Tue, 19 Mar 2019 00:00:00 +0100</pubDate>
+      <pubDate>mar., 19 mars 2019 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2019/03/simple-http-server-graal.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -13507,7 +13657,7 @@ After this blog post was published, I received a &lt;a href=&quot;https://github
     <item>
       <title>Gradle myth busting: lifecycle</title>
       <link>https://melix.github.io/blog//2018/09/gradle-lifecycle.html</link>
-      <pubDate>Tue, 11 Sep 2018 00:00:00 +0200</pubDate>
+      <pubDate>mar., 11 sept. 2018 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2018/09/gradle-lifecycle.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -13659,7 +13809,7 @@ After this blog post was published, I received a &lt;a href=&quot;https://github
     <item>
       <title>Assistants vocaux et robotisation: mon point de vue</title>
       <link>https://melix.github.io/blog//2018/07/robots-vs-human.html</link>
-      <pubDate>Tue, 3 Jul 2018 00:00:00 +0200</pubDate>
+      <pubDate>mar., 3 juil. 2018 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2018/07/robots-vs-human.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -13755,7 +13905,7 @@ After this blog post was published, I received a &lt;a href=&quot;https://github
     <item>
       <title>Parlons Gradle : Episode 1</title>
       <link>https://melix.github.io/blog//2017/10/parlons-gradle.html</link>
-      <pubDate>Mon, 30 Oct 2017 00:00:00 +0100</pubDate>
+      <pubDate>lun., 30 oct. 2017 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2017/10/parlons-gradle.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -13792,7 +13942,7 @@ After this blog post was published, I received a &lt;a href=&quot;https://github
     <item>
       <title>Pourquoi je soutiens Benoît Hamon</title>
       <link>https://melix.github.io/blog//2017/03/soutien-hamon.html</link>
-      <pubDate>Wed, 1 Mar 2017 00:00:00 +0100</pubDate>
+      <pubDate>mer., 1 mars 2017 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2017/03/soutien-hamon.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -13976,7 +14126,7 @@ A mes lecteurs habituels, ce billet n&amp;#8217;a rien à voir avec mes interven
     <item>
       <title>Gradle and Kotlin, a personal perspective</title>
       <link>https://melix.github.io/blog//2016/05/gradle-kotlin.html</link>
-      <pubDate>Sun, 22 May 2016 00:00:00 +0200</pubDate>
+      <pubDate>dim., 22 mai 2016 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2016/05/gradle-kotlin.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -14158,7 +14308,7 @@ class GreetingPluginExtension {
     <item>
       <title>A week fighting a PermGen leak</title>
       <link>https://melix.github.io/blog//2015/08/permgenleak.html</link>
-      <pubDate>Sat, 29 Aug 2015 00:00:00 +0200</pubDate>
+      <pubDate>sam., 29 août 2015 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2015/08/permgenleak.html</guid>
       	<description>
 	&lt;h1 id=&quot;_a_challenge_at_gradle&quot; class=&quot;sect0&quot;&gt;A challenge at Gradle&lt;/h1&gt;
@@ -14463,7 +14613,7 @@ tasks&amp;#8230;&amp;#8203; Anyway you can follow my progress on &lt;a href=&quo
     <item>
       <title>Improved sandboxing of Groovy scripts</title>
       <link>https://melix.github.io/blog//2015/03/sandboxing.html</link>
-      <pubDate>Fri, 27 Mar 2015 00:00:00 +0100</pubDate>
+      <pubDate>ven., 27 mars 2015 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2015/03/sandboxing.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -15619,7 +15769,7 @@ glad if someone or some people improve this solution and make a pull request so 
     <item>
       <title>Who is Groovy?</title>
       <link>https://melix.github.io/blog//2015/02/who-is-groovy.html</link>
-      <pubDate>Wed, 4 Mar 2015 00:00:00 +0100</pubDate>
+      <pubDate>mer., 4 mars 2015 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2015/02/who-is-groovy.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -16850,7 +17000,7 @@ is &lt;strong&gt;nothing close&lt;/strong&gt; to what it was when James left the
     <item>
       <title>Looking for a new job</title>
       <link>https://melix.github.io/blog//2015/01/for-hire.html</link>
-      <pubDate>Mon, 19 Jan 2015 00:00:00 +0100</pubDate>
+      <pubDate>lun., 19 janv. 2015 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2015/01/for-hire.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -16905,7 +17055,7 @@ is &lt;strong&gt;nothing close&lt;/strong&gt; to what it was when James left the
     <item>
       <title>10 things your static language can&amp;#8217;t do</title>
       <link>https://melix.github.io/blog//2014/12/10-things-static-cant-do.html</link>
-      <pubDate>Mon, 15 Dec 2014 00:00:00 +0100</pubDate>
+      <pubDate>lun., 15 déc. 2014 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2014/12/10-things-static-cant-do.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -17441,7 +17591,7 @@ Point p = [x:1, y:2] // coercion of a map literal into an object of class Point 
     <item>
       <title>Fixing Bluetooth debugging on Android Wear</title>
       <link>https://melix.github.io/blog//2014/10/android-moto360.html</link>
-      <pubDate>Mon, 20 Oct 2014 00:00:00 +0200</pubDate>
+      <pubDate>lun., 20 oct. 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/10/android-moto360.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -17572,7 +17722,7 @@ but no, wasn&amp;#8217;t that easy.&lt;/p&gt;
     <item>
       <title>Tip of the day: reversed git bisect</title>
       <link>https://melix.github.io/blog//2014/07/bisecting-groovy.html</link>
-      <pubDate>Wed, 23 Jul 2014 00:00:00 +0200</pubDate>
+      <pubDate>mer., 23 juil. 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/07/bisecting-groovy.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -17778,7 +17928,7 @@ working on my copy while bisecting is in progress.&lt;/p&gt;
     <item>
       <title>The new Groovy website</title>
       <link>https://melix.github.io/blog//2014/07/new-groovy-website.html</link>
-      <pubDate>Fri, 18 Jul 2014 00:00:00 +0200</pubDate>
+      <pubDate>ven., 18 juil. 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/07/new-groovy-website.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -18164,7 +18314,7 @@ end, I think the combination works quite good and that the site as it is now is 
     <item>
       <title>Contributing for the Groovy language: setting up IntelliJ IDEA</title>
       <link>https://melix.github.io/blog//2014/06/contribute-groovy-ide.html</link>
-      <pubDate>Tue, 24 Jun 2014 00:00:00 +0200</pubDate>
+      <pubDate>mar., 24 juin 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/06/contribute-groovy-ide.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -18182,7 +18332,7 @@ end, I think the combination works quite good and that the site as it is now is 
     <item>
       <title>Groovy on Android, technical details</title>
       <link>https://melix.github.io/blog//2014/06/grooid2.html</link>
-      <pubDate>Tue, 10 Jun 2014 00:00:00 +0200</pubDate>
+      <pubDate>mar., 10 juin 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/06/grooid2.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -18281,7 +18431,7 @@ end, I think the combination works quite good and that the site as it is now is 
     <item>
       <title>Groovy on Android</title>
       <link>https://melix.github.io/blog//2014/06/grooid.html</link>
-      <pubDate>Thu, 5 Jun 2014 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 5 juin 2014 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2014/06/grooid.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -18556,7 +18706,7 @@ android.applicationVariants.all {
     <item>
       <title>A fast markup template engine for Groovy (part 2 of 2)</title>
       <link>https://melix.github.io/blog//2014/02/markuptemplateengine_part2.html</link>
-      <pubDate>Tue, 18 Feb 2014 00:00:00 +0100</pubDate>
+      <pubDate>mar., 18 févr. 2014 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2014/02/markuptemplateengine_part2.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -19400,7 +19550,7 @@ mkpTemplate.make(model).writeTo(new PrintWriter(System.out))&lt;/code&gt;&lt;/pr
     <item>
       <title>A fast markup template engine for Groovy (part 1 of 2)</title>
       <link>https://melix.github.io/blog//2014/02/markuptemplateengine.html</link>
-      <pubDate>Sun, 16 Feb 2014 00:00:00 +0100</pubDate>
+      <pubDate>dim., 16 févr. 2014 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2014/02/markuptemplateengine.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -19952,7 +20102,7 @@ FreeMarker loop                            2862       0  2862  2894&lt;/pre&gt;
     <item>
       <title>Authoring your blog on GitHub with JBake and Gradle</title>
       <link>https://melix.github.io/blog//2014/02/hosting-jbake-github.html</link>
-      <pubDate>Mon, 3 Feb 2014 00:00:00 +0100</pubDate>
+      <pubDate>lun., 3 févr. 2014 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2014/02/hosting-jbake-github.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -20316,7 +20466,7 @@ would say, that&amp;#8217;s a &lt;a href=&quot;https://twitter.com/aalmiray/stat
     <item>
       <title>JLangDetect 0.4 released and moved to GitHub</title>
       <link>https://melix.github.io/blog//2014/01/jlangdetect-github.html</link>
-      <pubDate>Wed, 22 Jan 2014 00:00:00 +0100</pubDate>
+      <pubDate>mer., 22 janv. 2014 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2014/01/jlangdetect-github.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -20342,7 +20492,7 @@ available on &lt;a href=&quot;https://github.com/melix/jlangdetect&quot;&gt;GitH
     <item>
       <title>Closure parameter type inference for Groovy</title>
       <link>https://melix.github.io/blog//2014/01/closure_param_inference.html</link>
-      <pubDate>Tue, 7 Jan 2014 00:00:00 +0100</pubDate>
+      <pubDate>mar., 7 janv. 2014 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2014/01/closure_param_inference.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -20856,7 +21006,7 @@ parameter of type &lt;code&gt;T&lt;/code&gt; (where &lt;code&gt;T&lt;/code&gt; i
     <item>
       <title>Performance of coercion vs closures in Groovy 2.2</title>
       <link>https://melix.github.io/blog//2013/11/22/coercion_vs_direct.html</link>
-      <pubDate>Fri, 22 Nov 2013 00:00:00 +0100</pubDate>
+      <pubDate>ven., 22 nov. 2013 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2013/11/22/coercion_vs_direct.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -21366,7 +21516,7 @@ void doSomething(Closure cl) {
     <item>
       <title>A new home!</title>
       <link>https://melix.github.io/blog//2013/11/21/a_new_home.html</link>
-      <pubDate>Thu, 21 Nov 2013 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 21 nov. 2013 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2013/11/21/a_new_home.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -21401,7 +21551,7 @@ downloaded the old pages, converted them into &lt;a href=&quot;https://asciidoct
     <item>
       <title>deck2pdf: Exporting HTML5 slide decks to PDF</title>
       <link>https://melix.github.io/blog//2013/07/30/deck2pdf_exporting_html5_slide_decks.html</link>
-      <pubDate>Tue, 30 Jul 2013 00:00:00 +0200</pubDate>
+      <pubDate>mar., 30 juil. 2013 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2013/07/30/deck2pdf_exporting_html5_slide_decks.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -21484,7 +21634,7 @@ pause = 2000&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>GR8Conf Europe 2013 is over</title>
       <link>https://melix.github.io/blog//2013/05/27/gr8conf_europe_2013_is_over.html</link>
-      <pubDate>Mon, 27 May 2013 00:00:00 +0200</pubDate>
+      <pubDate>lun., 27 mai 2013 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2013/05/27/gr8conf_europe_2013_is_over.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -21581,7 +21731,7 @@ pause = 2000&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Null-safe invocation and primitive types</title>
       <link>https://melix.github.io/blog//2013/04/17/null_safe_invocation_and_primitive.html</link>
-      <pubDate>Wed, 17 Apr 2013 00:00:00 +0200</pubDate>
+      <pubDate>mer., 17 avr. 2013 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2013/04/17/null_safe_invocation_and_primitive.html</guid>
       	<description>
 	&lt;div class=&quot;sect2&quot;&gt;
@@ -21638,7 +21788,7 @@ def result = p?.age&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Les écoles sont-elles le problème ?</title>
       <link>https://melix.github.io/blog//2013/03/26/les_%C3%A9coles_sont_elles_le.html</link>
-      <pubDate>Tue, 26 Mar 2013 00:00:00 +0100</pubDate>
+      <pubDate>mar., 26 mars 2013 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2013/03/26/les_%C3%A9coles_sont_elles_le.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -21707,7 +21857,7 @@ def result = p?.age&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Static builders inception</title>
       <link>https://melix.github.io/blog//2013/02/13/static_builders_inception.html</link>
-      <pubDate>Wed, 13 Feb 2013 00:00:00 +0100</pubDate>
+      <pubDate>mer., 13 févr. 2013 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2013/02/13/static_builders_inception.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -22041,7 +22191,7 @@ String build() {
     <item>
       <title>Using Groovy to play with invokedynamic</title>
       <link>https://melix.github.io/blog//2013/01/31/using_groovy_to_play_with.html</link>
-      <pubDate>Thu, 31 Jan 2013 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 31 janv. 2013 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2013/01/31/using_groovy_to_play_with.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -22429,7 +22579,7 @@ Total time: 6.002 secs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Groovy&amp;amp;Grails eXchange 2012, type checking and upcoming conferences</title>
       <link>https://melix.github.io/blog//2012/12/19/groovy_grails_exchange_2012_type.html</link>
-      <pubDate>Wed, 19 Dec 2012 00:00:00 +0100</pubDate>
+      <pubDate>mer., 19 déc. 2012 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2012/12/19/groovy_grails_exchange_2012_type.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -22548,7 +22698,7 @@ Total time: 6.002 secs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>My Git tweaks for daily usage</title>
       <link>https://melix.github.io/blog//2012/07/25/my_git_tweaks_for_daily.html</link>
-      <pubDate>Wed, 25 Jul 2012 00:00:00 +0200</pubDate>
+      <pubDate>mer., 25 juil. 2012 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2012/07/25/my_git_tweaks_for_daily.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -22637,7 +22787,7 @@ export PS1=&quot;\[\033[00m\]\u@\h\[\033[01;34m\] \w \[\033[31m\]\$(parse_git_br
     <item>
       <title>Improved AST transformation testing in Groovy 2</title>
       <link>https://melix.github.io/blog//2012/07/12/improved_ast_transformation_testing_in.html</link>
-      <pubDate>Thu, 12 Jul 2012 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 12 juil. 2012 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2012/07/12/improved_ast_transformation_testing_in.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -22843,7 +22993,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <item>
       <title>Gradle plugin for CloudFoundry now supports standalone applications</title>
       <link>https://melix.github.io/blog//2012/07/03/gradle_plugin_for_cloudfoundry_now.html</link>
-      <pubDate>Tue, 3 Jul 2012 00:00:00 +0200</pubDate>
+      <pubDate>mar., 3 juil. 2012 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2012/07/03/gradle_plugin_for_cloudfoundry_now.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -22907,7 +23057,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <item>
       <title>Groovy 2.0 from an insider</title>
       <link>https://melix.github.io/blog//2012/06/29/groovy_2_0_from_an.html</link>
-      <pubDate>Fri, 29 Jun 2012 00:00:00 +0200</pubDate>
+      <pubDate>ven., 29 juin 2012 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2012/06/29/groovy_2_0_from_an.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -23089,7 +23239,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <item>
       <title>Static compilation for Groovy poll results</title>
       <link>https://melix.github.io/blog//2012/01/29/static_compilation_for_groovy_poll.html</link>
-      <pubDate>Sun, 29 Jan 2012 00:00:00 +0100</pubDate>
+      <pubDate>dim., 29 janv. 2012 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2012/01/29/static_compilation_for_groovy_poll.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -23170,7 +23320,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <item>
       <title>Static type checking talk from Paris Groovy/Grails User Group</title>
       <link>https://melix.github.io/blog//2012/01/22/static_type_checking_talk_from.html</link>
-      <pubDate>Sun, 22 Jan 2012 00:00:00 +0100</pubDate>
+      <pubDate>dim., 22 janv. 2012 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2012/01/22/static_type_checking_talk_from.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -23235,7 +23385,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <item>
       <title>CodeNarc plugin for IntelliJ IDEA updated</title>
       <link>https://melix.github.io/blog//2012/01/18/codenarc_plugin_for_intellij_idea.html</link>
-      <pubDate>Wed, 18 Jan 2012 00:00:00 +0100</pubDate>
+      <pubDate>mer., 18 janv. 2012 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2012/01/18/codenarc_plugin_for_intellij_idea.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -23296,7 +23446,7 @@ public class LabelFinder extends ClassCodeVisitorSupport {
     <item>
       <title>Groovy static type checker: status update</title>
       <link>https://melix.github.io/blog//2011/11/03/groovy_static_type_checker_status.html</link>
-      <pubDate>Thu, 3 Nov 2011 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 3 nov. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/11/03/groovy_static_type_checker_status.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -23760,7 +23910,7 @@ list.each(strategy)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>JLangDetect 0.3 released with bundled language profiles</title>
       <link>https://melix.github.io/blog//2011/06/27/jlangdetect_0_3_released_with.html</link>
-      <pubDate>Mon, 27 Jun 2011 00:00:00 +0200</pubDate>
+      <pubDate>lun., 27 juin 2011 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2011/06/27/jlangdetect_0_3_released_with.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -23885,7 +24035,7 @@ ULD.instance.with {
     <item>
       <title>Customizing Groovy compilation process</title>
       <link>https://melix.github.io/blog//2011/05/12/customizing_groovy_compilation_process.html</link>
-      <pubDate>Thu, 12 May 2011 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 12 mai 2011 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2011/05/12/customizing_groovy_compilation_process.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -24177,7 +24327,7 @@ def shell = new GroovyShell(configuration)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Inline assembly with Groovy&amp;#8230;&amp;#8203; Evil or awesome?</title>
       <link>https://melix.github.io/blog//2011/01/31/inline_assembly_with_groovy_evil.html</link>
-      <pubDate>Mon, 31 Jan 2011 00:00:00 +0100</pubDate>
+      <pubDate>lun., 31 janv. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/01/31/inline_assembly_with_groovy_evil.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -24280,7 +24430,7 @@ println sum(3,6)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Groovy CodeNarc plugin for IntelliJ IDEA is out</title>
       <link>https://melix.github.io/blog//2011/01/23/groovy_codenarc_plugin_for_intellij.html</link>
-      <pubDate>Sun, 23 Jan 2011 00:00:00 +0100</pubDate>
+      <pubDate>dim., 23 janv. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/01/23/groovy_codenarc_plugin_for_intellij.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -24302,7 +24452,7 @@ println sum(3,6)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>ASM plugin for IntelliJ and Groovy @Bytecode AST Transform updated</title>
       <link>https://melix.github.io/blog//2011/01/20/asm_plugin_for_intellij_and.html</link>
-      <pubDate>Thu, 20 Jan 2011 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 20 janv. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/01/20/asm_plugin_for_intellij_and.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -24567,7 +24717,7 @@ println sum(3,6)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Groovy @Bytecode AST transformation released</title>
       <link>https://melix.github.io/blog//2011/01/16/groovy_bytecode_ast_transformation_released.html</link>
-      <pubDate>Sun, 16 Jan 2011 00:00:00 +0100</pubDate>
+      <pubDate>dim., 16 janv. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/01/16/groovy_bytecode_ast_transformation_released.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -24633,7 +24783,7 @@ println fib(40)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Yes, Fibonacci in Groovy can be as fast as Java !</title>
       <link>https://melix.github.io/blog//2011/01/11/yes_fibonacci_in_groovy_can.html</link>
-      <pubDate>Tue, 11 Jan 2011 00:00:00 +0100</pubDate>
+      <pubDate>mar., 11 janv. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/01/11/yes_fibonacci_in_groovy_can.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -24925,7 +25075,7 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
     <item>
       <title>ASM Bytecode Outline for IntelliJ IDEA</title>
       <link>https://melix.github.io/blog//2011/01/09/asm_bytecode_outline_for_intellij.html</link>
-      <pubDate>Sun, 9 Jan 2011 00:00:00 +0100</pubDate>
+      <pubDate>dim., 9 janv. 2011 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2011/01/09/asm_bytecode_outline_for_intellij.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -24967,7 +25117,7 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
     <item>
       <title>Getting TestNG, Spock and Cobertura to work together with Maven</title>
       <link>https://melix.github.io/blog//2010/12/28/getting_testng_spock_and_cobertura.html</link>
-      <pubDate>Tue, 28 Dec 2010 00:00:00 +0100</pubDate>
+      <pubDate>mar., 28 déc. 2010 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2010/12/28/getting_testng_spock_and_cobertura.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -25130,7 +25280,7 @@ class BytecodeASTTransformation implements ASTTransformation, Opcodes {
     <item>
       <title>Groovy Xmas gift : converting a number to its french writing</title>
       <link>https://melix.github.io/blog//2010/12/23/groovy_xmas_gift_converting_a.html</link>
-      <pubDate>Thu, 23 Dec 2010 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 23 déc. 2010 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2010/12/23/groovy_xmas_gift_converting_a.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -25200,7 +25350,7 @@ asLetters = { number -&amp;gt;
     <item>
       <title>Upcoming Groovy goodness : automatic thread interruption</title>
       <link>https://melix.github.io/blog//2010/11/30/upcoming_groovy_goodness_automatic_thread.html</link>
-      <pubDate>Tue, 30 Nov 2010 00:00:00 +0100</pubDate>
+      <pubDate>mar., 30 nov. 2010 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2010/11/30/upcoming_groovy_goodness_automatic_thread.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -25458,7 +25608,7 @@ new MyOtherClass().myOtherMethod()&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Using custom Groovy metaclasses to boost performance</title>
       <link>https://melix.github.io/blog//2010/11/10/using_custom_groovy_metaclasses_to.html</link>
-      <pubDate>Wed, 10 Nov 2010 00:00:00 +0100</pubDate>
+      <pubDate>mer., 10 nov. 2010 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2010/11/10/using_custom_groovy_metaclasses_to.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -25778,7 +25928,7 @@ public class MySuperFastJavaObjectMetaClass extends MetaClassImpl {
     <item>
       <title>Experience feedback on Groovy</title>
       <link>https://melix.github.io/blog//2010/07/27/experience_feedback_on_groovy.html</link>
-      <pubDate>Tue, 27 Jul 2010 00:00:00 +0200</pubDate>
+      <pubDate>mar., 27 juil. 2010 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2010/07/27/experience_feedback_on_groovy.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -26047,7 +26197,7 @@ println &quot;Total : $total&quot;&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Retour d&amp;#8217;expérience : Groovy</title>
       <link>https://melix.github.io/blog//2010/07/26/retour_d_exp%C3%A9rience_groovy.html</link>
-      <pubDate>Mon, 26 Jul 2010 00:00:00 +0200</pubDate>
+      <pubDate>lun., 26 juil. 2010 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2010/07/26/retour_d_exp%C3%A9rience_groovy.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -26313,7 +26463,7 @@ println &quot;Total : $total&quot;&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Downloading sources and javadocs of dependencies in Grails</title>
       <link>https://melix.github.io/blog//2010/06/28/downloading_sources_and_javadocs_for.html</link>
-      <pubDate>Mon, 28 Jun 2010 00:00:00 +0200</pubDate>
+      <pubDate>lun., 28 juin 2010 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2010/06/28/downloading_sources_and_javadocs_for.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26339,7 +26489,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Coding a Groovy closure in pure Java</title>
       <link>https://melix.github.io/blog//2010/04/19/coding_a_groovy_closure_in.html</link>
-      <pubDate>Mon, 19 Apr 2010 00:00:00 +0200</pubDate>
+      <pubDate>lun., 19 avr. 2010 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2010/04/19/coding_a_groovy_closure_in.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26427,7 +26577,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Has the Java build tools war begun ?</title>
       <link>https://melix.github.io/blog//2010/04/15/has_the_java_build_tools.html</link>
-      <pubDate>Thu, 15 Apr 2010 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 15 avr. 2010 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2010/04/15/has_the_java_build_tools.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -26509,7 +26659,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>JLangdetect 0.2 released</title>
       <link>https://melix.github.io/blog//2009/09/30/jlangdetect_0_2_released.html</link>
-      <pubDate>Wed, 30 Sep 2009 00:00:00 +0200</pubDate>
+      <pubDate>mer., 30 sept. 2009 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2009/09/30/jlangdetect_0_2_released.html</guid>
       	<description>
 	&lt;div class=&quot;sect2&quot;&gt;
@@ -26564,7 +26714,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>JLangdetect available at google code</title>
       <link>https://melix.github.io/blog//2009/07/16/jlangdetect_available_to_google_code.html</link>
-      <pubDate>Thu, 16 Jul 2009 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 16 juil. 2009 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2009/07/16/jlangdetect_available_to_google_code.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26603,7 +26753,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Ubuntu Jaunty unusable for Swing debugging ?</title>
       <link>https://melix.github.io/blog//2009/04/30/ubuntu_jaunty_unusable_for_swing.html</link>
-      <pubDate>Thu, 30 Apr 2009 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 30 avr. 2009 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2009/04/30/ubuntu_jaunty_unusable_for_swing.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -26625,7 +26775,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>[Update] Adobe releases a buggy flash plugin once again</title>
       <link>https://melix.github.io/blog//2008/10/15/adobe_releases_a_buggy_flash.html</link>
-      <pubDate>Wed, 15 Oct 2008 00:00:00 +0200</pubDate>
+      <pubDate>mer., 15 oct. 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/10/15/adobe_releases_a_buggy_flash.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26645,7 +26795,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Language detection : more thoughts</title>
       <link>https://melix.github.io/blog//2008/09/25/language_detection_more_thoughts.html</link>
-      <pubDate>Thu, 25 Sep 2008 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 25 sept. 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/09/25/language_detection_more_thoughts.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26672,7 +26822,7 @@ grails download-sources-and-javadocs&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>NLP in Java : A language detector</title>
       <link>https://melix.github.io/blog//2008/09/21/nlp_in_java_a_language.html</link>
-      <pubDate>Sun, 21 Sep 2008 00:00:00 +0200</pubDate>
+      <pubDate>dim., 21 sept. 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/09/21/nlp_in_java_a_language.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -26890,7 +27040,7 @@ langof(&quot;eating some chocolate&quot;) = en : OK&lt;/pre&gt;
     <item>
       <title>Java 7 idea : change default file encoding</title>
       <link>https://melix.github.io/blog//2008/09/16/java_7_idea_change_default.html</link>
-      <pubDate>Tue, 16 Sep 2008 00:00:00 +0200</pubDate>
+      <pubDate>mar., 16 sept. 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/09/16/java_7_idea_change_default.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26910,7 +27060,7 @@ langof(&quot;eating some chocolate&quot;) = en : OK&lt;/pre&gt;
     <item>
       <title>The strange Hibernate version numbers</title>
       <link>https://melix.github.io/blog//2008/08/21/the_strange_hibernate_version_numbers.html</link>
-      <pubDate>Thu, 21 Aug 2008 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 21 août 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/08/21/the_strange_hibernate_version_numbers.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -26986,7 +27136,7 @@ langof(&quot;eating some chocolate&quot;) = en : OK&lt;/pre&gt;
     <item>
       <title>XPointer support in JDK is incomplete</title>
       <link>https://melix.github.io/blog//2008/07/16/xpointer_support_in_jdk_is.html</link>
-      <pubDate>Wed, 16 Jul 2008 00:00:00 +0200</pubDate>
+      <pubDate>mer., 16 juil. 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/07/16/xpointer_support_in_jdk_is.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -27038,7 +27188,7 @@ XPointer scheme support ?&lt;/pre&gt;
     <item>
       <title>&lt;strong&gt;gasp&lt;/strong&gt; Dell Optiplex 740 bios upgrade failure</title>
       <link>https://melix.github.io/blog//2008/06/06/gasp_dell_optiplex_740_bios.html</link>
-      <pubDate>Fri, 6 Jun 2008 00:00:00 +0200</pubDate>
+      <pubDate>ven., 6 juin 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/06/06/gasp_dell_optiplex_740_bios.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27058,7 +27208,7 @@ Click ok to try to reflash BIOS&lt;/pre&gt;
     <item>
       <title>Simplifiying java.util.concurrent with Groovy</title>
       <link>https://melix.github.io/blog//2008/04/02/simplifiying_java_util_concurrent_with.html</link>
-      <pubDate>Wed, 2 Apr 2008 00:00:00 +0200</pubDate>
+      <pubDate>mer., 2 avr. 2008 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2008/04/02/simplifiying_java_util_concurrent_with.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27105,7 +27255,7 @@ println &quot;This line of code will only appear after every closure in doInPara
     <item>
       <title>Moving Lucene a step forward</title>
       <link>https://melix.github.io/blog//2008/03/20/why_lucene_isn_t_that.html</link>
-      <pubDate>Thu, 20 Mar 2008 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 20 mars 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/03/20/why_lucene_isn_t_that.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -27191,7 +27341,7 @@ println &quot;This line of code will only appear after every closure in doInPara
     <item>
       <title>Tip: Find try/catch performance bottlenecks with structural search in IntelliJ IDEA</title>
       <link>https://melix.github.io/blog//2008/02/29/tip_find_try_catch_performance.html</link>
-      <pubDate>Fri, 29 Feb 2008 00:00:00 +0100</pubDate>
+      <pubDate>ven., 29 févr. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/02/29/tip_find_try_catch_performance.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27269,7 +27419,7 @@ Then you need to tweak the variables in order to specify the cardinalities. Clic
     <item>
       <title>Java BGGA closures proposal and the Groovy syntax</title>
       <link>https://melix.github.io/blog//2008/02/29/java_bgga_closures_proposal_and.html</link>
-      <pubDate>Fri, 29 Feb 2008 00:00:00 +0100</pubDate>
+      <pubDate>ven., 29 févr. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/02/29/java_bgga_closures_proposal_and.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27310,7 +27460,7 @@ Then you need to tweak the variables in order to specify the cardinalities. Clic
     <item>
       <title>Groovy, functional programming and the curry method</title>
       <link>https://melix.github.io/blog//2008/02/15/groovy_functional_programming_and_the.html</link>
-      <pubDate>Fri, 15 Feb 2008 00:00:00 +0100</pubDate>
+      <pubDate>ven., 15 févr. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/02/15/groovy_functional_programming_and_the.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27376,7 +27526,7 @@ println sum([(1..10),(11..20)])
     <item>
       <title>Apache CXF + Maven + Javamail + Log4J (update)</title>
       <link>https://melix.github.io/blog//2008/02/14/apache_cxf_maven_javamail_awful.html</link>
-      <pubDate>Thu, 14 Feb 2008 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 14 févr. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/02/14/apache_cxf_maven_javamail_awful.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27468,7 +27618,7 @@ the content of my mail&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Alternative to delegate pattern with cglib</title>
       <link>https://melix.github.io/blog//2008/02/09/alternative_to_delegate_pattern_with.html</link>
-      <pubDate>Sat, 9 Feb 2008 00:00:00 +0100</pubDate>
+      <pubDate>sam., 9 févr. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/02/09/alternative_to_delegate_pattern_with.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27609,7 +27759,7 @@ public class ProofOfConcept {
     <item>
       <title>The facts about annotations inheritance</title>
       <link>https://melix.github.io/blog//2008/01/18/the_facts_about_annotations_inheritance.html</link>
-      <pubDate>Fri, 18 Jan 2008 00:00:00 +0100</pubDate>
+      <pubDate>ven., 18 janv. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/01/18/the_facts_about_annotations_inheritance.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27726,7 +27876,7 @@ public @interface WebService
     <item>
       <title>The truth about annotations inheritance</title>
       <link>https://melix.github.io/blog//2008/01/17/the_truth_about_annotations_inheritance.html</link>
-      <pubDate>Thu, 17 Jan 2008 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 17 janv. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/01/17/the_truth_about_annotations_inheritance.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27800,7 +27950,7 @@ public class AnnotationTest {
     <item>
       <title>IntelliJ IDEA&amp;#8217;s local history saved my life !</title>
       <link>https://melix.github.io/blog//2008/01/17/intellij_idea_s_local_history.html</link>
-      <pubDate>Thu, 17 Jan 2008 00:00:00 +0100</pubDate>
+      <pubDate>jeu., 17 janv. 2008 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2008/01/17/intellij_idea_s_local_history.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -27823,7 +27973,7 @@ public class AnnotationTest {
     <item>
       <title>Separating configuration from deployment in web applications</title>
       <link>https://melix.github.io/blog//2007/12/26/separating_configuration_from_deployment_in.html</link>
-      <pubDate>Wed, 26 Dec 2007 00:00:00 +0100</pubDate>
+      <pubDate>mer., 26 déc. 2007 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2007/12/26/separating_configuration_from_deployment_in.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -28052,7 +28202,7 @@ This post showed you that you could, at level design, avoid some lacks to the Ja
     <item>
       <title>GFreeMarker 0.2 released</title>
       <link>https://melix.github.io/blog//2007/12/21/gfreemarker_0_2_released.html</link>
-      <pubDate>Fri, 21 Dec 2007 00:00:00 +0100</pubDate>
+      <pubDate>ven., 21 déc. 2007 00:00:00 +0100</pubDate>
       <guid isPermaLink="false">2007/12/21/gfreemarker_0_2_released.html</guid>
       	<description>
 	&lt;div class=&quot;paragraph&quot;&gt;
@@ -28076,7 +28226,7 @@ This post showed you that you could, at level design, avoid some lacks to the Ja
     <item>
       <title>FreeMarker for Groovy</title>
       <link>https://melix.github.io/blog//2007/08/03/freemarker_for_groovy.html</link>
-      <pubDate>Fri, 3 Aug 2007 00:00:00 +0200</pubDate>
+      <pubDate>ven., 3 août 2007 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2007/08/03/freemarker_for_groovy.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -28214,7 +28364,7 @@ println engine.createTemplate(tpl).make(binding)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Grails, Spring and templates security issue example</title>
       <link>https://melix.github.io/blog//2007/08/02/grails_spring_and_templates_security.html</link>
-      <pubDate>Thu, 2 Aug 2007 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 2 août 2007 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2007/08/02/grails_spring_and_templates_security.html</guid>
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
@@ -28368,7 +28518,7 @@ class ProofOfConceptController {
     <item>
       <title>Replacing Velocity with Groovy = JSmarty ?</title>
       <link>https://melix.github.io/blog//2007/08/01/replacing_velocity_with_groovy_jsmarty.html</link>
-      <pubDate>Wed, 1 Aug 2007 00:00:00 +0200</pubDate>
+      <pubDate>mer., 1 août 2007 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2007/08/01/replacing_velocity_with_groovy_jsmarty.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
@@ -28447,7 +28597,7 @@ println engine.createTemplate(tpl_src).make(binding)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Dynamic database models with Groovy and Hibernate</title>
       <link>https://melix.github.io/blog//2007/07/26/dynamic_database_models_with_groovy.html</link>
-      <pubDate>Thu, 26 Jul 2007 00:00:00 +0200</pubDate>
+      <pubDate>jeu., 26 juil. 2007 00:00:00 +0200</pubDate>
       <guid isPermaLink="false">2007/07/26/dynamic_database_models_with_groovy.html</guid>
       	<description>
 	&lt;div class=&quot;sect1&quot;&gt;
