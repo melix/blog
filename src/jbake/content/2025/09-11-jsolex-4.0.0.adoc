@@ -1,0 +1,92 @@
+= JSol'Ex 4.0.0 est sorti !
+Cédric Champeau
+2025-09-11
+:jbake-type: post
+:jbake-tags: solex,jsolex,solaire,astronomie,ia,claude,bass2000
+:jbake-status: published
+:source-highlighter: pygments
+:id: jsolex-4.0.0
+:linkattrs:
+
+Le 18 février 2023, je montais à l'Observatoire du Pic du Midi de Bigorre pour y passer une "Nuit au Sommet", une expérience mêlant observation nocturne et visite des installations scientifiques. J'y ai découvert avec fascination le coronographe Bernard-Lyot, l'expérience https://climso.fr/[CLIMSO] gérée par les Observateurs Associés de l'Observatoire Midi-Pyrénées.
+
+Des étoiles plein les yeux (et une en particulier, notre soleil), ma vie d'astronome amateur centrée sur le ciel profond allait basculer vers l'observation de notre Soleil. De retour à la maison, j'ai commencé à me renseigner sur le matériel solaire, et découvrait avec stupéfaction qu'il fallait investir, beaucoup, pour pouvoir observer notre astre en toute sécurité : filtres pleine ouverture, étalons, ... tout avait un coût démesuré pour un débutant comme moi. De quoi décourager, jusqu'à ce que je tombe par hasard http://www.astrosurf.com/solex/[sur le projet Sol'Ex], initié par la légende Christian Buil.
+
+Ce projet, très didactique, permet de se construire un spectrohéliographe, par impression 3D. Un tel instrument présente de nombreux avantages : coût modeste, résolution élevée et la possibilité d'observer dans de nombreuses longueurs d'ondes tout en mettant à disposition des données exploitables scientifiquement !
+
+L'inconvénient, si c'en est vraiment un, de cet instrument est qu'il ne produit pas une image du soleil observable directement à l'oculaire. Il est nécessaire d'utiliser un logiciel de reconstruction qui, à partir d'une vidéo enregistrant un "scan" du soleil, permet de générer une (voir plus) images du soleil. Ce processus de reconstruction, bien mystérieux pour moi à l'époque, était réalisé par un http://valerie.desnoux.free.fr/inti/[logiciel écrit par Valérie Desnoux, nommé INTI]. Etant développeur (Java), je me suis alors lancé un challenge à l'époque : puisque je ne comprenais pas comment ça fonctionnait, j'allais essayer de créer moi-même un logiciel pour faire cette reconstruction. De cet appétit est né https://melix.github.io/astro4j/latest/fr/jsolex.html[JSol'Ex].
+
+== JSol'Ex 4.0 et la collaboration scientifique
+
+Nous voici 2 ans et demi plus tard, JSol'Ex arrive en version 4. Entre temps, le nombre d'utilisateurs a explosé et mon logiciel est exploité non seulement par les utilisateurs du Sol'Ex de Christian Buil, mais aussi pour des spectrohéliographes commerciaux comme le https://mlastro.com/mlastro-shg[MLAstro SHG 700] (que j'utilise désormais). JSol'Ex a apporté de nombreuses innovations, comme la possibilité d'exécuter des scripts pour générer des animations, faire du stacking, créer des images personnalisées, ou encore la détection automatique d'éruptions, des régions actives (avec annotation), la détection de bombes d'Ellerman, la correction des bords dentelés et j'en passe.
+
+Récemment, JSol'Ex a été utilisé pour réaliser un https://iopscience.iop.org/article/10.3847/2515-5172/adef50[Atlas de Spectrohéliogrammes], et mentionné dans https://arxiv.org/abs/2508.10853[un article précisément sur la détection des bombes d'Ellerman]. Bref, JSol'Ex était devenu suffisamment mature pour faire de la "vraie science", chose qui m'a toujours un peu effrayé pour être honnête.
+
+Ainsi, j'ai toujours refusé d'intégrer une fonctionnalité dans JSol'Ex, qui m'a pourtant été demandée de nombreuses fois : la possibilité de l'utiliser pour soumettre des images dans la https://bass2000.obspm.fr/[base de données BASS2000] de l'https://www.linkedin.com/school/lira-observatoire-de-paris/[Observatoire de Paris-Meudon]. Plusieurs raisons à cela : d'une, je ne faisais pas confiance à mon propre logiciel pour sa qualité "scientifique". Si je le savais capable de produire de "belles images", il est tout à fait différent de s'en servir pour une exploitation scientifique. D'autre part, il n'était pas question pour moi d'intégrer une fonctionnalité qui avait été développée par Valérie Desnoux (autrice de INTI) et l'équipe de Meudon sans son accord, par respect pour son travail.
+
+Cependant, vous aurez compris que les temps ont changé et que la pression des utilisateurs ainsi que mes discussions avec Florence Cornu, du projet SOLAP, aux Rencontres du Ciel et de l'Espace fin 2024, puis aux https://www.mars60.fr/jason2025/[JASON] en Juin dernier ont eu raison de mes doutes. Avec son accord et celui de Valérie, je suis donc heureux de vous annoncer que JSol'Ex 4 est officiellement supporté pour soumettre vos images dans la base de données BASS 2000 !
+
+== Un assistant pas à pas
+
+Ne souhaitant pas faire les choses à moitié, j'ai particulièrement peaufiné le logiciel pour simplifier cette procédure. J'ai souhaité faire les choses avec sérieux, puisqu'il s'agit d'une base de données professionnelle, exploitée par des scientifiques. Ainsi, une chose importante pour moi était de guider l'utilisateur dans ce processus et de lui faire comprendre l'importance de la qualité des données, tout en simplifiant le processus de soumission.
+
+.Assistant de soumission BASS2000
+image::/blog/img/jsolex-4.0/bass2000.jpg[]
+
+Ainsi par exemple, BASS2000 n'a que très peu de tolérance sur les problèmes d'orientation de l'image : il faut que le Nord solaire soit à moins de 1 degré d'erreur, sinon l'image sera refusée. L'assistant intègre donc un outil pour aider à vérifier l'orientation et corriger les erreurs minimes dues par exemple à une mise en station imparfaite.
+
+L'assistant guidera aussi l'utilisateur dans son processus de soumission, en lui demandant de bien vérifier toutes les métadonnées associées à l'observation, et ira jusqu'à envoyer l'image sur le serveur FTP de BASS2000 pour validation par les équipes.
+
+Je suis particulièrement reconnaissant à Florence CORNU pour son aide afin que les images JSol'Ex soient acceptées dans la base et je remercie mes beta-testeurs qui ont patiemment testé mes versions de développement pendant l'été.
+
+Je ne vous cache pas qu'il s'agit là d'une forme de reconnaissance de mon travail, des centaines d'heures passées soirs et week-ends à développer ce logiciel qui rappelons-le est https://github.com/melix/astro4j[entièrement Open Source et gratuit].
+
+Enfin, je ne peux pas m'arrêter sans vous annoncer une deuxième bonne nouvelle : non seulement vous pourrez utiliser JSol'Ex pour soumettre vos images acquises avec un Sol'Ex, mais aussi avec le MLAstro SHG 700, qui devient officiellement supporté dans la base BASS2000 !
+
+== Changements dans l'interface
+
+Pour cette version j'ai aussi souhaité moderniser un peu l'interface graphique et la simplifier : avec le nombre de fonctionnalités croissantes arrive ce moment fatidique que tout développeur redoute : que l'interface ne devienne trop complexe pour les nouveaux utilisateurs et ne parle qu'aux anciens. J'ai essayé d'éviter cet écueil au cours du temps en refusant certaines fonctionnalités trop "de niche", mais sans pouvoir pour autant réussir à avoir une interface totalement claire.
+
+.Aperçu des changements d'interface
+image::/blog/img/jsolex-4.0/interface-overview.jpg[]
+
+Cette nouvelle version essaie donc de regrouper les paramètres par sections plus claires, tout en ajoutant des infobulles pour guider les utilisateurs, anciens comme nouveaux, dans cet esprit qui est que le logiciel se doit d'être le plus didactique possible : j'essaie, autant que faire se peut, de vous transmettre en tant qu'utilisateurs ce que moi-même j'apprends en développant ce logiciel. Un exemple frappant de cette philosophie, c'est cette fonctionnalité que j'avais ajoutée qui permet de montrer en cliquant sur le disque solaire, à quelle image il correspond dans le fichier source (une vidéo contenant des spectres).
+
+== Détection d'ellipse assistée par l'utilisateur
+
+Je vous parlais un peu plus haut de l'Atlas des Spectrohéliogrammes. Cet atlas, réalisé par Pál Váradi Nagy, nécessite un travail énorme d'analyse des données et est réalisé à l'aide de scripts JSol'Ex. Cependant, pour certaines longueurs d'ondes ou pour parfois des images un peu compliquées à traiter, le logiciel peut échouer à détecter correctement les contours du disque solaire. Ceci peut arriver notamment lorsque les images sont peu contrastées ou lorsqu'il y a des réflexions internes qui biaisent la détection.
+
+Afin de résoudre ces cas complexes qui, encore une fois, nuisent à l'analyse scientifiques, j'ai ajouté la possibilité d'aider le logiciel à détecter les contours, et ainsi à obtenir un image solaire bien ronde:
+
+.Détection d'ellipse assistée par l'utilisateur
+image::/blog/img/jsolex-4.0/ellipse-detection-assistant.jpg[]
+
+== L'IA à la rescousse
+
+Je suis développeur et en tant que tel, sur ce media, il me semblait pertinent d'ajouter une section sur la façon dont cette version a été développée.
+
+Cette version est la première version qui a été développée avec l'aide de l'IA, en particulier Claude Code. En effet, les dernières innovations en matière d'IA agentique sont pour le coup la véritable révolution à venir : autant avant, avoir une IA qui n'était pas capable de comprendre le contexte, faire des refactorings ou prévoir un plan de développement ne les rendait pas particulièrement utiles, autant les IA à base d'agents, qui sont capables d'analyser votre code, appeler des outils de manière autonome et avoir de vraies interactions avec vous sont un "game changer" de mon point de vue.
+
+Dans cette version, j'ai donc utilisé Claude Code (plan Pro) pour m'aider à faire les refactorings dont j'avais besoin et m'assister dans une tâche où je ne suis pas particulièrement à l'aise : le design d'interfaces graphiques.
+
+De manière générale, ça fonctionne plutôt bien. Très bien même. La capacité de l'outil à définir un plan d'implémentation et comprendre les besoins est assez fascinante. Le code généré, en revanche, nécessite toujours beaucoup de review. On pourrait dire que j'ai l'impression d'avoir un (très bon) stagiaire avec moi, en permanence. En tant que développeur senior, je suis assez rapide à identifier là où l'IA complique les choses inutilement, ou utilise des design pattern dépréciés, ou ne respecte pas les conventions de code. Je serai, par exemple, terrifié si le code original produit était parti en production sans review. Mais, en lui donnant les bonnes directions, en lui expliquant ses erreurs, on arrive rapidement à ce que l'on souhaite avec la qualité que l'on souhaite.
+
+Quelques exemples de choses qui ne fonctionnent pour le coup vraiment pas bien:
+
+* Claude vous demande de créer un fichier CLAUDE.md qui comprend des instructions sur comment compiler votre projet, comment il est organisé, etc. Bref, du contexte qui est systématiquement ajouté à chaque session. Pourtant, à l'utilisation, Claude ignore allègrement ces instructions.
+
+* En Java, les fichiers .properties sont encodés en ISO-8859-1, même dans une base où tous les sources sont en UTF-8. C'est une bizarrerie historique, mais Claude ne la comprend absolument pas. A chaque fois qu'il modifie mes fichiers properties (qui servent à l'internationalisation de l'interface), il casse systématiquement l'encodage. Pour l'éviter, le dois systématiquement, avant de lui faire faire une opération dont je sais qu'elle implique ces fichiers, lui dire "respecte les guidelines du fichier CLAUDE" où je lui ai donné une technique pour éviter les problèmes (convertir le fichier en UTF-8, puis l'éditer, puis le reconvertir en ISO-8859-1)
+
+* Les commentaires dans le code. Quand on commence à avoir un peu de bouteille comme moi, il est assez insupportable de lire des commentaires "captain obvious", ce genre de commentaires qui dit "la ligne suivante calcule 1+1". Claude en génère beaucoup. Trop. Et malgré le fait que mon fichier CLAUDE lui interdise explicitement.
+
+* La confiance en soi. Claude est bien trop optimiste et tend trop à flatter l'utilisateur. Par exemple, si je lui mens explicitement ("ton algorithme est faux parce que XXX"), il répondra systématiquement "Tu as raison !" sans "réfléchir" (j'utilise les guillemets avec intention), comme un tic de langage ! Ca devient assez frustrant à la longue, lorsqu'il ne comprend pas un problème ou complique inutilement l'implémentation.
+
+* Les limites : on arrive, sur un projet de la taille de JSol'Ex, très rapidement aux limites d'usage même sur un forfait Pro. Si je suis satisfait de ce que ça m'apporte pour le prix, je ne suis pas prêt à payer les 200€ / mois pour augmenter ces limites. N'oublions pas que je fais ça sur mon temps libre... je n'ai aucune obligation de résultat !
+
+Quoi qu'il en soit, il s'agit là d'avancées qu'il devient difficile d'ignorer. Et ceux qui me connaissent savent à quel point je suis critique sur l'utilisation des IA, les mythes autour de ce qu'elle est capable de faire et son impact écologique. Néanmoins, une chose est certaine : les dirigeants qui pensent économiser du temps et de l'argent en virant leurs développeurs pour les remplacer par de l'IA se mettent une balle dans le pied : elle pose de sérieux problèmes de qualité de code et donc de maintenance, et, avec l'arrivée des agents, posent de graves problèmes de sécurité (un outil autonome qui décide par lui même s'il faut vous demander l'autorisation pour exécuter une commande !"). L'IA doit être vue comme une aide à la productivité, mais qui doit être cadrée par des gens d'expérience. Bref, nous sommes à un tournant et je ne suis pas encore bien à l'aise avec ce que cela implique. Nous n'avons jamais été aussi près du rêve de gosse que j'avais d'IA "autonomes", mais la maturité me force à en avoir peur.
+
+Mais nous nous éloignons là du sujet initial et concluons donc ce billet : dites bienvenue à JSol'Ex 4, consultez la vidéo de présentation ci-dessous et n'hésitez pas à contribuer !
+
+++++
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4SPKsNvnzKo?si=KuqIIMc1H6SLgVec" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+++++
