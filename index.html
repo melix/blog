@@ -91,6 +91,844 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2026/02/05-measuring-solar-rotation.html"><h1>Measuring Solar Differential Rotation with JSol&#8217;Ex</h1></a>
+  			<p>05 February 2026</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	
+		<a href="/blog/tags/solar.html">solar</a> 
+	
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	
+		<a href="/blog/tags/doppler.html">doppler</a> 
+	
+		<a href="/blog/tags/rotation.html">rotation</a> 
+	</p>
+			
+  			<p><div class="sect1">
+<h2 id="_a_rotating_ball_of_plasma">A Rotating Ball of Plasma</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One fascinating aspect of the Sun is that it doesn&#8217;t rotate like a solid body.
+Unlike the Earth, which completes one rotation in 24 hours regardless of latitude, the Sun&#8217;s rotation rate varies with latitude: the equator rotates faster than the poles.
+This phenomenon, called <strong>differential rotation</strong>, has been studied since the 19th century and remains an important research topic in solar physics.</p>
+</div>
+<div class="paragraph">
+<p>The equatorial regions of the Sun complete a rotation in approximately 25 days, while near the poles, it takes about 35 days.
+This differential rotation is thought to play a key role in the solar dynamo mechanism that generates the Sun&#8217;s magnetic field and drives the 11-year solar cycle.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/jsolex-diff-velocity/differential-rotation-concept.svg" alt="Differential rotation concept" width="600">
+</div>
+</div>
+<div class="paragraph">
+<p>In this blog post, I will explain how I implemented a feature in JSol&#8217;Ex 4.5.0 that allows amateur astronomers to measure this differential rotation directly from their spectroheliograph data.
+A common mistake is to think that this measurement is not possible because the spectral dispersion of a SHG like the Sol&#8217;Ex is typically around 0.1 to 0.2Å, which larger than the scale of what we&#8217;re trying to measure (2 km/s, which is about 0.04Å).
+In fact, what we are trying to measure requires sub-pixel precision and we can achieve that.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_doppler_effect">The Doppler Effect</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The principle behind the measurement is simple: the <strong>Doppler effect</strong>.
+When a light source moves towards us, the wavelength is shifted towards the blue end of the spectrum (blueshift).
+When it moves away, the wavelength shifts towards the red (redshift).</p>
+</div>
+<div class="paragraph">
+<p>Since the Sun rotates, one limb is always moving towards us (let&#8217;s say the East limb) while the other is moving away (the West limb).
+By measuring the wavelength shift of a spectral line at both limbs, we can calculate the rotation velocity.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/jsolex-diff-velocity/doppler-effect-sun.svg" alt="Doppler effect for measuring solar rotation" width="700">
+</div>
+</div>
+<div class="paragraph">
+<p>One might wonder about the Earth&#8217;s own motion: we orbit the Sun at approximately 30 km/s, which is much larger than the ~2 km/s solar rotation velocity we&#8217;re trying to measure.
+This orbital motion does produce a Doppler shift of the entire solar spectrum.
+However, this affects equally all points we can measure: this is a global shift which affects all measurements equally and cancels out.
+The same is true for any radial velocity of the Sun relative to the Earth (which varies slightly throughout the year as Earth&#8217;s orbit is elliptical).</p>
+</div>
+<div class="paragraph">
+<p>The fundamental formula relating Doppler shift to velocity is:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\[\frac{\Delta\lambda}{\lambda_0} = \frac{v}{c}\]
+</div>
+</div>
+<div class="paragraph">
+<p>Where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>\(\Delta\lambda\) is the wavelength shift</p>
+</li>
+<li>
+<p>\(\lambda_0\) is the rest wavelength of the spectral line (typically the H-alpha wavelength)</p>
+</li>
+<li>
+<p>\(v\) is the velocity along the line of sight</p>
+</li>
+<li>
+<p>\(c\) is the speed of light (299,792 km/s)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_measurement_methodology">The Measurement Methodology</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_previous_work">Previous Work</h3>
+<div class="paragraph">
+<p>I am not the first person to try to make this measurement in amateur spectroheliography.
+In 2017, Peter Zetner <a href="https://www.cloudynights.com/forums/topic/574571-solar-differential-rotation-measured-with-a-spectroheliograph/">explained on CloudyNights</a> how to measure differential velocity using a spectroheliograph.
+He explained this methodology in depth in the <a href="https://solar-astronomy-book.com/">Solar Astronomy - Observing, imaging and studying the Sun</a> book.
+His methodology relies on measurements using the Na D2 line, but can also be applied on other bright lines including the commonly used Fe I line at 5250.2 Å, and involves comparing the pixel intensities, by averaging them at different latitudes.
+The best results are obtained by performing several scans and averaging data.
+While this works, I wanted to try a different methodology:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Use a single scan: the Doppler images that JSol&#8217;Ex or INTI can produce are in general very consistent and show that all the data we need is already present</p>
+</li>
+<li>
+<p>Avoid pixel intensities: these are very sensitive to limb darkening, observing conditions (e.g clouds, even if thin) or vignetting (darkening of the images along the slit)</p>
+</li>
+<li>
+<p>Make it possible to use H-alpha scans, not because they would give an accurate value of the velocity of the photosphere plasma, but because that&#8217;s the most widely imaged line in amateur solar observations</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The results, of course, will depend on the observed line.
+The methodology that I describe below is capable of returning reasonable results on several lines (H-alpha, Na D2, Fe I) but will completely fail on some others (e.g Ca II K, typically because the line is too wide).</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s dive into the methodology.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The implementation described here was developed iteratively based on real observations. I&#8217;m not a solar physicist, just an engineer trying to extract meaningful data from spectroheliograph captures. The algorithm works reasonably well in practice but should be validated against professional measurements for any scientific application. Therefore why it is advertised as experimental.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_east_west_limb_comparison">East-West Limb Comparison</h3>
+<div class="paragraph">
+<p>The key to understanding the methodology is that it relies on spectral line profile analysis and fitting.
+It requires extracting the spectral line profiles at different locations of the solar disk, preferably near the limbs where the velocities are highest.</p>
+</div>
+<div class="paragraph">
+<p>The differential rotation measurement extracts solar rotation velocities by comparing Doppler shifts between East and West limb points at the same heliographic latitude.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/jsolex-diff-velocity/spectral-profiles.svg" alt="Doppler Shifted Profiles" width="500">
+</div>
+</div>
+<div class="paragraph">
+<p>For each latitude (say, 20° North), the algorithm:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Selects a point on the East limb</p>
+</li>
+<li>
+<p>Selects the corresponding point on the West limb at the same latitude</p>
+</li>
+<li>
+<p>Measures the spectral line position at each point</p>
+</li>
+<li>
+<p>Computes the difference: West - East</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This differential approach has a crucial advantage: it cancels out systematic errors.
+Any instrumental offset, wavelength calibration error, or baseline shift affects both measurements equally and disappears when we take the difference.</p>
+</div>
+<div class="paragraph">
+<p>However, a single East-West measurement at each latitude is not reliable enough.
+Seeing conditions, local solar activity, or fitting errors can corrupt individual measurements.
+To improve accuracy, JSol&#8217;Ex samples <strong>multiple longitudes</strong> across the limb region (typically 14 points from 62° to 88° longitude) and aggregates these measurements.
+This redundancy allows outliers to be rejected and provides an error estimate based on measurement consistency.</p>
+</div>
+<div class="paragraph">
+<p>The measured velocity is then:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\[v_{measured} = \frac{\Delta\lambda}{\lambda_0} \times \frac{c}{2}\]
+</div>
+</div>
+<div class="paragraph">
+<p>The factor of 2 appears because we&#8217;re measuring the difference between approaching and receding limbs.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_from_measured_velocity_to_equatorial_velocity">From Measured Velocity to Equatorial Velocity</h3>
+<div class="paragraph">
+<p>The velocity we measure depends on the geometry: how much of the rotation velocity is projected along our line of sight.
+At the equator and at the limb, we see the full rotation velocity.
+At higher latitudes or closer to disk center, we see only a fraction.</p>
+</div>
+<div class="paragraph">
+<p>The geometric correction factor is:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\[v_{equatorial} = \frac{v_{measured}}{\cos(\phi) \times \sin(\theta)}\]
+</div>
+</div>
+<div class="paragraph">
+<p>Where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>\(\phi\) is the heliographic latitude</p>
+</li>
+<li>
+<p>\(\theta\) is the heliographic longitude (0° at disk center, ±90° at the limbs)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_finding_the_spectral_line_center">Finding the Spectral Line Center</h3>
+<div class="paragraph">
+<p>The most challenging part of the measurement is accurately determining the center of the absorption line.
+A shift of just 0.01 Å corresponds to a velocity of about 0.5 km/s, which is significant compared to the typical equatorial velocity of ~2 km/s.</p>
+</div>
+<div class="paragraph">
+<p>JSol&#8217;Ex uses <strong>Voigt profile fitting</strong> to measure the line center.
+The Voigt profile is the convolution of a Gaussian and a Lorentzian profile, which accurately models the shape of solar absorption lines.
+The Gaussian component represents thermal Doppler broadening, while the Lorentzian component represents natural and pressure broadening.</p>
+</div>
+<div class="paragraph">
+<p>For each measurement point, the algorithm:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Extracts a spectral profile from the SER file at the corresponding position</p>
+</li>
+<li>
+<p>Fits a Voigt profile to the absorption line</p>
+</li>
+<li>
+<p>Records the fitted line center position</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The configurable "Voigt fit half-width" parameter (default: 2 Å) controls how much of the line wings are included in the fit.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_coordinate_systems">Coordinate Systems</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the trickier aspects of this implementation is correctly mapping between the different coordinate systems involved.
+The algorithm starts with heliographic coordinates (where we want to measure) and maps them back to the original SER frames (where the spectral data lives).</p>
+</div>
+<div class="paragraph">
+<p><strong>1. Heliographic Coordinates (starting point)</strong></p>
+</div>
+<div class="paragraph">
+<p>We begin by specifying points in heliographic coordinates:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Latitude</strong>: -90° (south pole) to +90° (north pole)</p>
+</li>
+<li>
+<p><strong>Longitude</strong>: 0° at disk center, ±90° at the limbs</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This requires two solar parameters computed from the observation date:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>B0</strong>: The heliographic latitude of the disk center (varies throughout the year)</p>
+</li>
+<li>
+<p><strong>P</strong>: The position angle of the rotation axis (the "tilt" of the Sun as seen from Earth)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>2. Image Coordinates</strong></p>
+</div>
+<div class="paragraph">
+<p>The heliographic coordinates are converted to pixel positions in the reconstructed image.
+This involves reversing the corrections applied during reconstruction:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>P-angle correction</p>
+</li>
+<li>
+<p>Flip/rotation</p>
+</li>
+<li>
+<p>Geometric distortion</p>
+</li>
+<li>
+<p>Tilt angle</p>
+</li>
+<li>
+<p>Cropping</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>3. SER File Coordinates (destination)</strong></p>
+</div>
+<div class="paragraph">
+<p>Finally, the image coordinates are mapped to the raw SER video file:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Frame number</strong>: Position in the scan sequence (derived from x-coordinate)</p>
+</li>
+<li>
+<p><strong>Column</strong>: Position along the slit (derived from y-coordinate)</p>
+</li>
+<li>
+<p><strong>Row</strong>: Spectral direction (wavelength)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This reverse mapping allows us to extract the exact spectral profile at any heliographic location.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_data_processing_pipeline">The Data Processing Pipeline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The raw measurements are noisy.
+To produce a clean rotation curve, JSol&#8217;Ex uses a two-stage processing pipeline:</p>
+</div>
+<div class="sect2">
+<h3 id="_stage_1_longitude_aggregation">Stage 1: Longitude Aggregation</h3>
+<div class="paragraph">
+<p>As described earlier, at each latitude, multiple longitudes are sampled (typically 14 points across the limb region).
+These measurements are combined using one of three methods (the default is median but you can choose):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Median</strong>: Robust to outliers, uses the middle value</p>
+</li>
+<li>
+<p><strong>Average</strong>: Simple arithmetic mean</p>
+</li>
+<li>
+<p><strong>Weighted Average</strong>: Points closer to the limb (where Doppler signal is stronger) get higher weight</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The error estimate from this stage represents the consistency of measurements across longitudes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stage_2_latitude_smoothing">Stage 2: Latitude Smoothing</h3>
+<div class="paragraph">
+<p>Even after longitude aggregation, the latitude-by-latitude measurements remain noisy.
+Individual latitude bins can still be affected by localized features (sunspots, faculae) or simply measurement scatter.</p>
+</div>
+<div class="paragraph">
+<p>Since we expect solar rotation to vary <strong>smoothly</strong> with latitude (following the \(\sin^2\phi\) and \(\sin^4\phi\) terms of the differential rotation law), we can exploit this physical constraint to reduce noise further.
+JSol&#8217;Ex applies a smoothing filter that combines nearby latitude points within a configurable window (default: 5°).</p>
+</div>
+<div class="paragraph">
+<p>Importantly, the errors from Stage 1 are <strong>propagated</strong> rather than recomputed from the spread in the smoothing window.
+This ensures the error bars represent measurement uncertainty, not physical latitude variations.</p>
+</div>
+<div class="paragraph">
+<p>For the median aggregation:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\[\sigma_{smoothed} = \frac{median(\sigma_i)}{\sqrt{n}}\]
+</div>
+</div>
+<div class="paragraph">
+<p>For the average:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\[\sigma_{smoothed} = \frac{\sqrt{\sum \sigma_i^2}}{n}\]
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_outcome_and_comparison_with_theory">The Outcome and Comparison with Theory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The standard form of the differential rotation law (also known as the Faye formula, even if the original formula didn&#8217;t include the 3rd term) is:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\[\omega(\phi) = A + B \sin^2(\phi) + C \sin^4(\phi)\]
+</div>
+</div>
+<div class="paragraph">
+<p>Where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>\(\phi\) is the heliographic latitude</p>
+</li>
+<li>
+<p>\(A\) is the equatorial rotation rate</p>
+</li>
+<li>
+<p>\(B\) and \(C\) control the decrease in velocity with latitude</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>JSol&#8217;Ex compares measured results with the widely-used coefficients from <strong>Snodgrass &amp; Ulrich (1990)</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>\(A = 14.713\) deg/day (equatorial rotation rate)</p>
+</li>
+<li>
+<p>\(B = -2.396\) deg/day</p>
+</li>
+<li>
+<p>\(C = -1.787\) deg/day</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This gives an equatorial rotation period of about 24.5 days and a polar period of about 34 days.
+Converting to linear velocity at the solar surface (radius ≈ 696,000 km), the equatorial rotation velocity is approximately 2.0 km/s.</p>
+</div>
+<div class="paragraph">
+<p>JSol&#8217;Ex also fits its own A, B, C coefficients from your measurements, allowing direct comparison with the reference values.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_results">Results</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Below are example differential rotation profiles measured with JSol&#8217;Ex using two different spectral lines.
+These measurements were taken on different dates with different seeing conditions.</p>
+</div>
+<div class="sect2">
+<h3 id="_fe_i_5883_å">Fe I 5883 Å</h3>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-diff-velocity/velocity-FeI.png" alt="velocity FeI">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_h_alpha">H-alpha</h3>
+<div class="imageblock">
+<div class="content">
+<img src="/blog/img/jsolex-diff-velocity/velocity-Ha.png" alt="velocity Ha">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_observations">Observations</h3>
+<div class="paragraph">
+<p>The measured profiles show the expected general shape: higher velocities at the equator, decreasing toward the poles.
+The fitted curves follow the theoretical Snodgrass profile reasonably well.</p>
+</div>
+<div class="paragraph">
+<p>However, I observe differences between spectral lines that I cannot fully explain.
+The Fe I measurements show different absolute velocities than H-alpha, and the fitted coefficients differ between scans.</p>
+</div>
+<div class="paragraph">
+<p>Several factors could contribute to these differences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Formation height</strong>: Different spectral lines form at different heights in the solar atmosphere, and rotation rates may vary with height (as suggested by recent research from the <a href="https://www.nature.com/articles/s41550-024-02299-4">CHASE mission</a>)</p>
+</li>
+<li>
+<p><strong>Seeing conditions</strong>: The scans were taken on different dates with different atmospheric conditions</p>
+</li>
+<li>
+<p><strong>Line profile differences</strong>: H-alpha and Fe I have different line widths and depths, which may affect the Voigt fitting precision</p>
+</li>
+<li>
+<p><strong>Systematic effects</strong>: There may be instrumental or algorithmic factors I haven&#8217;t identified</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>I present these results as they are, without attempting to draw conclusions about which measurement is "correct" or what causes the observed differences.
+More measurements across different dates, spectral lines, and instruments would be needed to understand these variations.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_measuring_in_practice">Measuring in Practice</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The quality of results depends heavily on atmospheric seeing.
+Poor seeing blurs the spectral lines and makes accurate center determination difficult.
+Best results are obtained with excellent seeing conditions and a well-focused instrument.
+Last but not least, a high spectral resolution is preferred, which is normally the case with Sol&#8217;Ex (HR) or the SHG 700.</p>
+</div>
+<div class="paragraph">
+<p>You may also wonder which spectral line you should observe.
+I tested the algorithm with Fe I, Na D2 and H-alpha, giving the results below.
+In practice, strong absorption lines should in theory produce the best results, because:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The line depth should be sufficient for accurate fitting</p>
+</li>
+<li>
+<p>The wings should be well-defined for Voigt fitting</p>
+</li>
+<li>
+<p>The signal-to-noise ratio should be high</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Very broad lines like Ca II K are too wide for accurate Voigt fitting and will produce unreliable results.
+Too narrow lines may also represent a challenge for Voigt fitting but may work too.</p>
+</div>
+<div class="sect2">
+<h3 id="_the_impact_of_the_spectral_line_detection">The Impact of the Spectral Line Detection</h3>
+<div class="paragraph">
+<p>One subtle but important factor affecting the absolute accuracy of the measurements is the <strong>polynomial correction</strong> used during image reconstruction.
+Understanding this is essential for interpreting your results correctly.</p>
+</div>
+<div class="paragraph">
+<p>During spectroheliograph processing, JSol&#8217;Ex computes a polynomial that maps each column position along the slit to the expected row position of the spectral line center.
+This polynomial is computed from the <strong>average of SER frames</strong> in the scan (a heuristic is used to include frames containing actual solar data, not sky background).</p>
+</div>
+<div class="paragraph">
+<p>Such a detection is crucial because the spectral line is not straight across the slit due to optical phenomenons: it consistutes what we often call the "smile".
+Therefore, the line center might be at row 300 at column 500, but at row 350 at column 1000.
+The polynomial captures this curvature.</p>
+</div>
+<div class="paragraph">
+<p>By measuring line positions <strong>relative to the polynomial</strong>, we effectively remove the optical distortion from our measurements.
+Without this reference, we would be measuring the sum of optical curvature plus Doppler shift, making it impossible to extract the tiny velocity signals we&#8217;re after.</p>
+</div>
+<div class="paragraph">
+<p>A key question is: why can&#8217;t we just measure the absolute position of the spectral line in each frame and compute velocities directly?</p>
+</div>
+<div class="paragraph">
+<p>The answer lies in the precision required.
+A velocity of 2 km/s corresponds to a wavelength shift of only ~0.04 Å at H-alpha.
+With a typical spectral dispersion of 0.1-0.2 Å/pixel, this is a shift of only <strong>0.2 to 0.4 pixels</strong>.</p>
+</div>
+<div class="paragraph">
+<p>The optical curvature across the slit, on the other hand, can easily span 10-30 pixels or more.
+Any attempt to measure absolute line positions would be completely dominated by this curvature, making Doppler detection impossible.</p>
+</div>
+<div class="paragraph">
+<p>The polynomial serves as our <strong>reference baseline</strong>.
+By measuring how the line position in each individual frame <strong>deviates from the polynomial</strong>, we isolate the Doppler component from the optical component.
+This is the key insight that makes sub-pixel precision measurements possible, alongside the Voigt fitting.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_word_about_doppler_images">A Word About Doppler Images</h3>
+<div class="paragraph">
+<p>This, by the way, is also a reason why the Doppler images look different when scanning in RA vs DEC.
+Because this is a question that is often asked, and that it took <strong>months</strong> for me to understand the reason, I think it&#8217;s worth spending a bit of time explaining the phenomenon.
+I owe this explanation to Jean-François Pittet and Christian Buil, from a discussion weeks ago on the Sol&#8217;Ex mailing list.</p>
+</div>
+<div class="sect3">
+<h4 id="_ra_scanning_vs_dec_scanning_a_critical_difference_for_doppler_images">RA Scanning vs DEC Scanning: A Critical Difference for Doppler Images</h4>
+<div class="paragraph">
+<p>Spectroheliographs can scan the Sun in two directions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>RA scanning</strong> (Right Ascension): The slit is oriented North-South, and the scan proceeds East-West</p>
+</li>
+<li>
+<p><strong>DEC scanning</strong> (Declination): The slit is oriented East-West, and the scan proceeds North-South</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This choice has <strong>profound implications</strong> for Doppler visibility, as explained by Jean-François Pittet on the Sol&#8217;Ex mailing list.</p>
+</div>
+<div class="sect4">
+<h5 id="_ra_scanning_doppler_visible_in_images">RA Scanning: Doppler Visible in Images</h5>
+<div class="paragraph">
+<p>In RA scanning mode, each frame captures a vertical slice of the Sun from North pole to South pole.
+Over the course of the scan:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Early frames capture the <strong>East limb</strong> (approaching, blueshifted)</p>
+</li>
+<li>
+<p>Middle frames capture the <strong>disk center</strong> (no radial velocity)</p>
+</li>
+<li>
+<p>Late frames capture the <strong>West limb</strong> (receding, redshifted)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When JSol&#8217;Ex computes the polynomial from the average of all frames, the East and West contributions <strong>balance out</strong>.
+The blueshift from the East limb is canceled by the redshift from the West limb.
+The resulting polynomial represents the "neutral" baseline: approximately the line position at disk center with no Doppler shift.</p>
+</div>
+<div class="paragraph">
+<p>As a result, when we reconstruct the image at pixel shift 0, the Doppler shifts become <strong>visible as contrast differences</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>East limb appears darker (line shifted into the passband)</p>
+</li>
+<li>
+<p>West limb appears brighter (line shifted out of the passband)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is why Doppler images from RA scans show the characteristic East-West asymmetry.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_dec_scanning_doppler_absorbed_by_the_polynomial">DEC Scanning: Doppler "Absorbed" by the Polynomial</h5>
+<div class="paragraph">
+<p>In DEC scanning mode, each frame captures a horizontal slice of the Sun from East to West.
+Here&#8217;s the critical difference: <strong>all pixels within a single frame see approximately the same Doppler shift</strong>.</p>
+</div>
+<div class="paragraph">
+<p>For example, if the current frame is capturing the Eastern half of the disk:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>All points in that frame are approaching us</p>
+</li>
+<li>
+<p>All points have similar blueshift</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When JSol&#8217;Ex computes the polynomial from the average of all frames, it doesn&#8217;t just capture the optical curvature: it also captures the <strong>average Doppler shift</strong> across the scan.
+But here&#8217;s the problem: the Doppler shift varies systematically across the scan (East frames are blueshifted, West frames are redshifted).</p>
+</div>
+<div class="paragraph">
+<p>The polynomial effectively "absorbs" a weighted average of these Doppler shifts.
+When we then measure line positions relative to this polynomial, much of the Doppler signal has already been subtracted out.
+The resulting Doppler images will <strong>no longer show the rotation of the sun</strong> (which can also be a benefit, for other kind of observations).</p>
+</div>
+<div class="paragraph">
+<p>This is why experienced spectroheliographers often prefer RA scanning for Doppler work: the Doppler signal is more visible and easier to detect.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_the_p_angle_complication">The P-Angle Complication</h4>
+<div class="paragraph">
+<p>There&#8217;s an additional subtlety: the Sun&#8217;s rotation axis is not perpendicular to the ecliptic.
+The <strong>P-angle</strong> (position angle of the rotation axis) varies throughout the year from about -26° to +26°.</p>
+</div>
+<div class="paragraph">
+<p>Only twice per year (around early June and early December) is the P-angle close to zero.
+At these times:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>RA scanning is truly parallel to the solar equator</p>
+</li>
+<li>
+<p>The East-West Doppler pattern aligns perfectly with the scan direction</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>At other times, when P is non-zero:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The rotation axis is tilted relative to the scan direction</p>
+</li>
+<li>
+<p>The Doppler pattern is rotated relative to the image axes</p>
+</li>
+<li>
+<p>Some Doppler signal "leaks" into the polynomial average even in RA mode</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is one reason why differential rotation measurements can show slightly different results at different times of year, despite us taking the P and B0 angles into account.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_implications_for_differential_rotation_measurements">Implications for Differential Rotation Measurements</h4>
+<div class="paragraph">
+<p>This explains why <strong>RA scanning is essential</strong> for differential velocity measurements:</p>
+</div>
+<div class="paragraph">
+<p>In RA mode, East and West limb points at the same latitude correspond to the <strong>same column</strong> on the slit (same slit position, different frames).
+The polynomial value at that column is computed from the average of all frames (East limb, disk center, and West limb) so the Doppler shifts cancel out in the average.
+When we compute <code>(West - polynomial) - (East - polynomial)</code>, the polynomial terms are identical and cancel, leaving us with the true Doppler difference <code>West - East</code>.</p>
+</div>
+<div class="paragraph">
+<p>In DEC mode, East and West limb points at the same latitude correspond to <strong>opposite ends of the slit</strong> (different columns, same frame).
+The polynomial at the East column is computed from frames that <strong>all see the East limb</strong> at that position, so the polynomial absorbs the blueshift.
+Similarly, the polynomial at the West column absorbs the redshift.
+When we compute the difference, these absorbed Doppler shifts don&#8217;t cancel: they <strong>subtract from</strong> our measurement, significantly reducing the measured signal.</p>
+</div>
+<div class="paragraph">
+<p>This is why, in practice, DEC scans do not produce usable Doppler images or reliable differential velocity measurements.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_tips">Configuration Tips</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Limb longitude</strong> (default 75°): Measurements closer to the limb give stronger Doppler signals but risk limb darkening effects</p>
+</li>
+<li>
+<p><strong>Latitude step</strong> (default 2°): Smaller values give finer resolution but longer processing times</p>
+</li>
+<li>
+<p><strong>Smoothing window</strong>: Should be at least 2× the latitude step for effective smoothing</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Measuring differential rotation with amateur equipment would have seemed impossible just a few years ago.
+Pioneers like Peter Zetner or Christian Buil showed us the path.
+What I&#8217;m trying to do, as always with JSol&#8217;Ex, is to make this accessible to even more people at the cost of "magic", which is that some people will very likely share results without understanding the science behind it.
+I&#8217;m not too concerned by this, as I, myself, have been going this way: enjoying SHG image reconstruction, then figuring out how it works, then asking myself questions like "why is it even possible that we measure Doppler velocities so small?": this is an intellectual construct that takes time and we can do better, I think, at brining this to the masses, sharing our insights.</p>
+</div>
+<div class="paragraph">
+<p>This feature joins the growing list of scientific capabilities in JSol&#8217;Ex: Ellerman bomb detection, active region identification, and now differential rotation measurement.
+Each of these brings professional-level analysis within reach of amateur astronomers, but, as always, be cautious with what I&#8217;m saying: I&#8217;m not a scientist, just an engineer.
+I have no doubts that I made approximations, or took liberties that I should probably not have taken.</p>
+</div>
+<div class="paragraph">
+<p>However, I do think that this brings value to the ecosystem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bibliography">Bibliography</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_scientific_papers">Scientific Papers</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://ui.adsabs.harvard.edu/abs/1951MNRAS.111..413N/abstract">Newton, H.W. &amp; Nunn, M.L. (1951) - The Sun&#8217;s rotation derived from sunspots 1934-1944. MNRAS 111, 413</a></p>
+</li>
+<li>
+<p><a href="https://doi.org/10.1007/BF02276562">Howard, R. &amp; Harvey, J. (1970) - Spectroscopic determinations of solar rotation. Sol Phys 12, 23-51</a></p>
+</li>
+<li>
+<p><a href="https://doi.org/10.1007/BF00154804">Snodgrass, H.B. (1984) - Separation of large-scale photospheric Doppler patterns. Sol Phys 94, 13-31</a></p>
+</li>
+<li>
+<p><a href="https://doi.org/10.1086/168467">Snodgrass, H.B. &amp; Ulrich, R.K. (1990) - Rotation of Doppler features in the solar photosphere. ApJ 351, 309</a></p>
+</li>
+<li>
+<p><a href="https://doi.org/10.1023/A:1005226402796">Beck, J.G. (2000) - A comparison of differential rotation measurements. Sol Phys 191, 47-70</a></p>
+</li>
+<li>
+<p><a href="https://ui.adsabs.harvard.edu/abs/2000A%26A&#8230;&#8203;357..763W/abstract">Wöhl, H. &amp; Schmidt, W. (2000) - Solar equatorial plasma rotation: a comparison of different spectroscopic measurements. A&amp;A 357, 763-766</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/2406.18271">Takeda, Y. &amp; Ueno, S. (2024) - Measurement of Solar Differential Rotation by Absolutely Calibrated Iodine-Cell Spectroscopy</a></p>
+</li>
+<li>
+<p><a href="https://www.aanda.org/articles/aa/full_html/2025/10/aa56102-25/aa56102-25.html">Corbard, T. et al. (2025) - Rotational radial shear in the low solar photosphere. A&amp;A 702, A93</a></p>
+</li>
+<li>
+<p><a href="https://www.nature.com/articles/s41550-024-02299-4">Li, Z. et al. (2024) - Height-dependent differential rotation of the solar atmosphere detected by CHASE. Nature Astronomy</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_amateur_resources">Amateur Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.cloudynights.com/forums/topic/574571-solar-differential-rotation-measured-with-a-spectroheliograph/">Zetner, P. (2017) - Solar differential rotation measured with a spectroheliograph (CloudyNights)</a></p>
+</li>
+<li>
+<p><a href="https://solar-astronomy-book.com/">Zetner, P. et al. - Solar Astronomy: Observing, imaging and studying the Sun</a></p>
+</li>
+<li>
+<p><a href="http://www.astrosurf.com/solex/">Sol&#8217;Ex - Christian Buil&#8217;s spectroheliograph project</a></p>
+</li>
+<li>
+<p><a href="https://melix.github.io/astro4j/latest/en/jsolex.html">JSol&#8217;Ex Documentation</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></p>
   			<a href="/blog/2025/09-11-jsolex-4.0.0.html"><h1>JSol&#8217;Ex 4.0.0 est sorti !</h1></a>
   			<p>11 September 2025</p>
 			<p><em>Tags: </em>
