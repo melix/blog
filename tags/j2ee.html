@@ -16,6 +16,21 @@
       
     <script src="/blog/js/highlight.min.js"></script>
     <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+
+    <!-- MathJax for LaTeX math rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']],
+          displayMath: [['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
@@ -78,7 +93,7 @@
 	</div>
 	
 	<!--<ul>-->
-			<h4>décembre 2007</h4>
+			<h4>December 2007</h4>
 			<ul>
 		
 		<li>26 - <a href="../2007/12/26/separating_configuration_from_deployment_in.html">Separating configuration from deployment in web applications</a></li>

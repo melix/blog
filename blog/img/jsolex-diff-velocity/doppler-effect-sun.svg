@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420">
+  <defs>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="70%" style="stop-color:#FFA500"/>
+      <stop offset="100%" style="stop-color:#FF6633"/>
+    </radialGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#2196F3;stop-opacity:0"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F44336;stop-opacity:0"/>
+      <stop offset="100%" style="stop-color:#F44336;stop-opacity:0.6"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2196F3"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F44336"/>
+    </marker>
+    <marker id="arrowWhite" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="white"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="700" height="420" fill="#1a1a2e"/>
+
+  <!-- Title -->
+  <text x="350" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">Doppler Effect: Measuring Solar Rotation</text>
+
+  <!-- Sun with color overlays for Doppler shift -->
+  <circle cx="280" cy="220" r="130" fill="url(#sunGrad)"/>
+
+  <!-- Blue shift overlay (East limb - left side) -->
+  <clipPath id="leftHalf">
+    <rect x="150" y="90" width="130" height="260"/>
+  </clipPath>
+  <circle cx="280" cy="220" r="130" fill="url(#blueGrad)" clip-path="url(#leftHalf)"/>
+
+  <!-- Red shift overlay (West limb - right side) -->
+  <clipPath id="rightHalf">
+    <rect x="280" y="90" width="130" height="260"/>
+  </clipPath>
+  <circle cx="280" cy="220" r="130" fill="url(#redGrad)" clip-path="url(#rightHalf)"/>
+
+  <!-- Rotation direction arrow (curved arrow at top) -->
+  <path d="M 220 95 Q 280 70, 340 95" fill="none" stroke="white" stroke-width="2" marker-end="url(#arrowWhite)"/>
+  <text x="280" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">rotation</text>
+
+  <!-- East limb label and velocity arrow -->
+  <text x="150" y="145" text-anchor="middle" fill="#2196F3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">E</text>
+  <text x="150" y="165" text-anchor="middle" fill="#2196F3" font-family="Arial, sans-serif" font-size="11">(East)</text>
+
+  <!-- Velocity arrow pointing toward observer (right) -->
+  <line x1="150" y1="200" x2="150" y2="240" stroke="#2196F3" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <text x="150" y="270" text-anchor="middle" fill="#64B5F6" font-family="Arial, sans-serif" font-size="10">approaching</text>
+  <text x="150" y="285" text-anchor="middle" fill="#64B5F6" font-family="Arial, sans-serif" font-size="10">→ blueshift</text>
+
+  <!-- West limb label and velocity arrow -->
+  <text x="410" y="145" text-anchor="middle" fill="#F44336" font-family="Arial, sans-serif" font-size="16" font-weight="bold">W</text>
+  <text x="410" y="165" text-anchor="middle" fill="#F44336" font-family="Arial, sans-serif" font-size="11">(West)</text>
+
+  <!-- Velocity arrow pointing away from observer (left, but shown going into page conceptually) -->
+  <line x1="410" y1="240" x2="410" y2="200" stroke="#F44336" stroke-width="3" marker-end="url(#arrowRed)"/>
+  <text x="410" y="270" text-anchor="middle" fill="#EF9A9A" font-family="Arial, sans-serif" font-size="10">receding</text>
+  <text x="410" y="285" text-anchor="middle" fill="#EF9A9A" font-family="Arial, sans-serif" font-size="10">→ redshift</text>
+
+  <!-- Observer (Earth) on the right -->
+  <circle cx="600" cy="220" r="25" fill="#4CAF50"/>
+  <circle cx="600" cy="220" r="20" fill="#81C784"/>
+  <text x="600" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Earth</text>
+  <text x="600" y="265" text-anchor="middle" fill="#A5D6A7" font-family="Arial, sans-serif" font-size="11">(observer)</text>
+
+  <!-- Line of sight -->
+  <line x1="410" y1="220" x2="570" y2="220" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="8,4"/>
+
+  <!-- Explanation box at bottom -->
+  <rect x="100" y="330" width="500" height="75" rx="5" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.3)"/>
+
+  <text x="350" y="355" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13">
+    The wavelength shift Δλ between East and West limbs gives the rotation velocity:
+  </text>
+  <text x="350" y="380" text-anchor="middle" fill="#FFCC80" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    v = c × (λ_west - λ_east) / (2 × λ₀)
+  </text>
+  <text x="350" y="398" text-anchor="middle" fill="#B0BEC5" font-family="Arial, sans-serif" font-size="11">
+    At the equator: v ≈ 2 km/s → Δλ ≈ 0.04 Å (sub-pixel precision required!)
+  </text>
+</svg>

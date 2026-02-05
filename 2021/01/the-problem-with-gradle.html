@@ -16,6 +16,21 @@
       
     <script src="/blog/js/highlight.min.js"></script>
     <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+
+    <!-- MathJax for LaTeX math rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']],
+          displayMath: [['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="../../js/html5shiv.min.js"></script>
@@ -77,7 +92,7 @@
 		<h1>The problem with Gradle: really?</h1>
 	</div>
 
-	<p><em>06 janvier 2021</em></p>
+	<p><em>06 January 2021</em></p>
 	<p><em>Tags: </em>
 		<a href="/blog/tags/gradle.html">gradle</a> 
 	</em>
