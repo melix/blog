@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 380">
+  <defs>
+    <radialGradient id="sunGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="70%" style="stop-color:#FFA500"/>
+      <stop offset="100%" style="stop-color:#FF6633"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background (light) -->
+  <rect width="550" height="380" fill="#f8f8f8"/>
+
+  <!-- Title -->
+  <text x="275" y="30" text-anchor="middle" fill="#333" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Rotation solaire différentielle</text>
+
+  <!-- Sun -->
+  <circle cx="220" cy="200" r="130" fill="url(#sunGradient)"/>
+
+  <!-- Latitude lines -->
+  <ellipse cx="220" cy="200" rx="130" ry="18" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+  <ellipse cx="220" cy="155" rx="110" ry="15" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+  <ellipse cx="220" cy="245" rx="110" ry="15" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+  <ellipse cx="220" cy="115" rx="70" ry="9" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+  <ellipse cx="220" cy="285" rx="70" ry="9" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+
+  <!-- Rotation arrows - Equator (fastest, longest arrows) -->
+  <!-- Left side: arrow curving upward (counter-clockwise rotation seen from north) -->
+  <path d="M 90 200 Q 85 165, 115 155" fill="none" stroke="#333" stroke-width="3"/>
+  <polygon points="118,150 108,155 115,163" fill="#333"/>
+
+  <!-- Right side: arrow curving downward -->
+  <path d="M 350 200 Q 355 235, 325 245" fill="none" stroke="#333" stroke-width="3"/>
+  <polygon points="322,250 332,245 325,237" fill="#333"/>
+
+  <!-- Rotation arrows - Mid latitudes (medium arrows) -->
+  <!-- Upper left -->
+  <path d="M 110 155 Q 100 130, 125 120" fill="none" stroke="#555" stroke-width="2.5"/>
+  <polygon points="128,115 118,120 124,128" fill="#555"/>
+
+  <!-- Lower left -->
+  <path d="M 110 245 Q 100 270, 125 280" fill="none" stroke="#555" stroke-width="2.5"/>
+  <polygon points="128,285 118,280 124,272" fill="#555"/>
+
+  <!-- Upper right -->
+  <path d="M 330 155 Q 340 180, 315 190" fill="none" stroke="#555" stroke-width="2.5"/>
+  <polygon points="312,195 322,190 316,182" fill="#555"/>
+
+  <!-- Lower right -->
+  <path d="M 330 245 Q 340 220, 315 210" fill="none" stroke="#555" stroke-width="2.5"/>
+  <polygon points="312,205 322,210 316,218" fill="#555"/>
+
+  <!-- Rotation arrows - High latitudes (shortest arrows) -->
+  <!-- Top left -->
+  <path d="M 150 115 Q 140 95, 165 88" fill="none" stroke="#777" stroke-width="2"/>
+  <polygon points="168,83 158,88 163,95" fill="#777"/>
+
+  <!-- Bottom left -->
+  <path d="M 150 285 Q 140 305, 165 312" fill="none" stroke="#777" stroke-width="2"/>
+  <polygon points="168,317 158,312 163,305" fill="#777"/>
+
+  <!-- Top right -->
+  <path d="M 290 115 Q 300 135, 275 145" fill="none" stroke="#777" stroke-width="2"/>
+  <polygon points="272,150 282,145 277,137" fill="#777"/>
+
+  <!-- Bottom right -->
+  <path d="M 290 285 Q 300 265, 275 255" fill="none" stroke="#777" stroke-width="2"/>
+  <polygon points="272,250 282,255 277,263" fill="#777"/>
+
+  <!-- Poles -->
+  <circle cx="220" cy="70" r="4" fill="#333"/>
+  <circle cx="220" cy="330" r="4" fill="#333"/>
+  <text x="220" y="58" text-anchor="middle" fill="#333" font-family="Arial, sans-serif" font-size="12" font-weight="bold">N</text>
+  <text x="220" y="355" text-anchor="middle" fill="#333" font-family="Arial, sans-serif" font-size="12" font-weight="bold">S</text>
+
+  <!-- Period labels on the left -->
+  <text x="45" y="205" text-anchor="middle" fill="#0066CC" font-family="Arial, sans-serif" font-size="13" font-weight="bold">~25 jours</text>
+  <text x="52" y="155" text-anchor="middle" fill="#3388DD" font-family="Arial, sans-serif" font-size="12">~27 jours</text>
+  <text x="70" y="115" text-anchor="middle" fill="#5599EE" font-family="Arial, sans-serif" font-size="11">~31 jours</text>
+  <text x="105" y="78" text-anchor="middle" fill="#77AAFF" font-family="Arial, sans-serif" font-size="10">~35 jours</text>
+
+  <!-- Explanation box -->
+  <rect x="370" y="120" width="160" height="160" rx="5" fill="white" stroke="#ccc" stroke-width="1"/>
+  <text x="450" y="145" text-anchor="middle" fill="#333" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Période de rotation</text>
+  <line x1="385" y1="155" x2="515" y2="155" stroke="#ddd"/>
+
+  <text x="450" y="180" text-anchor="middle" fill="#0066CC" font-family="Arial, sans-serif" font-size="11" font-weight="bold">Equateur: + rapide</text>
+  <text x="450" y="200" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14">↓</text>
+  <text x="450" y="220" text-anchor="middle" fill="#3388DD" font-family="Arial, sans-serif" font-size="11">Latitudes moy</text>
+  <text x="450" y="240" text-anchor="middle" fill="#666" font-family="Arial, sans-serif" font-size="14">↓</text>
+  <text x="450" y="260" text-anchor="middle" fill="#77AAFF" font-family="Arial, sans-serif" font-size="11">Poles: + lent</text>
+</svg>

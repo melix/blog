@@ -6,9 +6,837 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 5 Feb 2026 23:47:26 +0100</pubDate>
-    <lastBuildDate>Thu, 5 Feb 2026 23:47:26 +0100</lastBuildDate>
+    <pubDate>Fri, 6 Feb 2026 09:20:33 +0100</pubDate>
+    <lastBuildDate>Fri, 6 Feb 2026 09:20:33 +0100</lastBuildDate>
 
+    <item>
+      <title>Mesurer la rotation différentielle solaire avec JSol&amp;#8217;Ex</title>
+      <link>https://melix.github.io/blog//2026/02/06-mesure-rotation-differentielle.html</link>
+      <pubDate>Thu, 5 Feb 2026 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2026/02/06-mesure-rotation-differentielle.html</guid>
+      	<description>
+	&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_une_boule_de_plasma_en_rotation&quot;&gt;Une boule de plasma en rotation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;un des aspects fascinants du Soleil est qu&amp;#8217;il ne tourne pas comme un corps solide.
+Contrairement à la Terre, qui effectue une rotation en 24 heures quelle que soit la latitude, la vitesse de rotation du Soleil varie avec la latitude : l&amp;#8217;équateur tourne plus vite que les pôles.
+Ce phénomène, appelé &lt;strong&gt;rotation différentielle&lt;/strong&gt;, est étudié depuis le 19ème siècle et reste un sujet de recherche important en physique solaire.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les régions équatoriales du Soleil effectuent une rotation en environ 25 jours, tandis que près des pôles, cela prend environ 35 jours.
+Cette rotation différentielle joue un rôle clé dans le mécanisme de dynamo solaire qui génère le champ magnétique du Soleil et pilote le cycle solaire de 11 ans.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-diff-velocity/differential-rotation-concept-fr.svg&quot; alt=&quot;Concept de rotation différentielle&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans cet article, je vais expliquer comment j&amp;#8217;ai ajouté une fonctionnalité dans JSol&amp;#8217;Ex 4.5.0 qui permet aux astronomes amateurs de mesurer cette rotation différentielle directement à partir d&amp;#8217;un scan obtenu avec un spectrohéliographe.
+Une erreur fréquente est de penser que cette mesure n&amp;#8217;est pas possible parce que la dispersion spectrale d&amp;#8217;un spectrographe comme le Sol&amp;#8217;Ex est typiquement d&amp;#8217;environ 0.1 à 0.2 Å, c&amp;#8217;est-à-dire plus grand que l&amp;#8217;échelle de ce que nous essayons de mesurer (2 km/s, soit environ 0.04 Å).
+En pratique, nous devrons obtenir une précision sub-pixellaire et cet article explique comment y arriver.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_leffet_doppler&quot;&gt;L&amp;#8217;effet Doppler&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le principe derrière la mesure est simple : l&apos;&lt;strong&gt;effet Doppler&lt;/strong&gt;.
+Quand une source lumineuse se déplace vers nous, la longueur d&amp;#8217;onde est décalée vers le bleu du spectre (blueshift).
+Quand elle s&amp;#8217;éloigne, la longueur d&amp;#8217;onde se décale vers le rouge (redshift).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Puisque le Soleil tourne, un limbe se déplace toujours vers nous (le limbe Est) tandis que l&amp;#8217;autre s&amp;#8217;éloigne (le limbe Ouest).
+En mesurant le décalage de longueur d&amp;#8217;onde d&amp;#8217;une raie spectrale aux deux limbes, nous pouvons calculer la vitesse de rotation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-diff-velocity/doppler-effect-sun-fr.svg&quot; alt=&quot;Effet Doppler pour mesurer la rotation solaire&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On pourrait se demander ce qu&amp;#8217;il en est du mouvement propre de la Terre : nous orbitons autour du Soleil à environ 30 km/s, ce qui est bien plus grand que la vitesse de rotation solaire d&amp;#8217;environ 2 km/s que nous essayons de mesurer.
+Ce mouvement orbital produit effectivement un décalage Doppler de tout le spectre solaire.
+Cependant, cet effet s&amp;#8217;applique de manière égale à tous les points que nous pouvons mesurer : en d&amp;#8217;autres termes, puisque tout le spectre est décalé de manière uniforme, tout s&amp;#8217;annule.
+Il en va de même pour toute vitesse radiale du Soleil par rapport à la Terre (qui varie légèrement tout au long de l&amp;#8217;année car l&amp;#8217;orbite de la Terre est elliptique).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La formule fondamentale reliant le décalage Doppler à la vitesse est :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;stemblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+\[\frac{\Delta\lambda}{\lambda_0} = \frac{v}{c}\]
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Où :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;\(\Delta\lambda\) est le décalage en longueur d&amp;#8217;onde (ce qu&amp;#8217;on cherche à mesurer)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(\lambda_0\) est la longueur d&amp;#8217;onde au repos de la raie spectrale (typiquement la longueur d&amp;#8217;onde H-alpha)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(v\) est la vitesse le long de la ligne de visée&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(c\) est la vitesse de la lumière (299 792 km/s)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_la_méthodologie_de_mesure&quot;&gt;La méthodologie de mesure&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_travaux_antérieurs&quot;&gt;Travaux antérieurs&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne suis pas la première personne à essayer de faire cette mesure en spectrohéliographie amateur.
+En 2017, Peter Zetner &lt;a href=&quot;https://www.cloudynights.com/forums/topic/574571-solar-differential-rotation-measured-with-a-spectroheliograph/&quot;&gt;a expliqué sur CloudyNights&lt;/a&gt; comment mesurer la vitesse différentielle en utilisant un spectrohéliographe.
+Il a expliqué cette méthodologie en profondeur dans le livre &lt;a href=&quot;https://astronomiesolaire.com/&quot;&gt;Astronomie solaire - Observer, photographier et étudier le Soleil&lt;/a&gt;.
+Sa méthodologie repose sur des mesures utilisant la raie Na D2. mais peut aussi être appliquée sur d&amp;#8217;autres raies brillantes incluant la raie Fe I couramment utilisée à 5250.2 Å, et implique de comparer les intensités des pixels, en les moyennant à différentes latitudes.
+Les résultats sont meilleurs en effectuant plusieurs scans et en moyennant les données.
+Bien que cela fonctionne, je voulais essayer une méthodologie différente :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Utiliser un seul scan : les images Doppler que JSol&amp;#8217;Ex ou INTI peuvent produire sont en général très cohérentes et montrent que toutes les données dont nous avons besoin sont déjà présentes&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Éviter les intensités de pixels : celles-ci sont très sensibles à l&amp;#8217;assombrissement centre-bord, aux conditions d&amp;#8217;observation (par exemple les nuages, même fins) ou au vignetage (assombrissement des images le long de la fente)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Rendre possible l&amp;#8217;utilisation de scans H-alpha, non pas parce qu&amp;#8217;ils donneraient une valeur précise de la vitesse du plasma de la photosphère, mais parce que c&amp;#8217;est la raie la plus largement imagée dans les observations solaires amateurs&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les résultats, bien sûr, dépendront de la raie observée.
+La méthodologie que je décris ci-dessous est capable de retourner des résultats raisonnables sur plusieurs raies (H-alpha, Na D2. Fe I) mais échouera complètement sur certaines autres (par exemple Ca II K, typiquement parce que la raie est trop large).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Plongeons-nous dans la méthodologie.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+L&amp;#8217;implémentation décrite ici a été développée de manière itérative basée sur des observations réelles. Je ne suis pas physicien solaire, juste un ingénieur essayant d&amp;#8217;extraire des données significatives des captures de spectrohéliographe. L&amp;#8217;algorithme fonctionne raisonnablement bien en pratique mais devrait être validé par rapport à des mesures professionnelles pour toute application scientifique. C&amp;#8217;est pourquoi cette fonctionnalité est annoncée comme expérimentale.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_comparaison_des_limbes_est_ouest&quot;&gt;Comparaison des limbes Est-Ouest&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La clé pour comprendre la méthodologie est qu&amp;#8217;elle repose sur l&amp;#8217;analyse et l&amp;#8217;ajustement de profils de raies spectrales.
+Elle nécessite d&amp;#8217;extraire les profils de raies spectrales à différents endroits du disque solaire, de préférence près des limbes où les vitesses sont les plus élevées (plus on s&amp;#8217;approche du méridien solaire, plus les vitesses sont faibles et donc difficiles à détecter).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La mesure de rotation différentielle extrait les vitesses de rotation solaire en comparant les décalages Doppler entre les points des limbes Est et Ouest à la même latitude héliographique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-diff-velocity/spectral-profiles-fr.svg&quot; alt=&quot;Profils spectraux décalés&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour chaque latitude (par exemple, 20° Nord), l&amp;#8217;algorithme :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Sélectionne un point sur le limbe Est&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Sélectionne le point correspondant sur le limbe Ouest à la même latitude&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Mesure la position de la raie spectrale à chaque point&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Calcule la différence : Ouest - Est&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette approche différentielle a un avantage crucial : elle annule les erreurs systématiques.
+Tout décalage instrumental, erreur de calibration en longueur d&amp;#8217;onde, ou décalage de référence affecte les deux mesures de manière égale et disparaît quand nous prenons la différence.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cependant, une seule mesure Est-Ouest à chaque latitude n&amp;#8217;est pas assez fiable.
+Les conditions de seeing, l&amp;#8217;activité solaire locale, ou les erreurs d&amp;#8217;ajustement peuvent corrompre les mesures individuelles.
+Pour améliorer la précision, JSol&amp;#8217;Ex échantillonne &lt;strong&gt;plusieurs longitudes&lt;/strong&gt; à travers la région du limbe (typiquement 14 points de 62° à 88° de longitude) et agrège ces mesures.
+Cette redondance permet de rejeter les valeurs aberrantes et fournit une estimation d&amp;#8217;erreur basée sur la cohérence des mesures.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La vitesse mesurée est alors :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;stemblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+\[v_{measured} = \frac{\Delta\lambda}{\lambda_0} \times \frac{c}{2}\]
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le facteur 2 apparaît parce que nous mesurons la différence entre les limbes s&amp;#8217;approchant et s&amp;#8217;éloignant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_de_la_vitesse_mesurée_à_la_vitesse_équatoriale&quot;&gt;De la vitesse mesurée à la vitesse équatoriale&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La vitesse que nous mesurons dépend de la géométrie : quelle fraction de la vitesse de rotation est projetée le long de notre ligne de visée.
+À l&amp;#8217;équateur et au limbe, nous voyons la vitesse de rotation complète.
+À des latitudes plus élevées ou plus près du centre du disque, nous n&amp;#8217;en voyons qu&amp;#8217;une fraction.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le facteur de correction géométrique est :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;stemblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+\[v_{equatorial} = \frac{v_{measured}}{\cos(\phi) \times \sin(\theta)}\]
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Où :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;\(\phi\) est la latitude héliographique&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(\theta\) est la longitude héliographique (0° au centre du disque, ±90° aux limbes)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_trouver_le_centre_de_la_raie_spectrale&quot;&gt;Trouver le centre de la raie spectrale&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La partie la plus difficile de la mesure est de déterminer précisément le centre de la raie d&amp;#8217;absorption.
+Un décalage de seulement 0.01 Å correspond à une vitesse d&amp;#8217;environ 0.5 km/s, ce qui est significatif par rapport à la vitesse équatoriale typique d&amp;#8217;environ 2 km/s.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex utilise l&apos;&lt;strong&gt;ajustement de profil de Voigt&lt;/strong&gt; pour mesurer le centre de la raie.
+Le profil de Voigt est la convolution d&amp;#8217;un profil gaussien et d&amp;#8217;un profil lorentzien, qui modélise précisément la forme des raies d&amp;#8217;absorption solaires.
+La composante gaussienne représente l&amp;#8217;élargissement Doppler thermique, tandis que la composante lorentzienne représente l&amp;#8217;élargissement naturel et de pression.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour chaque point de mesure, l&amp;#8217;algorithme :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Extrait un profil spectral du fichier SER à la position correspondante&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Ajuste un profil de Voigt à la raie d&amp;#8217;absorption&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Enregistre la position du centre de raie ajustée&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le paramètre configurable &quot;demi-largeur d&amp;#8217;ajustement de Voigt&quot; (par défaut : 2 Å) contrôle quelle proportion des ailes de la raie sont incluses dans l&amp;#8217;ajustement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_systèmes_de_coordonnées&quot;&gt;Systèmes de coordonnées&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;un des aspects les plus délicats de cette implémentation est de transformer correctement les coordonnées que nous manipulons.
+L&amp;#8217;algorithme commence avec les coordonnées héliographiques (où nous voulons mesurer) et les transforme en coordonnées des trames SER originales (où les données spectrales se trouvent).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;1. Coordonnées héliographiques (point de départ)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous commençons par spécifier des points en coordonnées héliographiques :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Latitude&lt;/strong&gt; : -90° (pôle sud) à +90° (pôle nord)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Longitude&lt;/strong&gt; : 0° au centre du disque, ±90° aux limbes&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela nécessite deux paramètres solaires calculés à partir de la date d&amp;#8217;observation :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;B0&lt;/strong&gt; : La latitude héliographique du centre du disque (varie tout au long de l&amp;#8217;année)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;P&lt;/strong&gt; : L&amp;#8217;angle de position de l&amp;#8217;axe de rotation (l&amp;#8217;inclinaison du Soleil vu depuis la Terre)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;2. Coordonnées image&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les coordonnées héliographiques sont converties en positions de pixels dans l&amp;#8217;image reconstruite.
+Cela implique d&amp;#8217;inverser les corrections appliquées pendant la reconstruction :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Correction de l&amp;#8217;angle P&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Retournement/rotation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Distorsion géométrique&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Angle d&amp;#8217;inclinaison&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Recadrage&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;3. Coordonnées du fichier SER (destination)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finalement, les coordonnées image sont mappées vers le fichier vidéo SER brut :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Numéro de trame&lt;/strong&gt; : Position dans la séquence de scan (dérivée de la coordonnée x)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Colonne&lt;/strong&gt; : Position le long de la fente (dérivée de la coordonnée y)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Ligne&lt;/strong&gt; : Direction spectrale (longueur d&amp;#8217;onde)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce mapping inverse nous permet d&amp;#8217;extraire le profil spectral exact à n&amp;#8217;importe quelle position héliographique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_pipeline_de_traitement_des_données&quot;&gt;Le pipeline de traitement des données&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les mesures brutes sont bruitées.
+Pour produire une courbe de rotation propre, JSol&amp;#8217;Ex utilise un pipeline de traitement en deux étapes :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_étape_1_agrégation_en_longitude&quot;&gt;Étape 1 : Agrégation en longitude&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme décrit précédemment, à chaque latitude, plusieurs longitudes sont échantillonnées (typiquement 14 points à travers la région du limbe).
+Ces mesures sont combinées en utilisant l&amp;#8217;une des trois méthodes (la médiane par défaut mais vous pouvez choisir) :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Médiane&lt;/strong&gt; : Robuste aux valeurs aberrantes, utilise la valeur centrale&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Moyenne&lt;/strong&gt; : Simple moyenne arithmétique&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Moyenne pondérée&lt;/strong&gt; : Les points plus proches du limbe (où le signal Doppler est plus fort) ont un poids plus élevé&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;estimation d&amp;#8217;erreur de cette étape représente la cohérence des mesures à travers les longitudes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_étape_2_lissage_en_latitude&quot;&gt;Étape 2 : Lissage en latitude&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Même après l&amp;#8217;agrégation en longitude, les mesures latitude par latitude restent bruitées.
+Les bins de latitude individuels peuvent encore être affectés par des caractéristiques localisées (taches solaires, facules) ou simplement par la dispersion des mesures.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Puisque nous nous attendons à ce que la rotation solaire varie &lt;strong&gt;de manière lisse&lt;/strong&gt; avec la latitude (suivant les termes \(\sin^2\phi\) et \(\sin^4\phi\) de la loi de rotation différentielle), nous pouvons exploiter cette contrainte physique pour réduire davantage le bruit.
+JSol&amp;#8217;Ex applique un filtre de lissage qui combine les points de latitude voisins dans une fenêtre configurable (par défaut : 5°).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De manière importante, les erreurs de l&amp;#8217;étape 1 sont &lt;strong&gt;propagées&lt;/strong&gt; plutôt que recalculées à partir de la dispersion dans la fenêtre de lissage.
+Cela garantit que les barres d&amp;#8217;erreur représentent l&amp;#8217;incertitude de mesure, pas les variations physiques de latitude.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour l&amp;#8217;agrégation médiane :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;stemblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+\[\sigma_{smoothed} = \frac{median(\sigma_i)}{\sqrt{n}}\]
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour la moyenne :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;stemblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+\[\sigma_{smoothed} = \frac{\sqrt{\sum \sigma_i^2}}{n}\]
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_résultat_et_la_comparaison_avec_la_théorie&quot;&gt;Le résultat et la comparaison avec la théorie&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La forme standard de la loi de rotation différentielle (aussi connue comme la formule de Faye, même si la formule originale n&amp;#8217;incluait pas le 3ème terme) est :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;stemblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+\[\omega(\phi) = A + B \sin^2(\phi) + C \sin^4(\phi)\]
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Où :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;\(\phi\) est la latitude héliographique&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(A\) est le taux de rotation équatorial&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(B\) et \(C\) contrôlent la diminution de la vitesse avec la latitude&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex compare les résultats mesurés avec les coefficients largement utilisés de &lt;strong&gt;Snodgrass &amp;amp; Ulrich (1990)&lt;/strong&gt; :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;\(A = 14.713\) deg/jour (taux de rotation équatorial)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(B = -2.396\) deg/jour&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;\(C = -1.787\) deg/jour&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela donne une période de rotation équatoriale d&amp;#8217;environ 24.5 jours et une période polaire d&amp;#8217;environ 34 jours.
+Convertie en vitesse linéaire à la surface solaire (rayon ≈ 696 000 km), la vitesse de rotation équatoriale est d&amp;#8217;environ 2.0 km/s.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;JSol&amp;#8217;Ex ajuste également ses propres coefficients A, B, C à partir de vos mesures, permettant une comparaison directe avec les valeurs de référence.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_résultats&quot;&gt;Résultats&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ci-dessous des exemples de profils de rotation différentielle mesurés avec JSol&amp;#8217;Ex en utilisant deux raies spectrales différentes.
+Ces mesures ont été prises à des dates différentes avec des conditions de seeing différentes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_fe_i_5883_å&quot;&gt;Fe I 5883 Å&lt;/h3&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-diff-velocity/velocity-FeI.png&quot; alt=&quot;velocity FeI&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_h_alpha&quot;&gt;H-alpha&lt;/h3&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/jsolex-diff-velocity/velocity-Ha.png&quot; alt=&quot;velocity Ha&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_observations&quot;&gt;Observations&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les profils mesurés montrent la forme générale attendue : des vitesses plus élevées à l&amp;#8217;équateur, diminuant vers les pôles.
+Les courbes ajustées suivent raisonnablement bien le profil théorique de Snodgrass.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cependant, j&amp;#8217;observe des différences entre les raies spectrales que je ne peux pas entièrement expliquer.
+Les mesures Fe I montrent des vitesses absolues différentes de H-alpha, et les coefficients ajustés diffèrent entre les scans.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Plusieurs facteurs pourraient contribuer à ces différences :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hauteur de formation&lt;/strong&gt; : Différentes raies spectrales se forment à différentes hauteurs dans l&amp;#8217;atmosphère solaire, et les taux de rotation peuvent varier avec l&amp;#8217;altitude (comme suggéré par des recherches récentes de la &lt;a href=&quot;https://www.nature.com/articles/s41550-024-02299-4&quot;&gt;mission CHASE&lt;/a&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Conditions de seeing&lt;/strong&gt; : Les scans ont été pris à des dates différentes avec des conditions atmosphériques différentes&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Différences de profil de raie&lt;/strong&gt; : H-alpha et Fe I ont des largeurs et profondeurs de raie différentes, ce qui peut affecter la précision de l&amp;#8217;ajustement de Voigt&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Effets systématiques&lt;/strong&gt; : Il peut y avoir des facteurs instrumentaux ou algorithmiques que je n&amp;#8217;ai pas identifiés&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je présente ces résultats tels qu&amp;#8217;ils sont, sans essayer de tirer des conclusions sur quelle mesure est &quot;correcte&quot; ou ce qui cause les différences observées.
+Plus de mesures sur différentes dates, raies spectrales et instruments seraient nécessaires pour comprendre ces variations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_mesurer_en_pratique&quot;&gt;Mesurer en pratique&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La qualité des résultats dépend fortement du seeing atmosphérique.
+Un mauvais seeing floute les raies spectrales et rend la détermination précise du centre difficile.
+Les meilleurs résultats sont obtenus avec d&amp;#8217;excellentes conditions de seeing et un instrument bien focalisé.
+Enfin et surtout, une haute résolution spectrale est préférée, ce qui est normalement le cas avec le Sol&amp;#8217;Ex (HR) ou le SHG 700.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous pouvez aussi vous demander quelle raie spectrale vous devriez observer.
+J&amp;#8217;ai testé l&amp;#8217;algorithme avec Fe I, Na D2 et H-alpha, donnant les résultats ci-dessous.
+En pratique, les raies d&amp;#8217;absorption fortes devraient en théorie produire les meilleurs résultats, car :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;La profondeur de raie devrait être suffisante pour un ajustement précis&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Les ailes devraient être bien définies pour l&amp;#8217;ajustement de Voigt&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le rapport signal sur bruit devrait être élevé&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les raies très larges comme Ca II K sont trop larges pour un ajustement de Voigt précis et produiront des résultats peu fiables.
+Les raies trop étroites peuvent aussi représenter un défi pour l&amp;#8217;ajustement de Voigt mais peuvent fonctionner aussi.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_limpact_de_la_détection_de_la_raie_spectrale&quot;&gt;L&amp;#8217;impact de la détection de la raie spectrale&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Un facteur subtil mais important affectant la précision absolue des mesures est la &lt;strong&gt;correction polynomiale&lt;/strong&gt; utilisée pendant la reconstruction d&amp;#8217;image.
+Comprendre ceci est essentiel pour interpréter correctement vos résultats.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pendant le traitement du spectrohéliographe, JSol&amp;#8217;Ex calcule un polynôme qui fait correspondre chaque position de colonne le long de la fente vers la position de ligne attendue du centre de la raie spectrale.
+Ce polynôme est calculé à partir de la &lt;strong&gt;moyenne des trames SER&lt;/strong&gt; dans le scan (une heuristique est utilisée pour inclure les trames contenant des données solaires réelles, pas le fond de ciel).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une telle détection est cruciale car la raie spectrale n&amp;#8217;est pas droite à travers la fente en raison de phénomènes optiques : elle constitue ce que nous appelons souvent le &quot;smile&quot;.
+Par conséquent, le centre de raie peut être à la ligne 300 à la colonne 500. mais à la ligne 350 à la colonne 1000.
+Le polynôme capture cette courbure.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En mesurant les positions de raie &lt;strong&gt;relativement au polynôme&lt;/strong&gt;, nous éliminons efficacement la distorsion optique de nos mesures.
+Sans cette référence, nous mesurerions la somme de la courbure optique plus le décalage Doppler, rendant impossible l&amp;#8217;extraction des minuscules signaux de vitesse que nous recherchons.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une question clé est : pourquoi ne pouvons-nous pas simplement mesurer la position absolue de la raie spectrale dans chaque trame et calculer les vitesses directement ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La réponse réside dans la précision requise.
+Une vitesse de 2 km/s correspond à un décalage de longueur d&amp;#8217;onde de seulement ~0.04 Å à H-alpha.
+Avec une dispersion spectrale typique de 0.1-0.2 Å/pixel, c&amp;#8217;est un décalage de seulement &lt;strong&gt;0.2 à 0.4 pixels&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La courbure optique à travers la fente, d&amp;#8217;autre part, peut facilement s&amp;#8217;étendre sur 10-30 pixels ou plus.
+Toute tentative de mesurer les positions absolues de raie serait complètement dominée par cette courbure, rendant la détection Doppler impossible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le polynôme sert de &lt;strong&gt;référence de base&lt;/strong&gt;.
+En mesurant comment la position de raie dans chaque trame individuelle &lt;strong&gt;dévie du polynôme&lt;/strong&gt;, nous isolons la composante Doppler de la composante optique.
+C&amp;#8217;est l&amp;#8217;idée clé qui rend les mesures de précision sub-pixellaire possibles, avec l&amp;#8217;ajustement de Voigt.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_un_mot_sur_les_images_doppler&quot;&gt;Un mot sur les images Doppler&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ceci, d&amp;#8217;ailleurs, est aussi une raison pour laquelle les images Doppler sont différentes quand on scanne en AD vs DEC.
+Parce que c&amp;#8217;est une question souvent posée, et qu&amp;#8217;il m&amp;#8217;a fallu &lt;strong&gt;des mois&lt;/strong&gt; pour comprendre la raison, je pense qu&amp;#8217;il vaut la peine de passer un peu de temps à expliquer le phénomène.
+Je dois cette explication à Jean-François Pittet et Christian Buil, d&amp;#8217;une discussion il y a quelques semaines sur la mailing list Sol&amp;#8217;Ex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_scan_en_ad_vs_scan_en_dec_une_différence_critique_pour_les_images_doppler&quot;&gt;Scan en AD vs scan en DEC : une différence critique pour les images Doppler&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les spectrohéliographes peuvent scanner le Soleil dans deux directions :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Scan en AD&lt;/strong&gt; (Ascension Droite) : La fente est orientée Nord-Sud, et le scan procède Est-Ouest&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Scan en DEC&lt;/strong&gt; (Déclinaison) : La fente est orientée Est-Ouest, et le scan procède Nord-Sud&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce choix a des &lt;strong&gt;implications profondes&lt;/strong&gt; pour la visibilité Doppler, comme expliqué par Jean-François Pittet sur la mailing list Sol&amp;#8217;Ex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect4&quot;&gt;
+&lt;h5 id=&quot;_scan_en_ad_doppler_visible_dans_les_images&quot;&gt;Scan en AD : Doppler visible dans les images&lt;/h5&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En mode scan AD, chaque trame capture une tranche verticale du Soleil du pôle Nord au pôle Sud.
+Au cours du scan :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Les premières trames capturent le &lt;strong&gt;limbe Est&lt;/strong&gt; (s&amp;#8217;approchant, décalé vers le bleu)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Les trames du milieu capturent le &lt;strong&gt;centre du disque&lt;/strong&gt; (pas de vitesse radiale)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Les dernières trames capturent le &lt;strong&gt;limbe Ouest&lt;/strong&gt; (s&amp;#8217;éloignant, décalé vers le rouge)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quand JSol&amp;#8217;Ex calcule le polynôme à partir de la moyenne de toutes les trames, les contributions Est et Ouest &lt;strong&gt;s&amp;#8217;équilibrent&lt;/strong&gt;.
+Le blueshift du limbe Est est annulé par le redshift du limbe Ouest.
+Le polynôme résultant représente la référence &quot;neutre&quot; : approximativement la position de raie au centre du disque sans décalage Doppler.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En conséquence, quand nous reconstruisons l&amp;#8217;image au décalage de pixel 0. les décalages Doppler deviennent &lt;strong&gt;visibles comme différences de contraste&lt;/strong&gt; :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Le limbe Est apparaît plus sombre (raie décalée dans la bande passante)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le limbe Ouest apparaît plus clair (raie décalée hors de la bande passante)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est pourquoi les images Doppler des scans AD montrent l&amp;#8217;asymétrie caractéristique Est-Ouest.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect4&quot;&gt;
+&lt;h5 id=&quot;_scan_en_dec_doppler_absorbé_par_le_polynôme&quot;&gt;Scan en DEC : Doppler &quot;absorbé&quot; par le polynôme&lt;/h5&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En mode scan DEC, chaque trame capture une tranche horizontale du Soleil d&amp;#8217;Est en Ouest.
+Voici la différence critique : &lt;strong&gt;tous les pixels dans une seule trame voient approximativement le même décalage Doppler&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Par exemple, si la trame actuelle capture la moitié Est du disque :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Tous les points dans cette trame s&amp;#8217;approchent de nous&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Tous les points ont un blueshift similaire&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quand JSol&amp;#8217;Ex calcule le polynôme à partir de la moyenne de toutes les trames, il ne capture pas seulement la courbure optique : il capture aussi le &lt;strong&gt;décalage Doppler moyen&lt;/strong&gt; à travers le scan.
+Mais voici le problème : le décalage Doppler varie systématiquement à travers le scan (les trames Est sont décalées vers le bleu, les trames Ouest sont décalées vers le rouge).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le polynôme &quot;absorbe&quot; effectivement une moyenne pondérée de ces décalages Doppler.
+Quand nous mesurons ensuite les positions de raie relativement à ce polynôme, une grande partie du signal Doppler a déjà été soustraite.
+Les images Doppler résultantes ne &lt;strong&gt;montreront plus la rotation du soleil&lt;/strong&gt; (ce qui peut aussi être un avantage, pour d&amp;#8217;autres types d&amp;#8217;observations).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est pourquoi les spectrohéliographes expérimentés préfèrent souvent le scan AD pour le travail Doppler : le signal Doppler est plus visible et plus facile à détecter.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_la_complication_de_langle_p&quot;&gt;La complication de l&amp;#8217;angle P&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il y a une subtilité supplémentaire : l&amp;#8217;axe de rotation du Soleil n&amp;#8217;est pas perpendiculaire à l&amp;#8217;écliptique.
+L&apos;&lt;strong&gt;angle P&lt;/strong&gt; (angle de position de l&amp;#8217;axe de rotation) varie tout au long de l&amp;#8217;année d&amp;#8217;environ -26° à +26°.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Deux fois par an (vers début juin et début décembre) l&amp;#8217;angle P est proche de zéro.
+À ces moments :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Le scan AD est vraiment parallèle à l&amp;#8217;équateur solaire&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le motif Doppler Est-Ouest s&amp;#8217;aligne parfaitement avec la direction de scan&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;À d&amp;#8217;autres moments, quand P est non nul :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;L&amp;#8217;axe de rotation est incliné par rapport à la direction de scan&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le motif Doppler est tourné par rapport aux axes de l&amp;#8217;image&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Une partie du signal Doppler &quot;fuit&quot; dans la moyenne polynomiale même en mode AD&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est une des raisons pour lesquelles les mesures de rotation différentielle peuvent montrer des résultats légèrement différents à différentes périodes de l&amp;#8217;année, bien que nous prenions en compte les angles P et B0.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;_implications_pour_les_mesures_de_rotation_différentielle&quot;&gt;Implications pour les mesures de rotation différentielle&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ceci explique pourquoi le &lt;strong&gt;scan AD est essentiel&lt;/strong&gt; pour les mesures de vitesse différentielle :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En mode AD, les points des limbes Est et Ouest à la même latitude correspondent à la &lt;strong&gt;même colonne&lt;/strong&gt; sur la fente (même position de fente, trames différentes).
+La valeur du polynôme à cette colonne est calculée à partir de la moyenne de toutes les trames (limbe Est, centre du disque, et limbe Ouest) donc les décalages Doppler s&amp;#8217;annulent dans la moyenne.
+Quand nous calculons &lt;code&gt;(Ouest - polynôme) - (Est - polynôme)&lt;/code&gt;, les termes du polynôme sont identiques et s&amp;#8217;annulent, nous laissant avec la vraie différence Doppler &lt;code&gt;Ouest - Est&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En mode DEC, les points des limbes Est et Ouest à la même latitude correspondent aux &lt;strong&gt;extrémités opposées de la fente&lt;/strong&gt; (colonnes différentes, même trame).
+Le polynôme à la colonne Est est calculé à partir de trames qui &lt;strong&gt;voient toutes le limbe Est&lt;/strong&gt; à cette position, donc le polynôme absorbe le blueshift.
+De même, le polynôme à la colonne Ouest absorbe le redshift.
+Quand nous calculons la différence, ces décalages Doppler absorbés ne s&amp;#8217;annulent pas : ils &lt;strong&gt;se soustraient&lt;/strong&gt; de notre mesure, réduisant significativement le signal mesuré.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est pourquoi, en pratique, les scans DEC ne produisent pas d&amp;#8217;images Doppler utilisables ou de mesures de vitesse différentielle fiables.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_conseils_de_configuration&quot;&gt;Conseils de configuration&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Longitude du limbe&lt;/strong&gt; (par défaut 75°) : Les mesures plus proches du limbe donnent des signaux Doppler plus forts mais risquent des effets d&amp;#8217;assombrissement centre-bord&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Pas de latitude&lt;/strong&gt; (par défaut 2°) : Des valeurs plus petites donnent une résolution plus fine mais des temps de traitement plus longs&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fenêtre de lissage&lt;/strong&gt; : Devrait être au moins 2× le pas de latitude pour un lissage efficace&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mesurer la rotation différentielle avec du matériel amateur aurait semblé impossible il y a quelques années seulement.
+Des pionniers comme Peter Zetner ou Christian Buil nous ont montré la voie.
+Ce que j&amp;#8217;essaie de faire, comme toujours avec JSol&amp;#8217;Ex, c&amp;#8217;est de rendre ceci accessible à encore plus de personnes au prix de la &quot;magie&quot;, c&amp;#8217;est-à-dire que certaines personnes partageront très probablement des résultats sans comprendre la science derrière.
+Je ne suis pas trop inquiet par cela, parce que je suis moi-même passé par là : apprécier la reconstruction d&amp;#8217;images SHG, puis comprendre comment ça fonctionne, puis me poser des questions comme &quot;pourquoi est-il même possible de mesurer des vitesses Doppler si petites ?&quot; : c&amp;#8217;est une construction intellectuelle qui prend du temps.
+Nous, membres de la communauté Sol&amp;#8217;Ex, pouvons faire mieux, je pense, pour apporter cela aux masses, en partageant nos idées et en écrivant des logiciels comme celui-ci.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette fonctionnalité rejoint la liste croissante des capacités scientifiques dans JSol&amp;#8217;Ex : détection des bombes d&amp;#8217;Ellerman, identification des régions actives, et maintenant mesure de la rotation différentielle.
+Chacune de celles-ci met des analyses de niveau professionnel à la portée des astronomes amateurs, mais, comme toujours, soyez prudent avec ce que je dis : je ne suis pas un scientifique, juste un ingénieur.
+Je n&amp;#8217;ai aucun doute que j&amp;#8217;ai fait des approximations, ou pris des libertés que je n&amp;#8217;aurais probablement pas dû prendre.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_bibliographie&quot;&gt;Bibliographie&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_articles_scientifiques&quot;&gt;Articles scientifiques&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://ui.adsabs.harvard.edu/abs/1951MNRAS.111..413N/abstract&quot;&gt;Newton, H.W. &amp;amp; Nunn, M.L. (1951) - The Sun&amp;#8217;s rotation derived from sunspots 1934-1944. MNRAS 111, 413&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1007/BF02276562&quot;&gt;Howard, R. &amp;amp; Harvey, J. (1970) - Spectroscopic determinations of solar rotation. Sol Phys 12. 23-51&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1007/BF00154804&quot;&gt;Snodgrass, H.B. (1984) - Separation of large-scale photospheric Doppler patterns. Sol Phys 94, 13-31&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1086/168467&quot;&gt;Snodgrass, H.B. &amp;amp; Ulrich, R.K. (1990) - Rotation of Doppler features in the solar photosphere. ApJ 351, 309&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1023/A:1005226402796&quot;&gt;Beck, J.G. (2000) - A comparison of differential rotation measurements. Sol Phys 191, 47-70&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://ui.adsabs.harvard.edu/abs/2000A%26A&amp;#8230;&amp;#8203;357..763W/abstract&quot;&gt;Wöhl, H. &amp;amp; Schmidt, W. (2000) - Solar equatorial plasma rotation: a comparison of different spectroscopic measurements. A&amp;amp;A 357, 763-766&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://arxiv.org/abs/2406.18271&quot;&gt;Takeda, Y. &amp;amp; Ueno, S. (2024) - Measurement of Solar Differential Rotation by Absolutely Calibrated Iodine-Cell Spectroscopy&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.aanda.org/articles/aa/full_html/2025/10/aa56102-25/aa56102-25.html&quot;&gt;Corbard, T. et al. (2025) - Rotational radial shear in the low solar photosphere. A&amp;amp;A 702. A93&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.nature.com/articles/s41550-024-02299-4&quot;&gt;Li, Z. et al. (2024) - Height-dependent differential rotation of the solar atmosphere detected by CHASE. Nature Astronomy&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_ressources_amateurs&quot;&gt;Ressources amateurs&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.cloudynights.com/forums/topic/574571-solar-differential-rotation-measured-with-a-spectroheliograph/&quot;&gt;Zetner, P. (2017) - Solar differential rotation measured with a spectroheliograph (CloudyNights)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://solar-astronomy-book.com/&quot;&gt;Zetner, P. et al. - Solar Astronomy: Observing, imaging and studying the Sun&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.astrosurf.com/solex/&quot;&gt;Sol&amp;#8217;Ex - Projet de spectrohéliographe de Christian Buil&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html&quot;&gt;Documentation JSol&amp;#8217;Ex&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Measuring Solar Differential Rotation with JSol&amp;#8217;Ex</title>
       <link>https://melix.github.io/blog//2026/02/05-measuring-solar-rotation.html</link>
