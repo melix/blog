@@ -1,0 +1,79 @@
+= Announcing TamboUI
+Cédric Champeau, Max Rydalh Andersen
+2026-02-17
+:jbake-type: post
+:jbake-tags: tamboui,tui,java
+:jbake-status: published
+:source-highlighter: pygments
+:id: announcing-tamboui
+:linkattrs:
+:stem: latexmath
+
+
+[NOTE]
+====
+This blog post is co-authored by https://melix.github.io/blog/2026/02/17-announcing-tamboui.html[Cédric Champeau] (Micronaut) and https://xam.dk/blog/announcing-tamboui[Max Rydahl Andersen] (Quarkus), and cross-posted on our respective personal blogs.
+====
+
+Today we are excited to announce https://tamboui.dev/[TamboUI], an open-source Terminal UI framework for the Java ecosystem!
+
+The terminal is having a renaissance.
+
+AI coding tools live there. Developer workflows are increasingly CLI-first again. Rust has https://ratatui.rs/[Ratatui]. Python has Rich and Textual, Go has Charm, Typescript has OpenTUI. But Java, despite its performance, maturity, and tooling, didn’t have a modern, composable, developer-friendly TUI framework.
+
+We thought that should change.
+
+video::ERAp2vRHX3M[youtube, width=640, height=480]
+
+== How it started
+
+TamboUI (pronounced like the french word “tambouille”, slang for "cooking up something" or "makeshift creation") was born a bit by accident: a couple months ago, Cédric was https://bsky.app/profile/melix.champeau.me/post/3m7ulazaogt25[asking about which TUI libraries that tools like Claude Code were using]. Max Andersen answered that most likely this was https://ratatui.rs/[Ratatui], a framework written in Rust. Both thought that it was a bit sad that there was no such library for Java.
+
+A few weeks later, https://bsky.app/profile/melix.champeau.me/post/3mae3pyw4ek25[Cédric did an experiment by asking AI (Claude Code) to port Ratatui to Java]. The result was fairly impressive, and the beginning of a collaboration that led to the creation of TamboUI. In fact, Max https://xam.dk/blog/lets-make-2026-the-year-of-java-in-the-terminal/[gave you a hint last year] that this was going to happen.
+
+That said, TamboUI is not a Ratatui port nor is it a Textual port. We’ve put a lot of effort in going beyond the initial AI generated port. The library was designed with Java developers in mind, inspired by the good things found in other ecosystems’ approach to TUI frameworks. It offers a multi-layer API: from low-level widget primitives (like Ratatui), to a managed TUI layer with event handling, up to a declarative Toolkit DSL that handles the event loop and rendering thread for you—things that Ratatui doesn’t really cover. This brings the power of Ratatui, Textual or Rich to the Java ecosystem, with the Java touch!
+
+Not only that, TamboUI is also https://www.graalvm.org/latest/reference-manual/native-image/[GraalVM native] compatible! This means that you can compile your Java TUI applications as native binaries, making Java a first class citizen in terminal applications development, with low memory footprints and fast startup!
+
+If you want to give it a try, the easiest is to run our demos using https://www.jbang.dev/[JBang]:
+
+[source,shell]
+----
+jbang demos@tamboui
+----
+
+== Try it out
+
+At this stage, the APIs are still unstable and subject to change. TamboUI is developed with the mindset of being framework-agnostic and having as few external dependencies as possible. You can choose between several backends like https://jline.org/[JLine], https://aeshell.github.io/[Aesh] or the built-in Panama backend. By choosing the latter, you’ll get the best performance while not depending on any external library.
+
+Whether you want to build:
+
+* a standalone CLI tool
+* an internal developer tool
+* a DevOps utility
+* add a TUI frontend to existing Java tool
+* an AI agent
+* or something entirely new
+
+Give TamboUI a try and let us know what worked and what could be improved!
+
+Check out the documentation at https://tamboui.dev/docs/main/[], join us on https://tamboui.zulipchat.com[Zulip], or browse the source on https://github.com/tamboui/tamboui[GitHub]. We'd love your feedback and contributions!
+
+== Acknowledgments
+
+We would like to thank the following people for their ideas, suggestions and contributions to the creation of first public release of TamboUI (in alphabetical order):
+
+- Andres Almiray
+- Andrea Peruffo
+- Charles Moulliard
+- Claus Ibsen
+- Graeme Rocher
+- Guillaume LaForge
+- Ståle Pedersen
+- Tako Schotanus
+
+and of course to the Ratatui and Textual creators for their inspiration and work.
+
+--  
+Max Rydahl Andersen & Cédric Champeau
+--
