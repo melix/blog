@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Announcing TamboUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+
+    <!-- MathJax for LaTeX math rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']],
+          displayMath: [['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <script defer data-domain="melix.github.io" src="https://analytics.champeau.me/js/script.js"></script>
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		          <li><a href="/blog/projects.html">Projects</a></li>
+				    <li><a href="/blog/jsolex.html">JSol'Ex</a></li>
+		<li><a href="/blog/astrophotography.html">Astrophotography</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+		          <li><a href="/blog/tags/jsolex.html">JSol'Ex</a></li>
+				    <li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://bsky.app/profile/melix.champeau.me"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	        <li><a rel="me" href="https://astrodon.social/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Announcing TamboUI</h1>
+	</div>
+
+	<p><em>17 February 2026</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/tamboui.html">tamboui</a> 
+	</em>
+		<a href="/blog/tags/tui.html">tui</a> 
+	</em>
+		<a href="/blog/tags/java.html">java</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This blog post is co-authored by <a href="https://melix.github.io/blog/2026/02/17-announcing-tamboui.html">Cédric Champeau</a> (Micronaut) and <a href="https://xam.dk/blog/announcing-tamboui">Max Rydahl Andersen</a> (Quarkus), and cross-posted on our respective personal blogs.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Today we are excited to announce <a href="https://tamboui.dev/">TamboUI</a>, an open-source Terminal UI framework for the Java ecosystem!</p>
+</div>
+<div class="paragraph">
+<p>The terminal is having a renaissance.</p>
+</div>
+<div class="paragraph">
+<p>AI coding tools live there. Developer workflows are increasingly CLI-first again. Rust has <a href="https://ratatui.rs/">Ratatui</a>. Python has Rich and Textual, Go has Charm, Typescript has OpenTUI. But Java, despite its performance, maturity, and tooling, didn’t have a modern, composable, developer-friendly TUI framework.</p>
+</div>
+<div class="paragraph">
+<p>We thought that should change.</p>
+</div>
+<div class="videoblock">
+<div class="content">
+<iframe width="640" height="480" src="https://www.youtube.com/embed/ERAp2vRHX3M?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_it_started">How it started</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>TamboUI (pronounced like the french word “tambouille”, slang for "cooking up something" or "makeshift creation") was born a bit by accident: a couple months ago, Cédric was <a href="https://bsky.app/profile/melix.champeau.me/post/3m7ulazaogt25">asking about which TUI libraries that tools like Claude Code were using</a>. Max Andersen answered that most likely this was <a href="https://ratatui.rs/">Ratatui</a>, a framework written in Rust. Both thought that it was a bit sad that there was no such library for Java.</p>
+</div>
+<div class="paragraph">
+<p>A few weeks later, <a href="https://bsky.app/profile/melix.champeau.me/post/3mae3pyw4ek25">Cédric did an experiment by asking AI (Claude Code) to port Ratatui to Java</a>. The result was fairly impressive, and the beginning of a collaboration that led to the creation of TamboUI. In fact, Max <a href="https://xam.dk/blog/lets-make-2026-the-year-of-java-in-the-terminal/">gave you a hint last year</a> that this was going to happen.</p>
+</div>
+<div class="paragraph">
+<p>That said, TamboUI is not a Ratatui port nor is it a Textual port. We’ve put a lot of effort in going beyond the initial AI generated port. The library was designed with Java developers in mind, inspired by the good things found in other ecosystems’ approach to TUI frameworks. It offers a multi-layer API: from low-level widget primitives (like Ratatui), to a managed TUI layer with event handling, up to a declarative Toolkit DSL that handles the event loop and rendering thread for you—things that Ratatui doesn’t really cover. This brings the power of Ratatui, Textual or Rich to the Java ecosystem, with the Java touch!</p>
+</div>
+<div class="paragraph">
+<p>Not only that, TamboUI is also <a href="https://www.graalvm.org/latest/reference-manual/native-image/">GraalVM native</a> compatible! This means that you can compile your Java TUI applications as native binaries, making Java a first class citizen in terminal applications development, with low memory footprints and fast startup!</p>
+</div>
+<div class="paragraph">
+<p>If you want to give it a try, the easiest is to run our demos using <a href="https://www.jbang.dev/">JBang</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="shell">jbang demos@tamboui</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_try_it_out">Try it out</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At this stage, the APIs are still unstable and subject to change. TamboUI is developed with the mindset of being framework-agnostic and having as few external dependencies as possible. You can choose between several backends like <a href="https://jline.org/">JLine</a>, <a href="https://aeshell.github.io/">Aesh</a> or the built-in Panama backend. By choosing the latter, you’ll get the best performance while not depending on any external library.</p>
+</div>
+<div class="paragraph">
+<p>Whether you want to build:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a standalone CLI tool</p>
+</li>
+<li>
+<p>an internal developer tool</p>
+</li>
+<li>
+<p>a DevOps utility</p>
+</li>
+<li>
+<p>add a TUI frontend to existing Java tool</p>
+</li>
+<li>
+<p>an AI agent</p>
+</li>
+<li>
+<p>or something entirely new</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Give TamboUI a try and let us know what worked and what could be improved!</p>
+</div>
+<div class="paragraph">
+<p>Check out the documentation at <a href="https://tamboui.dev/docs/main/" class="bare">https://tamboui.dev/docs/main/</a>, join us on <a href="https://tamboui.zulipchat.com">Zulip</a>, or browse the source on <a href="https://github.com/tamboui/tamboui">GitHub</a>. We&#8217;d love your feedback and contributions!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_acknowledgments">Acknowledgments</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We would like to thank the following people for their ideas, suggestions and contributions to the creation of first public release of TamboUI (in alphabetical order):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Andres Almiray</p>
+</li>
+<li>
+<p>Andrea Peruffo</p>
+</li>
+<li>
+<p>Charles Moulliard</p>
+</li>
+<li>
+<p>Claus Ibsen</p>
+</li>
+<li>
+<p>Graeme Rocher</p>
+</li>
+<li>
+<p>Guillaume LaForge</p>
+</li>
+<li>
+<p>Ståle Pedersen</p>
+</li>
+<li>
+<p>Tako Schotanus</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>and of course to the Ratatui and Textual creators for their inspiration and work.</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>Max Rydahl Andersen &amp; Cédric Champeau</p>
+</div>
+</div>
+</div>
+</div>
+</div></p>
+   
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+   <script>hljs.highlightAll();</script>
+  </body>
+</html>

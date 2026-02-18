@@ -6,9 +6,162 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Fri, 6 Feb 2026 09:20:33 +0100</pubDate>
-    <lastBuildDate>Fri, 6 Feb 2026 09:20:33 +0100</lastBuildDate>
+    <pubDate>Wed, 18 Feb 2026 11:48:41 +0100</pubDate>
+    <lastBuildDate>Wed, 18 Feb 2026 11:48:41 +0100</lastBuildDate>
 
+    <item>
+      <title>Announcing TamboUI</title>
+      <link>https://melix.github.io/blog//2026/02/17-announcing-tamboui.html</link>
+      <pubDate>Tue, 17 Feb 2026 00:00:00 +0100</pubDate>
+      <guid isPermaLink="false">2026/02/17-announcing-tamboui.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This blog post is co-authored by &lt;a href=&quot;https://melix.github.io/blog/2026/02/17-announcing-tamboui.html&quot;&gt;Cédric Champeau&lt;/a&gt; (Micronaut) and &lt;a href=&quot;https://xam.dk/blog/announcing-tamboui&quot;&gt;Max Rydahl Andersen&lt;/a&gt; (Quarkus), and cross-posted on our respective personal blogs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Today we are excited to announce &lt;a href=&quot;https://tamboui.dev/&quot;&gt;TamboUI&lt;/a&gt;, an open-source Terminal UI framework for the Java ecosystem!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The terminal is having a renaissance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;AI coding tools live there. Developer workflows are increasingly CLI-first again. Rust has &lt;a href=&quot;https://ratatui.rs/&quot;&gt;Ratatui&lt;/a&gt;. Python has Rich and Textual, Go has Charm, Typescript has OpenTUI. But Java, despite its performance, maturity, and tooling, didn’t have a modern, composable, developer-friendly TUI framework.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We thought that should change.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;videoblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;iframe width=&quot;640&quot; height=&quot;480&quot; src=&quot;https://www.youtube.com/embed/ERAp2vRHX3M?rel=0&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_how_it_started&quot;&gt;How it started&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;TamboUI (pronounced like the french word “tambouille”, slang for &quot;cooking up something&quot; or &quot;makeshift creation&quot;) was born a bit by accident: a couple months ago, Cédric was &lt;a href=&quot;https://bsky.app/profile/melix.champeau.me/post/3m7ulazaogt25&quot;&gt;asking about which TUI libraries that tools like Claude Code were using&lt;/a&gt;. Max Andersen answered that most likely this was &lt;a href=&quot;https://ratatui.rs/&quot;&gt;Ratatui&lt;/a&gt;, a framework written in Rust. Both thought that it was a bit sad that there was no such library for Java.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A few weeks later, &lt;a href=&quot;https://bsky.app/profile/melix.champeau.me/post/3mae3pyw4ek25&quot;&gt;Cédric did an experiment by asking AI (Claude Code) to port Ratatui to Java&lt;/a&gt;. The result was fairly impressive, and the beginning of a collaboration that led to the creation of TamboUI. In fact, Max &lt;a href=&quot;https://xam.dk/blog/lets-make-2026-the-year-of-java-in-the-terminal/&quot;&gt;gave you a hint last year&lt;/a&gt; that this was going to happen.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That said, TamboUI is not a Ratatui port nor is it a Textual port. We’ve put a lot of effort in going beyond the initial AI generated port. The library was designed with Java developers in mind, inspired by the good things found in other ecosystems’ approach to TUI frameworks. It offers a multi-layer API: from low-level widget primitives (like Ratatui), to a managed TUI layer with event handling, up to a declarative Toolkit DSL that handles the event loop and rendering thread for you—things that Ratatui doesn’t really cover. This brings the power of Ratatui, Textual or Rich to the Java ecosystem, with the Java touch!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Not only that, TamboUI is also &lt;a href=&quot;https://www.graalvm.org/latest/reference-manual/native-image/&quot;&gt;GraalVM native&lt;/a&gt; compatible! This means that you can compile your Java TUI applications as native binaries, making Java a first class citizen in terminal applications development, with low memory footprints and fast startup!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you want to give it a try, the easiest is to run our demos using &lt;a href=&quot;https://www.jbang.dev/&quot;&gt;JBang&lt;/a&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;pygments highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot;&gt;jbang demos@tamboui&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_try_it_out&quot;&gt;Try it out&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this stage, the APIs are still unstable and subject to change. TamboUI is developed with the mindset of being framework-agnostic and having as few external dependencies as possible. You can choose between several backends like &lt;a href=&quot;https://jline.org/&quot;&gt;JLine&lt;/a&gt;, &lt;a href=&quot;https://aeshell.github.io/&quot;&gt;Aesh&lt;/a&gt; or the built-in Panama backend. By choosing the latter, you’ll get the best performance while not depending on any external library.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Whether you want to build:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a standalone CLI tool&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;an internal developer tool&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a DevOps utility&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;add a TUI frontend to existing Java tool&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;an AI agent&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;or something entirely new&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Give TamboUI a try and let us know what worked and what could be improved!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Check out the documentation at &lt;a href=&quot;https://tamboui.dev/docs/main/&quot; class=&quot;bare&quot;&gt;https://tamboui.dev/docs/main/&lt;/a&gt;, join us on &lt;a href=&quot;https://tamboui.zulipchat.com&quot;&gt;Zulip&lt;/a&gt;, or browse the source on &lt;a href=&quot;https://github.com/tamboui/tamboui&quot;&gt;GitHub&lt;/a&gt;. We&amp;#8217;d love your feedback and contributions!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_acknowledgments&quot;&gt;Acknowledgments&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We would like to thank the following people for their ideas, suggestions and contributions to the creation of first public release of TamboUI (in alphabetical order):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Andres Almiray&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Andrea Peruffo&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Charles Moulliard&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Claus Ibsen&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Graeme Rocher&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Guillaume LaForge&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Ståle Pedersen&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Tako Schotanus&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and of course to the Ratatui and Textual creators for their inspiration and work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;openblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Max Rydahl Andersen &amp;amp; Cédric Champeau&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Mesurer la rotation différentielle solaire avec JSol&amp;#8217;Ex</title>
       <link>https://melix.github.io/blog//2026/02/06-mesure-rotation-differentielle.html</link>

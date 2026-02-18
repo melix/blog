@@ -91,6 +91,161 @@
 	<div class="page-header">
 		<h1>Blog</h1>
 	</div>
+  			<a href="/blog/2026/02/17-announcing-tamboui.html"><h1>Announcing TamboUI</h1></a>
+  			<p>17 February 2026</p>
+			<p><em>Tags: </em>
+		<a href="/blog/tags/tamboui.html">tamboui</a> 
+	
+		<a href="/blog/tags/tui.html">tui</a> 
+	
+		<a href="/blog/tags/java.html">java</a> 
+	</p>
+			
+  			<p><div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This blog post is co-authored by <a href="https://melix.github.io/blog/2026/02/17-announcing-tamboui.html">Cédric Champeau</a> (Micronaut) and <a href="https://xam.dk/blog/announcing-tamboui">Max Rydahl Andersen</a> (Quarkus), and cross-posted on our respective personal blogs.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Today we are excited to announce <a href="https://tamboui.dev/">TamboUI</a>, an open-source Terminal UI framework for the Java ecosystem!</p>
+</div>
+<div class="paragraph">
+<p>The terminal is having a renaissance.</p>
+</div>
+<div class="paragraph">
+<p>AI coding tools live there. Developer workflows are increasingly CLI-first again. Rust has <a href="https://ratatui.rs/">Ratatui</a>. Python has Rich and Textual, Go has Charm, Typescript has OpenTUI. But Java, despite its performance, maturity, and tooling, didn’t have a modern, composable, developer-friendly TUI framework.</p>
+</div>
+<div class="paragraph">
+<p>We thought that should change.</p>
+</div>
+<div class="videoblock">
+<div class="content">
+<iframe width="640" height="480" src="https://www.youtube.com/embed/ERAp2vRHX3M?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_it_started">How it started</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>TamboUI (pronounced like the french word “tambouille”, slang for "cooking up something" or "makeshift creation") was born a bit by accident: a couple months ago, Cédric was <a href="https://bsky.app/profile/melix.champeau.me/post/3m7ulazaogt25">asking about which TUI libraries that tools like Claude Code were using</a>. Max Andersen answered that most likely this was <a href="https://ratatui.rs/">Ratatui</a>, a framework written in Rust. Both thought that it was a bit sad that there was no such library for Java.</p>
+</div>
+<div class="paragraph">
+<p>A few weeks later, <a href="https://bsky.app/profile/melix.champeau.me/post/3mae3pyw4ek25">Cédric did an experiment by asking AI (Claude Code) to port Ratatui to Java</a>. The result was fairly impressive, and the beginning of a collaboration that led to the creation of TamboUI. In fact, Max <a href="https://xam.dk/blog/lets-make-2026-the-year-of-java-in-the-terminal/">gave you a hint last year</a> that this was going to happen.</p>
+</div>
+<div class="paragraph">
+<p>That said, TamboUI is not a Ratatui port nor is it a Textual port. We’ve put a lot of effort in going beyond the initial AI generated port. The library was designed with Java developers in mind, inspired by the good things found in other ecosystems’ approach to TUI frameworks. It offers a multi-layer API: from low-level widget primitives (like Ratatui), to a managed TUI layer with event handling, up to a declarative Toolkit DSL that handles the event loop and rendering thread for you—things that Ratatui doesn’t really cover. This brings the power of Ratatui, Textual or Rich to the Java ecosystem, with the Java touch!</p>
+</div>
+<div class="paragraph">
+<p>Not only that, TamboUI is also <a href="https://www.graalvm.org/latest/reference-manual/native-image/">GraalVM native</a> compatible! This means that you can compile your Java TUI applications as native binaries, making Java a first class citizen in terminal applications development, with low memory footprints and fast startup!</p>
+</div>
+<div class="paragraph">
+<p>If you want to give it a try, the easiest is to run our demos using <a href="https://www.jbang.dev/">JBang</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="shell">jbang demos@tamboui</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_try_it_out">Try it out</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At this stage, the APIs are still unstable and subject to change. TamboUI is developed with the mindset of being framework-agnostic and having as few external dependencies as possible. You can choose between several backends like <a href="https://jline.org/">JLine</a>, <a href="https://aeshell.github.io/">Aesh</a> or the built-in Panama backend. By choosing the latter, you’ll get the best performance while not depending on any external library.</p>
+</div>
+<div class="paragraph">
+<p>Whether you want to build:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a standalone CLI tool</p>
+</li>
+<li>
+<p>an internal developer tool</p>
+</li>
+<li>
+<p>a DevOps utility</p>
+</li>
+<li>
+<p>add a TUI frontend to existing Java tool</p>
+</li>
+<li>
+<p>an AI agent</p>
+</li>
+<li>
+<p>or something entirely new</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Give TamboUI a try and let us know what worked and what could be improved!</p>
+</div>
+<div class="paragraph">
+<p>Check out the documentation at <a href="https://tamboui.dev/docs/main/" class="bare">https://tamboui.dev/docs/main/</a>, join us on <a href="https://tamboui.zulipchat.com">Zulip</a>, or browse the source on <a href="https://github.com/tamboui/tamboui">GitHub</a>. We&#8217;d love your feedback and contributions!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_acknowledgments">Acknowledgments</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We would like to thank the following people for their ideas, suggestions and contributions to the creation of first public release of TamboUI (in alphabetical order):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Andres Almiray</p>
+</li>
+<li>
+<p>Andrea Peruffo</p>
+</li>
+<li>
+<p>Charles Moulliard</p>
+</li>
+<li>
+<p>Claus Ibsen</p>
+</li>
+<li>
+<p>Graeme Rocher</p>
+</li>
+<li>
+<p>Guillaume LaForge</p>
+</li>
+<li>
+<p>Ståle Pedersen</p>
+</li>
+<li>
+<p>Tako Schotanus</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>and of course to the Ratatui and Textual creators for their inspiration and work.</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>Max Rydahl Andersen &amp; Cédric Champeau</p>
+</div>
+</div>
+</div>
+</div>
+</div></p>
   			<a href="/blog/2026/02/06-mesure-rotation-differentielle.html"><h1>Mesurer la rotation différentielle solaire avec JSol&#8217;Ex</h1></a>
   			<p>05 February 2026</p>
 			<p><em>Tags: </em>
@@ -1923,390 +2078,6 @@ I have no doubts that I made approximations, or took liberties that I should pro
 <p>Mais nous nous éloignons là du sujet initial et concluons donc ce billet : dites bienvenue à JSol&#8217;Ex 4, consultez la vidéo de présentation ci-dessous et n&#8217;hésitez pas à contribuer !</p>
 </div>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/4SPKsNvnzKo?si=KuqIIMc1H6SLgVec" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-</div></p>
-  			<a href="/blog/2025/05-19-jsolex-3-2-0.html"><h1>Ellerman Bombs Detection with JSol&#8217;Ex 3.2</h1></a>
-  			<p>17 May 2025</p>
-			<p><em>Tags: </em>
-		<a href="/blog/tags/solex.html">solex</a> 
-	
-		<a href="/blog/tags/jsolex.html">jsolex</a> 
-	
-		<a href="/blog/tags/solar.html">solar</a> 
-	
-		<a href="/blog/tags/astronomy.html">astronomy</a> 
-	
-		<a href="/blog/tags/ellerman.html">ellerman</a> 
-	
-		<a href="/blog/tags/bombs.html">bombs</a> 
-	</p>
-			
-  			<p><div id="preamble">
-<div class="sectionbody">
-<style>
-.videoWrapper {
-  position: relative;
-  padding-bottom: 56.25%;
-  /* 16:9 */
-  padding-top: 25px;
-  height: 0;
-}
-
-.videoWrapper iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-</style>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_about_ellerman_bombs">About Ellerman Bombs</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Ellerman bombs were first described by Ferdinand Ellerman back in 1917.
-Ellerman&#8217;s article was named -Solar Hydrogen "Bombs"- and it&#8217;s only later that these were commonly referred to as "Ellerman bombs".</p>
-</div>
-<div class="paragraph">
-<p>I came upon this term while reading <a href="http://www.astrosurf.com/rondi/obs/shg/Bombes_ellerman.htm">an article from Sylvain or André Rondi</a> quite early in my solar imaging journey, and I was since then obsessed by these phenomena.</p>
-</div>
-<div class="paragraph">
-<p>Ellerman Bombs are small, transient, and explosive events that occur in the solar atmosphere, particularly in the vicinity of sunspots.
-These are very short lived compared to other solar features: from several dozens of seconds to a few minutes.
-The most common explanation is magnetic reconnection, which occurs when two magnetic regions opposite polarity come into contact and reconnect, releasing energy in the form of heat and light.
-This is for example described in <a href="https://dx.doi.org/10.1051/0004-6361/201321632">this article from González, Danilovic and Kneer</a>.</p>
-</div>
-<div class="paragraph">
-<p>Amateur observations of Ellerman bombs are quite rare, but Rondi described such observations using a spectroheliograph back in 2005.
-They are rare because they are mostly invisible where the amateur observations are made (the center of the H-alpha line), and are too small to notice.
-However, these are visible in the wings of the H-alpha line: this is where a spectroheliograph comes in handy, since the cropping window that is used to capture an image contains more than just the H-alpha line.</p>
-</div>
-<div class="paragraph">
-<p>I had a <a href="https://github.com/melix/astro4j/issues/382">long standing issue</a> to do something about it in JSol&#8217;Ex, and I finally got around to it: all it took was getting some test data to entertain the ideas.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_observation_of_an_ellerman_bomb">Observation of an Ellerman Bomb</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>I am doing many observations of the sun: I started in 2023 with a Sol&#8217;Ex, then I recently got an SHG 700, so I have accumulated quite a bit of data, which is completed by scans which are shared with me by other users of JSol&#8217;Ex.</p>
-</div>
-<div class="paragraph">
-<p>I have been looking for Ellerman bombs in my data, but I never found any yet.
-This changed a couple weeks ago: I was doing some routine work on JSol&#8217;Ex and using a capture I had done in April, 29, 2025 at 08:32 UTC, when I noticed, by accident, a bright spot in the continuum image:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/continuum.jpg" alt="continuum">
-</div>
-</div>
-<div class="paragraph">
-<p>It may not be obvious at first, which is precisely why these are hard to spot, so here&#8217;s a hint:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/zoom-continuum.png" alt="zoom continuum">
-</div>
-</div>
-<div class="paragraph">
-<p>JSol&#8217;Ex offers the ability to easily generate animations of the data captured at different wavelengths, so I generated a quick animation, which shows the same image at ±2.5Å from the center of the H-alpha line:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/anim_ellerman.gif" alt="anim ellerman">
-</div>
-</div>
-<div class="paragraph">
-<p>We can see the typical behavior of an Ellerman bomb: it is bright in the wings of the H-alpha line,  but it vanishes when we are at the center of the line.
-The fine spectral dispersion of the spectroheliograph makes it possible to highlight this phenomenon very precisely.</p>
-</div>
-<div class="paragraph">
-<p>The corresponding frame of the SER file shows the aspect of the Ellerman bomb in the spectrum:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/ellerman-spectrum.png" alt="ellerman spectrum">
-</div>
-</div>
-<div class="paragraph">
-<p>The shape that you can see is often referred to as the "moustache".
-At this stage I was pretty sure I had observed my first Ellerman bomb, and that I could implement an algorithm to detect it.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_jsolex_3_2_auto_detection">JSol&#8217;Ex 3.2 auto-detection</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>JSol&#8217;Ex 3.2 ships with a new feature to automatically detect Ellerman bombs in the data.
-Currently, it is limited to H-alpha, but it should be possible to detect these in CaII as well.</p>
-</div>
-<div class="paragraph">
-<p>The algorithm I implemented uses statistical analysis of the spectrum to match the characteristics of the "moustache" shape, in particular:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>a maximum of intensity around 1Å from the center of the line</p>
-</li>
-<li>
-<p>a distance which spreads up to 5Å from the center of the line</p>
-</li>
-<li>
-<p>a brightening which is only visible in the wings of the line</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>JSol&#8217;Ex will generate, for each detection, an image showing the location of the detected bombs:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/ellerman-location.jpg" alt="ellerman location">
-</div>
-</div>
-<div class="paragraph">
-<p>And for each bomb, it will create an image which shows the region of the spectrum which is used to detect the bomb.
-This is for example what is automatically generated for the bomb described above:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/spectrum-detection.jpg" alt="spectrum detection">
-</div>
-</div>
-<div class="sect2">
-<h3 id="_algorithm_details">Algorithm details</h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-This is a description of the algorithm that I implemented in an <em>adhoc</em> fashion: I&#8217;m not a mathematician nor a scientist: I&#8217;m an engineer and the algorithm above was implemented using my "intuition" of what I thought would work. It is likely to change as new versions are released.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>The algorithm is based on the following steps:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>for each frame in the SER file, identify the "borders" of the sun</p>
-</li>
-<li>
-<p>perform a Gaussian blur on the spectrum to reduce noise</p>
-</li>
-<li>
-<p>within the borders, compute, for each column, the average intensity of the spectrum for the center of the line and the wings separately. The center of the line is defined as the range [-0.35Å, 0.35Å] and the wings as the range [-5Å, -0.35Å[ ∪ ]0.35Å, 5Å]</p>
-</li>
-<li>
-<p>compute the maximum intensity of the wings, starting from the center of the line, and going outwards until we reach the maximum intensity (local extremum)</p>
-</li>
-<li>
-<p>compute the average of each column average intensity for the wings (the "global average")</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>With Ellerman bomb scoring parameters defined below, the algorithm proceeds per column:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>For each column index <code>x</code> in the spectrum image:</p>
-</li>
-<li>
-<p>Build a neighborhood of up to 16 columns around <code>x</code>:
-<code>Nₓ = { x + k  |  k ∈ ℤ,  |k| ≤ 8 }</code>, clamped to the image boundaries.</p>
-</li>
-<li>
-<p>Compute the overall mean column intensity
-<code>Ī_global = (1 / N_total) ∑_{j=1..N_total} Ī(j)</code>.</p>
-</li>
-<li>
-<p>Exclude any columns in <code>Nₓ</code> whose average intensity falls below 90 % of <code>Ī_global</code>, since very dark columns (usually sunspots) would pull down our estimate of the local wing background and hide true brightening events. Call the remaining set <code>Mₓ</code> and let <code>m = |Mₓ|</code>.</p>
-</li>
-<li>
-<p>If <code>m &lt; 1</code>, there aren’t enough valid neighbors to form a reliable background—skip column <code>x</code>.</p>
-</li>
-<li>
-<p>On the Gaussian-smoothed data, measure three key values at column <code>x</code>:</p>
-</li>
-<li>
-<p><code>c₀ ≔ I_center(x)</code>, the mean intensity in the core region of the spectral line.</p>
-</li>
-<li>
-<p><code>c_w ≔ I_wing(x)</code>, the average intensity across the two wing windows at ±1 Å.</p>
-</li>
-<li>
-<p><code>c_max ≔ max_{p ∈ wing-pixels nearest ±1 Å} I(p, x)</code>, the single highest wing intensity near the expected shift.</p>
-</li>
-<li>
-<p>Compute the local wing background
-<code>r₀ = (1 / (m−1)) ∑_{j ∈ Mₓ, j≠x} I_wing(j)</code>.
-Using only nearby “bright enough” columns keeps the background estimate from being skewed by dark features.</p>
-</li>
-<li>
-<p>Define a line-brightening factor
-<code>B = max(1, c₀ / min(r₀, I_center,global))</code>.
-Ellerman bombs boost the wings without greatly brightening the core, whereas flares brighten both.</p>
-</li>
-<li>
-<p>Form an initial score
-<code>S₀ = 1 + c_max / min(r₀, I_wing,global)</code>,
-where <code>I_wing,global = (1/N_total) ∑_{j=1..N_total} I_wing(j)</code>.
-This compares the local wing peak to the typical wing level across the image.</p>
-</li>
-<li>
-<p>Adjust for how many neighbors were used:
-<code>S₁ = S₀ × (m / 16)</code>.
-Fewer valid neighbors mean less confidence, so the score is scaled down proportionally.</p>
-</li>
-<li>
-<p>Compute the wing-to-background ratio
-<code>rᵢ = c_max / r₀</code>.
-If <code>rᵢ ≤ 1.05</code>, the wing peak is too close to the local background and the column is discarded. Otherwise, we boost the score further:</p>
-</li>
-<li>
-<p>Raise <code>S₁</code> to the power of <code>e^{rᵢ}</code>, giving
-<code>S₂ = S₁^( e^{rᵢ} )</code>.
-This makes the score grow quickly when the wing peak stands out strongly.</p>
-</li>
-<li>
-<p>Multiply by <code>√(c_max / c₀)</code> to get
-<code>S₃ = S₂ · √(c_max / c₀)</code>.
-That emphasizes cases where the wings are much brighter than the core.</p>
-</li>
-<li>
-<p>Finally, penalize any shift away from the ideal ±1 Å wing position. If <code>y_core</code> and <code>y_max</code> are the pixel locations of line center and wing peak, compute
-<code>Δλ = |y_max – y_core| × (Å / pixel)</code>,
-then
-<code>S_final = S₃ / (1 + |1 Å – Δλ|)</code>.</p>
-</li>
-<li>
-<p>If <code>S_final &gt; 12</code>, mark column <code>x</code> as a candidate event. Use the value of <code>B</code> to decide:</p>
-</li>
-<li>
-<p>When <code>B &lt; 1.5</code>, it behaves like an Ellerman bomb (wings bright, core unchanged).</p>
-</li>
-<li>
-<p>When <code>B &gt; 2</code>, it matches a flare (both core and wings bright).</p>
-</li>
-<li>
-<p>If <code>1.5 ≤ B ≤ 2</code>, the result is ambiguous and ignored.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>All thresholds (0.9× global mean, 1.05 ratio, score &gt; 12, B cutoffs) were chosen by testing on data and visually inspecting results.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_post_filtering">Post-filtering</h3>
-<div class="paragraph">
-<p>There will often be cases where the same bomb is detected in multiple frames.
-Therefore, we need to do some merging of bombs which are spatially connected.</p>
-</div>
-<div class="paragraph">
-<p>Eventually, we apply a limit threshold: if there are more than 5 Ellerman Bombs detected in an image, then we consider the detection to be false positives (this happens typically on saturated images, or images with too much noise).
-This is a bit arbitrary, but it seems to work well in practice.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_test_data">Test data</h3>
-<div class="paragraph">
-<p>I had about ~1100 scans I could reuse for detection, and it successfully discovered Ellerman bombs candidates in about 10% of them.
-Of course this required some tuning and several runs to get the parameters right.
-This doesn&#8217;t mean that you have 10% chances of finding an Ellerman bomb in your data, because the test data I have is biased (I often do 10 to 20 scans in a row, within a few minutes, to perform stacking, so if a bomb is detected in an image, it has decent chances of being detected in the next one).
-Also, I am using the term "Ellerman Bomb candidate", because there&#8217;s nothing better than visual confirmation to make sure that what you see is indeed an Ellerman bomb: an algorithm is not perfect, and it may fail for many reasons (noise, saturation, artifacts, etc.)</p>
-</div>
-<div class="paragraph">
-<p>Here are a few examples of Ellerman bombs candidates detected in my data:</p>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/candidate1.jpg" alt="candidate1">
-</div>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/candidate2.jpg" alt="candidate2">
-</div>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/candidate3.jpg" alt="candidate3">
-</div>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/candidate4.jpg" alt="candidate4">
-</div>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/candidate5.jpg" alt="candidate5">
-</div>
-</div>
-<div class="imageblock text-center">
-<div class="content">
-<img src="/blog/img/ellerman/candidate6.jpg" alt="candidate6">
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This blog post described my first visual Ellerman bomb detection.
-Then I described how I implemented an algorithm to automatically detect Ellerman bombs in JSol&#8217;Ex 3.2.
-I am very happy to release this to the wild, so that this kind of discovery is made more accessible to everyone.
-Of course, as I always say, you should take the detections with care, and always review the results.
-This is why you get both a global "map" of the detected bombs, and a detailed view of each bomb, which can be used to confirm the detection.
-In addition, I recommend that you create animations of the regions, which you can simply do in JSol&#8217;Ex by CTLR+clicking on the image then selecting an area around the bomb.</p>
-</div>
-<div class="paragraph">
-<p>Finally, I&#8217;d like to thank my friends of the Astro Club de Challans, who heard me talk about Ellerman bombs detection for a while, showing them preliminary results, and who were very supportive of my work.
-Last but not least, thanks again to my wife for her patience, seeing me work on this (too) late at night!</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_bibiography">Bibiography</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://ui.adsabs.harvard.edu/abs/1917ApJ&#8230;&#8203;.46..298E/abstract">Ellerman, F. (1917) - Solar Hydrogen "Bombs"</a></p>
-</li>
-<li>
-<p><a href="http://www.astrosurf.com/rondi/obs/shg/Bombes_ellerman.htm">S. Rondi, A. Rondi - Bombes d&#8217;Ellerman</a></p>
-</li>
-<li>
-<p><a href="https://dx.doi.org/10.1051/0004-6361/201321632">N. Bello González , S. Danilovic , and F. Kneer - On the structure and dynamics of Ellerman bombs</a></p>
-</li>
-<li>
-<p><a href="https://www.jstage.jst.go.jp/article/starsandgalaxies/6/0/6_3/_article/-char/en">R. Ichikawa, S. Nozawa - Detailed altitude analysis of Ellerman bomb using the domeless solar telescope at the Hida Observatory, Kyoto University</a></p>
-</li>
-<li>
-<p><a href="https://arxiv.org/abs/1407.3048">Jie Hong, M. D. Ding, Ying Li, Cheng Fang, Wenda Cao - Spectral observations of Ellerman bombs and fitting with a two-cloud model</a></p>
-</li>
-<li>
-<p><a href="https://arxiv.org/abs/1406.5702">A. Berlicki, P. Heinzel - Observations and NLTE modeling of Ellerman bombs</a></p>
-</li>
-<li>
-<p><a href="https://adsabs.harvard.edu/full/2007ASPC..368..253P">E. Pariat, B. Schmieder, A. Berlicki., A. López Ariste - Spectrophotometry of Ellerman Bombs with THEMIS</a></p>
-</li>
-</ul>
-</div>
 </div>
 </div></p>
 	
