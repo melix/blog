@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 245">
+  <!-- Background (light) -->
+  <rect width="420" height="245" fill="#f8f8f8"/>
+
+  <!-- Title -->
+  <text x="210" y="20" text-anchor="middle" fill="#333" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Profils spectraux décalés (effet Doppler)</text>
+
+  <!-- Chart area -->
+  <rect x="50" y="40" width="340" height="160" fill="#fff" stroke="#888" stroke-width="1"/>
+
+  <!-- X-axis -->
+  <line x1="50" y1="200" x2="390" y2="200" stroke="#555" stroke-width="1.5"/>
+  <text x="220" y="220" text-anchor="middle" fill="#555" font-family="Arial, sans-serif" font-size="11">Longueur d'onde (λ)</text>
+
+  <!-- Y-axis -->
+  <line x1="50" y1="40" x2="50" y2="200" stroke="#555" stroke-width="1.5"/>
+  <text x="25" y="120" text-anchor="middle" fill="#555" font-family="Arial, sans-serif" font-size="11" transform="rotate(-90, 25, 120)">Intensité</text>
+
+  <!-- Reference Longueur d'onde marker (λ0) - dashed vertical line -->
+  <line x1="220" y1="45" x2="220" y2="195" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="220" y="238" text-anchor="middle" fill="#555" font-family="Arial, sans-serif" font-size="11" font-weight="bold">λ₀</text>
+
+  <!-- Reference Voigt profile (gray dashed) - wider parabolic valley -->
+  <path d="M 55,52 L 140,52
+           C 165,52 180,65 190,90
+           C 200,115 210,150 215,165
+           C 218,172 220,175 220,175
+           C 220,175 222,172 225,165
+           C 230,150 240,115 250,90
+           C 260,65 275,52 300,52
+           L 385,52"
+        fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- East Voigt profile (blue, shifted left by 12px) -->
+  <path d="M 55,52 L 128,52
+           C 153,52 168,65 178,90
+           C 188,115 198,150 203,165
+           C 206,172 208,175 208,175
+           C 208,175 210,172 213,165
+           C 218,150 228,115 238,90
+           C 248,65 263,52 288,52
+           L 385,52"
+        fill="none" stroke="#1565C0" stroke-width="2"/>
+
+  <!-- West Voigt profile (red, shifted right by 12px) -->
+  <path d="M 55,52 L 152,52
+           C 177,52 192,65 202,90
+           C 212,115 222,150 227,165
+           C 230,172 232,175 232,175
+           C 232,175 234,172 237,165
+           C 242,150 252,115 262,90
+           C 272,65 287,52 312,52
+           L 385,52"
+        fill="none" stroke="#C62828" stroke-width="2"/>
+
+  <!-- Line center markers at absorption minimum -->
+  <circle cx="208" cy="175" r="4" fill="#1565C0"/>
+  <circle cx="232" cy="175" r="4" fill="#C62828"/>
+
+  <!-- Small labels near the line centers -->
+  <text x="208" y="192" text-anchor="middle" fill="#1565C0" font-family="Arial, sans-serif" font-size="9" font-weight="bold">E</text>
+  <text x="232" y="192" text-anchor="middle" fill="#C62828" font-family="Arial, sans-serif" font-size="9" font-weight="bold">O</text>
+
+  <!-- Δλ bracket showing the shift -->
+  <line x1="210" y1="197" x2="230" y2="197" stroke="#555" stroke-width="1"/>
+  <line x1="210" y1="194" x2="210" y2="200" stroke="#555" stroke-width="1"/>
+  <line x1="230" y1="194" x2="230" y2="200" stroke="#555" stroke-width="1"/>
+  <text x="220" y="208" text-anchor="middle" fill="#555" font-family="Arial, sans-serif" font-size="8">Δλ</text>
+</svg>
