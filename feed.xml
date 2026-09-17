@@ -6,9 +6,338 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Mon, 31 Aug 2026 15:31:15 +0200</pubDate>
-    <lastBuildDate>Mon, 31 Aug 2026 15:31:15 +0200</lastBuildDate>
+    <pubDate>Thu, 17 Sep 2026 10:28:58 +0200</pubDate>
+    <lastBuildDate>Thu, 17 Sep 2026 10:28:58 +0200</lastBuildDate>
 
+    <item>
+      <title>Mesurer les oscillations du Soleil avec un spectrohéliographe amateur</title>
+      <link>https://melix.github.io/blog//2026/09/16-heliosismologie-amateur.html</link>
+      <pubDate>Wed, 16 Sep 2026 00:00:00 +0200</pubDate>
+      <guid isPermaLink="false">2026/09/16-heliosismologie-amateur.html</guid>
+      	<description>
+	&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le Soleil a un cœur qui bat. Et si nous pouvions l&amp;#8217;entendre ?&lt;sup class=&quot;footnote&quot; id=&quot;_footnote_disclaimer&quot;&gt;[&lt;a id=&quot;_footnoteref_1&quot; class=&quot;footnote&quot; href=&quot;#_footnotedef_1&quot; title=&quot;View footnote.&quot;&gt;1&lt;/a&gt;]&lt;/sup&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans ce billet, je vais raconter comment j&amp;#8217;ai mesuré les oscillations de cinq minutes du Soleil avec une lunette de 102 mm à 250 € et un spectrohéliographe (SHG 700), depuis mon jardin.
+Ces oscillations sont la base de l&amp;#8217;héliosismologie, la discipline qui permet de sonder l&amp;#8217;intérieur du Soleil comme un sismologue sonde celui de la Terre.
+À la recherche d&amp;#8217;une expérience inédite pour compléter ma future présentation aux &lt;a href=&quot;https://www.afastronomie.fr/rencontres-ciel-espace&quot;&gt;Rencontres du Ciel et de l&amp;#8217;Espace&lt;/a&gt; à Paris, je soupçonnais que ce serait possible, mais je ne savais pas si j&amp;#8217;y arriverais.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Au final, j&amp;#8217;ai retrouvé six &quot;modes&quot; de résonance du Soleil (j&amp;#8217;ai découvert ce terme de mode en faisant cette expérience), et leurs fréquences s&amp;#8217;accordent admirablement&lt;sup class=&quot;footnote&quot; id=&quot;_footnote_rigueur&quot;&gt;[&lt;a id=&quot;_footnoteref_2&quot; class=&quot;footnote&quot; href=&quot;#_footnotedef_2&quot; title=&quot;View footnote.&quot;&gt;2&lt;/a&gt;]&lt;/sup&gt; avec les valeurs publiées par le satellite SOHO.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;N&amp;#8217;ayant trouvé aucune référence à ce genre de mesure faite par un amateur, ce qui ne veut pas dire qu&amp;#8217;elles n&amp;#8217;existent pas, je pense que c&amp;#8217;est une première mondiale.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce billet se focalise sur les résultats, et sur l&amp;#8217;expérience elle-même. Si vous êtes intéressé par la méthode et l&amp;#8217;analyse, je vous renvoie à l&amp;#8217;article complet que j&amp;#8217;ai écrit à ce sujet, disponible en &lt;a href=&quot;/blog/img/heliosismologie/heliosismologie-amateur.pdf&quot;&gt;PDF français&lt;/a&gt; et en &lt;a href=&quot;/blog/img/heliosismologie/heliosismologie-amateur-en.pdf&quot;&gt;PDF anglais&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_les_oscillations_de_cinq_minutes&quot;&gt;Les oscillations de cinq minutes&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En 1962, Leighton, Noyes et Simon découvrent que la surface du Soleil oscille, avec une période d&amp;#8217;environ cinq minutes.
+C&amp;#8217;est Ulrich qui l&amp;#8217;explique en 1970 : ce sont des ondes sonores, produites par la convection sous la surface, qui se réfléchissent entre les couches profondes et la photosphère, et qui finissent par résonner.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans une cavité qui résonne, toutes les notes ne sont pas permises : un tuyau d&amp;#8217;orgue produit une fondamentale et ses harmoniques, et rien entre les deux.
+Le Soleil fait pareil, mais il faut deux nombres pour décrire une de ses notes : la taille de l&amp;#8217;onde à la surface, et sa fréquence.
+Si on trie tous les mouvements de la surface selon ces deux critères, la puissance ne se répartit pas n&amp;#8217;importe comment : elle se concentre le long de lignes étroites, qu&amp;#8217;on appelle des crêtes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Voir ces crêtes, c&amp;#8217;est voir que le Soleil résonne.
+Deubner les a observées pour la première fois en 1975, et il en distinguait trois ou quatre.
+C&amp;#8217;est ce que je voulais essayer de refaire.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Petite parenthèse personnelle : quand j&amp;#8217;ai commencé mes études en 1998, je voulais faire de l&amp;#8217;astrophysique, et j&amp;#8217;ai abandonné en voyant le niveau de maths qu&amp;#8217;il fallait (j&amp;#8217;en avais &lt;a href=&quot;/blog/2023/04-22-introducing-astro4j.html&quot;&gt;déjà parlé ici&lt;/a&gt;).
+Pour cet exercice, j&amp;#8217;ai exploité mon expérience dans le développement de JSol&amp;#8217;Ex ainsi que mes nombreuses observations pour établir le protocole.
+La lecture des papiers m&amp;#8217;a permis de comprendre les étapes nécessaires pour obtenir le diagramme, mais la compréhension des équations et des modèles m&amp;#8217;a essentiellement échappé.
+Sans l&amp;#8217;aide de l&amp;#8217;IA, jamais je n&amp;#8217;aurais pu faire cette expérience ou analyser correctement les résultats.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ceci traduit ma relation compliquée avec l&amp;#8217;IA, qui mériterait un billet à elle seule : il n&amp;#8217;est surprenant pour personne que je sois terrifié par la vitesse à laquelle l&amp;#8217;IA change nos vies, avec des implications éthiques, sociales, sociétales et environnementales indéniables, mais je suis aussi fasciné par ce qu&amp;#8217;elle permet de faire et le résultat de ce billet en est un exemple. Pour moi, la question n&amp;#8217;est vraiment pas de savoir si l&amp;#8217;IA fonctionne ou pas : ça marche et c&amp;#8217;est impressionnant. La question du bénéfice / risque, la question de la priorité du développement de l&amp;#8217;IA par rapport notamment aux enjeux environnementaux sont les points qu&amp;#8217;on devrait discuter. Bref, je la maudis autant que je l&amp;#8217;admire.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je vis, tous les jours, les contradictions de cette relation, et je ne sais pas encore comment la gérer : je reste, jusqu&amp;#8217;à preuve du contraire, un être humain faillible et je me rassure en me disant que je fais ici de la science, quelque chose d&amp;#8217;utile, à l&amp;#8217;inverse des publicités qu&amp;#8217;on voit fleurir partout, ou encore des vidéos et musiques générées par l&amp;#8217;IA qu&amp;#8217;on voit dans les conférences tech françaises&amp;#8230;&amp;#8203; mais je m&amp;#8217;égare.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_lexpérience&quot;&gt;L&amp;#8217;expérience&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le protocole est au final relativement simple : un balayage du disque toutes les minutes, pendant six heures, sans interruption, sur une raie fer dont le facteur de Lambé (représentant la sensibilité au champ magnétique) est le plus proche de zéro possible.
+Ça donne 336 balayages retenus et 1,4 To de vidéo, c&amp;#8217;est-à-dire un film du Soleil à une image par minute, dans lequel chaque pixel contient un profil de raie.
+J&amp;#8217;ai dû éliminer quelques scans pour diverses raisons (géométrie, artéfacts, résonance de la monture, etc.) mais l&amp;#8217;essentiel est là.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Un spectrohéliographe, comme le &lt;a href=&quot;http://www.astrosurf.com/solex/&quot;&gt;Sol&amp;#8217;Ex de Christian Buil&lt;/a&gt; ou le &lt;a href=&quot;https://mlastro.com/product-category/spectroheliographs/&quot;&gt;SHG 700&lt;/a&gt; que j&amp;#8217;utilise, ne produit pas directement une image du Soleil.
+En chaque point du disque, il enregistre le profil complet d&amp;#8217;une raie du spectre, et c&amp;#8217;est toute la différence avec un filtre : le filtre donne une intensité, le spectrohéliographe donne la position exacte de la raie qu&amp;#8217;il est possible de convertir directement en vitesse (effet Doppler).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/disque_fe5434_exemple.jpg&quot; alt=&quot;Le disque solaire dans la raie Fe I 5434,5 Å&quot; width=&quot;600&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Un de mes balayages, dans la raie du fer neutre à 5434,5 Å&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Parlons maintenant un peu du point probablement le plus surprenant, si on ne regarde que les chiffres : ce qu&amp;#8217;on cherche à mesurer est bien plus fin que la résolution nominale de l&amp;#8217;instrument.
+Il y a donc une astuce.
+Sur mon spectre, un pixel correspond à 5 737 m/s, alors que les oscillations que je cherche font quelques centaines de mètres par seconde : une vitesse de 300 m/s déplace la raie d&amp;#8217;un vingtième de pixel.
+Comment peut-on obtenir une précision d&amp;#8217;un vingtième de pixel ?
+En pratique, on peut le déduire, en comparant chaque point du disque à lui-même plutôt qu&amp;#8217;à un modèle.
+C&amp;#8217;est le même genre de problème que pour la &lt;a href=&quot;/blog/2026/02/06-mesure-rotation-differentielle.html&quot;&gt;mesure de rotation différentielle&lt;/a&gt; dont j&amp;#8217;avais parlé, mais bien plus exigeant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une fois les vitesses mesurées, il reste à trier les mouvements par taille et par fréquence, et à regarder où se trouve la puissance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/diagramme_kw_reperes.png&quot; alt=&quot;Le diagramme avec ses repères&quot; width=&quot;800&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Les crêtes de résonance du Soleil, vues depuis mon jardin&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On constate bien des &quot;courbes&quot; plus blanches que le fond : il s&amp;#8217;agit des fameuses crêtes de résonance du Soleil.
+L&amp;#8217;axe horizontal mesure la taille des ondes : plus on va à droite, plus les structures sont petites.
+L&amp;#8217;axe vertical est la fréquence, sachant que 3 mHz correspond à une oscillation toutes les 5 minutes 33 secondes.
+Les courbes vertes ne sont pas un ajustement : ce sont les crêtes mesurées par le satellite SOHO, posées telles quelles sur mon diagramme.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_la_comparaison_avec_soho&quot;&gt;La comparaison avec SOHO&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Voir des lignes est une chose, s&amp;#8217;assurer que ce sont les bonnes en est une autre, et c&amp;#8217;est ce qui m&amp;#8217;a demandé le plus de travail : on a beau obtenir un diagramme, comment s&amp;#8217;assurer qu&amp;#8217;on a bien retrouvé les modes de résonance du Soleil et pas halluciné des résultats ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les fréquences des modes solaires sont publiées : le projet SOHO/MDI met à disposition, sur les serveurs de Stanford, les tables ajustées sur ses propres spectres.
+J&amp;#8217;ai donc comparé mes six crêtes aux valeurs publiées :&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Crête&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Table MDI (mHz)&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Ma mesure (mHz)&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Écart&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1,6441&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1,659&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+15 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p2&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,0072&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,027&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+20 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p3&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,3404&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,347&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+7 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p4&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,6356&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,635&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;−1 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p5&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,9201&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,927&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+6 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p6&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;3,1902&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;3,175&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;−15 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;écart moyen est de 11 µHz, soit le quart de la résolution de ma série.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans ce tableau, c&amp;#8217;est qu&amp;#8217;aucun paramètre n&amp;#8217;est ajusté.
+L&amp;#8217;échelle des fréquences vient uniquement de l&amp;#8217;heure inscrite dans les fichiers SER, celle des tailles uniquement du rayon du disque mesuré en pixels.
+Les deux mesures (temps et pixels) sont soumises à des incertitudes indépendantes et elles s&amp;#8217;accordent malgré tout.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_problème_de_la_monture&quot;&gt;Le problème de la monture&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je m&amp;#8217;attendais à ce que la limite de l&amp;#8217;exercice vienne du seeing, qui était médiocre pendant toutes mes observations (ciel clair, mais une turbulence bien présente).
+En réalité, le graphique a montré des crêtes surprenantes qui ne font pas partie des résultats SOHO.
+La cause ? La monture !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ma SAL-33 utilise des réducteurs harmoniques, qui ont une erreur périodique de 430 secondes, d&amp;#8217;environ 16 secondes d&amp;#8217;arc crête à crête (Minh Nguyen, de ML Astro, me l&amp;#8217;a confirmé quand je lui ai envoyé mes mesures).
+Pendant les quinze secondes que dure un balayage, cette erreur fait varier la vitesse à laquelle l&amp;#8217;image défile devant la fente, et il reste une déformation qui décale le contenu de l&amp;#8217;image de quelques pixels, différemment d&amp;#8217;un balayage à l&amp;#8217;autre.
+Autrement dit, mes cartes de vitesse successives sont légèrement décalées entre elles, ce qui brouille les crêtes.
+Je dois dire que non seulement je n&amp;#8217;avais pas anticipé ce problème, mais, jamais je n&amp;#8217;aurais cru que le diagramme ferait apparaître ce défaut et qu&amp;#8217;on pourrait en mesurer l&amp;#8217;ampleur !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai donc mesuré ce glissement, et corrigé.
+Le contraste des oscillations augmente de moitié, les fréquences ne bougent pas, et leur accord avec les tables s&amp;#8217;améliore encore : l&amp;#8217;écart maximal passe de 46 à 24 µHz.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme ce genre de correction peut facilement se transformer en illusion (on cherche quelque chose, on finit par le trouver), j&amp;#8217;ai appliqué exactement la même correction à des balayages tirés au hasard.
+Si ma méthode améliorait les choses par simple construction mathématique, ce témoin se serait amélioré lui aussi.
+Or il se dégrade.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_cas_du_mode_f&quot;&gt;Le cas du mode f&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il reste une famille d&amp;#8217;ondes que je n&amp;#8217;ai pas trouvée là où elle devrait être, et c&amp;#8217;est le mode f, qui n&amp;#8217;est pas une onde sonore, mais une onde de surface, comparable aux vagues sur l&amp;#8217;eau.
+Aucune crête ne suit la courbe théorique chez moi, mais il y a très clairement une bande de puissance juste en dessous.
+La proximité m&amp;#8217;a longuement intrigué&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/bande_sous_mode_f.png&quot; alt=&quot;La région du mode f&quot; width=&quot;800&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Elle est présente sur mes trois séances, avant comme après la correction de monture, et sa forme suit celle de la courbe théorique, mais elle est 4 à 8 % trop basse en fréquence.
+J&amp;#8217;ai longtemps espéré que c&amp;#8217;était le mode f, décalé pour une raison physique intéressante, mais il est plus probable que l&amp;#8217;explication vienne d&amp;#8217;ailleurs : les tables montrent que le mode f réel se situe légèrement au-dessus de la courbe théorique, jamais en dessous.
+J&amp;#8217;ai aussi écarté une réplique produite par la monture, un effet de projection, et une variation liée au cycle solaire, qui est des milliers de fois trop petite.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, je ne sais pas ce que c&amp;#8217;est.
+Si quelqu&amp;#8217;un a une idée, je suis preneur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_en_pratique&quot;&gt;En pratique&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Tout se passe dans JSol&amp;#8217;Ex, en un seul traitement par lot : le logiciel reconstruit les images, ajuste le disque, corrige la géométrie, puis exécute mon script Python dans son interpréteur intégré, qui calcule les vitesses, le spectre et les figures.
+Au passage, merci &lt;a href=&quot;https://www.graalvm.org/&quot;&gt;GraalVM&lt;/a&gt; !
+Il n&amp;#8217;y a aucun autre logiciel dans la chaîne, et c&amp;#8217;est pour moi le point important, celui qui me fait passer du temps à développer JSol&amp;#8217;Ex : rendre ce genre de mesure accessible au plus grand nombre.
+Cependant, mes scripts Python utilisent Numpy, ce qui veut dire qu&amp;#8217;avec les limites de GraalVM, le script ne fonctionnera pas sous Windows.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le traitement des 354 fichiers, calcul du diagramme compris, prend environ 2 h 30 sur un Ryzen 9 9950X.
+Rendez-vous compte : près de 1,5 To de données traitées en 2 h 30 avec production directe de ces graphiques !
+Je n&amp;#8217;ai pas le contexte de l&amp;#8217;expérience de Deubner, mais je suppose que le traitement a dû être bien plus long à l&amp;#8217;époque.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le reste, c&amp;#8217;est de la patience : six heures de suivi sans interruption, une raie bien choisie, et un ciel qui veut bien rester dégagé.
+Fort heureusement, l&amp;#8217;acquisition en elle-même est entièrement automatisée, et je n&amp;#8217;ai eu qu&amp;#8217;à surveiller la météo et le ciel.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce qui rend ce résultat possible, ce n&amp;#8217;est pas le matériel, qui est finalement assez banal : une lunette de 102 mm, un spectrohéliographe du commerce (cependant un Sol&amp;#8217;Ex devrait aussi fonctionner, si possible avec une fente plus fine de 2ème génération) et une monture légère.
+Non, c&amp;#8217;est plutôt la persévérance (combinaison d&amp;#8217;une longue série régulière, traitements un peu longs) et, j&amp;#8217;ai envie de dire, la simplicité de la mise en œuvre du traitement dans JSol&amp;#8217;Ex.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est aussi, à mon grand désarroi, l&amp;#8217;utilisation de l&amp;#8217;IA générative, qui m&amp;#8217;a permis de passer outre le formalisme mathématique pour comprendre l&amp;#8217;intention des équations et des modèles, et d&amp;#8217;écrire le code qui calcule les vitesses et le diagramme.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme toujours avec ce que j&amp;#8217;écris ici, prenez-le avec le recul nécessaire : je ne suis pas physicien solaire, je ne suis pas scientifique, et j&amp;#8217;ai très probablement fait des approximations que je n&amp;#8217;aurais pas dû faire.
+C&amp;#8217;est d&amp;#8217;ailleurs pour ça que je publie l&amp;#8217;article complet en même temps que ce billet : les chiffres, les incertitudes et les limites y sont détaillés, et tout est vérifiable.
+J&amp;#8217;ai cependant tout vérifié là où j&amp;#8217;ai les compétences, en particulier le code, et ce qui me rassure, c&amp;#8217;est que j&amp;#8217;ai justement dû corriger des erreurs de l&amp;#8217;IA tout au long de la mise au point, l&amp;#8217;humain a encore son mot à dire (pour combien de temps ?).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, si vous avez un spectrohéliographe et une monture qui suit correctement pendant quelques heures, vous pouvez refaire cette mesure, et j&amp;#8217;aimerais beaucoup voir vos résultats.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_pour_aller_plus_loin&quot;&gt;Pour aller plus loin&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/img/heliosismologie/heliosismologie-amateur.pdf&quot;&gt;L&amp;#8217;article complet, en français&lt;/a&gt; : méthode, tableaux et incertitudes&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/img/heliosismologie/heliosismologie-amateur-en.pdf&quot;&gt;The complete article, in English&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2026/02/06-mesure-rotation-differentielle.html&quot;&gt;Mesurer la rotation différentielle solaire avec JSol&amp;#8217;Ex&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://melix.github.io/astro4j/latest/fr/jsolex.html&quot;&gt;Documentation de JSol&amp;#8217;Ex&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_ressources&quot;&gt;Ressources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1086/147285&quot;&gt;Leighton, R.B., Noyes, R.W. &amp;amp; Simon, G.W. (1962) - Velocity Fields in the Solar Atmosphere. I. ApJ 135, 474&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1086/150731&quot;&gt;Ulrich, R.K. (1970) - The Five-Minute Oscillations on the Solar Surface. ApJ 162, 993&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://ui.adsabs.harvard.edu/abs/1975A%26A&amp;#8230;&amp;#8203;.44..371D/abstract&quot;&gt;Deubner, F.-L. (1975) - Observations of low wavenumber nonradial eigenmodes of the Sun. A&amp;amp;A 44, 371&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://doi.org/10.1023/a:1004963425123&quot;&gt;Rhodes, E.J. Jr. et al. (1997) - Measurements of Frequencies of Solar Oscillations from the MDI Medium-l Program. Sol. Phys. 175, 287&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://jsoc.stanford.edu/MDI/MDI_Global.html&quot;&gt;Tables de fréquences des modes solaires, SOHO/MDI, JSOC Stanford&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;footnotes&quot;&gt;
+&lt;hr&gt;
+&lt;div class=&quot;footnote&quot; id=&quot;_footnotedef_1&quot;&gt;
+&lt;a href=&quot;#_footnoteref_1&quot;&gt;1&lt;/a&gt;. Un lecteur avisé me dirait qu&amp;#8217;il ne s&amp;#8217;agit pas de battements et qu&amp;#8217;on ne peut pas l&amp;#8217;entendre. Une meilleure métaphore serait celle d&amp;#8217;une cloche qui résonne, mais la poésie doit parfois s&amp;#8217;affranchir de la rigueur scientifique.
+&lt;/div&gt;
+&lt;div class=&quot;footnote&quot; id=&quot;_footnotedef_2&quot;&gt;
+&lt;a href=&quot;#_footnoteref_2&quot;&gt;2&lt;/a&gt;. C&amp;#8217;est l&amp;#8217;amateur qui parle ici. Pour des chiffres concrets, fiez-vous au papier
+&lt;/div&gt;
+&lt;/div&gt;
+	</description>
+    </item>
     <item>
       <title>Road-trip en Espagne en électrique pour l&amp;#8217;éclipse totale d&amp;#8217;août 2026</title>
       <link>https://melix.github.io/blog//2026/08/31-espagne-voiture-electrique.html</link>
