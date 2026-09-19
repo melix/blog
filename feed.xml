@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Thu, 17 Sep 2026 10:28:58 +0200</pubDate>
-    <lastBuildDate>Thu, 17 Sep 2026 10:28:58 +0200</lastBuildDate>
+    <pubDate>Sat, 19 Sep 2026 16:51:54 +0200</pubDate>
+    <lastBuildDate>Sat, 19 Sep 2026 16:51:54 +0200</lastBuildDate>
 
     <item>
       <title>Mesurer les oscillations du Soleil avec un spectrohéliographe amateur</title>
@@ -17,6 +17,23 @@
       	<description>
 	&lt;div id=&quot;preamble&quot;&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;admonitionblock important&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Important&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Mise à jour du 19 septembre 2026&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La première version de ce billet contenait une erreur dans mon traitement, qui dédoublait les crêtes et me faisait chercher un mode f là où il n&amp;#8217;était pas.
+Le billet, les figures et les articles en PDF présentent désormais les résultats corrigés.
+L&amp;#8217;histoire de cette erreur est racontée &lt;a href=&quot;#premiere-version&quot;&gt;en fin de billet&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Le Soleil a un cœur qui bat. Et si nous pouvions l&amp;#8217;entendre ?&lt;sup class=&quot;footnote&quot; id=&quot;_footnote_disclaimer&quot;&gt;[&lt;a id=&quot;_footnoteref_1&quot; class=&quot;footnote&quot; href=&quot;#_footnotedef_1&quot; title=&quot;View footnote.&quot;&gt;1&lt;/a&gt;]&lt;/sup&gt;.&lt;/p&gt;
 &lt;/div&gt;
@@ -29,7 +46,8 @@ Ces oscillations sont la base de l&amp;#8217;héliosismologie, la discipline qui
 &lt;p&gt;Au final, j&amp;#8217;ai retrouvé six &quot;modes&quot; de résonance du Soleil (j&amp;#8217;ai découvert ce terme de mode en faisant cette expérience), et leurs fréquences s&amp;#8217;accordent admirablement&lt;sup class=&quot;footnote&quot; id=&quot;_footnote_rigueur&quot;&gt;[&lt;a id=&quot;_footnoteref_2&quot; class=&quot;footnote&quot; href=&quot;#_footnotedef_2&quot; title=&quot;View footnote.&quot;&gt;2&lt;/a&gt;]&lt;/sup&gt; avec les valeurs publiées par le satellite SOHO.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;N&amp;#8217;ayant trouvé aucune référence à ce genre de mesure faite par un amateur, ce qui ne veut pas dire qu&amp;#8217;elles n&amp;#8217;existent pas, je pense que c&amp;#8217;est une première mondiale.&lt;/p&gt;
+&lt;p&gt;N&amp;#8217;ayant trouvé aucune référence à ce genre de mesure en vitesse faite par un amateur, ce qui ne veut pas dire qu&amp;#8217;elles n&amp;#8217;existent pas, je pense que c&amp;#8217;est une première mondiale.
+Des mesures faites à partir de la luminosité de la surface existent en revanche, &lt;a href=&quot;#premiere-version&quot;&gt;j&amp;#8217;y reviens plus bas&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Ce billet se focalise sur les résultats, et sur l&amp;#8217;expérience elle-même. Si vous êtes intéressé par la méthode et l&amp;#8217;analyse, je vous renvoie à l&amp;#8217;article complet que j&amp;#8217;ai écrit à ce sujet, disponible en &lt;a href=&quot;/blog/img/heliosismologie/heliosismologie-amateur.pdf&quot;&gt;PDF français&lt;/a&gt; et en &lt;a href=&quot;/blog/img/heliosismologie/heliosismologie-amateur-en.pdf&quot;&gt;PDF anglais&lt;/a&gt;.&lt;/p&gt;
@@ -109,7 +127,7 @@ C&amp;#8217;est le même genre de problème que pour la &lt;a href=&quot;/blog/2
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/blog/img/heliosismologie/diagramme_kw_reperes.png&quot; alt=&quot;Le diagramme avec ses repères&quot; width=&quot;800&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/diagramme_kw_reperes_v2.png&quot; alt=&quot;Le diagramme avec ses repères&quot; width=&quot;800&quot;&gt;
 &lt;/div&gt;
 &lt;div class=&quot;title&quot;&gt;Figure 2. Les crêtes de résonance du Soleil, vues depuis mon jardin&lt;/div&gt;
 &lt;/div&gt;
@@ -150,43 +168,43 @@ J&amp;#8217;ai donc comparé mes six crêtes aux valeurs publiées :&lt;/p&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p1&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1,6441&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1,659&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+15 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1,649&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+5 µHz&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p2&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,0072&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,027&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+20 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,023&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+15 µHz&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p3&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,3404&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,347&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+7 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,331&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;−9 µHz&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p4&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,6356&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,635&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;−1 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,636&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0 µHz&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p5&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,9201&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,927&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2,926&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;+6 µHz&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;p6&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;3,1902&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;3,175&lt;/p&gt;&lt;/td&gt;
-&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;−15 µHz&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;3,183&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;−7 µHz&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;L&amp;#8217;écart moyen est de 11 µHz, soit le quart de la résolution de ma série.&lt;/p&gt;
+&lt;p&gt;L&amp;#8217;écart moyen est de 7 µHz, soit moins du sixième de la résolution de ma série.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Dans ce tableau, c&amp;#8217;est qu&amp;#8217;aucun paramètre n&amp;#8217;est ajusté.
@@ -211,7 +229,7 @@ Je dois dire que non seulement je n&amp;#8217;avais pas anticipé ce problème, 
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;J&amp;#8217;ai donc mesuré ce glissement, et corrigé.
-Le contraste des oscillations augmente de moitié, les fréquences ne bougent pas, et leur accord avec les tables s&amp;#8217;améliore encore : l&amp;#8217;écart maximal passe de 46 à 24 µHz.&lt;/p&gt;
+Le contraste des oscillations augmente de près de moitié, les fréquences ne bougent pas, et leur accord avec SOHO s&amp;#8217;améliore encore un peu : l&amp;#8217;écart maximal passe de 20 à 16 µHz.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Comme ce genre de correction peut facilement se transformer en illusion (on cherche quelque chose, on finit par le trouver), j&amp;#8217;ai appliqué exactement la même correction à des balayages tirés au hasard.
@@ -224,23 +242,71 @@ Or il se dégrade.&lt;/p&gt;
 &lt;h2 id=&quot;_le_cas_du_mode_f&quot;&gt;Le cas du mode f&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Il reste une famille d&amp;#8217;ondes que je n&amp;#8217;ai pas trouvée là où elle devrait être, et c&amp;#8217;est le mode f, qui n&amp;#8217;est pas une onde sonore, mais une onde de surface, comparable aux vagues sur l&amp;#8217;eau.
-Aucune crête ne suit la courbe théorique chez moi, mais il y a très clairement une bande de puissance juste en dessous.
-La proximité m&amp;#8217;a longuement intrigué&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;p&gt;Il reste une famille d&amp;#8217;ondes à part, et c&amp;#8217;est le mode f, qui n&amp;#8217;est pas une onde sonore, mais une onde de surface, comparable aux vagues sur l&amp;#8217;eau.
+Sa position théorique est la courbe orange du diagramme.
+Il est bien plus faible que les autres crêtes, mais il est là : pour les ondes les plus petites (au-delà du degré 450), une crête suit la courbe théorique à moins de 0,8 % près.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/blog/img/heliosismologie/bande_sous_mode_f.png&quot; alt=&quot;La région du mode f&quot; width=&quot;800&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/mode_f.png&quot; alt=&quot;La région du mode f&quot; width=&quot;800&quot;&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Elle est présente sur mes trois séances, avant comme après la correction de monture, et sa forme suit celle de la courbe théorique, mais elle est 4 à 8 % trop basse en fréquence.
-J&amp;#8217;ai longtemps espéré que c&amp;#8217;était le mode f, décalé pour une raison physique intéressante, mais il est plus probable que l&amp;#8217;explication vienne d&amp;#8217;ailleurs : les tables montrent que le mode f réel se situe légèrement au-dessus de la courbe théorique, jamais en dessous.
-J&amp;#8217;ai aussi écarté une réplique produite par la monture, un effet de projection, et une variation liée au cycle solaire, qui est des milliers de fois trop petite.&lt;/p&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. La région du mode f : la crête suit la position théorique, en orange&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Bref, je ne sais pas ce que c&amp;#8217;est.
-Si quelqu&amp;#8217;un a une idée, je suis preneur.&lt;/p&gt;
+&lt;p&gt;En dessous du degré 400, il est trop faible pour que je le détecte.
+On voit aussi sur cette figure des lignes qui descendent en biais : ce sont des restes du défaut de la monture, que ma correction n&amp;#8217;élimine pas complètement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;premiere-version&quot;&gt;L&amp;#8217;erreur de la première version&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La première version de ce billet, publiée le 16 septembre, racontait une autre histoire pour le mode f.
+Je ne le trouvais pas à sa place, mais je voyais une bande de puissance 4 à 8 % plus bas, présente sur mes trois séances, et que je n&amp;#8217;arrivais pas à expliquer.
+Je terminais en disant que si quelqu&amp;#8217;un avait une idée, j&amp;#8217;étais preneur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/diagramme_kw_reperes.png&quot; alt=&quot;Le diagramme de la première version&quot; width=&quot;800&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Le diagramme de la première version : les crêtes sont dédoublées&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/bande_sous_mode_f.png&quot; alt=&quot;La bande sous le mode f&quot; width=&quot;800&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. La bande que je prenais pour une structure inconnue&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Après la publication, j&amp;#8217;ai reçu sur le forum Cloudy Nights deux remarques de Matt Penn, qui a passé trente ans à faire de la physique solaire dans plusieurs observatoires américains, et qui est à l&amp;#8217;origine des expériences de science participative &lt;a href=&quot;https://debinitiative.org/&quot;&gt;Citizen CATE et DEB&lt;/a&gt; sur les éclipses.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La première concerne ma &quot;première mondiale&quot;.
+Des mesures de ces oscillations ont déjà été faites avec du matériel amateur, et par lui-même : &lt;a href=&quot;https://www.cloudynights.com/forums/topic/704140-observing-solar-oscillation-spectrum/&quot;&gt;en 2020, avec une lunette de 60 mm&lt;/a&gt;, il obtenait déjà un diagramme du même genre.
+Ces mesures portent sur les variations de luminosité de la surface, et non sur les vitesses, ce qui est plus simple à obtenir.
+Ma première ne concerne donc que la mesure en vitesse.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La seconde remarque était plus embêtante : sur mon diagramme, chaque crête semblait dédoublée, ce qui n&amp;#8217;est pas normal.
+Son conseil était de trouver la cause de ce dédoublement avant de chercher à expliquer la bande sous le mode f.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En cherchant, j&amp;#8217;ai trouvé une erreur dans mon calcul de la dérive.
+Pour analyser la même région du Soleil pendant six heures, mon script déplace la zone analysée pour compenser la rotation du Soleil.
+À cause de cette erreur, la zone ne suivait pas exactement la surface, qui glissait dans ma zone d&amp;#8217;analyse à 1,5 km/s.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Or un glissement décale la fréquence apparente des ondes : vers le haut pour celles qui vont dans un sens, vers le bas pour celles qui vont dans l&amp;#8217;autre.
+Chaque crête se dédouble, et ma bande mystérieuse n&amp;#8217;était que la moitié basse du mode f.
+Les professionnels utilisent d&amp;#8217;ailleurs cet effet pour mesurer les courants sous la surface du Soleil.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une fois le suivi corrigé, les crêtes sont redevenues simples et plus nettes, le mode f est apparu à sa place, et l&amp;#8217;écart moyen avec les tables de SOHO est passé de 11 à 7 µHz.
+Le script est corrigé, et il vérifie désormais lui-même que la zone analysée suit bien la surface.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Un grand merci à Matt Penn pour ses remarques.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -321,6 +387,9 @@ J&amp;#8217;ai cependant tout vérifié là où j&amp;#8217;ai les compétences,
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;http://jsoc.stanford.edu/MDI/MDI_Global.html&quot;&gt;Tables de fréquences des modes solaires, SOHO/MDI, JSOC Stanford&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.cloudynights.com/forums/topic/704140-observing-solar-oscillation-spectrum/&quot;&gt;Penn, M. (2020) - Observing solar oscillation spectrum. Forum Cloudy Nights, Solar Observing and Imaging&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
