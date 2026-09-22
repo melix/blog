@@ -6,8 +6,8 @@
     <atom:link href="https://melix.github.io/blog//feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Tue, 22 Sep 2026 11:52:10 +0200</pubDate>
-    <lastBuildDate>Tue, 22 Sep 2026 11:52:10 +0200</lastBuildDate>
+    <pubDate>Tue, 22 Sep 2026 12:24:10 +0200</pubDate>
+    <lastBuildDate>Tue, 22 Sep 2026 12:24:10 +0200</lastBuildDate>
 
     <item>
       <title>Measuring the Sun&amp;#8217;s oscillations with an amateur spectroheliograph</title>
@@ -458,6 +458,7 @@ I did check everything where I have the skills, in particular the code, and what
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;La première version de ce billet contenait une erreur dans mon traitement, qui dédoublait les crêtes et me faisait chercher un mode f là où il n&amp;#8217;était pas.
 Le billet, les figures et les articles en PDF présentent désormais les résultats corrigés.
+Une section sur la pesée du Soleil à partir du mode f a été ajoutée le 22 septembre.
 L&amp;#8217;histoire de cette erreur est racontée &lt;a href=&quot;#premiere-version&quot;&gt;en fin de billet&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/td&gt;
@@ -689,6 +690,40 @@ On voit aussi sur cette figure des lignes qui descendent en biais : ce sont des 
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_bonus_peser_le_soleil&quot;&gt;Bonus : peser le Soleil&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Puisque le mode f est une vague de surface, comme la houle sur l&amp;#8217;océan, il obéit à une relation très simple entre son rythme, sa longueur et la gravité : plus la gravité est forte, plus la vague oscille vite.
+Un pêcheur qui chronomètre la houle et mesure sa longueur peut en déduire la gravité de la Terre.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bonne nouvelle, mon diagramme me donne justement ces deux informations : à quel rythme les vagues oscillent, et combien il en tient sur le tour du Soleil (c&amp;#8217;est ce que mesure le &quot;degré&quot;).
+Newton nous dit que la gravité d&amp;#8217;un astre dépend de sa masse et de son rayon.
+En combinant les deux, le rayon s&amp;#8217;élimine et il reste la densité moyenne du Soleil. Le calcul tient sur une page :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/blog/img/heliosismologie/calcul-masse-du-soleil.png&quot; alt=&quot;Calcul manuscrit : de la relation des vagues de surface à la densité moyenne du Soleil&quot; width=&quot;600&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. La densité du Soleil à partir du mode f, sur une page&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour chaque vague, je lis son rythme et son degré sur mon diagramme, et la formule me donne la densité.
+Par exemple, au degré 650, une oscillation toutes les 6 min 33 s donne 1 406 kg/m³.
+Sur dix vagues, la moyenne est de 1 410 kg/m³, pour 1 408 dans la littérature.
+C&amp;#8217;est une moyenne, à peine plus que l&amp;#8217;eau : le centre est 150 fois plus dense, et la surface des milliers de fois moins dense que l&amp;#8217;air.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il reste une étape. Pour calculer la masse, il faut le volume, donc le rayon, estimé à 695 700 km.
+On obtient 1,989 x 10³⁰ kg, pour une valeur communément admise de 1,988 x 10³⁰ kg.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il faut rester modeste : il y a des erreurs de mesure et des approximations, c&amp;#8217;est donc un peu aussi par chance que je tombe si près de la valeur de référence.
+Néanmoins, j&amp;#8217;adore la physique !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
 &lt;h2 id=&quot;premiere-version&quot;&gt;L&amp;#8217;erreur de la première version&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -700,13 +735,13 @@ Je terminais en disant que si quelqu&amp;#8217;un avait une idée, j&amp;#8217;�
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/blog/img/heliosismologie/diagramme_kw_reperes.png&quot; alt=&quot;Le diagramme de la première version&quot; width=&quot;800&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 4. Le diagramme de la première version : les crêtes sont dédoublées&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Le diagramme de la première version : les crêtes sont dédoublées&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/blog/img/heliosismologie/bande_sous_mode_f.png&quot; alt=&quot;La bande sous le mode f&quot; width=&quot;800&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 5. La bande que je prenais pour une structure inconnue&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. La bande que je prenais pour une structure inconnue&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Après la publication, j&amp;#8217;ai reçu sur le forum Cloudy Nights deux remarques de Matt Penn, qui a passé trente ans à faire de la physique solaire dans plusieurs observatoires américains, et qui est à l&amp;#8217;origine des expériences de science participative &lt;a href=&quot;https://debinitiative.org/&quot;&gt;Citizen CATE et DEB&lt;/a&gt; sur les éclipses.&lt;/p&gt;
