@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cédric Champeau's blog: Measuring the Sun&#8217;s oscillations with an amateur spectroheliograph</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">    
+
+    <!-- Le styles -->
+    <link href="/blog/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/blog/css/asciidoctor.css" rel="stylesheet">
+    <link href="/blog/css/base.css" rel="stylesheet">
+   <script src="https://kit.fontawesome.com/fefa3ec5bf.js" crossorigin="anonymous"></script>
+      
+    <script src="/blog/js/highlight.min.js"></script>
+    <link href="/blog/css/equilibrium-gray-light.min.css" rel="stylesheet">
+
+    <!-- MathJax for LaTeX math rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']],
+          displayMath: [['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">-->
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <script defer data-domain="melix.github.io" src="https://analytics.champeau.me/js/script.js"></script>
+  </head>
+  <body>
+    <div id="wrap">
+   
+	
+	<!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+	    <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/blog">Cédric Champeau's blog</a>
+	    </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">                
+                <li><a href="/blog/about.html">About</a></li>
+		          <li><a href="/blog/projects.html">Projects</a></li>
+				    <li><a href="/blog/jsolex.html">JSol'Ex</a></li>
+		<li><a href="/blog/astrophotography.html">Astrophotography</a></li>
+		<li class="dropdown">
+          		<a data-toggle="dropdown" href="#">Topics<b class="caret"></b></a>
+		          <ul class="dropdown-menu" role="menu">
+		          <li><a href="/blog/tags/jsolex.html">JSol'Ex</a></li>
+				    <li><a href="/blog/tags/gradle.html">Gradle</a></li>
+                <li><a href="/blog/tags/groovy.html">Groovy</a></li>
+                <li><a href="/blog/tags/micronaut.html">Micronaut</a></li>
+                <li><a href="/blog/tags/index.html">See all tags</a></li>
+		          </ul>
+	       </li>
+                <li><a href="/blog/feed.xml">Feed</a></li>                
+              </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li><a href="https://github.com/melix"><i class="fa fa-github"></i></a></li>
+	        <li><a href="https://bsky.app/profile/melix.champeau.me"><i class="fa fa-twitter"></i></a></li>
+	        <li><a rel="me" href="https://mastodon.xyz/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	        <li><a rel="me" href="https://astrodon.social/@melix"><i class="fa-brands fa-mastodon"></i></a></li>
+	      </ul>
+            </div>
+          </div>
+      </div>
+      <div class="container">
+	
+	<div class="page-header">
+		<h1>Measuring the Sun&#8217;s oscillations with an amateur spectroheliograph</h1>
+	</div>
+
+	<p><em>22 September 2026</em></p>
+	<p><em>Tags: </em>
+		<a href="/blog/tags/solex.html">solex</a> 
+	</em>
+		<a href="/blog/tags/jsolex.html">jsolex</a> 
+	</em>
+		<a href="/blog/tags/shg700.html">shg700</a> 
+	</em>
+		<a href="/blog/tags/solar.html">solar</a> 
+	</em>
+		<a href="/blog/tags/astronomy.html">astronomy</a> 
+	</em>
+		<a href="/blog/tags/doppler.html">doppler</a> 
+	</em>
+		<a href="/blog/tags/helioseismology.html">helioseismology</a> 
+	</p>
+	<p><div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This is an English version of <a href="/blog/2026/09/16-heliosismologie-amateur.html">my blog post originally written in French</a>, published on 16 September and updated on 19 September.
+It includes the corrected results, and a new section about weighing the Sun.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The Sun has a beating heart. What if we could hear it?<sup class="footnote" id="_footnote_disclaimer">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>In this post, I am going to tell you how I measured the Sun&#8217;s five-minute oscillations with a 102 mm refractor costing €250 and a spectroheliograph (SHG 700), from my garden.
+These oscillations are the basis of helioseismology, the discipline which probes the interior of the Sun the way a seismologist probes the interior of the Earth.
+Looking for an original experiment to complete my upcoming talk at the <a href="https://www.afastronomie.fr/rencontres-ciel-espace">Rencontres du Ciel et de l&#8217;Espace</a> in Paris, I suspected it would be possible, but I did not know whether I would succeed.</p>
+</div>
+<div class="paragraph">
+<p>In the end, I recovered six resonance "modes" of the Sun (I learnt the word mode while doing this experiment), and their frequencies agree admirably<sup class="footnote" id="_footnote_rigueur">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup> with the values published by the SOHO satellite.</p>
+</div>
+<div class="paragraph">
+<p>Having found no reference to this kind of velocity measurement made by an amateur, which does not mean none exists, I believe this is a world first.
+Measurements based on the brightness of the surface do exist, <a href="#first-version">I come back to this below</a>.</p>
+</div>
+<div class="paragraph">
+<p>This post focuses on the results and on the experiment itself. If you are interested in the method and the analysis, I refer you to the complete article I wrote on the subject, available as a <a href="/blog/img/heliosismologie/heliosismologie-amateur-en.pdf">PDF in English</a> and a <a href="/blog/img/heliosismologie/heliosismologie-amateur.pdf">PDF in French</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_five_minute_oscillations">The five-minute oscillations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In 1962, Leighton, Noyes and Simon discovered that the surface of the Sun oscillates, with a period of about five minutes.
+Ulrich explained it in 1970: these are sound waves, produced by convection below the surface, which bounce between the deep layers and the photosphere, and end up resonating.</p>
+</div>
+<div class="paragraph">
+<p>In a resonating cavity, not every note is allowed: an organ pipe produces a fundamental and its harmonics, and nothing in between.
+The Sun does the same, but two numbers are needed to describe one of its notes: the size of the wave at the surface, and its frequency.
+If you sort all the motions of the surface by these two criteria, the power is not spread at random: it concentrates along narrow lines, called ridges.</p>
+</div>
+<div class="paragraph">
+<p>Seeing these ridges is seeing the Sun resonate.
+Deubner observed them for the first time in 1975, and he could distinguish three or four of them.
+This is what I wanted to try to reproduce.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>A personal aside: when I started my studies in 1998, I wanted to do astrophysics, and I gave up when I saw the level of mathematics required (I had <a href="/blog/2023/04-22-introducing-astro4j.html">already talked about this here</a>).
+For this exercise, I relied on my experience developing JSol&#8217;Ex and on my many observations to establish the protocol.
+Reading the papers allowed me to understand the steps needed to obtain the diagram, but the understanding of the equations and models essentially escaped me.
+Without the help of AI, I could never have done this experiment or analysed the results correctly.</p>
+</div>
+<div class="paragraph">
+<p>This reflects my complicated relationship with AI, which would deserve a post of its own: it will surprise no one that I am terrified by the speed at which AI is changing our lives, with undeniable ethical, social, societal and environmental implications, but I am also fascinated by what it makes possible, and the result of this post is an example. For me, the question is really not whether AI works or not: it works, and it is impressive. The benefit/risk question, and the question of prioritising AI development over environmental issues in particular, are the points we should be discussing. In short, I curse it as much as I admire it.</p>
+</div>
+<div class="paragraph">
+<p>I live the contradictions of this relationship every day, and I do not yet know how to handle them: until proven otherwise, I remain a fallible human being, and I reassure myself by telling myself that what I am doing here is science, something useful, unlike the adverts blooming everywhere, or the AI-generated videos and music we see at French tech conferences&#8230;&#8203; but I digress.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_experiment">The experiment</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The protocol is, in the end, fairly simple: one scan of the disc every minute, for six hours, without interruption, in an iron line whose Landé factor (which represents the sensitivity to magnetic fields) is as close to zero as possible.
+This gives 336 retained scans and 1.4 TB of video, that is a movie of the Sun at one frame per minute, in which every pixel contains a line profile.
+I had to discard a few scans for various reasons (geometry, artefacts, mount resonance, and so on) but the bulk is there.</p>
+</div>
+<div class="paragraph">
+<p>A spectroheliograph, such as <a href="http://www.astrosurf.com/solex/">Christian Buil&#8217;s Sol&#8217;Ex</a> or the <a href="https://mlastro.com/product-category/spectroheliographs/">SHG 700</a> I use, does not directly produce an image of the Sun.
+At every point of the disc, it records the complete profile of a spectral line, and this is the whole difference with a filter: a filter gives an intensity, a spectroheliograph gives the exact position of the line, which can be converted directly into a velocity (Doppler effect).</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/heliosismologie/disque_fe5434_exemple.jpg" alt="The solar disc in the Fe I 5434.5 Å line" width="600">
+</div>
+<div class="title">Figure 1. One of my scans, in the neutral iron line at 5434.5 Å</div>
+</div>
+<div class="paragraph">
+<p>Let us now talk about what is probably the most surprising point, if you only look at the numbers: what we are trying to measure is much finer than the nominal resolution of the instrument.
+So there is a trick.
+On my spectrum, one pixel corresponds to 5,737 m/s, whereas the oscillations I am looking for are a few hundred metres per second: a velocity of 300 m/s shifts the line by a twentieth of a pixel.
+How can one reach a precision of a twentieth of a pixel?
+In practice, it can be inferred, by comparing each point of the disc with itself rather than with a model.
+It is the same kind of problem as the <a href="/blog/2026/02/05-measuring-solar-rotation.html">differential rotation measurement</a> I wrote about, but far more demanding.</p>
+</div>
+<div class="paragraph">
+<p>Once the velocities are measured, what remains is to sort the motions by size and frequency, and to look at where the power is.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/heliosismologie/diagramme_kw_reperes_v2.png" alt="The diagram with its reference marks" width="800">
+</div>
+<div class="title">Figure 2. The resonance ridges of the Sun, seen from my garden</div>
+</div>
+<div class="paragraph">
+<p>One can clearly see "curves" brighter than the background: these are the famous resonance ridges of the Sun.
+The horizontal axis measures the size of the waves: the further right, the smaller the structures.
+The vertical axis is the frequency, knowing that 3 mHz corresponds to one oscillation every 5 minutes 33 seconds.
+The green curves are not a fit: they are the ridges measured by the SOHO satellite, laid as they are on my diagram.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_comparison_with_soho">The comparison with SOHO</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Seeing lines is one thing, making sure they are the right ones is another, and this is what took me the most work: however nice the diagram, how can one make sure that the resonance modes of the Sun have really been found, and that the results are not a hallucination?</p>
+</div>
+<div class="paragraph">
+<p>The frequencies of the solar modes are published: the SOHO/MDI project makes available, on the Stanford servers, the tables fitted on its own spectra.
+So I compared my six ridges with the published values:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Ridge</th>
+<th class="tableblock halign-left valign-top">MDI table (mHz)</th>
+<th class="tableblock halign-left valign-top">My measurement (mHz)</th>
+<th class="tableblock halign-left valign-top">Difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">p1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.6441</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.653</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">+9 µHz</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">p2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.0072</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.023</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">+16 µHz</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">p3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.3404</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.329</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">−12 µHz</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">p4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.6356</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.636</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0 µHz</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">p5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.9201</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.926</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">+6 µHz</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">p6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3.1902</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3.181</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">−9 µHz</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The mean difference is 9 µHz, a fifth of the resolution of my series.</p>
+</div>
+<div class="paragraph">
+<p>What matters in this table is that no parameter is adjusted.
+The frequency scale comes solely from the time stamps written in the SER files, the size scale solely from the radius of the disc measured in pixels.
+The two measurements (time and pixels) are subject to independent uncertainties, and they agree nonetheless.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_mount_problem">The mount problem</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I expected the limit of the exercise to come from the seeing, which was poor during all my observations (clear sky, but definite turbulence).
+In reality, the chart showed surprising ridges which are not part of the SOHO results.
+The cause? The mount!</p>
+</div>
+<div class="paragraph">
+<p>My SAL-33 uses harmonic drives, which have a periodic error of 430 seconds, of about 16 arc seconds peak to peak (Minh Nguyen, of ML Astro, confirmed it when I sent him my measurements).
+During the fifteen seconds a scan lasts, this error changes the speed at which the image moves across the slit, and what remains is a distortion which shifts the content of the image by a few pixels, differently from one scan to the next.
+In other words, my successive velocity maps are slightly shifted with respect to each other, which blurs the ridges.
+I must say that not only had I not anticipated this problem, but I would never have believed that the diagram would reveal this flaw and that its amplitude could be measured!</p>
+</div>
+<div class="paragraph">
+<p>So I measured this slip, and corrected it.
+The contrast of the oscillations increases by nearly half, the frequencies do not move, and their agreement with SOHO improves a little more: the largest difference drops from 19 to 16 µHz.</p>
+</div>
+<div class="paragraph">
+<p>Since this kind of correction can easily turn into an illusion (you look for something, you end up finding it), I applied exactly the same correction to randomly drawn scans.
+If my method improved things by mere mathematical construction, this control would have improved too.
+It gets worse instead.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_case_of_the_f_mode">The case of the f mode</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There remains a separate family of waves, the f mode, which is not a sound wave but a surface wave, comparable to waves on water.
+Its theoretical position is the orange curve of the diagram.
+It is much fainter than the other ridges, but it is there: for the smallest waves (beyond degree 450), a ridge follows the theoretical curve to within 1 %.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/heliosismologie/mode_f.png" alt="The f-mode region" width="800">
+</div>
+<div class="title">Figure 3. The f-mode region: the ridge follows the theoretical position, in orange</div>
+</div>
+<div class="paragraph">
+<p>Below degree 400, it is too faint for me to detect.
+This figure also shows lines running down at an angle: they are leftovers of the mount flaw, which my correction does not remove completely.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bonus_weighing_the_sun">Bonus: weighing the Sun</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Since the f mode is a surface wave, like a swell on the ocean, it obeys a very simple relation between its rhythm, its length and gravity: the stronger the gravity, the faster the wave oscillates.
+A fisherman who times the swell and measures its length can deduce the gravity of the Earth.</p>
+</div>
+<div class="paragraph">
+<p>Good news, my diagram gives me exactly these two pieces of information: how fast the waves oscillate, and how many of them fit around the Sun (this is what the "degree" measures).
+Newton tells us that the gravity of a body depends on its mass and its radius.
+Combining the two, the radius cancels out and what remains is the mean density of the Sun. The whole computation fits on one page:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/heliosismologie/calcul-masse-du-soleil.png" alt="Handwritten computation: from the surface wave relation to the mean density of the Sun" width="600">
+</div>
+<div class="title">Figure 4. Density of the Sun from the f mode, on one page</div>
+</div>
+<div class="paragraph">
+<p>For each wave, I read its rhythm and its degree on my diagram, and the formula gives the density.
+For instance, at degree 650, one oscillation every 6 min 33 s gives 1,406 kg/m³.
+Over ten waves, the average is 1,410 kg/m³, for 1,408 in the literature.
+It is a mean value, barely more than water: the centre is 150 times denser, and the surface thousands of times less dense than air.</p>
+</div>
+<div class="paragraph">
+<p>One step remains. To compute the mass, the volume is needed, hence the radius, estimated at 695,700 km.
+This gives 1.989 x 10³⁰ kg, for a commonly accepted value of 1.988 x 10³⁰ kg.</p>
+</div>
+<div class="paragraph">
+<p>One has to stay modest: there are measurement errors and approximations, so it is partly by luck that I land so close to the reference value.
+Still, I love physics!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="first-version">The mistake in the first version</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The first version of this post, published on 16 September, told a different story about the f mode.
+I could not find it where it belonged, but I saw a band of power 4 to 8 % lower, present in my three sessions, which I could not explain.
+I ended by saying that if anyone had an idea, I was interested.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/heliosismologie/diagramme_kw_reperes.png" alt="The diagram of the first version" width="800">
+</div>
+<div class="title">Figure 5. The diagram of the first version: the ridges are split</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/blog/img/heliosismologie/bande_sous_mode_f.png" alt="The band below the f mode" width="800">
+</div>
+<div class="title">Figure 6. The band I took for an unknown feature</div>
+</div>
+<div class="paragraph">
+<p>After publication, I received on the Cloudy Nights forum two remarks from Matt Penn, who spent thirty years doing solar physics in several American observatories, and who is behind the <a href="https://debinitiative.org/">Citizen CATE and DEB</a> citizen science eclipse experiments.</p>
+</div>
+<div class="paragraph">
+<p>The first concerns my "world first".
+Measurements of these oscillations had already been made with amateur equipment, and by himself: <a href="https://www.cloudynights.com/forums/topic/704140-observing-solar-oscillation-spectrum/">in 2020, with a 60 mm refractor</a>, he already obtained a diagram of the same kind.
+Those measurements are based on the brightness variations of the surface, not on velocities, which is simpler to obtain.
+My first therefore only concerns the velocity measurement.</p>
+</div>
+<div class="paragraph">
+<p>The second remark was more embarrassing: on my diagram, every ridge seemed to be split in two, which is not normal.
+His advice was to find the cause of this splitting before trying to explain the band below the f mode.</p>
+</div>
+<div class="paragraph">
+<p>While searching, I found a mistake in my drift computation.
+To analyse the same region of the Sun for six hours, my script moves the analysed area to compensate for the rotation of the Sun.
+Because of this mistake, the area did not follow the surface exactly, and the surface was slipping across my analysed area at 1.5 km/s.</p>
+</div>
+<div class="paragraph">
+<p>Now, a slip shifts the apparent frequency of the waves: upwards for those travelling one way, downwards for those travelling the other way.
+Every ridge splits in two, and my mysterious band was nothing but the lower half of the f mode.
+Professionals actually use this effect to measure the flows below the surface of the Sun.</p>
+</div>
+<div class="paragraph">
+<p>Once the tracking was fixed, the ridges became single and sharper again, the f mode appeared where it belongs, and the mean difference with the SOHO tables went from 11 to 9 µHz.
+The script is fixed, and it now checks by itself that the analysed area follows the surface.</p>
+</div>
+<div class="paragraph">
+<p>Many thanks to Matt Penn for his remarks.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_in_practice">In practice</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Everything happens in JSol&#8217;Ex, in a single batch: the software reconstructs the images, fits the disc, corrects the geometry, then runs my Python script in its embedded interpreter, which computes the velocities, the spectrum and the figures.
+By the way, thank you <a href="https://www.graalvm.org/">GraalVM</a>!
+There is no other software in the chain, and for me this is the important point, the one that makes me spend time developing JSol&#8217;Ex: making this kind of measurement accessible to as many people as possible.
+However, my Python scripts use NumPy, which means that, given the limits of GraalVM, the script will not work on Windows.</p>
+</div>
+<div class="paragraph">
+<p>Processing the 354 files, diagram included, takes about 2 h 30 on a Ryzen 9 9950X.
+Think about it: nearly 1.5 TB of data processed in 2 h 30 with these charts produced directly!
+I do not know the context of Deubner&#8217;s experiment, but I suppose the processing must have taken much longer back then.</p>
+</div>
+<div class="paragraph">
+<p>The rest is patience: six hours of uninterrupted tracking, a well-chosen line, and a sky willing to stay clear.
+Fortunately, the acquisition itself is fully automated, and all I had to do was watch the weather and the sky.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>What makes this result possible is not the equipment, which is fairly ordinary in the end: a 102 mm refractor, a commercial spectroheliograph (a Sol&#8217;Ex should work too, preferably with a thinner second-generation slit) and a light mount.
+No, it is rather perseverance (the combination of a long regular series and somewhat lengthy processing) and, I am tempted to say, the simplicity of implementing the processing in JSol&#8217;Ex.</p>
+</div>
+<div class="paragraph">
+<p>It is also, to my dismay, the use of generative AI, which allowed me to get past the mathematical formalism to understand the intent of the equations and models, and to write the code which computes the velocities and the diagram.</p>
+</div>
+<div class="paragraph">
+<p>As always with what I write here, take it with the necessary caution: I am not a solar physicist, I am not a scientist, and I have most probably made approximations I should not have made.
+This is precisely why I publish the complete article at the same time as this post: the numbers, the uncertainties and the limitations are detailed there, and everything can be checked.
+I did check everything where I have the skills, in particular the code, and what reassures me is that I did have to correct AI mistakes throughout the development: humans still have a say (for how long?).</p>
+</div>
+<div class="paragraph">
+<p>In short, if you have a spectroheliograph and a mount which tracks properly for a few hours, you can redo this measurement, and I would very much like to see your results.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_going_further">Going further</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="/blog/img/heliosismologie/heliosismologie-amateur-en.pdf">The complete article, in English</a>: method, tables and uncertainties</p>
+</li>
+<li>
+<p><a href="/blog/img/heliosismologie/heliosismologie-amateur.pdf">L&#8217;article complet, en français</a></p>
+</li>
+<li>
+<p><a href="/blog/2026/02/05-measuring-solar-rotation.html">Measuring Solar Differential Rotation with JSol&#8217;Ex</a></p>
+</li>
+<li>
+<p><a href="https://melix.github.io/astro4j/latest/en/jsolex.html">JSol&#8217;Ex documentation</a></p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_resources">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://doi.org/10.1086/147285">Leighton, R.B., Noyes, R.W. &amp; Simon, G.W. (1962) - Velocity Fields in the Solar Atmosphere. I. ApJ 135, 474</a></p>
+</li>
+<li>
+<p><a href="https://doi.org/10.1086/150731">Ulrich, R.K. (1970) - The Five-Minute Oscillations on the Solar Surface. ApJ 162, 993</a></p>
+</li>
+<li>
+<p><a href="https://ui.adsabs.harvard.edu/abs/1975A%26A&#8230;&#8203;.44..371D/abstract">Deubner, F.-L. (1975) - Observations of low wavenumber nonradial eigenmodes of the Sun. A&amp;A 44, 371</a></p>
+</li>
+<li>
+<p><a href="https://doi.org/10.1023/a:1004963425123">Rhodes, E.J. Jr. et al. (1997) - Measurements of Frequencies of Solar Oscillations from the MDI Medium-l Program. Sol. Phys. 175, 287</a></p>
+</li>
+<li>
+<p><a href="http://jsoc.stanford.edu/MDI/MDI_Global.html">Solar mode frequency tables, SOHO/MDI, JSOC Stanford</a></p>
+</li>
+<li>
+<p><a href="https://www.cloudynights.com/forums/topic/704140-observing-solar-oscillation-spectrum/">Penn, M. (2020) - Observing solar oscillation spectrum. Cloudy Nights forum, Solar Observing and Imaging</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. A knowledgeable reader would tell me that these are not heartbeats and that we cannot hear them. A better metaphor would be a ringing bell, but poetry sometimes has to depart from scientific rigour.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. This is the amateur speaking. For actual numbers, trust the paper.
+</div>
+</div></p>
+   
+	<hr>
+	
+		</div>
+		<div id="push"></div>
+    </div>
+    
+    <div id="footer">
+      <div class="container">
+	<p class="muted credit">All posts on this blog are published with a <em>Creative Commons by-nc-sa</em> license.<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/2.0/fr/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/fr/88x31.png"/></a></p>
+        <p class="muted credit">Baked with <a href="https://jbake.org">JBake v2.6.6</a></p>
+      </div>
+    </div>
+    
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <script src="/blog/js/jquery-1.11.1.min.js"></script>
+    <script src="/blog/js/bootstrap.min.js"></script>
+   <script>hljs.highlightAll();</script>
+  </body>
+</html>
